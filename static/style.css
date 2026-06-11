@@ -1293,3 +1293,30 @@ button.auth-chip { background: none; }
 .release-block ul { padding-left: 18px; }
 .release-block li { margin-bottom: 5px; font-size: .87rem; color: var(--muted); }
 .release-block li::marker { color: var(--border); }
+
+/* ── Export toast ───────────────────────────────────────────── */
+#export-toast {
+  position: fixed;
+  bottom: 1.75rem;
+  right: 1.75rem;
+  z-index: 1070;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: .55rem 1rem;
+  font-size: .82rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,.45);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .18s ease, transform .18s ease;
+  pointer-events: none;
+  max-width: 420px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#export-toast.et-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}

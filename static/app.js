@@ -895,24 +895,20 @@ function exportAllHands(btn) {
 }
 
 function _rowExportStatus(btn, state, text, autoClear) {
-  // Show a temporary inline status message below the button group in the same cell.
-  const td = btn ? btn.closest('td') : null;
-  if (!td) return;
-  let el = td.querySelector('.row-export-status');
-  if (!el) {
-    el = document.createElement('div');
-    el.className = 'row-export-status';
-    el.style.cssText = 'font-size:.72rem;margin-top:5px;min-height:1em';
-    td.appendChild(el);
-  }
+  const toast = document.getElementById('export-toast');
+  if (!toast) return;
+  clearTimeout(toast._hideTimer);
   if (state === 'loading') {
-    el.innerHTML = `<span style="color:var(--muted)">Exporting…</span>`;
+    toast.innerHTML = `<span style="color:var(--muted)">${text || 'Exporting…'}</span>`;
   } else if (state === 'ok') {
-    el.innerHTML = `<span style="color:var(--green)">✓ ${text}</span>`;
+    toast.innerHTML = `<span style="color:var(--green)">✓ ${text}</span>`;
   } else {
-    el.innerHTML = `<span style="color:var(--red)">${text}</span>`;
+    toast.innerHTML = `<span style="color:var(--red)">${text}</span>`;
   }
-  if (autoClear) setTimeout(() => { el.innerHTML = ''; }, autoClear);
+  toast.classList.add('et-visible');
+  if (autoClear) {
+    toast._hideTimer = setTimeout(() => toast.classList.remove('et-visible'), autoClear);
+  }
 }
 
 function _doExportTournament(tourneyId, btn) {
