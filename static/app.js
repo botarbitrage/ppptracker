@@ -196,6 +196,18 @@ function _tzParts(ts, tz, opts) {
 }
 
 /** "8 Jun 26, 14:30" — on mobile collapses to "8 Jun, 14:30" */
+function copyHandId(btn) {
+  const handNum = btn.dataset.handNum;
+  navigator.clipboard.writeText(handNum).then(() => {
+    btn.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = `<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+    }, 1500);
+  });
+}
+
 function fmtHandDateTime(ts, tz) {
   if (!ts) return '—';
   const d = new Date(ts * 1000);
@@ -391,8 +403,13 @@ function renderHandsTable(hands, tbodyId) {
   const tz = currentTz();
   tbody.innerHTML = hands.map(h => {
     const cards = (h.hole_cards || []).map(renderCard).join('');
+    const copyBtn = h.hand_num
+      ? `<button class="copy-hand-btn" onclick="copyHandId(this)" data-hand-num="${h.hand_num}" title="Hand ID: ${h.hand_num}">
+           <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+         </button>`
+      : '';
     return `<tr>
-      <td>${fmtHandDateTime(h.ts, tz)}</td>
+      <td><span class="hand-when-cell">${fmtHandDateTime(h.ts, tz)}${copyBtn}</span></td>
       <td class="no-wrap">${cards || '—'}</td>
       <td class="d-none d-md-table-cell">${posBadge(h.position)}</td>
       <td>${streetBadge(h.last_street)}</td>

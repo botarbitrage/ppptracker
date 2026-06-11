@@ -656,6 +656,53 @@ body {
 
 .no-wrap { white-space: nowrap; }
 
+/* Copy-hand-id button in When column */
+.hand-when-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.copy-hand-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1.5px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .2s, color .2s, border-color .2s, background .2s, transform .15s;
+  flex-shrink: 0;
+}
+tr:hover .copy-hand-btn {
+  opacity: 1;
+}
+.copy-hand-btn:hover {
+  color: var(--green);
+  border-color: rgba(0,230,118,.45);
+  background: rgba(0,230,118,.08);
+}
+.copy-hand-btn.copied {
+  color: var(--green);
+  border-color: var(--green);
+  background: rgba(0,230,118,.15);
+  transform: scale(1.12);
+}
+.copy-hand-btn svg {
+  width: 12px;
+  height: 12px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: opacity .15s;
+}
+
 /* Auto-layout: browser distributes width across whichever columns are visible */
 .hand-table { table-layout: auto; width: 100%; }
 .hand-table colgroup { display: none; }
