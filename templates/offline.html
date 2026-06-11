@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>PPPoker Hand Analyser — Offline</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <style>
+    body { display:flex; align-items:center; justify-content:center; min-height:100vh; text-align:center; }
+    .offline-icon { font-size:4rem; margin-bottom:1rem; }
+    h2 { color:var(--green); margin-bottom:.5rem; }
+    p  { color:var(--muted); max-width:320px; }
+  </style>
+</head>
+<body>
+<div>
+  <div class="offline-icon">♠</div>
+  <h2>You're offline</h2>
+  <p>PPPoker Hand Analyser needs a connection to fetch hand history. Reconnect and tap retry.</p>
+  <button class="btn btn-import mt-3 px-4" onclick="location.reload()">Retry</button>
+</div>
+</body>
+</html>

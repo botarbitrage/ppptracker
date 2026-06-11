@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="90" fill="#0d1117"/>
+  <!-- Spade body -->
+  <path d="M256 80
+    C256 80 110 200 110 300
+    C110 355 155 385 210 370
+    C195 410 175 430 145 445
+    L367 445
+    C337 430 317 410 302 370
+    C357 385 402 355 402 300
+    C402 200 256 80 256 80Z"
+    fill="#3fb950"/>
+  <!-- Stem already included in path above via the bottom triangle -->
+</svg>

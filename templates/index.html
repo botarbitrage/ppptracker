@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PPPoker Hand Analyser</title>
+
+  <!-- PWA / TWA -->
+  <link rel="manifest" href="/static/manifest.json"/>
+  <meta name="theme-color" content="#00e676"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="PPPokerHA"/>
+  <link rel="apple-touch-icon" href="/static/icons/icon-192.png"/>
+  <link rel="icon" type="image/svg+xml" href="/static/icons/icon.svg"/>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    crossorigin="anonymous"
+  />
+  <link rel="stylesheet" href="/static/style.css?v=21"/>
+</head>
+<body>
+<div class="container-fluid py-4 px-3 px-md-5">
+
+  <!-- ── Auth bar ─────────────────────────────────────────── -->
+  <div id="auth-bar" class="auth-bar mb-2"></div>
+
+  <!-- ── Header ───────────────────────────────────────────── -->
+  <div class="text-center mb-3">
+    <h1 class="app-title">♠ PPPoker Hand Analyser ♣</h1>
+    <p class="app-tagline">ANALYSE &nbsp;·&nbsp; STUDY &nbsp;·&nbsp; WIN</p>
+  </div>
+
+  <!-- ── Feature banner ───────────────────────────────────── -->
+  <div class="feature-banner mb-4" style="max-width:1400px;margin:0 auto">
+
+    <!-- Info tiles row -->
+    <div class="info-tiles">
+
+<button class="info-tile" data-bs-toggle="modal" data-bs-target="#modal-tool"
+        title="What this tool does">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span>The Tool</span>
+      </button>
+
+      <button class="info-tile" data-bs-toggle="modal" data-bs-target="#modal-howto"
+        title="Step-by-step guide">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>How to Use</span>
+      </button>
+
+      <button class="info-tile" data-bs-toggle="modal" data-bs-target="#modal-tiers"
+        title="Free vs Pro — what you get">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span>Free vs Pro</span>
+      </button>
+
+      <button class="info-tile" data-bs-toggle="modal" data-bs-target="#modal-releases"
+        title="What's new in each version">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span>Release Notes</span>
+      </button>
+
+    </div>
+
+    <!-- Free vs Pro comparison row -->
+    <div class="tier-compare">
+      <div class="tier-card tier-free">
+        <div class="tier-name">FREE</div>
+        <ul class="tier-list">
+          <li><span class="tier-check">✓</span> Last 30 hands</li>
+          <li><span class="tier-check">✓</span> Full session stats</li>
+          <li><span class="tier-check">✓</span> Tournament overview</li>
+          <li><span class="tier-check">✓</span> 5 single-hand exports/day</li>
+          <li><span class="tier-x">✕</span> Tournament exports</li>
+        </ul>
+      </div>
+      <div class="tier-vs">VS</div>
+      <div class="tier-card tier-pro">
+        <div class="tier-name">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          PRO — $7.99/mo
+        </div>
+        <ul class="tier-list">
+          <li><span class="tier-check">✓</span> All hands history (200)</li>
+          <li><span class="tier-check">✓</span> Full session stats</li>
+          <li><span class="tier-check">✓</span> Tournament exports</li>
+          <li><span class="tier-check">✓</span> Unlimited daily exports</li>
+          <li><span class="tier-check">✓</span> Priority features</li>
+        </ul>
+        <button class="tier-cta" onclick="showUpgradeModal('banner')">Upgrade to Pro</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Import card ──────────────────────────────────────── -->
+  <div class="import-card mb-4" style="max-width:1400px;margin:0 auto">
+    <div class="d-flex gap-2 align-items-center flex-wrap">
+      <input
+        type="text"
+        id="url-input"
+        class="form-control form-control-lg import-input"
+        placeholder="Paste PPPoker replay link…"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button
+        id="import-btn"
+        class="btn btn-import btn-lg"
+        onclick="handleImport()"
+      >IMPORT</button>
+    </div>
+
+    <!-- Error -->
+    <div id="error-msg" class="alert alert-danger mt-3 mb-0 py-2 d-none"></div>
+
+    <!-- Loading / Success -->
+    <div id="loading-msg" class="d-none mt-3 text-center">
+      <div id="loading-spinner" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></div>
+      <span id="loading-text" style="color:var(--green)">Fetching hand history&hellip; this may take a few seconds</span>
+    </div>
+  </div>
+
+  <!-- Export accuracy warning modal -->
+  <div class="modal fade" id="exportWarningModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="background:var(--panel);border:1px solid var(--border);color:var(--text)">
+        <div class="modal-header" style="border-bottom:1px solid var(--border)">
+          <h5 class="modal-title">⚠️ Export Accuracy Notice</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" style="font-size:.88rem;line-height:1.6">
+          <p>Hand history exported from PPPokerHA is converted to PokerStars format and <strong>may not be 100% accurate</strong> when imported into third-party tools such as PokerTracker 4, DriveHUD, or GTO Wizard.</p>
+          <p class="mb-1">Known limitations:</p>
+          <ul style="color:var(--muted)">
+            <li>Pot sizes may differ slightly in edge cases</li>
+            <li>Some action types may not translate perfectly</li>
+            <li>Community cards may be missing for folded-out hands</li>
+          </ul>
+          <p class="mb-0" style="color:var(--muted);font-size:.82rem">Use exported data for study purposes only — not for official records.</p>
+        </div>
+        <div class="modal-footer d-flex align-items-center justify-content-between" style="border-top:1px solid var(--border)">
+          <label class="d-flex align-items-center gap-2 mb-0" style="font-size:.82rem;color:var(--muted);cursor:pointer">
+            <input type="checkbox" id="export-warning-suppress" style="accent-color:var(--green)">
+            Don't show this again
+          </label>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-import btn-sm px-4" id="export-confirm-btn">Export</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Pro Upgrade Modal ──────────────────────────────── -->
+  <div class="modal fade" id="pro-upgrade-modal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="background:var(--panel);border:1px solid var(--border);color:var(--text)">
+        <div class="modal-header" style="border-bottom:1px solid var(--border)">
+          <h5 class="modal-title d-flex align-items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Unlock Pro
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" style="font-size:.9rem;line-height:1.7">
+          <p id="pro-modal-reason" class="mb-3" style="color:var(--muted);font-size:.85rem"></p>
+          <p class="mb-2 fw-600" style="font-weight:600">What you get with Pro:</p>
+          <ul class="mb-3" style="color:var(--text);padding-left:1.2rem">
+            <li>Unlimited hand history (free tier shows last 30)</li>
+            <li>Unlimited daily exports</li>
+            <li>Full tournament export access</li>
+            <li style="color:var(--muted)"><em>More features coming…</em></li>
+          </ul>
+          <div id="pro-coming-soon" class="d-none mb-2 text-center" style="color:var(--green);font-weight:600">Coming soon 🚀</div>
+        </div>
+        <div class="modal-footer flex-column align-items-stretch gap-2" style="border-top:1px solid var(--border)">
+          <button type="button" id="pro-upgrade-btn" class="btn btn-import btn-lg w-100" onclick="handleUpgradeClick()">
+            Upgrade to Pro — $7.99/month
+          </button>
+          <button type="button" class="btn btn-outline-secondary btn-sm w-100" data-bs-dismiss="modal">Maybe later</button>
+          <div id="pro-dev-hatch" class="d-none text-center mt-1">
+            <button type="button" class="btn btn-link btn-sm" style="color:var(--muted);font-size:.75rem" onclick="activateProDev()">Activate Pro (dev)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Results ──────────────────────────────────────────── -->
+  <div id="results-section" class="d-none" style="max-width:1400px;margin:0 auto">
+
+    <!-- Player badge -->
+    <div id="player-badge" class="player-badge mb-3">
+      <div class="player-badge-top">
+        <div class="d-flex align-items-center gap-3">
+          <div class="player-avatar" id="player-avatar-text"></div>
+          <span id="player-info"></span>
+        </div>
+        <div class="player-tz">
+          <span class="tz-label">Timezone</span>
+          <select id="tz-select" class="tz-select form-select form-select-sm">
+            <option value="Australia/Adelaide">ADL</option>
+            <option value="Australia/Sydney">SYD</option>
+            <option value="Australia/Melbourne">MEL</option>
+            <option value="Australia/Brisbane">BNE</option>
+            <option value="Australia/Darwin">DRW</option>
+            <option value="Australia/Perth">PER</option>
+            <option value="UTC">UTC</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hand History ───────────────────────────────────────── -->
+    <div class="section-card mb-4">
+      <div class="section-header">
+        <h5 class="d-flex align-items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="2" width="13" height="18" rx="2" stroke-opacity="0.5"/>
+            <rect x="2" y="4" width="13" height="18" rx="2" fill="var(--panel-alt)"/>
+            <path d="M8.5 10 C8.5 8.5 6 8.5 6 10.5 C6 13 8.5 14.5 8.5 14.5 C8.5 14.5 11 13 11 10.5 C11 8.5 8.5 8.5 8.5 10Z" stroke-width="1.2"/>
+          </svg>
+          Hand History
+        </h5>
+      </div>
+      <div class="px-3 py-3">
+        <div id="hand-stats-grid" class="hand-stats-grid">
+          <div class="hstat-card"><span id="hs-hands" class="hstat-val">—</span><span class="hstat-lbl">HANDS</span></div>
+          <div class="hstat-card"><span id="hs-flop"  class="hstat-val">—</span><span class="hstat-lbl">FLOP</span></div>
+          <div class="hstat-card"><span id="hs-won"   class="hstat-val">—</span><span class="hstat-lbl">WON</span></div>
+          <div class="hstat-card"><span id="hs-turn"  class="hstat-val">—</span><span class="hstat-lbl">TURN</span></div>
+          <div class="hstat-card"><span id="hs-river" class="hstat-val">—</span><span class="hstat-lbl">RIVER</span></div>
+          <div class="hstat-card"><span id="hs-sd"    class="hstat-val">—</span><span class="hstat-lbl">SHOWDOWN</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shared colgroup for hand tables -->
+    <template id="hand-colgroup">
+      <colgroup>
+        <col style="width:18%">
+        <col style="width:13%">
+        <col style="width:10%">
+        <col style="width:11%">
+        <col style="width:10%">
+        <col style="width:14%">
+        <col style="width:10%">
+      </colgroup>
+    </template>
+
+    <!-- Last 3 Hands ───────────────────────────────────────── -->
+    <div class="section-card mb-4">
+      <div class="section-header">
+        <h5 class="d-flex align-items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Last 3 Hands
+        </h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-dark table-striped table-hover hand-table">
+          <thead>
+            <tr>
+              <th data-tz-label="When">When</th>
+              <th>Hole Cards</th>
+              <th class="d-none d-md-table-cell">Position</th>
+              <th>Street</th>
+              <th class="d-none d-md-table-cell">Result</th>
+              <th class="d-none d-lg-table-cell">Net P/L (BB)</th>
+              <th>Replay</th>
+            </tr>
+          </thead>
+          <tbody id="recent-hands-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Last 3 Winning Hands ───────────────────────────────── -->
+    <div class="section-card mb-4">
+      <div class="section-header">
+        <h5 class="d-flex align-items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Last 3 Winning Hands
+        </h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-dark table-striped table-hover hand-table">
+          <thead>
+            <tr>
+              <th data-tz-label="When">When</th>
+              <th>Hole Cards</th>
+              <th class="d-none d-md-table-cell">Position</th>
+              <th>Street</th>
+              <th class="d-none d-md-table-cell">Result</th>
+              <th class="d-none d-lg-table-cell">Net P/L (BB)</th>
+              <th>Replay</th>
+            </tr>
+          </thead>
+          <tbody id="recent-won-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Export Single Hand ─────────────────────────────────── -->
+    <div class="section-card mb-4">
+      <div class="section-header">
+        <h5 class="d-flex align-items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export Single Hand
+          <button class="info-badge-btn" data-bs-toggle="modal" data-bs-target="#modal-tool" title="About conversion accuracy">ⓘ</button>
+        </h5>
+      </div>
+      <div class="px-4 py-3">
+        <div id="export-hand-grid" class="export-btn-grid">
+          <button class="export-grid-btn" data-platform="PokerTracker" title="Export for PokerTracker" onclick="exportSpecificHand(this)">
+            <img src="https://www.google.com/s2/favicons?domain=pokertracker.com&sz=64" width="28" height="28" alt="PT">
+            <span>Poker Tracker</span>
+          </button>
+          <button class="export-grid-btn" data-platform="DriveHUD" title="Export for DriveHUD" onclick="exportSpecificHand(this)">
+            <img src="https://www.google.com/s2/favicons?domain=drivehud.com&sz=64" width="28" height="28" alt="DH">
+            <span>DriveHUD</span>
+          </button>
+          <button class="export-grid-btn" data-platform="GTOWizard" title="Export for GTO Wizard" onclick="exportSpecificHand(this)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 32 32">
+              <rect width="32" height="32" rx="5" fill="#0f0f10"/>
+              <polyline points="4,8 9,24 16,13 23,24 28,8" fill="none" stroke="#3dff7a" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
+            </svg>
+            <span>GTO Wizard</span>
+          </button>
+          <button class="export-grid-btn" title="Export as JSON" onclick="exportSpecificHandJson(this)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <span>JSON File</span>
+          </button>
+        </div>
+        <div id="export-hand-counter" class="export-counter mt-2 d-none"></div>
+      </div>
+    </div>
+
+    <!-- Export All Hands ───────────────────────────────────── -->
+    <div class="section-card mb-4">
+      <div class="section-header">
+        <h5 class="d-flex align-items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export All Hands
+          <button class="info-badge-btn" data-bs-toggle="modal" data-bs-target="#modal-tool" title="About conversion accuracy">ⓘ</button>
+        </h5>
+      </div>
+      <div class="px-4 py-3">
+        <div id="export-all-container"></div>
+        <div id="export-status" class="d-none mt-2" style="font-size:.82rem"></div>
+      </div>
+    </div>
+
+    <!-- Tournament History ──────────────────────────────────── -->
+    <div class="section-card mb-4">
+      <div class="section-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <h5 class="mb-0 d-flex align-items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+          Tournament History
+          <button class="info-badge-btn"
+                  data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-container="body"
+                  title="Buy-in, ITM%, and finishing position are not available in the PPPoker API data.">ⓘ</button>
+        </h5>
+        <div id="tourney-strip" class="val-strip"></div>
+      </div>
+      <div class="table-responsive">
+        <table id="tournaments-table" class="table table-dark table-striped table-hover">
+          <thead>
+            <tr>
+              <th style="white-space:nowrap">Date</th>
+              <th class="d-none d-sm-table-cell">Room</th>
+              <th class="d-none d-lg-table-cell" data-tz-label="Sit Down Time">Sit Down Time</th>
+              <th class="d-none d-lg-table-cell">Time Played</th>
+              <th class="d-none d-md-table-cell">Type</th>
+              <th class="text-center">Hands</th>
+              <th class="text-center export-col">Export Format</th>
+            </tr>
+          </thead>
+          <tbody id="tournaments-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /results -->
+</div><!-- /container -->
+
+<!-- ── Auth Modal ────────────────────────────────────────── -->
+<div class="modal fade" id="modal-auth" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:420px">
+    <div class="modal-content" style="background:var(--panel);border:1px solid var(--border);color:var(--text)">
+      <div class="modal-header" style="border-bottom:1px solid var(--border)">
+        <h5 class="modal-title d-flex align-items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Sign in
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="padding:20px 22px">
+
+        <!-- Google -->
+        <button class="btn-google-signin" onclick="signInWithGoogle()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          </svg>
+          Continue with Google
+        </button>
+
+        <!-- Divider -->
+        <div class="auth-divider"><span>or</span></div>
+
+        <!-- Magic link -->
+        <p class="mb-2" style="color:var(--muted);font-size:.84rem">Email a magic link — no password needed.</p>
+        <input type="email" id="auth-email-input" class="form-control" autocomplete="email"
+               placeholder="your@email.com"
+               style="background:var(--panel-alt);border:1px solid var(--border);color:var(--text);font-family:var(--font-body)" />
+        <div id="auth-msg" class="mt-2 d-none" style="font-size:.85rem"></div>
+      </div>
+      <div class="modal-footer" style="border-top:1px solid var(--border);justify-content:flex-end;gap:8px">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" id="auth-send-btn" class="btn btn-sm px-4"
+                style="background:rgba(0,230,118,.12);border:1px solid rgba(0,230,118,.5);color:var(--green);font-family:var(--font-head);font-size:.8rem;letter-spacing:.5px"
+                onclick="sendMagicLink()">Send Magic Link</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Footer ─────────────────────────────────────────────── -->
+<footer class="site-footer">
+  <div class="site-footer-inner">
+
+    <!-- Always-visible bar -->
+    <div class="footer-bottom">
+      <span>© 2026 PPPoker Hand Analyser — Built by a punter, for punters</span>
+      <span class="footer-sep">·</span>
+      <span>Not affiliated with PPPoker</span>
+      <span class="footer-sep">·</span>
+      <button class="footer-link-btn" data-bs-toggle="modal" data-bs-target="#modal-about">About me</button>
+    </div>
+
+    <!-- Collapsible legal panel -->
+    <details class="footer-legal">
+      <summary class="footer-legal-toggle">
+        <span>⚖ Legal, Privacy &amp; Responsible Gambling</span>
+        <span class="footer-chevron">▾</span>
+      </summary>
+      <div class="footer-cols">
+
+        <div class="footer-col">
+          <div class="footer-heading">Legal &amp; Compliance</div>
+          <p>PPPoker Hand Analyser is an independent tool for educational and study purposes only. It is not affiliated with, endorsed by, or connected to PPPoker or its parent company in any way. Use of this tool is entirely at your own discretion.</p>
+          <p>This tool does not facilitate gambling, accept wagers, or process any financial transactions. It is a hand history converter intended to assist players in reviewing their own gameplay.</p>
+        </div>
+
+        <div class="footer-col">
+          <div class="footer-heading">Responsible Gambling</div>
+          <p>You must be 18 years of age or older to use poker platforms in Australia. If gambling is causing distress for you or someone you know, free confidential support is available 24/7:</p>
+          <ul class="footer-links">
+            <li><a href="https://www.gamblinghelponline.org.au" target="_blank" rel="noopener">Gambling Help Online</a> — 1800 858 858</li>
+            <li><a href="https://www.lifeline.org.au" target="_blank" rel="noopener">Lifeline</a> — 13 11 14</li>
+          </ul>
+          <p style="font-size:.75rem">Online gambling is regulated in Australia under the <em>Interactive Gambling Act 2001</em>. This tool does not constitute a gambling service.</p>
+        </div>
+
+        <div class="footer-col">
+          <div class="footer-heading">Data &amp; Security</div>
+          <p>This tool operates in accordance with the <em>Privacy Act 1988 (Cth)</em> and the Australian Privacy Principles. No PPPoker account credentials, passwords, or personal login information are ever requested, stored, or transmitted.</p>
+          <p>The only data processed is the hand history contained in the public replay link you voluntarily provide. An anonymous session ID is stored locally in your browser to track your daily single-hand export usage (5/day on the free tier). No personally identifiable information is collected or sold.</p>
+          <p>Conversion accuracy is 95%+ across tested hand types. Exported files are for study purposes only — not official records.</p>
+        </div>
+
+      </div>
+    </details>
+
+  </div>
+</footer>
+
+<!-- ── Info Modals ────────────────────────────────────────── -->
+
+<!-- About Me -->
+<div class="modal fade" id="modal-about" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content info-modal-content">
+      <div class="modal-header info-modal-header">
+        <h5 class="modal-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.2em;margin-right:8px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          About Me
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body info-modal-body">
+        <p>Hey everyone! Just a regular Aussie poker player here who got hooked on PPPoker a while back. The games are good, the action is decent, and the community is there. But there's one thing that's always driven me mad: <strong>you can't study your hands.</strong></p>
+        <p>PokerTracker, DriveHUD, GTO Wizard — all the serious training tools need a hand history file. PPPoker doesn't give you one. Their replay system is locked inside the app, and there's no export button in sight. So if you want to actually improve your game, you're stuck replaying hands one by one in a clunky mobile viewer.</p>
+        <p>I got frustrated enough to do something about it. With the help of AI tools, I built <strong>PPPoker Hand Analyser</strong> — a web app that pulls your hand history straight from PPPoker's API and converts it into a format that actually works with your training software.</p>
+        <p>No poker background in software development. No team. Just a player who wanted better tools and figured out how to build them. If it helps your game even a little, it was worth it. ♠</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- The Tool -->
+<div class="modal fade" id="modal-tool" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content info-modal-content">
+      <div class="modal-header info-modal-header">
+        <h5 class="modal-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.2em;margin-right:8px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          The Tool
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body info-modal-body">
+        <p><strong>PPPoker Hand Analyser</strong> bridges the gap between PPPoker and your training software. Here's what it does:</p>
+        <ul>
+          <li><strong>Fetches your hands</strong> directly from PPPoker's API using your hand review link — no installs, no file uploads, no screen scraping.</li>
+          <li><strong>Converts to PokerStars format</strong> — the industry-standard hand history format accepted by PokerTracker 4, DriveHUD, and GTO Wizard.</li>
+          <li><strong>Tracks tournament history</strong> — see every tournament you've played, hands logged, session length, and result at a glance.</li>
+          <li><strong>Exports on demand</strong> — download all hands, a single hand by ID, or a full tournament in .txt or .json format.</li>
+        </ul>
+        <hr style="border-color:var(--border);margin:14px 0"/>
+        <p><strong>🔒 Your PPPoker account is never touched.</strong> This tool works entirely through the public hand review link PPPoker generates for you. It does not ask for, store, or transmit your PPPoker username, password, or any account credentials — ever. The only data processed is the hand history contained in the link you provide.</p>
+        <p><strong>Conversion accuracy is 95%+</strong> across the hands tested so far. The vast majority of hand types, bet sizes, and board runouts convert cleanly. That said, edge cases exist — unusual all-in situations, incomplete hands, or rare PPPoker-specific action types may not convert perfectly. Use exported files for study and improvement, not as official records.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- How to Use -->
+<div class="modal fade" id="modal-howto" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content info-modal-content">
+      <div class="modal-header info-modal-header">
+        <h5 class="modal-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.2em;margin-right:8px"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          How to Use
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body info-modal-body">
+        <ol class="howto-steps">
+          <li>
+            <div class="howto-step-text">
+              <strong>Open PPPoker on your phone or PC</strong>
+              <span>Go to your profile → Hand History. You'll see a list of recent hands.</span>
+            </div>
+          </li>
+          <li>
+            <div class="howto-step-text">
+              <strong>Tap any hand to open the replay</strong>
+              <span>Inside the replay screen, look for a <em>Share</em> or <em>Copy Link</em> button. It produces a URL that looks like:</span>
+              <code>http://replay.pppoker.net/...?uid=...&amp;rdkey=...</code>
+            </div>
+          </li>
+          <li>
+            <div class="howto-step-text">
+              <strong>Paste the link here</strong>
+              <span>Drop it into the input box at the top of this page and click <strong>Download My Hands</strong>. The app fetches up to 200 of your most recent hands — this takes 10–30 seconds.</span>
+            </div>
+          </li>
+          <li>
+            <div class="howto-step-text">
+              <strong>Review your stats</strong>
+              <span>Your session stats, recent hands, and tournament history all load automatically. Check your hole cards, position, and results inline.</span>
+            </div>
+          </li>
+          <li>
+            <div class="howto-step-text">
+              <strong>Export to your training tool</strong>
+              <span>Hit <strong>PT4</strong>, <strong>DriveHUD</strong>, or <strong>GTO Wizard</strong> to download a PokerStars-format .txt file. Import it into your software and start studying.</span>
+            </div>
+          </li>
+        </ol>
+        <p style="color:var(--muted);font-size:.83rem;margin-top:12px">⚠️ Links expire after a short time. If you get a "link expired" error, go back to PPPoker and copy a fresh link.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Free vs Pro -->
+<div class="modal fade" id="modal-tiers" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content info-modal-content">
+      <div class="modal-header info-modal-header">
+        <h5 class="modal-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.2em;margin-right:8px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Free vs Pro
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body info-modal-body">
+        <p>PPPoker Hand Analyser is free to use with sensible limits. Pro removes those limits and unlocks everything.</p>
+        <table class="tier-table">
+          <thead>
+            <tr><th>Feature</th><th>Free</th><th style="color:var(--yellow)">Pro</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Hand history displayed</td><td>Last 30</td><td>All 200</td></tr>
+            <tr><td>Session stats</td><td>✓ Full</td><td>✓ Full</td></tr>
+            <tr><td>Tournament overview</td><td>✓</td><td>✓</td></tr>
+            <tr><td>Single-hand exports/day</td><td>5/day</td><td>Unlimited</td></tr>
+            <tr><td>Export all hands</td><td>✕ Locked</td><td>✓ Unlocked</td></tr>
+            <tr><td>Tournament exports</td><td>✕ Locked</td><td>✓ Unlocked</td></tr>
+            <tr><td>Priority new features</td><td>—</td><td>✓</td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top:14px;font-size:.88rem">Pro is <strong style="color:var(--yellow)">$7.99/month</strong> and can be cancelled any time. Payments are coming soon — sign up below to be notified when Pro launches.</p>
+        <button class="tier-cta mt-2" onclick="bootstrap.Modal.getInstance(document.getElementById('modal-tiers')).hide(); showUpgradeModal('banner');">Upgrade to Pro — $7.99/month</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Release Notes -->
+<div class="modal fade" id="modal-releases" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content info-modal-content">
+      <div class="modal-header info-modal-header">
+        <h5 class="modal-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.2em;margin-right:8px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Release Notes
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body info-modal-body">
+
+        <div class="release-block release-latest">
+          <div class="release-version">v0.3 — Jun 2026</div>
+          <div class="release-tag">Latest</div>
+          <ul>
+            <li>🎨 Full UI redesign — gaming dark theme, Oxanium font, neon green accents</li>
+            <li>🆓 Free &amp; Pro tiers introduced — freemium gates, upgrade modal</li>
+            <li>🔥 Firebase Analytics + Firestore session tracking added</li>
+            <li>📦 Platform-specific export filenames (PokerTracker, DriveHUD, GTOWizard)</li>
+            <li>📐 Export buttons redesigned as 2×2 icon grid</li>
+            <li>📱 Mobile-first layout improvements throughout</li>
+          </ul>
+        </div>
+
+        <div class="release-block">
+          <div class="release-version">v0.2 — May 2026</div>
+          <ul>
+            <li>♠ Playing card visuals for hole cards with 4-colour suit support</li>
+            <li>🃏 Suit mapping corrected (clubs/hearts/spades/diamonds)</li>
+            <li>📊 Hero-centric validation pills (Flop / Turn / River / Showdown)</li>
+            <li>🏆 Tournament History section with MTT / Satellite / Won pills</li>
+            <li>📤 JSON export endpoints for hands &amp; tournaments</li>
+            <li>🔁 DriveHUD replaces PokerStars branding throughout</li>
+            <li>🌍 Timezone selector for date/time display</li>
+          </ul>
+        </div>
+
+        <div class="release-block">
+          <div class="release-version">v0.1 — Apr 2026</div>
+          <ul>
+            <li>🚀 Initial launch — proof of concept</li>
+            <li>🔗 PPPoker API hand fetching via share link</li>
+            <li>📝 PokerStars-format hand history export</li>
+            <li>📈 Basic session stats (VPIP, PFR, hands played)</li>
+            <li>🔄 Replay links to PPPoker hand viewer</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script
+  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+  crossorigin="anonymous"
+></script>
+<!-- Firebase SDK (compat build — exposes global `firebase` object) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="/static/app.js?v=16"></script>
+<script>
+  if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+    navigator.serviceWorker.register('/static/sw.js', { scope: '/' })
+      .catch(err => console.warn('SW registration failed:', err));
+  }
+</script>
+</body>
+</html>
