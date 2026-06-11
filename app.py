@@ -418,6 +418,19 @@ def create_checkout_session():
         return jsonify({'error': str(e)}), 400
 
 
+def _uid_for_customer(db, customer_id):
+    """Look up Firestore uid by Stripe customer_id (fallback when metadata is absent)."""
+    if not customer_id or not db:
+        return None
+    try:
+        docs = db.collection('users').where('stripe_customer_id', '==', customer_id).limit(1).get()
+        for doc in docs:
+            return doc.id
+    except Exception:
+        pass
+    return None
+
+
 @app.route('/api/stripe-webhook', methods=['POST'])
 def stripe_webhook():
     payload = request.get_data()
@@ -427,22 +440,33 @@ def stripe_webhook():
     except (ValueError, stripe.SignatureVerificationError):
         return jsonify({'error': 'Invalid signature'}), 400
 
-    db = _get_admin_db()
+    db  = _get_admin_db()
+    t   = event['type']
+    obj = event['data']['object']
 
-    if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        uid     = session.get('metadata', {}).get('uid', '')
+    if t == 'checkout.session.completed':
+        uid = obj.get('metadata', {}).get('uid', '')
         if uid:
             db.collection('users').document(uid).set(
-                {'is_pro': True, 'stripe_customer_id': session.get('customer', '')},
+                {'is_pro': True, 'stripe_customer_id': obj.get('customer', '')},
                 merge=True
             )
 
-    elif event['type'] == 'customer.subscription.deleted':
-        sub = event['data']['object']
-        uid = sub.get('metadata', {}).get('uid', '')
+    elif t in ('customer.subscription.deleted', 'customer.subscription.updated'):
+        uid = (obj.get('metadata', {}).get('uid', '')
+               or _uid_for_customer(db, obj.get('customer', '')))
         if uid:
-            db.collection('users').document(uid).set({'is_pro': False}, merge=True)
+            status = obj.get('status', '')
+            if t == 'customer.subscription.deleted' or status in ('canceled', 'unpaid'):
+                db.collection('users').document(uid).set({'is_pro': False}, merge=True)
+            elif status == 'active':
+                db.collection('users').document(uid).set({'is_pro': True}, merge=True)
+
+    elif t == 'invoice.payment_succeeded':
+        if obj.get('subscription'):   # only subscription invoices, not one-off
+            uid = _uid_for_customer(db, obj.get('customer', ''))
+            if uid:
+                db.collection('users').document(uid).set({'is_pro': True}, merge=True)
 
     return jsonify({'received': True})
 
