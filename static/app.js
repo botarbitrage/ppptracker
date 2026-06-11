@@ -1182,10 +1182,10 @@ async function _initFirebase() {
   _renderAuthBar(null);   // show Sign in immediately; overwritten once auth state resolves
   try {
     const res = await fetch('/api/firebase-config');
-    if (!res.ok) { console.error('[Firebase] config fetch failed:', res.status); return; }
+    if (!res.ok) return;
     const cfg = await res.json();
-    if (!cfg.FIREBASE_API_KEY) { console.error('[Firebase] FIREBASE_API_KEY missing from config'); return; }
-    if (typeof firebase === 'undefined') { console.error('[Firebase] SDK not loaded (blocked?)'); return; }
+    if (!cfg.FIREBASE_API_KEY) return;
+    if (typeof firebase === 'undefined') return;
 
     firebase.initializeApp({
       apiKey:            cfg.FIREBASE_API_KEY,
