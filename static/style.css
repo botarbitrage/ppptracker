@@ -946,19 +946,22 @@ button.auth-chip { background: none; }
 
 .auth-signout-btn {
   background: none;
-  border: none;
-  border-left: 1px solid rgba(255,255,255,.18);
-  padding: 0 0 0 9px;
-  margin-left: 4px;
-  color: var(--text);
+  border: 1px solid rgba(255,82,82,.35);
+  border-radius: 20px;
+  padding: 4px 11px;
+  margin-left: 6px;
+  color: var(--red);
   font-size: .72rem;
   font-family: var(--font-body);
   cursor: pointer;
   line-height: 1;
-  transition: color .15s;
+  transition: background .15s, border-color .15s;
 }
 
-.auth-signout-btn:hover { color: var(--red); }
+.auth-signout-btn:hover {
+  background: rgba(255,82,82,.12);
+  border-color: var(--red);
+}
 
 .btn-google-signin {
   display: flex;
