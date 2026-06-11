@@ -1094,8 +1094,17 @@ function signOutUser() {
   _auth.signOut().then(() => {
     _currentUser = null;
     _userState   = { is_pro: false, exports_today: 0, last_export_date: '' };
+    window._lastData = null;
+
+    // Reset UI to blank-slate state
+    const urlInput = document.getElementById('url-input');
+    if (urlInput) urlInput.value = '';
+    const results = document.getElementById('results-section');
+    if (results) results.classList.add('d-none');
+
     _renderAuthBar(null);
-    _loadUserState(); // Reload as guest
+    _updateExportGates();
+    _loadUserState();
   }).catch(e => console.warn('Sign out failed:', e));
 }
 
