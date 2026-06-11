@@ -94,7 +94,7 @@ function showUpgradeModal(reason) {
   modal.show();
 }
 
-function handleUpgradeClick() {
+function handleUpgradeClick(tier = 'pro') {
   _trackEvent('pro_upgrade_clicked');
   const btn = document.getElementById('pro-upgrade-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Redirecting…'; }
@@ -103,7 +103,7 @@ function handleUpgradeClick() {
   fetch('/api/create-checkout-session', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ uid, email }),
+    body: JSON.stringify({ uid, email, tier }),
   })
     .then(r => r.json())
     .then(d => {

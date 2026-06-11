@@ -367,8 +367,9 @@ import firebase_admin
 from firebase_admin import credentials, firestore as admin_firestore
 
 stripe.api_key = os.getenv('STRIPE_SECRET_KEY', '')
-_STRIPE_PRICE_ID    = os.getenv('STRIPE_PRICE_ID', '')
-_STRIPE_WEBHOOK_SEC = os.getenv('STRIPE_WEBHOOK_SECRET', '')
+_STRIPE_PRICE_ID         = os.getenv('STRIPE_PRICE_ID', '')
+_STRIPE_PROTEST_PRICE_ID = os.getenv('STRIPE_PROTEST_PRICE_ID', '')
+_STRIPE_WEBHOOK_SEC      = os.getenv('STRIPE_WEBHOOK_SECRET', '')
 
 
 def _get_admin_db():
@@ -387,16 +388,18 @@ def _get_admin_db():
 
 @app.route('/api/create-checkout-session', methods=['POST'])
 def create_checkout_session():
-    if not stripe.api_key or not _STRIPE_PRICE_ID:
+    data  = request.get_json(silent=True) or {}
+    tier  = data.get('tier', 'pro')
+    price = _STRIPE_PROTEST_PRICE_ID if tier == 'protest' else _STRIPE_PRICE_ID
+    if not stripe.api_key or not price:
         return jsonify({'error': 'Stripe not configured'}), 503
-    data      = request.get_json(silent=True) or {}
     uid       = data.get('uid', '')
     email     = data.get('email', '')
     origin    = request.headers.get('Origin', os.getenv('APP_URL', 'https://pppokerha.up.railway.app'))
     try:
         session = stripe.checkout.Session.create(
             mode               = 'subscription',
-            line_items         = [{'price': _STRIPE_PRICE_ID, 'quantity': 1}],
+            line_items         = [{'price': price, 'quantity': 1}],
             success_url        = f'{origin}/?session_id={{CHECKOUT_SESSION_ID}}&upgraded=1',
             cancel_url         = f'{origin}/',
             customer_email     = email or None,

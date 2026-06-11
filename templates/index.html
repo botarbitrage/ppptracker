@@ -191,6 +191,7 @@
           <button type="button" class="btn btn-outline-secondary btn-sm w-100" data-bs-dismiss="modal">Maybe later</button>
           <div id="pro-dev-hatch" class="d-none text-center mt-1">
             <button type="button" class="btn btn-link btn-sm" style="color:var(--muted);font-size:.75rem" onclick="activateProDev()">Activate Pro (dev)</button>
+            <button type="button" class="btn btn-link btn-sm d-block mx-auto" style="color:var(--muted);font-size:.75rem" onclick="handleUpgradeClick('protest')">Pro-test — $0.99/year (test sub)</button>
           </div>
         </div>
       </div>
@@ -707,7 +708,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="/static/app.js?v=19"></script>
+<script src="/static/app.js?v=20"></script>
 <script>
   if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
     navigator.serviceWorker.register('/static/sw.js', { scope: '/' })
