@@ -673,7 +673,7 @@ function _updateExportGates() {
   _renderExportAllSection();
   _renderExportCounter();
   const tierCompare = document.getElementById('tier-compare');
-  if (tierCompare) tierCompare.style.display = _isPro() ? 'none' : '';
+  if (tierCompare) tierCompare.style.display = isPro() ? 'none' : '';
 }
 
 /* ── Export Panel ────────────────────────────────────────── */
