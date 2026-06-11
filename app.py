@@ -370,6 +370,9 @@ stripe.api_key = os.getenv('STRIPE_SECRET_KEY', '')
 _STRIPE_PRICE_ID    = os.getenv('STRIPE_PRICE_ID', '')
 _STRIPE_WEBHOOK_SEC = os.getenv('STRIPE_WEBHOOK_SECRET', '')
 
+import sys
+print(f"[STARTUP] STRIPE key present: {bool(stripe.api_key)}, PRICE_ID present: {bool(_STRIPE_PRICE_ID)}", file=sys.stderr, flush=True)
+
 def _get_admin_db():
     """Lazy-init Firebase Admin SDK and return a Firestore client."""
     if not firebase_admin._apps:
