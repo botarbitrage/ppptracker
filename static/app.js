@@ -254,16 +254,51 @@ function _openExportHandModal(cb) {
 
 function _validateExportHandInput(val) {
   const status = document.getElementById('hand-id-status');
+  const okBtn  = document.getElementById('hand-id-ok-btn');
   const trimmed = val.trim();
-  if (!trimmed) { status.innerHTML = ''; return; }
+  if (!trimmed) {
+    status.innerHTML = '';
+    if (okBtn) okBtn.disabled = true;
+    return;
+  }
   if (/^[\w-]{4,}$/.test(trimmed)) {
-    status.innerHTML = `<span style="color:var(--green)">✓ Exporting hand <strong>${trimmed}</strong>…</span>`;
-    const cb = _exportHandCb;
-    _exportHandCb = null;
-    bootstrap.Modal.getOrCreateInstance(document.getElementById('modal-export-hand')).hide();
-    cb(trimmed);
+    status.innerHTML = `<span style="color:var(--green)">✓ Valid hand ID</span>`;
+    if (okBtn) okBtn.disabled = false;
   } else {
-    status.innerHTML = `<span style="color:var(--red)">✗ That doesn't look like a valid hand ID</span>`;
+    status.innerHTML = `<span style="color:var(--red)">✗ Invalid hand ID</span>`;
+    if (okBtn) okBtn.disabled = true;
+  }
+}
+
+function _confirmExportHand() {
+  const input  = document.getElementById('hand-id-input');
+  const status = document.getElementById('hand-id-status');
+  const okBtn  = document.getElementById('hand-id-ok-btn');
+  const val    = input.value.trim();
+  if (!val || !/^[\w-]{4,}$/.test(val) || !_exportHandCb) return;
+
+  const cb = _exportHandCb;
+  _exportHandCb = null;
+  if (okBtn) okBtn.disabled = true;
+
+  status.innerHTML = `<span style="color:var(--muted)">Exporting hand <strong>${val}</strong>…</span>`;
+
+  const onDone = () => {
+    status.innerHTML = `<span style="color:var(--green)">✓ Export completed successfully</span>`;
+    setTimeout(() => bootstrap.Modal.getOrCreateInstance(
+      document.getElementById('modal-export-hand')).hide(), 1500);
+  };
+  const onFail = (msg) => {
+    status.innerHTML = `<span style="color:var(--red)">✗ ${msg || 'Export failed'}</span>`;
+    _exportHandCb = cb;
+    if (okBtn) okBtn.disabled = false;
+  };
+
+  const result = cb(val);
+  if (result && typeof result.then === 'function') {
+    result.then(onDone).catch(err => onFail(err.message));
+  } else {
+    onDone();
   }
 }
 
@@ -744,7 +779,7 @@ function exportSpecificHandJson(btn) {
   _openExportHandModal(handId => {
     consumeExportQuota();
     _panelExportStatus(btn, 'loading', 'Building JSON…');
-    fetch('/api/export/json/hand', {
+    return fetch('/api/export/json/hand', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ hand_id: handId }),
@@ -760,7 +795,7 @@ function exportSpecificHandJson(btn) {
         _triggerDownload(blob, filename);
         _panelExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
       })
-      .catch(err => _panelExportStatus(btn, 'err', err.message, 6000));
+      .catch(err => { _panelExportStatus(btn, 'err', err.message, 6000); throw err; });
   });
 }
 
@@ -811,7 +846,7 @@ function exportSpecificHand(btn) {
   _openExportHandModal(handId => {
     consumeExportQuota();
     _panelExportStatus(btn, 'loading', 'Looking up hand…');
-    fetch('/api/export/hand', {
+    return fetch('/api/export/hand', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ hand_id: handId, platform }),
@@ -827,7 +862,7 @@ function exportSpecificHand(btn) {
         _triggerDownload(blob, filename);
         _panelExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
       })
-      .catch(err => _panelExportStatus(btn, 'err', err.message, 6000));
+      .catch(err => { _panelExportStatus(btn, 'err', err.message, 6000); throw err; });
   });
 }
 
@@ -967,9 +1002,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const handIdInput = document.getElementById('hand-id-input');
   if (exportHandModal && handIdInput) {
     handIdInput.addEventListener('input', () => _validateExportHandInput(handIdInput.value));
+    handIdInput.addEventListener('keydown', e => { if (e.key === 'Enter') _confirmExportHand(); });
     exportHandModal.addEventListener('hidden.bs.modal', () => {
       handIdInput.value = '';
       document.getElementById('hand-id-status').innerHTML = '';
+      const okBtn = document.getElementById('hand-id-ok-btn');
+      if (okBtn) okBtn.disabled = true;
       _exportHandCb = null;
     });
   }
