@@ -1097,23 +1097,25 @@ function signOutUser() {
   }).catch(e => console.warn('Sign out failed:', e));
 }
 
-/** Sign in with Google popup. onAuthStateChanged handles the rest. */
+/** Sign in with Google — uses redirect flow (avoids popup blockers). */
 function signInWithGoogle() {
-  if (!_auth) return;
+  const msgEl = document.getElementById('auth-msg');
+  if (!_auth) {
+    if (msgEl) {
+      msgEl.className = 'mt-2';
+      msgEl.innerHTML = `<span style="color:var(--red,#f85149)">Auth not ready — please wait a moment and try again.</span>`;
+      msgEl.classList.remove('d-none');
+    }
+    return;
+  }
   const provider = new firebase.auth.GoogleAuthProvider();
-  _auth.signInWithPopup(provider)
-    .then(() => {
-      const modal = bootstrap.Modal.getInstance(document.getElementById('modal-auth'));
-      if (modal) modal.hide();
-    })
-    .catch(err => {
-      const msgEl = document.getElementById('auth-msg');
-      if (msgEl) {
-        msgEl.className = 'mt-2';
-        msgEl.innerHTML = `<span style="color:var(--red,#f85149)">${err.message || 'Google sign-in failed.'}</span>`;
-        msgEl.classList.remove('d-none');
-      }
-    });
+  _auth.signInWithRedirect(provider).catch(err => {
+    if (msgEl) {
+      msgEl.className = 'mt-2';
+      msgEl.innerHTML = `<span style="color:var(--red,#f85149)">${err.message || 'Google sign-in failed.'}</span>`;
+      msgEl.classList.remove('d-none');
+    }
+  });
 }
 
 /* ── Firebase ─────────────────────────────────────────────── */
@@ -1146,6 +1148,11 @@ async function _initFirebase() {
     _analytics = firebase.analytics();
     _db        = firebase.firestore();
     _auth      = firebase.auth ? firebase.auth() : null;
+
+    // ── Handle Google redirect result ──
+    if (_auth) {
+      try { await _auth.getRedirectResult(); } catch (e) { console.warn('Google redirect result error:', e); }
+    }
 
     // ── Handle magic-link redirect (must run before onAuthStateChanged) ──
     if (_auth && _auth.isSignInWithEmailLink(window.location.href)) {
