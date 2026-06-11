@@ -1154,6 +1154,12 @@ async function _initFirebase() {
     _db        = firebase.firestore();
     _auth      = firebase.auth ? firebase.auth() : null;
 
+    // Unlock auth buttons now that Firebase is ready
+    ['btn-google-signin', 'auth-send-btn'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.disabled = false;
+    });
+
     // ── Handle magic-link redirect (must run before onAuthStateChanged) ──
     if (_auth && _auth.isSignInWithEmailLink(window.location.href)) {
       let email = localStorage.getItem('emailForSignIn');

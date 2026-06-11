@@ -986,6 +986,10 @@ button.auth-chip { background: none; }
   background: #f1f3f4;
   box-shadow: 0 2px 8px rgba(0,0,0,.25);
 }
+.btn-google-signin:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
 
 .auth-divider {
   display: flex;
