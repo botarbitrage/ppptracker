@@ -22,6 +22,13 @@ _session_records = None
 
 app = Flask(__name__)
 
+@app.after_request
+def _set_coop_header(response):
+    # Allow OAuth redirect flows (Firebase) to work alongside COOP
+    if response.content_type and response.content_type.startswith('text/html'):
+        response.headers['Cross-Origin-Opener-Policy'] = 'same-origin-allow-popups'
+    return response
+
 REQUEST_TIMEOUT = 30
 MAX_WORKERS = 10
 REQUEST_DELAY = 0.1
