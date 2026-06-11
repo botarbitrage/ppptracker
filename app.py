@@ -360,6 +360,82 @@ def export_json_hand():
 # Firestore security rules should restrict writes to documents where
 #   request.resource.data.session_id == the document ID.
 
+# ── Stripe + Firebase Admin ───────────────────────────────────────────────────
+
+import stripe
+import firebase_admin
+from firebase_admin import credentials, firestore as admin_firestore
+
+stripe.api_key = os.getenv('STRIPE_SECRET_KEY', '')
+_STRIPE_PRICE_ID    = os.getenv('STRIPE_PRICE_ID', '')
+_STRIPE_WEBHOOK_SEC = os.getenv('STRIPE_WEBHOOK_SECRET', '')
+
+def _get_admin_db():
+    """Lazy-init Firebase Admin SDK and return a Firestore client."""
+    if not firebase_admin._apps:
+        # On Railway the service account JSON is injected as an env var
+        sa_json = os.getenv('FIREBASE_SERVICE_ACCOUNT_JSON', '')
+        if sa_json:
+            import json
+            cred = credentials.Certificate(json.loads(sa_json))
+        else:
+            cred = credentials.ApplicationDefault()
+        firebase_admin.initialize_app(cred)
+    return admin_firestore.client()
+
+
+@app.route('/api/create-checkout-session', methods=['POST'])
+def create_checkout_session():
+    if not stripe.api_key or not _STRIPE_PRICE_ID:
+        return jsonify({'error': 'Stripe not configured'}), 503
+    data      = request.get_json(silent=True) or {}
+    uid       = data.get('uid', '')
+    email     = data.get('email', '')
+    origin    = request.headers.get('Origin', os.getenv('APP_URL', 'https://pppokerha.up.railway.app'))
+    try:
+        session = stripe.checkout.Session.create(
+            mode               = 'subscription',
+            line_items         = [{'price': _STRIPE_PRICE_ID, 'quantity': 1}],
+            success_url        = f'{origin}/?session_id={{CHECKOUT_SESSION_ID}}&upgraded=1',
+            cancel_url         = f'{origin}/',
+            customer_email     = email or None,
+            metadata           = {'uid': uid},
+            subscription_data  = {'metadata': {'uid': uid}},
+        )
+        return jsonify({'url': session.url})
+    except stripe.StripeError as e:
+        return jsonify({'error': str(e)}), 400
+
+
+@app.route('/api/stripe-webhook', methods=['POST'])
+def stripe_webhook():
+    payload = request.get_data()
+    sig     = request.headers.get('Stripe-Signature', '')
+    try:
+        event = stripe.Webhook.construct_event(payload, sig, _STRIPE_WEBHOOK_SEC)
+    except (ValueError, stripe.SignatureVerificationError):
+        return jsonify({'error': 'Invalid signature'}), 400
+
+    db = _get_admin_db()
+
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        uid     = session.get('metadata', {}).get('uid', '')
+        if uid:
+            db.collection('users').document(uid).set(
+                {'is_pro': True, 'stripe_customer_id': session.get('customer', '')},
+                merge=True
+            )
+
+    elif event['type'] == 'customer.subscription.deleted':
+        sub = event['data']['object']
+        uid = sub.get('metadata', {}).get('uid', '')
+        if uid:
+            db.collection('users').document(uid).set({'is_pro': False}, merge=True)
+
+    return jsonify({'received': True})
+
+
 _FIREBASE_ENV_KEYS = [
     'FIREBASE_API_KEY',
     'FIREBASE_AUTH_DOMAIN',

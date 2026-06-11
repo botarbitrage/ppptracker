@@ -97,9 +97,24 @@ function showUpgradeModal(reason) {
 function handleUpgradeClick() {
   _trackEvent('pro_upgrade_clicked');
   const btn = document.getElementById('pro-upgrade-btn');
-  const cs  = document.getElementById('pro-coming-soon');
-  if (btn) btn.disabled = true;
-  if (cs)  cs.classList.remove('d-none');
+  if (btn) { btn.disabled = true; btn.textContent = 'Redirecting…'; }
+  const uid   = _currentUser ? _currentUser.uid   : '';
+  const email = _currentUser ? _currentUser.email : '';
+  fetch('/api/create-checkout-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ uid, email }),
+  })
+    .then(r => r.json())
+    .then(d => {
+      if (d.url) { window.location.href = d.url; }
+      else throw new Error(d.error || 'Could not start checkout');
+    })
+    .catch(err => {
+      if (btn) { btn.disabled = false; btn.textContent = 'Upgrade to Pro'; }
+      const cs = document.getElementById('pro-coming-soon');
+      if (cs) { cs.textContent = err.message; cs.classList.remove('d-none'); }
+    });
 }
 
 function activateProDev() {
