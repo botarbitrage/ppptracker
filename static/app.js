@@ -261,11 +261,13 @@ function _validateExportHandInput(val) {
     if (okBtn) okBtn.disabled = true;
     return;
   }
-  if (/^[\w-]{4,}$/.test(trimmed)) {
+  if (/^\d{12}(-\w+)+$/.test(trimmed)) {
     status.innerHTML = `<span style="color:var(--green)">✓ Valid hand ID</span>`;
     if (okBtn) okBtn.disabled = false;
   } else {
-    status.innerHTML = `<span style="color:var(--red)">✗ Invalid hand ID</span>`;
+    const hint = /^\d{12}/.test(trimmed) ? 'Missing segments after timestamp'
+                                          : 'Must start with a 12-digit timestamp (e.g. 260611124411-…)';
+    status.innerHTML = `<span style="color:var(--red)">✗ ${hint}</span>`;
     if (okBtn) okBtn.disabled = true;
   }
 }
