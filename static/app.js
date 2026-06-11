@@ -1163,7 +1163,6 @@ async function _initFirebase() {
 
     _analytics = firebase.analytics();
     _db        = firebase.firestore();
-    _db.settings({ experimentalForceLongPolling: true, merge: true });
     _auth      = firebase.auth ? firebase.auth() : null;
 
     // Unlock auth buttons now that Firebase is ready
