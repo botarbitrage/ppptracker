@@ -371,7 +371,9 @@ _STRIPE_PRICE_ID    = os.getenv('STRIPE_PRICE_ID', '')
 _STRIPE_WEBHOOK_SEC = os.getenv('STRIPE_WEBHOOK_SECRET', '')
 
 import sys
+_user_env_keys = [k for k in os.environ if not k.startswith('RAILWAY') and k not in ('PATH','HOME','LANG','TERM','PWD','SHLVL')]
 print(f"[STARTUP] STRIPE key present: {bool(stripe.api_key)}, PRICE_ID present: {bool(_STRIPE_PRICE_ID)}", file=sys.stderr, flush=True)
+print(f"[STARTUP] User-defined env keys visible: {sorted(_user_env_keys)}", file=sys.stderr, flush=True)
 
 def _get_admin_db():
     """Lazy-init Firebase Admin SDK and return a Firestore client."""
