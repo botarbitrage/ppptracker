@@ -196,6 +196,13 @@ function _tzParts(ts, tz, opts) {
 }
 
 /** "8 Jun 26, 14:30" — on mobile collapses to "8 Jun, 14:30" */
+async function _clipboardHandId() {
+  try {
+    const text = (await navigator.clipboard.readText()).trim();
+    return /^\d{6,}$/.test(text) ? text : '';
+  } catch (e) { return ''; }
+}
+
 function copyHandId(btn) {
   const handNum = btn.dataset.handNum;
   navigator.clipboard.writeText(handNum).then(() => {
@@ -678,9 +685,10 @@ function exportRawJson() {
   }
 }
 
-function exportSpecificHandJson(btn) {
+async function exportSpecificHandJson(btn) {
   if (!checkExportQuota()) { showUpgradeModal('export'); return; }
-  const handId = (prompt('Enter hand ID to export:') || '').trim();
+  const prefill = await _clipboardHandId();
+  const handId = (prompt('Enter hand ID to export:', prefill) || '').trim();
   if (!handId) return;
   consumeExportQuota();
   _panelExportStatus(btn, 'loading', 'Building JSON…');
@@ -744,9 +752,10 @@ function exportTournamentJson(tourneyId, btn) {
     .catch(err => _rowExportStatus(btn, 'err', err.message, 6000));
 }
 
-function exportSpecificHand(btn) {
+async function exportSpecificHand(btn) {
   if (!checkExportQuota()) { showUpgradeModal('export'); return; }
-  const handId = (prompt('Enter hand ID to export:') || '').trim();
+  const prefill = await _clipboardHandId();
+  const handId = (prompt('Enter hand ID to export:', prefill) || '').trim();
   if (!handId) return;
   consumeExportQuota();
   _panelExportStatus(btn, 'loading', 'Looking up hand…');
