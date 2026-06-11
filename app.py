@@ -342,8 +342,9 @@ def export_json_tournament():
 def export_json_hand():
     if not _session_records:
         return jsonify({"error": "No hand data available. Please import first."}), 400
-    body    = request.get_json(force=True, silent=True) or {}
-    hand_id = (body.get("hand_id") or "").strip().replace("-", "")
+    body         = request.get_json(force=True, silent=True) or {}
+    raw_hand_id  = (body.get("hand_id") or "").strip()
+    hand_id      = raw_hand_id.replace("-", "")
     if not hand_id:
         return jsonify({"error": "Please provide a hand ID."}), 400
     match = next(
@@ -352,10 +353,9 @@ def export_json_hand():
         None,
     )
     if not match:
-        return jsonify({"error": f"Hand '{hand_id}' not found."}), 404
+        return jsonify({"error": f"Hand '{raw_hand_id}' not found."}), 404
     import json as _json
-    ts    = _dt.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"pppoker_hand{hand_id}_{ts}.json"
+    filename = f"pppoker_hand_{raw_hand_id}.json"
     data = _json.dumps(match, indent=2)
     return Response(data, mimetype="application/json",
                     headers={"Content-Disposition": f"attachment; filename={filename}"})
