@@ -394,6 +394,26 @@
   </div><!-- /results -->
 </div><!-- /container -->
 
+<!-- ── Export Hand ID Modal ───────────────────────────────── -->
+<div class="modal fade" id="modal-export-hand" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:340px">
+    <div class="modal-content" style="background:var(--panel);border:1px solid var(--border);color:var(--text)">
+      <div class="modal-header" style="border-bottom:1px solid var(--border);padding:.75rem 1rem">
+        <h6 class="modal-title" style="font-family:var(--font-head);letter-spacing:.08em;font-size:.85rem;color:var(--muted)">ENTER HAND ID</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="padding:1rem 1rem 1.25rem">
+        <input type="text" id="hand-id-input"
+               class="form-control"
+               style="background:var(--bg);border-color:var(--border);color:var(--text);font-family:monospace;font-size:.95rem;letter-spacing:.03em"
+               placeholder="e.g. 001-002-987654321"
+               autocomplete="off" spellcheck="false"/>
+        <div id="hand-id-status" class="mt-2" style="min-height:1.4rem;font-size:.84rem"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ── Auth Modal ────────────────────────────────────────── -->
 <div class="modal fade" id="modal-auth" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" style="max-width:420px">
@@ -687,7 +707,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="/static/app.js?v=17"></script>
+<script src="/static/app.js?v=18"></script>
 <script>
   if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
     navigator.serviceWorker.register('/static/sw.js', { scope: '/' })

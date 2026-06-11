@@ -196,16 +196,49 @@ function _tzParts(ts, tz, opts) {
 }
 
 /** "8 Jun 26, 14:30" — on mobile collapses to "8 Jun, 14:30" */
+let _pendingHandId  = '';
+let _exportHandCb   = null;
+
 function copyHandId(btn) {
   const handNum = btn.dataset.handNum;
-  navigator.clipboard.writeText(handNum).then(() => {
-    btn.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
-    btn.classList.add('copied');
-    setTimeout(() => {
-      btn.classList.remove('copied');
-      btn.innerHTML = `<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
-    }, 1500);
-  });
+  _pendingHandId = handNum;
+  navigator.clipboard.writeText(handNum).catch(() => {});
+  btn.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
+  btn.classList.add('copied');
+  setTimeout(() => {
+    btn.classList.remove('copied');
+    btn.innerHTML = `<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+  }, 1500);
+}
+
+function _openExportHandModal(cb) {
+  _exportHandCb = cb;
+  const input  = document.getElementById('hand-id-input');
+  const status = document.getElementById('hand-id-status');
+  input.value  = _pendingHandId;
+  status.innerHTML = '';
+  _pendingHandId = '';
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('modal-export-hand')).show();
+  // Focus + trigger validation if pre-filled
+  setTimeout(() => {
+    input.focus();
+    if (input.value) _validateExportHandInput(input.value);
+  }, 300);
+}
+
+function _validateExportHandInput(val) {
+  const status = document.getElementById('hand-id-status');
+  const trimmed = val.trim();
+  if (!trimmed) { status.innerHTML = ''; return; }
+  if (/^[\w-]{4,}$/.test(trimmed)) {
+    status.innerHTML = `<span style="color:var(--green)">✓ Exporting hand <strong>${trimmed}</strong>…</span>`;
+    const cb = _exportHandCb;
+    _exportHandCb = null;
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('modal-export-hand')).hide();
+    cb(trimmed);
+  } else {
+    status.innerHTML = `<span style="color:var(--red)">✗ That doesn't look like a valid hand ID</span>`;
+  }
 }
 
 function fmtHandDateTime(ts, tz) {
@@ -680,27 +713,27 @@ function exportRawJson() {
 
 function exportSpecificHandJson(btn) {
   if (!checkExportQuota()) { showUpgradeModal('export'); return; }
-  const handId = (prompt('Enter hand ID to export:') || '').trim();
-  if (!handId) return;
-  consumeExportQuota();
-  _panelExportStatus(btn, 'loading', 'Building JSON…');
-  fetch('/api/export/json/hand', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ hand_id: handId }),
-  })
-    .then(r => {
-      if (!r.ok) return r.json().then(d => { throw new Error(d.error || 'Export failed'); });
-      const cd = r.headers.get('Content-Disposition') || '';
-      const m  = cd.match(/filename[^;=\n]*=([^;\n]*)/);
-      const filename = m ? m[1].replace(/['"]/g, '').trim() : 'hand.json';
-      return r.blob().then(blob => ({ blob, filename }));
+  _openExportHandModal(handId => {
+    consumeExportQuota();
+    _panelExportStatus(btn, 'loading', 'Building JSON…');
+    fetch('/api/export/json/hand', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hand_id: handId }),
     })
-    .then(({ blob, filename }) => {
-      _triggerDownload(blob, filename);
-      _panelExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
-    })
-    .catch(err => _panelExportStatus(btn, 'err', err.message, 6000));
+      .then(r => {
+        if (!r.ok) return r.json().then(d => { throw new Error(d.error || 'Export failed'); });
+        const cd = r.headers.get('Content-Disposition') || '';
+        const m  = cd.match(/filename[^;=\n]*=([^;\n]*)/);
+        const filename = m ? m[1].replace(/['"]/g, '').trim() : 'hand.json';
+        return r.blob().then(blob => ({ blob, filename }));
+      })
+      .then(({ blob, filename }) => {
+        _triggerDownload(blob, filename);
+        _panelExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
+      })
+      .catch(err => _panelExportStatus(btn, 'err', err.message, 6000));
+  });
 }
 
 function exportAllHandsJson(btn) {
@@ -746,31 +779,28 @@ function exportTournamentJson(tourneyId, btn) {
 
 function exportSpecificHand(btn) {
   if (!checkExportQuota()) { showUpgradeModal('export'); return; }
-  const handId = (prompt('Enter hand ID to export:') || '').trim();
-  if (!handId) return;
-  consumeExportQuota();
-  _panelExportStatus(btn, 'loading', 'Looking up hand…');
-
   const platform = (btn && btn.dataset.platform) || '';
-  fetch('/api/export/hand', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ hand_id: handId, platform }),
-  })
-    .then(r => {
-      if (!r.ok) return r.json().then(d => { throw new Error(d.error || 'Export failed'); });
-      const cd = r.headers.get('Content-Disposition') || '';
-      const m  = cd.match(/filename[^;=\n]*=([^;\n]*)/);
-      const filename = m ? m[1].replace(/['"]/g, '').trim() : 'hand_export.txt';
-      return r.blob().then(blob => ({ blob, filename }));
+  _openExportHandModal(handId => {
+    consumeExportQuota();
+    _panelExportStatus(btn, 'loading', 'Looking up hand…');
+    fetch('/api/export/hand', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hand_id: handId, platform }),
     })
-    .then(({ blob, filename }) => {
-      _triggerDownload(blob, filename);
-      _panelExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
-    })
-    .catch(err => {
-      _panelExportStatus(btn, 'err', err.message, 6000);
-    });
+      .then(r => {
+        if (!r.ok) return r.json().then(d => { throw new Error(d.error || 'Export failed'); });
+        const cd = r.headers.get('Content-Disposition') || '';
+        const m  = cd.match(/filename[^;=\n]*=([^;\n]*)/);
+        const filename = m ? m[1].replace(/['"]/g, '').trim() : 'hand_export.txt';
+        return r.blob().then(blob => ({ blob, filename }));
+      })
+      .then(({ blob, filename }) => {
+        _triggerDownload(blob, filename);
+        _panelExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
+      })
+      .catch(err => _panelExportStatus(btn, 'err', err.message, 6000));
+  });
 }
 
 function exportAllHands(btn) {
@@ -901,6 +931,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('auth-email-input').addEventListener('keydown', e => {
       if (e.key === 'Enter') sendMagicLink();
+    });
+  }
+
+  // Export hand modal — validate on input, auto-proceed on valid ID
+  const exportHandModal = document.getElementById('modal-export-hand');
+  const handIdInput = document.getElementById('hand-id-input');
+  if (exportHandModal && handIdInput) {
+    handIdInput.addEventListener('input', () => _validateExportHandInput(handIdInput.value));
+    exportHandModal.addEventListener('hidden.bs.modal', () => {
+      handIdInput.value = '';
+      document.getElementById('hand-id-status').innerHTML = '';
+      _exportHandCb = null;
     });
   }
 
