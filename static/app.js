@@ -1125,12 +1125,13 @@ function _trackEvent(name, params) {
 }
 
 async function _initFirebase() {
+  _renderAuthBar(null);   // show Sign in immediately; overwritten once auth state resolves
   try {
     const res = await fetch('/api/firebase-config');
-    if (!res.ok) return;                         // Firebase not configured — degrade silently
+    if (!res.ok) return;
     const cfg = await res.json();
     if (!cfg.FIREBASE_API_KEY) return;
-    if (typeof firebase === 'undefined') return; // SDK blocked (e.g. ad-blocker)
+    if (typeof firebase === 'undefined') return;
 
     firebase.initializeApp({
       apiKey:            cfg.FIREBASE_API_KEY,
