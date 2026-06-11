@@ -24,9 +24,9 @@ app = Flask(__name__)
 
 @app.after_request
 def _set_coop_header(response):
-    # Allow OAuth redirect flows (Firebase) to work alongside COOP
+    # unsafe-none lets Firebase's signInWithPopup check popup.closed without COOP violations
     if response.content_type and response.content_type.startswith('text/html'):
-        response.headers['Cross-Origin-Opener-Policy'] = 'same-origin-allow-popups'
+        response.headers['Cross-Origin-Opener-Policy'] = 'unsafe-none'
     return response
 
 REQUEST_TIMEOUT = 30
