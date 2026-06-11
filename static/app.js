@@ -124,8 +124,19 @@ function activateProDev() {
       .then(() => location.reload())
       .catch(() => location.reload());
   } else {
-    // Firestore unavailable — flip in-memory only for this session
     _userState.is_pro = true;
+    location.reload();
+  }
+}
+
+function deactivateProDev() {
+  const ref = _getUserDocRef();
+  if (ref) {
+    ref.set({ is_pro: false }, { merge: true })
+      .then(() => location.reload())
+      .catch(() => location.reload());
+  } else {
+    _userState.is_pro = false;
     location.reload();
   }
 }
