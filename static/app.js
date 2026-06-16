@@ -762,6 +762,20 @@ async function _loadHistory() {
   } catch (e) { console.warn('History load failed:', e); }
 }
 
+const _TSUM_EXPORT_ICONS = (tourneyId) => `
+  <button class="btn export-icon-btn" data-platform="PokerTracker" title="Export for PokerTracker" onclick="event.stopPropagation();exportPersistedTournament('${tourneyId}', this)">
+    <img src="https://www.google.com/s2/favicons?domain=pokertracker.com&sz=64" width="16" height="16" alt="PT">
+  </button>
+  <button class="btn export-icon-btn" data-platform="DriveHUD" title="Export for DriveHUD" onclick="event.stopPropagation();exportPersistedTournament('${tourneyId}', this)">
+    <img src="https://www.google.com/s2/favicons?domain=drivehud.com&sz=64" width="16" height="16" alt="DH">
+  </button>
+  <button class="btn export-icon-btn" data-platform="GTOWizard" title="Export for GTO Wizard" onclick="event.stopPropagation();exportPersistedTournament('${tourneyId}', this)">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 32 32"><rect width="32" height="32" rx="5" fill="#0f0f10"/><polyline points="4,8 9,24 16,13 23,24 28,8" fill="none" stroke="#3dff7a" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/></svg>
+  </button>
+  <button class="btn export-icon-btn" title="Export as JSON file" onclick="event.stopPropagation();exportPersistedTournamentJson('${tourneyId}', this)">
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+  </button>`;
+
 function _renderTournamentSummary(tournaments) {
   const tbody = document.getElementById('tourney-summary-tbody');
   if (!tbody) return;
@@ -775,29 +789,75 @@ function _renderTournamentSummary(tournaments) {
 
   const rows = Object.entries(byRoom).sort((a, b) => b[1].length - a[1].length);
   if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No tournament data yet. Import a session to start.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">No tournament data yet. Import a session to start.</td></tr>';
     return;
   }
 
   const tz = currentTz();
-  tbody.innerHTML = rows.map(([name, entries]) => {
-    const count      = entries.length;
-    const avgHands   = Math.round(entries.reduce((s, t) => s + (t.hands || 0), 0) / count);
-    const avgDurSecs = entries.reduce((s, t) => s + (t.duration_secs || 0), 0) / count;
-    const avgVpip    = (entries.reduce((s, t) => s + (t.vpip_pct || 0), 0) / count).toFixed(1);
-    const avgPfr     = (entries.reduce((s, t) => s + (t.pfr_pct  || 0), 0) / count).toFixed(1);
-    const lastTs     = Math.max(...entries.map(t => t.earliest_ts || 0));
-    const lastDate   = lastTs ? new Date(lastTs * 1000).toLocaleDateString('en-GB',
+  tbody.innerHTML = rows.map(([name, entries], idx) => {
+    const rowId       = `tsum-${idx}`;
+    const count       = entries.length;
+    const totalHands  = entries.reduce((s, t) => s + (t.hands || 0), 0);
+    const totalDurHr  = entries.reduce((s, t) => s + (t.duration_secs || 0), 0) / 3600;
+    const handsPerHr  = totalDurHr > 0 ? (totalHands / totalDurHr) : 0;
+    const avgHands    = Math.round(totalHands / count);
+    const avgDurSecs  = entries.reduce((s, t) => s + (t.duration_secs || 0), 0) / count;
+    const avgVpip     = (entries.reduce((s, t) => s + (t.vpip_pct || 0), 0) / count).toFixed(1);
+    const avgPfr      = (entries.reduce((s, t) => s + (t.pfr_pct  || 0), 0) / count).toFixed(1);
+    const lastTs      = Math.max(...entries.map(t => t.earliest_ts || 0));
+    const lastDate    = lastTs ? new Date(lastTs * 1000).toLocaleDateString('en-GB',
         { day: 'numeric', month: 'short', year: '2-digit', timeZone: tz }) : '—';
-    return `<tr>
-      <td><small>${name}</small></td>
+
+    const sortedEntries = [...entries].sort((a, b) => (b.earliest_ts || 0) - (a.earliest_ts || 0));
+    const eventCards = sortedEntries.map(t => {
+      const d = t.earliest_ts ? new Date(t.earliest_ts * 1000).toLocaleDateString('en-GB',
+          { day: 'numeric', month: 'short', year: '2-digit', timeZone: tz }) : '—';
+      const statusBadge = t.finish_busted
+        ? '<span class="tsum-badge tsum-badge-bust">Busted</span>'
+        : '<span class="tsum-badge tsum-badge-ok">Survived</span>';
+      return `<div class="tsum-event-card">
+        <div class="tsum-event-top">
+          <span class="tsum-event-date">${d}</span>
+          ${statusBadge}
+        </div>
+        <div class="tsum-event-stats">
+          <span><strong>${t.hands || 0}</strong> hands</span>
+          <span>${_fmtDuration(t.duration_secs)}</span>
+          <span>${(t.vpip_pct || 0).toFixed(1)}% / ${(t.pfr_pct || 0).toFixed(1)}%</span>
+          <span>${fmtProfitHtml(t.net || 0)}</span>
+        </div>
+        <div class="tsum-event-actions">${_TSUM_EXPORT_ICONS(t.tourney_id)}</div>
+      </div>`;
+    }).join('');
+
+    return `<tr class="tsum-summary-row" onclick="_toggleTourneyDetail('${rowId}')">
+      <td>
+        <svg class="tsum-chevron" id="${rowId}-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        <small>${name}</small>
+      </td>
       <td class="text-center">${count}</td>
       <td class="text-center d-none d-md-table-cell">${avgHands}</td>
       <td class="text-center d-none d-md-table-cell">${_fmtDuration(avgDurSecs)}</td>
+      <td class="text-center d-none d-lg-table-cell">${handsPerHr.toFixed(1)}/hr</td>
       <td class="text-center d-none d-lg-table-cell">${avgVpip}% / ${avgPfr}%</td>
       <td class="text-center"><small>${lastDate}</small></td>
+    </tr>
+    <tr class="tsum-detail-row">
+      <td colspan="7">
+        <div class="tsum-detail-wrap" id="${rowId}-detail">
+          <div class="tsum-event-grid">${eventCards}</div>
+        </div>
+      </td>
     </tr>`;
   }).join('');
+}
+
+function _toggleTourneyDetail(rowId) {
+  const detail  = document.getElementById(`${rowId}-detail`);
+  const chevron = document.getElementById(`${rowId}-chevron`);
+  if (!detail) return;
+  detail.classList.toggle('tsum-detail-open');
+  if (chevron) chevron.classList.toggle('tsum-chevron-open');
 }
 
 /** Renders the persisted (cross-session) Tournament History for Pro users — top N most recent, with full export. */

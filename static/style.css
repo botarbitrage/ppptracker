@@ -1336,4 +1336,103 @@ button.auth-chip { background: none; }
   border: 1px solid rgba(0,230,118,.3);
 }
 
-/* ── Session history download button ──────────────────────── */
+/* ── Tournament Summary drill-down ───────────────────────────── */
+
+.tsum-summary-row {
+  cursor: pointer;
+}
+
+.tsum-chevron {
+  display: inline-block;
+  vertical-align: -1px;
+  margin-right: 6px;
+  color: var(--green);
+  transition: transform .2s ease;
+}
+.tsum-chevron-open {
+  transform: rotate(90deg);
+}
+
+.tsum-detail-row > td {
+  background: transparent !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+.tsum-detail-wrap {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .35s ease;
+  background: rgba(0,0,0,.18);
+}
+.tsum-detail-wrap.tsum-detail-open {
+  max-height: 2000px;
+}
+
+.tsum-event-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px 18px;
+}
+
+.tsum-event-card {
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  flex: 1 1 200px;
+  min-width: 180px;
+  max-width: 260px;
+  transition: transform .15s ease, border-color .15s ease;
+}
+.tsum-event-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--green);
+}
+
+.tsum-event-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.tsum-event-date {
+  font-family: var(--font-head);
+  letter-spacing: .03em;
+  font-size: .8rem;
+  color: var(--text);
+}
+
+.tsum-badge {
+  font-size: .65rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-family: var(--font-head);
+  letter-spacing: .03em;
+  white-space: nowrap;
+}
+.tsum-badge-bust {
+  background: rgba(255,82,82,.12);
+  border: 1px solid rgba(255,82,82,.35);
+  color: var(--red);
+}
+.tsum-badge-ok {
+  background: rgba(0,230,118,.1);
+  border: 1px solid rgba(0,230,118,.3);
+  color: var(--green);
+}
+
+.tsum-event-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  font-size: .78rem;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.tsum-event-actions {
+  display: flex;
+  gap: 6px;
+}
