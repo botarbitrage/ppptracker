@@ -412,10 +412,10 @@ def _try_save_session(id_token, records, player_name, url, tournaments):
         return None
     try:
         import json as _jj, time as _tt
+        db = _get_admin_db()  # ensures firebase_admin.initialize_app() has run
         decoded = admin_auth.verify_id_token(id_token)
         uid = decoded['uid']
 
-        db = _get_admin_db()
         user_snap = db.collection('users').document(uid).get()
         if not user_snap.exists or not user_snap.to_dict().get('is_pro'):
             return None
@@ -549,13 +549,13 @@ def list_sessions():
     auth_hdr = request.headers.get('Authorization', '')
     if not auth_hdr.startswith('Bearer '):
         return jsonify({'error': 'Unauthorized'}), 401
+    db = _get_admin_db()  # ensures firebase_admin.initialize_app() has run
     try:
         decoded = admin_auth.verify_id_token(auth_hdr[7:])
         uid = decoded['uid']
     except Exception:
         return jsonify({'error': 'Unauthorized'}), 401
 
-    db   = _get_admin_db()
     docs = (db.collection('users').document(uid)
               .collection('sessions')
               .order_by('created_at', direction=admin_firestore.Query.DESCENDING)
@@ -577,13 +577,13 @@ def download_session(session_id):
     auth_hdr = request.headers.get('Authorization', '')
     if not auth_hdr.startswith('Bearer '):
         return jsonify({'error': 'Unauthorized'}), 401
+    db = _get_admin_db()  # ensures firebase_admin.initialize_app() has run
     try:
         decoded = admin_auth.verify_id_token(auth_hdr[7:])
         uid = decoded['uid']
     except Exception:
         return jsonify({'error': 'Unauthorized'}), 401
 
-    db  = _get_admin_db()
     doc = db.collection('users').document(uid).collection('sessions').document(session_id).get()
     if not doc.exists:
         return jsonify({'error': 'Session not found'}), 404
