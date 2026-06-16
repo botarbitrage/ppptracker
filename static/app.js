@@ -446,7 +446,7 @@ function handleImport() {
       });
   };
 
-  if (isPro() && _currentUser) {
+  if (_currentUser) {
     _currentUser.getIdToken().then(_doFetch).catch(() => _doFetch(null));
   } else {
     _doFetch(null);
