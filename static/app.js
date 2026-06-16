@@ -749,10 +749,15 @@ async function _loadHistory() {
     if (!r.ok) return;
     const data = await r.json();
     const sessions = data.sessions || [];
-    _renderTournamentSummary(sessions);
-    _renderSessionHistory(sessions);
     const ts = document.getElementById('tournament-summary-section');
     const sh = document.getElementById('session-history-section');
+    if (!sessions.length) {
+      if (ts) ts.classList.add('d-none');
+      if (sh) sh.classList.add('d-none');
+      return;
+    }
+    _renderTournamentSummary(sessions);
+    _renderSessionHistory(sessions);
     if (ts) ts.classList.remove('d-none');
     if (sh) sh.classList.remove('d-none');
   } catch (e) { console.warn('History load failed:', e); }
