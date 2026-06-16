@@ -490,9 +490,17 @@ function renderResults(data) {
   renderHandStats(data.validation || {}, data.stats || {});
   renderRecentHands(data.recent_hands || []);
   renderRecentWonHands(data.recent_won_hands || []);
-  // Pro users get the persisted cross-session Tournament History via _loadHistory()
-  // (triggered right after this call when data.saved is true) — avoid a render flash.
-  if (!data.saved) renderTournaments(data.tournaments || []);
+  // Pro users get the persisted cross-session Tournament History from the
+  // independent top-level section below (populated by _loadHistory(), which
+  // runs whether or not an import happened this session). The free-tier card
+  // inside #results-section only shows the current import's tournaments.
+  const freeCard = document.getElementById('free-tournament-history-card');
+  if (data.saved) {
+    if (freeCard) freeCard.classList.add('d-none');
+  } else {
+    if (freeCard) freeCard.classList.remove('d-none');
+    renderTournaments(data.tournaments || []);
+  }
   updateTzHeaders();
   _updateExportGates();
 
@@ -745,6 +753,7 @@ async function _loadHistory() {
   const token = await _currentUser.getIdToken().catch(() => null);
   if (!token) return;
   const ts = document.getElementById('tournament-summary-section');
+  const th = document.getElementById('tournament-history-pro-section');
   try {
     const r = await fetch('/api/tournaments', { headers: { 'Authorization': `Bearer ${token}` } });
     if (!r.ok) return;
@@ -752,11 +761,13 @@ async function _loadHistory() {
     const tournaments = data.tournaments || [];
     if (!tournaments.length) {
       if (ts) ts.classList.add('d-none');
+      if (th) th.classList.add('d-none');
       return;
     }
     _renderTournamentSummary(tournaments);
     _renderTournamentHistoryPro(tournaments);
     if (ts) ts.classList.remove('d-none');
+    if (th) th.classList.remove('d-none');
   } catch (e) { console.warn('History load failed:', e); }
 }
 
@@ -860,8 +871,8 @@ function _toggleTourneyDetail(rowId) {
 
 /** Renders the persisted (cross-session) Tournament History for Pro users — top N most recent, with full export. */
 function _renderTournamentHistoryPro(tournaments) {
-  const tbody  = document.getElementById('tournaments-tbody');
-  const strip  = document.getElementById('tourney-strip');
+  const tbody  = document.getElementById('tournaments-pro-tbody');
+  const strip  = document.getElementById('tourney-strip-pro');
   if (!tbody) return;
 
   const top = [...tournaments]
@@ -1374,6 +1385,8 @@ function signOutUser() {
 
     const ts = document.getElementById('tournament-summary-section');
     if (ts) ts.classList.add('d-none');
+    const th = document.getElementById('tournament-history-pro-section');
+    if (th) th.classList.add('d-none');
     const savedBadge = document.getElementById('saved-badge');
     if (savedBadge) savedBadge.classList.add('d-none');
 
