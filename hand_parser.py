@@ -147,6 +147,15 @@ def extract_tourney_id(gameid):
     return parts[1] if len(parts) >= 2 else (gameid or 'unknown')
 
 
+def _seq_num(gameid):
+    """Per-tournament strictly-monotonic hand sequence number (3rd segment of gameid), or 0 if unparseable."""
+    parts = (gameid or '').split('-')
+    try:
+        return int(parts[2]) if len(parts) >= 3 else 0
+    except ValueError:
+        return 0
+
+
 def _fmt_duration(seconds):
     """Format a duration in seconds as 'Xh YYm' or 'Ym'."""
     if seconds is None or seconds < 0:

@@ -406,6 +406,76 @@ def _get_admin_bucket():
     return admin_storage.bucket(name=bucket_name)
 
 
+def _merge_tournament(db, bucket, uid, tid, new_records):
+    """
+    Atomically merge new_records into the persisted tournament doc/blob for tid.
+    Wrapped in a Firestore transaction so a concurrent import racing on the same
+    tid is forced to retry from a fresh read rather than clobbering this write.
+    """
+    import json as _jj, time as _tt
+    from google.cloud import firestore as gcf
+    from hand_parser import _seq_num
+
+    doc_ref      = db.collection('users').document(uid).collection('tournaments').document(tid)
+    storage_path = f"tournaments/{uid}/{tid}.json"
+
+    @gcf.transactional
+    def _txn(transaction):
+        snapshot = doc_ref.get(transaction=transaction)
+        merged_records = new_records
+        if snapshot.exists and bucket:
+            old_path = snapshot.to_dict().get('storage_path', storage_path)
+            blob = bucket.blob(old_path)
+            if blob.exists():
+                try:
+                    old_records = _jj.loads(blob.download_as_bytes())
+                    seen = {r.get('summary', {}).get('D') for r in new_records}
+                    merged_records = new_records + [
+                        r for r in old_records if r.get('summary', {}).get('D') not in seen
+                    ]
+                except Exception:
+                    pass  # unreadable old blob — fall back to just the new hands
+
+        # Sort by per-tournament sequence number (tie-free), not by concatenation order.
+        merged_records.sort(
+            key=lambda r: _seq_num(r.get('summary', {}).get('D', '')), reverse=True)
+
+        _, _, _, recomputed = process_hands(merged_records)
+        if not recomputed:
+            return False
+        stat = recomputed[0]
+
+        if bucket:
+            bucket.blob(storage_path).upload_from_string(
+                _jj.dumps(merged_records), content_type='application/json')
+
+        transaction.set(doc_ref, {
+            'tourney_id':    tid,
+            'room_name':     stat.get('room_name', ''),
+            'is_mtt':        stat.get('is_mtt', False),
+            'hands':         stat.get('hands', 0),
+            'net':           stat.get('net', 0),
+            'first_chips':   stat.get('first_chips', 0),
+            'last_chips':    stat.get('last_chips', 0),
+            'finish_busted': stat.get('finish_busted', False),
+            'duration_secs': stat.get('duration_secs'),
+            'earliest_ts':   stat.get('earliest_ts'),
+            'blind_min':     stat.get('blind_min', 0),
+            'blind_max':     stat.get('blind_max', 0),
+            'vpip_pct':      stat.get('vpip_pct', 0.0),
+            'pfr_pct':       stat.get('pfr_pct', 0.0),
+            'af':            stat.get('af', 0.0),
+            'wtsd_pct':      stat.get('wtsd_pct', 0.0),
+            'biggest_win':   stat.get('biggest_win', 0),
+            'biggest_loss':  stat.get('biggest_loss', 0),
+            'storage_path':  storage_path,
+            'updated_at':    int(_tt.time()),
+        })
+        return True
+
+    return _txn(db.transaction())
+
+
 def _try_save_tournaments(id_token, records, tournaments):
     """
     Merge each tournament from this import into per-tournament persisted storage.
@@ -416,7 +486,6 @@ def _try_save_tournaments(id_token, records, tournaments):
     if not id_token or not tournaments:
         return False
     try:
-        import json as _jj, time as _tt
         from hand_parser import extract_tourney_id
 
         db = _get_admin_db()  # ensures firebase_admin.initialize_app() has run
@@ -428,7 +497,6 @@ def _try_save_tournaments(id_token, records, tournaments):
             return False
 
         bucket = _get_admin_bucket()
-        tourneys_ref = db.collection('users').document(uid).collection('tournaments')
 
         for t in tournaments:
             tid = t.get('tourney_id')
@@ -438,56 +506,7 @@ def _try_save_tournaments(id_token, records, tournaments):
                             if extract_tourney_id(r.get('summary', {}).get('D', '')) == tid]
             if not new_records:
                 continue
-
-            storage_path = f"tournaments/{uid}/{tid}.json"
-            doc_ref      = tourneys_ref.document(tid)
-            existing     = doc_ref.get()
-
-            merged_records = new_records
-            if existing.exists and bucket:
-                old_path = existing.to_dict().get('storage_path', storage_path)
-                blob = bucket.blob(old_path)
-                if blob.exists():
-                    try:
-                        old_records = _jj.loads(blob.download_as_bytes())
-                        seen = {r.get('summary', {}).get('D') for r in new_records}
-                        merged_records = new_records + [
-                            r for r in old_records if r.get('summary', {}).get('D') not in seen
-                        ]
-                    except Exception:
-                        pass  # unreadable old blob — fall back to just the new hands
-
-            _, _, _, recomputed = process_hands(merged_records)
-            if not recomputed:
-                continue
-            stat = recomputed[0]
-
-            if bucket:
-                bucket.blob(storage_path).upload_from_string(
-                    _jj.dumps(merged_records), content_type='application/json')
-
-            doc_ref.set({
-                'tourney_id':    tid,
-                'room_name':     stat.get('room_name', ''),
-                'is_mtt':        stat.get('is_mtt', False),
-                'hands':         stat.get('hands', 0),
-                'net':           stat.get('net', 0),
-                'first_chips':   stat.get('first_chips', 0),
-                'last_chips':    stat.get('last_chips', 0),
-                'finish_busted': stat.get('finish_busted', False),
-                'duration_secs': stat.get('duration_secs'),
-                'earliest_ts':   stat.get('earliest_ts'),
-                'blind_min':     stat.get('blind_min', 0),
-                'blind_max':     stat.get('blind_max', 0),
-                'vpip_pct':      stat.get('vpip_pct', 0.0),
-                'pfr_pct':       stat.get('pfr_pct', 0.0),
-                'af':            stat.get('af', 0.0),
-                'wtsd_pct':      stat.get('wtsd_pct', 0.0),
-                'biggest_win':   stat.get('biggest_win', 0),
-                'biggest_loss':  stat.get('biggest_loss', 0),
-                'storage_path':  storage_path,
-                'updated_at':    int(_tt.time()),
-            })
+            _merge_tournament(db, bucket, uid, tid, new_records)
         return True
     except Exception as exc:
         import traceback
