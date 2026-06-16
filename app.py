@@ -459,7 +459,10 @@ def _try_save_session(id_token, records, player_name, url, tournaments):
             'tournaments':      tourney_docs,
         })
         return session_id
-    except Exception:
+    except Exception as exc:
+        import traceback
+        print(f"[_try_save_session] FAILED: {type(exc).__name__}: {exc}")
+        traceback.print_exc()
         return None
 
 
