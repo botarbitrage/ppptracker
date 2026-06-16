@@ -215,14 +215,18 @@ def process_hands(records):
 
         pre_actions = flow.get('pre_flop', {}).get('actions', [])
 
-        # Accumulate stats
-        if _is_vpip(pre_actions, hero_seatid): vpip += 1
-        if _is_pfr(pre_actions, hero_seatid):  pfr  += 1
+        # Accumulate stats (save intermediates for per-tournament reuse)
+        _h_vpip     = _is_vpip(pre_actions, hero_seatid)
+        _h_pfr      = _is_pfr(pre_actions, hero_seatid)
+        _h_br, _h_c = _postflop_af(flow, hero_seatid)
+        _h_saw_flop = _hero_saw_flop(flow, hero_seatid)
+        _h_at_sd    = False
 
-        br, c = _postflop_af(flow, hero_seatid)
-        af_bets += br; af_calls += c
+        if _h_vpip: vpip += 1
+        if _h_pfr:  pfr  += 1
+        af_bets += _h_br; af_calls += _h_c
 
-        if _hero_saw_flop(flow, hero_seatid):
+        if _h_saw_flop:
             wtsd_elig += 1
             if any(a.get('seatid') == hero_seatid
                    for a in flow.get('turn', {}).get('actions', [])):
@@ -231,6 +235,7 @@ def process_hands(records):
                    for a in flow.get('river', {}).get('actions', [])):
                 hero_saw_river += 1
             if _hero_at_showdown(sd_res, hero_uid):
+                _h_at_sd = True
                 wtsd += 1
                 if _hero_won_showdown(win_info, sd_res, hero_seatid, hero_uid):
                     wsd += 1
@@ -255,6 +260,12 @@ def process_hands(records):
                 # records are newest-first: first encountered = latest hand
                 latest_ts=timestamp,
                 earliest_ts=timestamp,
+                # Per-tournament stat counters
+                vpip_count=0, pfr_count=0,
+                t_af_bets=0, t_af_calls=0,
+                t_wtsd_elig=0, t_wtsd=0,
+                t_biggest_win=0, t_biggest_loss=0,
+                blind_min=small_blind, blind_max=small_blind,
             )
         t = tourney_map[tid]
         t['hands'] += 1
@@ -262,6 +273,16 @@ def process_hands(records):
         t['last_chips'] = hero_chips
         if timestamp and timestamp < (t['earliest_ts'] or timestamp + 1):
             t['earliest_ts'] = timestamp
+        if _h_vpip:     t['vpip_count'] += 1
+        if _h_pfr:      t['pfr_count']  += 1
+        t['t_af_bets']  += _h_br
+        t['t_af_calls'] += _h_c
+        if _h_saw_flop: t['t_wtsd_elig'] += 1
+        if _h_at_sd:    t['t_wtsd']      += 1
+        if profit > t['t_biggest_win']:  t['t_biggest_win']  = profit
+        if profit < t['t_biggest_loss']: t['t_biggest_loss'] = profit
+        if small_blind and small_blind < t['blind_min']: t['blind_min'] = small_blind
+        if small_blind and small_blind > t['blind_max']: t['blind_max'] = small_blind
 
         # Build hand entry for the recent-hand lists
         if len(recent_hands) < 3 or (len(recent_won) < 3 and profit > 0):
@@ -314,16 +335,27 @@ def process_hands(records):
         earliest = t.get('earliest_ts')
         latest   = t.get('latest_ts')
         duration = (latest - earliest) if (latest and earliest) else None
+        h_count  = t['hands']
         tourney_list.append(dict(
             tourney_id=t['tourney_id'],
             room_name=t['room_name'],
             is_mtt=t['is_mtt'],
-            hands=t['hands'],
+            hands=h_count,
             net=t['net'],
             first_chips=t['first_chips'],
             last_chips=t['last_chips'],
+            finish_busted=t['last_chips'] == 0,
             time_played=_fmt_duration(duration),
+            duration_secs=int(duration) if duration is not None else None,
             earliest_ts=earliest,
+            blind_min=t.get('blind_min', 0),
+            blind_max=t.get('blind_max', 0),
+            vpip_pct=round(t['vpip_count'] / h_count * 100, 1) if h_count else 0.0,
+            pfr_pct=round(t['pfr_count']  / h_count * 100, 1) if h_count else 0.0,
+            af=round(t['t_af_bets'] / t['t_af_calls'], 2) if t['t_af_calls'] else float(t['t_af_bets']),
+            wtsd_pct=round(t['t_wtsd'] / t['t_wtsd_elig'] * 100, 1) if t['t_wtsd_elig'] else 0.0,
+            biggest_win=t['t_biggest_win'],
+            biggest_loss=t['t_biggest_loss'],
         ))
 
     tournaments = sorted(tourney_list, key=lambda x: x['tourney_id'])

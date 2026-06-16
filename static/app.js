@@ -410,9 +410,10 @@ function handleImport() {
   const url = (document.getElementById('url-input').value || '').trim();
   clearError();
   document.getElementById('results-section').classList.add('d-none');
-  // Clear any stale export status from a previous session
   const _es = document.getElementById('export-status');
   if (_es) { _es.classList.add('d-none'); _es.innerHTML = ''; }
+  const savedBadge = document.getElementById('saved-badge');
+  if (savedBadge) savedBadge.classList.add('d-none');
 
   if (!url) {
     showError('Please enter a PPPoker Hand Review URL.');
@@ -421,22 +422,37 @@ function handleImport() {
 
   setLoading(true);
 
-  fetch('/api/analyze', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ url }),
-  })
-    .then(r => r.json())
-    .then(data => {
-      setLoading(false);
-      if (data.error) { showError(data.error); return; }
-      renderResults(data);
-      showImportSuccess(data);
+  const _doFetch = (idToken) => {
+    const headers = { 'Content-Type': 'application/json' };
+    if (idToken) headers['Authorization'] = `Bearer ${idToken}`;
+    fetch('/api/analyze', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ url }),
     })
-    .catch(err => {
-      setLoading(false);
-      showError('Network error: ' + err.message);
-    });
+      .then(r => r.json())
+      .then(data => {
+        setLoading(false);
+        if (data.error) { showError(data.error); return; }
+        renderResults(data);
+        showImportSuccess(data);
+        if (data.session_id) {
+          const b = document.getElementById('saved-badge');
+          if (b) b.classList.remove('d-none');
+          _loadHistory();
+        }
+      })
+      .catch(err => {
+        setLoading(false);
+        showError('Network error: ' + err.message);
+      });
+  };
+
+  if (isPro() && _currentUser) {
+    _currentUser.getIdToken().then(_doFetch).catch(() => _doFetch(null));
+  } else {
+    _doFetch(null);
+  }
 }
 
 /* ── Render all ──────────────────────────────────────────── */
@@ -711,6 +727,139 @@ function _updateExportGates() {
   _renderExportCounter();
   const tierCompare = document.getElementById('tier-compare');
   if (tierCompare) tierCompare.style.display = isPro() ? 'none' : '';
+}
+
+/* ── Session history & Tournament Summary ────────────────── */
+
+const _HIST_RECENT_MS = 90 * 24 * 60 * 60 * 1000; // 90 days in ms
+
+function _fmtDuration(secs) {
+  if (!secs || secs < 0) return '—';
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  return h ? `${h}h ${String(m).padStart(2, '0')}m` : `${m}m`;
+}
+
+async function _loadHistory() {
+  if (!isPro() || !_currentUser) return;
+  const token = await _currentUser.getIdToken().catch(() => null);
+  if (!token) return;
+  try {
+    const r = await fetch('/api/sessions', { headers: { 'Authorization': `Bearer ${token}` } });
+    if (!r.ok) return;
+    const data = await r.json();
+    const sessions = data.sessions || [];
+    _renderTournamentSummary(sessions);
+    _renderSessionHistory(sessions);
+    const ts = document.getElementById('tournament-summary-section');
+    const sh = document.getElementById('session-history-section');
+    if (ts) ts.classList.remove('d-none');
+    if (sh) sh.classList.remove('d-none');
+  } catch (e) { console.warn('History load failed:', e); }
+}
+
+function _renderTournamentSummary(sessions) {
+  const tbody = document.getElementById('tourney-summary-tbody');
+  if (!tbody) return;
+
+  const byRoom = {};
+  for (const s of sessions) {
+    for (const t of (s.tournaments || [])) {
+      const key = t.room_name || '(Unknown)';
+      if (!byRoom[key]) byRoom[key] = [];
+      byRoom[key].push(t);
+    }
+  }
+
+  const rows = Object.entries(byRoom).sort((a, b) => b[1].length - a[1].length);
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-muted">No tournament data yet. Import a session to start.</td></tr>';
+    return;
+  }
+
+  const tz = currentTz();
+  tbody.innerHTML = rows.map(([name, entries]) => {
+    const count      = entries.length;
+    const avgHands   = Math.round(entries.reduce((s, t) => s + (t.hands || 0), 0) / count);
+    const avgDurSecs = entries.reduce((s, t) => s + (t.duration_secs || 0), 0) / count;
+    const avgNet     = Math.round(entries.reduce((s, t) => s + (t.net || 0), 0) / count);
+    const bestNet    = Math.max(...entries.map(t => t.net || 0));
+    const bustPct    = Math.round(entries.filter(t => t.finish_busted).length / count * 100);
+    const avgVpip    = (entries.reduce((s, t) => s + (t.vpip_pct || 0), 0) / count).toFixed(1);
+    const avgPfr     = (entries.reduce((s, t) => s + (t.pfr_pct  || 0), 0) / count).toFixed(1);
+    const lastTs     = Math.max(...entries.map(t => t.earliest_ts || 0));
+    const lastDate   = lastTs ? new Date(lastTs * 1000).toLocaleDateString('en-GB',
+        { day: 'numeric', month: 'short', year: '2-digit', timeZone: tz }) : '—';
+    return `<tr>
+      <td><small>${name}</small></td>
+      <td class="text-center">${count}</td>
+      <td class="text-center d-none d-md-table-cell">${avgHands}</td>
+      <td class="text-center d-none d-md-table-cell">${_fmtDuration(avgDurSecs)}</td>
+      <td class="text-center d-none d-sm-table-cell">${fmtProfitHtml(avgNet)}</td>
+      <td class="text-center d-none d-sm-table-cell"><span class="profit-pos">+${bestNet.toLocaleString()}</span></td>
+      <td class="text-center d-none d-lg-table-cell">${bustPct}%</td>
+      <td class="text-center d-none d-lg-table-cell">${avgVpip}% / ${avgPfr}%</td>
+      <td class="text-center"><small>${lastDate}</small></td>
+    </tr>`;
+  }).join('');
+}
+
+function _renderSessionHistory(sessions) {
+  const tbody = document.getElementById('session-history-tbody');
+  if (!tbody) return;
+
+  if (!sessions.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">No saved sessions yet. Import a hand history to start.</td></tr>';
+    return;
+  }
+
+  const now = Date.now();
+  const tz  = currentTz();
+  tbody.innerHTML = sessions.map(s => {
+    const isRecent = s.created_at && (now - s.created_at * 1000) < _HIST_RECENT_MS;
+    const dateStr  = s.created_at
+      ? new Date(s.created_at * 1000).toLocaleDateString('en-GB',
+          { day: 'numeric', month: 'short', year: '2-digit', timeZone: tz })
+      : '—';
+    const actionCell = isRecent
+      ? `<button class="btn btn-sm hist-dl-btn" onclick="reDownloadSession('${s.session_id}', this)">⬇ JSON</button>`
+      : `<span class="text-muted" style="font-size:.75rem" title="Detailed data available for 90 days from import">Archived</span>`;
+    return `<tr>
+      <td><small>${dateStr}</small></td>
+      <td><small>${s.player_name || '—'}</small></td>
+      <td class="text-center">${s.hand_count || 0}</td>
+      <td class="text-center">${s.tournament_count || 0}</td>
+      <td class="text-center">${actionCell}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function reDownloadSession(sessionId, btn) {
+  if (!_currentUser) return;
+  const token = await _currentUser.getIdToken().catch(() => null);
+  if (!token) return;
+  if (btn) { btn.disabled = true; btn.textContent = '…'; }
+  try {
+    const r = await fetch(`/api/sessions/${sessionId}/download`,
+      { headers: { 'Authorization': `Bearer ${token}` } });
+    if (r.status === 410) {
+      if (btn) { btn.textContent = 'Archived'; btn.disabled = true; }
+      return;
+    }
+    if (!r.ok) {
+      const d = await r.json().catch(() => ({}));
+      throw new Error(d.error || 'Download failed');
+    }
+    const cd = r.headers.get('Content-Disposition') || '';
+    const m  = cd.match(/filename[^;=\n]*=([^;\n]*)/);
+    const filename = m ? m[1].replace(/['"]/g, '').trim() : `pppoker_session_${sessionId}.json`;
+    const blob = await r.blob();
+    _triggerDownload(blob, filename);
+    if (btn) { btn.disabled = false; btn.textContent = '⬇ JSON'; }
+  } catch (err) {
+    if (btn) { btn.disabled = false; btn.textContent = '⬇ JSON'; }
+    _rowExportStatus(btn, 'err', err.message, 5000);
+  }
 }
 
 /* ── Export Panel ────────────────────────────────────────── */
@@ -1138,6 +1287,13 @@ function signOutUser() {
     const results = document.getElementById('results-section');
     if (results) results.classList.add('d-none');
 
+    const ts = document.getElementById('tournament-summary-section');
+    const sh = document.getElementById('session-history-section');
+    if (ts) ts.classList.add('d-none');
+    if (sh) sh.classList.add('d-none');
+    const savedBadge = document.getElementById('saved-badge');
+    if (savedBadge) savedBadge.classList.add('d-none');
+
     _renderAuthBar(null);
     _updateExportGates();
     _loadUserState();
@@ -1227,11 +1383,11 @@ async function _initFirebase() {
         await _loadUserState();
         _renderAuthBar(user ? user.email : null);
         if (user) {
-          // Keep email + last_seen fresh on the auth user doc
           _getUserDocRef().set({
             email:     user.email,
             last_seen: firebase.firestore.FieldValue.serverTimestamp(),
           }, { merge: true }).catch(() => {});
+          if (isPro()) _loadHistory();
         }
       });
     } else {

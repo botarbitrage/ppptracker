@@ -136,8 +136,10 @@ def index():
 
 @app.route("/api/analyze", methods=["POST"])
 def analyze():
-    body = request.get_json(force=True, silent=True) or {}
-    url = body.get("url", "").strip()
+    body     = request.get_json(force=True, silent=True) or {}
+    url      = body.get("url", "").strip()
+    auth_hdr = request.headers.get('Authorization', '')
+    id_token = auth_hdr[7:] if auth_hdr.startswith('Bearer ') else None
 
     if not url:
         return jsonify({"error": "URL is required."}), 400
@@ -196,6 +198,8 @@ def analyze():
     recent_hands, recent_won, stats, tournaments = process_hands(records)
     validation = validate_hands(records)
 
+    session_id = _try_save_session(id_token, records, player_name, url, tournaments)
+
     return jsonify({
         "player": {"name": player_name, "uid": uid},
         "total_fetched": len(records),
@@ -205,6 +209,7 @@ def analyze():
         "stats": stats,
         "tournaments": tournaments,
         "validation": validation,
+        "session_id": session_id,
     })
 
 
@@ -371,7 +376,7 @@ def export_json_hand():
 
 import stripe
 import firebase_admin
-from firebase_admin import credentials, firestore as admin_firestore
+from firebase_admin import credentials, firestore as admin_firestore, auth as admin_auth, storage as admin_storage
 
 stripe.api_key = os.getenv('STRIPE_SECRET_KEY', '')
 _STRIPE_PRICE_ID         = os.getenv('STRIPE_PRICE_ID', '')
@@ -382,7 +387,6 @@ _STRIPE_WEBHOOK_SEC      = os.getenv('STRIPE_WEBHOOK_SECRET', '')
 def _get_admin_db():
     """Lazy-init Firebase Admin SDK and return a Firestore client."""
     if not firebase_admin._apps:
-        # On Railway the service account JSON is injected as an env var
         sa_json = os.getenv('FIREBASE_SERVICE_ACCOUNT_JSON', '')
         if sa_json:
             import json
@@ -391,6 +395,72 @@ def _get_admin_db():
             cred = credentials.ApplicationDefault()
         firebase_admin.initialize_app(cred)
     return admin_firestore.client()
+
+
+def _get_admin_bucket():
+    """Return the Firebase Storage bucket, initialising Admin SDK if needed."""
+    _get_admin_db()
+    bucket_name = os.getenv('FIREBASE_STORAGE_BUCKET', '')
+    if not bucket_name:
+        return None
+    return admin_storage.bucket(name=bucket_name)
+
+
+def _try_save_session(id_token, records, player_name, url, tournaments):
+    """Upload session to Firebase Storage + write Firestore metadata. Returns session_id or None."""
+    if not id_token:
+        return None
+    try:
+        import json as _jj, time as _tt
+        decoded = admin_auth.verify_id_token(id_token)
+        uid = decoded['uid']
+
+        db = _get_admin_db()
+        user_snap = db.collection('users').document(uid).get()
+        if not user_snap.exists or not user_snap.to_dict().get('is_pro'):
+            return None
+
+        session_id   = f"{int(_tt.time() * 1000)}_{uid[:6]}"
+        storage_path = f"sessions/{uid}/{session_id}.json"
+
+        bucket = _get_admin_bucket()
+        if bucket:
+            blob = bucket.blob(storage_path)
+            blob.upload_from_string(_jj.dumps(records), content_type='application/json')
+
+        tourney_docs = [{
+            'tourney_id':   t.get('tourney_id'),
+            'room_name':    t.get('room_name', ''),
+            'is_mtt':       t.get('is_mtt', False),
+            'hands':        t.get('hands', 0),
+            'net':          t.get('net', 0),
+            'first_chips':  t.get('first_chips', 0),
+            'last_chips':   t.get('last_chips', 0),
+            'finish_busted':t.get('finish_busted', False),
+            'duration_secs':t.get('duration_secs'),
+            'earliest_ts':  t.get('earliest_ts'),
+            'blind_min':    t.get('blind_min', 0),
+            'blind_max':    t.get('blind_max', 0),
+            'vpip_pct':     t.get('vpip_pct', 0.0),
+            'pfr_pct':      t.get('pfr_pct', 0.0),
+            'af':           t.get('af', 0.0),
+            'wtsd_pct':     t.get('wtsd_pct', 0.0),
+            'biggest_win':  t.get('biggest_win', 0),
+            'biggest_loss': t.get('biggest_loss', 0),
+        } for t in (tournaments or [])]
+
+        db.collection('users').document(uid).collection('sessions').document(session_id).set({
+            'created_at':       int(_tt.time()),
+            'player_name':      player_name,
+            'url':              url,
+            'hand_count':       len(records),
+            'tournament_count': len(tourney_docs),
+            'storage_path':     storage_path,
+            'tournaments':      tourney_docs,
+        })
+        return session_id
+    except Exception:
+        return None
 
 
 @app.route('/api/create-checkout-session', methods=['POST'])
@@ -469,6 +539,67 @@ def stripe_webhook():
                 db.collection('users').document(uid).set({'is_pro': True}, merge=True)
 
     return jsonify({'received': True})
+
+
+@app.route('/api/sessions', methods=['GET'])
+def list_sessions():
+    auth_hdr = request.headers.get('Authorization', '')
+    if not auth_hdr.startswith('Bearer '):
+        return jsonify({'error': 'Unauthorized'}), 401
+    try:
+        decoded = admin_auth.verify_id_token(auth_hdr[7:])
+        uid = decoded['uid']
+    except Exception:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    db   = _get_admin_db()
+    docs = (db.collection('users').document(uid)
+              .collection('sessions')
+              .order_by('created_at', direction=admin_firestore.Query.DESCENDING)
+              .get())
+
+    sessions = []
+    for doc in docs:
+        d = doc.to_dict()
+        d['session_id'] = doc.id
+        # Remove storage_path from client response (internal detail)
+        d.pop('storage_path', None)
+        sessions.append(d)
+
+    return jsonify({'sessions': sessions})
+
+
+@app.route('/api/sessions/<session_id>/download', methods=['GET'])
+def download_session(session_id):
+    auth_hdr = request.headers.get('Authorization', '')
+    if not auth_hdr.startswith('Bearer '):
+        return jsonify({'error': 'Unauthorized'}), 401
+    try:
+        decoded = admin_auth.verify_id_token(auth_hdr[7:])
+        uid = decoded['uid']
+    except Exception:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    db  = _get_admin_db()
+    doc = db.collection('users').document(uid).collection('sessions').document(session_id).get()
+    if not doc.exists:
+        return jsonify({'error': 'Session not found'}), 404
+
+    storage_path = doc.to_dict().get('storage_path', '')
+    bucket = _get_admin_bucket()
+    if not bucket or not storage_path:
+        return jsonify({'error': 'Storage not configured'}), 503
+
+    blob = bucket.blob(storage_path)
+    if not blob.exists():
+        return jsonify({'archived': True, 'error': 'Session data no longer available'}), 410
+
+    data        = blob.download_as_bytes()
+    player_name = doc.to_dict().get('player_name', 'session')
+    slug        = _re.sub(r'[^A-Za-z0-9]', '_', player_name)[:20]
+    filename    = f"pppoker_session_{session_id}_{slug}.json"
+    return Response(data, mimetype='application/json',
+                    headers={'Content-Disposition': f'attachment; filename={filename}'})
 
 
 _FIREBASE_ENV_KEYS = [

@@ -1298,7 +1298,8 @@ button.auth-chip { background: none; }
 #export-toast {
   position: fixed;
   bottom: 1.75rem;
-  right: 1.75rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
   z-index: 1070;
   background: var(--panel);
   border: 1px solid var(--border);
@@ -1307,16 +1308,48 @@ button.auth-chip { background: none; }
   font-size: .82rem;
   box-shadow: 0 4px 20px rgba(0,0,0,.45);
   opacity: 0;
-  transform: translateY(10px);
   transition: opacity .18s ease, transform .18s ease;
   pointer-events: none;
-  max-width: 420px;
+  max-width: 90vw;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 #export-toast.et-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0);
   pointer-events: auto;
+}
+
+/* ── Session saved badge ───────────────────────────────────── */
+.saved-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .18rem .55rem;
+  border-radius: 20px;
+  font-size: .72rem;
+  font-family: var(--font-head);
+  letter-spacing: .04em;
+  color: var(--green);
+  background: rgba(0,230,118,.1);
+  border: 1px solid rgba(0,230,118,.3);
+}
+
+/* ── Session history download button ──────────────────────── */
+.hist-dl-btn {
+  font-size: .75rem;
+  padding: .2rem .65rem;
+  background: rgba(0,230,118,.1);
+  border: 1px solid rgba(0,230,118,.3);
+  color: var(--green);
+  font-family: var(--font-head);
+}
+.hist-dl-btn:hover:not(:disabled) {
+  background: rgba(0,230,118,.2);
+  color: var(--green);
+}
+.hist-dl-btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
 }
