@@ -198,7 +198,7 @@ def analyze():
     recent_hands, recent_won, stats, tournaments = process_hands(records)
     validation = validate_hands(records)
 
-    session_id = _try_save_session(id_token, records, player_name, url, tournaments)
+    saved = _try_save_tournaments(id_token, records, tournaments)
 
     return jsonify({
         "player": {"name": player_name, "uid": uid},
@@ -209,7 +209,7 @@ def analyze():
         "stats": stats,
         "tournaments": tournaments,
         "validation": validation,
-        "session_id": session_id,
+        "saved": saved,
     })
 
 
@@ -406,64 +406,94 @@ def _get_admin_bucket():
     return admin_storage.bucket(name=bucket_name)
 
 
-def _try_save_session(id_token, records, player_name, url, tournaments):
-    """Upload session to Firebase Storage + write Firestore metadata. Returns session_id or None."""
-    if not id_token:
-        return None
+def _try_save_tournaments(id_token, records, tournaments):
+    """
+    Merge each tournament from this import into per-tournament persisted storage.
+    On a re-import of the same tourney_id, hands are merged (de-duped by gameid)
+    with any previously stored hands for that tournament and stats recomputed
+    from the merged set. Returns True if anything was saved (Pro user), else False.
+    """
+    if not id_token or not tournaments:
+        return False
     try:
         import json as _jj, time as _tt
+        from hand_parser import extract_tourney_id
+
         db = _get_admin_db()  # ensures firebase_admin.initialize_app() has run
         decoded = admin_auth.verify_id_token(id_token)
         uid = decoded['uid']
 
         user_snap = db.collection('users').document(uid).get()
         if not user_snap.exists or not user_snap.to_dict().get('is_pro'):
-            return None
-
-        session_id   = f"{int(_tt.time() * 1000)}_{uid[:6]}"
-        storage_path = f"sessions/{uid}/{session_id}.json"
+            return False
 
         bucket = _get_admin_bucket()
-        if bucket:
-            blob = bucket.blob(storage_path)
-            blob.upload_from_string(_jj.dumps(records), content_type='application/json')
+        tourneys_ref = db.collection('users').document(uid).collection('tournaments')
 
-        tourney_docs = [{
-            'tourney_id':   t.get('tourney_id'),
-            'room_name':    t.get('room_name', ''),
-            'is_mtt':       t.get('is_mtt', False),
-            'hands':        t.get('hands', 0),
-            'net':          t.get('net', 0),
-            'first_chips':  t.get('first_chips', 0),
-            'last_chips':   t.get('last_chips', 0),
-            'finish_busted':t.get('finish_busted', False),
-            'duration_secs':t.get('duration_secs'),
-            'earliest_ts':  t.get('earliest_ts'),
-            'blind_min':    t.get('blind_min', 0),
-            'blind_max':    t.get('blind_max', 0),
-            'vpip_pct':     t.get('vpip_pct', 0.0),
-            'pfr_pct':      t.get('pfr_pct', 0.0),
-            'af':           t.get('af', 0.0),
-            'wtsd_pct':     t.get('wtsd_pct', 0.0),
-            'biggest_win':  t.get('biggest_win', 0),
-            'biggest_loss': t.get('biggest_loss', 0),
-        } for t in (tournaments or [])]
+        for t in tournaments:
+            tid = t.get('tourney_id')
+            if not tid:
+                continue
+            new_records = [r for r in records
+                            if extract_tourney_id(r.get('summary', {}).get('D', '')) == tid]
+            if not new_records:
+                continue
 
-        db.collection('users').document(uid).collection('sessions').document(session_id).set({
-            'created_at':       int(_tt.time()),
-            'player_name':      player_name,
-            'url':              url,
-            'hand_count':       len(records),
-            'tournament_count': len(tourney_docs),
-            'storage_path':     storage_path,
-            'tournaments':      tourney_docs,
-        })
-        return session_id
+            storage_path = f"tournaments/{uid}/{tid}.json"
+            doc_ref      = tourneys_ref.document(tid)
+            existing     = doc_ref.get()
+
+            merged_records = new_records
+            if existing.exists and bucket:
+                old_path = existing.to_dict().get('storage_path', storage_path)
+                blob = bucket.blob(old_path)
+                if blob.exists():
+                    try:
+                        old_records = _jj.loads(blob.download_as_bytes())
+                        seen = {r.get('summary', {}).get('D') for r in new_records}
+                        merged_records = new_records + [
+                            r for r in old_records if r.get('summary', {}).get('D') not in seen
+                        ]
+                    except Exception:
+                        pass  # unreadable old blob — fall back to just the new hands
+
+            _, _, _, recomputed = process_hands(merged_records)
+            if not recomputed:
+                continue
+            stat = recomputed[0]
+
+            if bucket:
+                bucket.blob(storage_path).upload_from_string(
+                    _jj.dumps(merged_records), content_type='application/json')
+
+            doc_ref.set({
+                'tourney_id':    tid,
+                'room_name':     stat.get('room_name', ''),
+                'is_mtt':        stat.get('is_mtt', False),
+                'hands':         stat.get('hands', 0),
+                'net':           stat.get('net', 0),
+                'first_chips':   stat.get('first_chips', 0),
+                'last_chips':    stat.get('last_chips', 0),
+                'finish_busted': stat.get('finish_busted', False),
+                'duration_secs': stat.get('duration_secs'),
+                'earliest_ts':   stat.get('earliest_ts'),
+                'blind_min':     stat.get('blind_min', 0),
+                'blind_max':     stat.get('blind_max', 0),
+                'vpip_pct':      stat.get('vpip_pct', 0.0),
+                'pfr_pct':       stat.get('pfr_pct', 0.0),
+                'af':            stat.get('af', 0.0),
+                'wtsd_pct':      stat.get('wtsd_pct', 0.0),
+                'biggest_win':   stat.get('biggest_win', 0),
+                'biggest_loss':  stat.get('biggest_loss', 0),
+                'storage_path':  storage_path,
+                'updated_at':    int(_tt.time()),
+            })
+        return True
     except Exception as exc:
         import traceback
-        print(f"[_try_save_session] FAILED: {type(exc).__name__}: {exc}")
+        print(f"[_try_save_tournaments] FAILED: {type(exc).__name__}: {exc}")
         traceback.print_exc()
-        return None
+        return False
 
 
 @app.route('/api/create-checkout-session', methods=['POST'])
@@ -544,63 +574,91 @@ def stripe_webhook():
     return jsonify({'received': True})
 
 
-@app.route('/api/sessions', methods=['GET'])
-def list_sessions():
-    auth_hdr = request.headers.get('Authorization', '')
+def _verify_bearer(req):
+    """Verify the Authorization: Bearer <token> header. Returns uid or None."""
+    auth_hdr = req.headers.get('Authorization', '')
     if not auth_hdr.startswith('Bearer '):
-        return jsonify({'error': 'Unauthorized'}), 401
-    db = _get_admin_db()  # ensures firebase_admin.initialize_app() has run
+        return None
     try:
         decoded = admin_auth.verify_id_token(auth_hdr[7:])
-        uid = decoded['uid']
+        return decoded['uid']
     except Exception:
+        return None
+
+
+@app.route('/api/tournaments', methods=['GET'])
+def list_tournaments():
+    db  = _get_admin_db()  # ensures firebase_admin.initialize_app() has run
+    uid = _verify_bearer(request)
+    if not uid:
         return jsonify({'error': 'Unauthorized'}), 401
 
-    docs = (db.collection('users').document(uid)
-              .collection('sessions')
-              .order_by('created_at', direction=admin_firestore.Query.DESCENDING)
-              .get())
-
-    sessions = []
+    docs = db.collection('users').document(uid).collection('tournaments').get()
+    tournaments = []
     for doc in docs:
         d = doc.to_dict()
-        d['session_id'] = doc.id
-        # Remove storage_path from client response (internal detail)
-        d.pop('storage_path', None)
-        sessions.append(d)
+        d.pop('storage_path', None)  # internal detail, not needed by client
+        tournaments.append(d)
 
-    return jsonify({'sessions': sessions})
+    return jsonify({'tournaments': tournaments})
 
 
-@app.route('/api/sessions/<session_id>/download', methods=['GET'])
-def download_session(session_id):
-    auth_hdr = request.headers.get('Authorization', '')
-    if not auth_hdr.startswith('Bearer '):
-        return jsonify({'error': 'Unauthorized'}), 401
-    db = _get_admin_db()  # ensures firebase_admin.initialize_app() has run
-    try:
-        decoded = admin_auth.verify_id_token(auth_hdr[7:])
-        uid = decoded['uid']
-    except Exception:
-        return jsonify({'error': 'Unauthorized'}), 401
-
-    doc = db.collection('users').document(uid).collection('sessions').document(session_id).get()
+def _fetch_tournament_records(uid, tourney_id):
+    """Returns (records, doc_dict) for a persisted tournament, or (None, None)."""
+    db  = _get_admin_db()
+    doc = db.collection('users').document(uid).collection('tournaments').document(tourney_id).get()
     if not doc.exists:
-        return jsonify({'error': 'Session not found'}), 404
-
-    storage_path = doc.to_dict().get('storage_path', '')
+        return None, None
+    d = doc.to_dict()
+    storage_path = d.get('storage_path', '')
     bucket = _get_admin_bucket()
     if not bucket or not storage_path:
-        return jsonify({'error': 'Storage not configured'}), 503
-
+        return None, d
     blob = bucket.blob(storage_path)
     if not blob.exists():
-        return jsonify({'archived': True, 'error': 'Session data no longer available'}), 410
+        return None, d
+    import json as _jj
+    return _jj.loads(blob.download_as_bytes()), d
 
-    data        = blob.download_as_bytes()
-    player_name = doc.to_dict().get('player_name', 'session')
-    slug        = _re.sub(r'[^A-Za-z0-9]', '_', player_name)[:20]
-    filename    = f"pppoker_session_{session_id}_{slug}.json"
+
+@app.route('/api/tournaments/<tourney_id>/export', methods=['POST'])
+def export_persisted_tournament(tourney_id):
+    uid = _verify_bearer(request)
+    if not uid:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    records, _doc = _fetch_tournament_records(uid, tourney_id)
+    if records is None:
+        return jsonify({'error': 'Tournament data not available'}), 404
+
+    body     = request.get_json(force=True, silent=True) or {}
+    platform = (body.get('platform') or '').strip()
+    try:
+        filepath, _ = export_pokerstars(records, platform=platform)
+        return send_file(
+            os.path.abspath(filepath),
+            as_attachment=True,
+            download_name=os.path.basename(filepath),
+            mimetype='text/plain',
+        )
+    except Exception as exc:
+        return jsonify({'error': str(exc)}), 500
+
+
+@app.route('/api/tournaments/<tourney_id>/export/json', methods=['POST'])
+def export_persisted_tournament_json(tourney_id):
+    uid = _verify_bearer(request)
+    if not uid:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    records, doc = _fetch_tournament_records(uid, tourney_id)
+    if records is None:
+        return jsonify({'error': 'Tournament data not available'}), 404
+
+    import json as _jj
+    room     = _re.sub(r'[^A-Za-z0-9]', '', (doc or {}).get('room_name', ''))[:24]
+    filename = f"pppoker_{room}_{tourney_id}.json" if room else f"pppoker_tourney{tourney_id}.json"
+    data = _jj.dumps(records, indent=2)
     return Response(data, mimetype='application/json',
                     headers={'Content-Disposition': f'attachment; filename={filename}'})
 

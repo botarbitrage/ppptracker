@@ -1337,19 +1337,3 @@ button.auth-chip { background: none; }
 }
 
 /* ── Session history download button ──────────────────────── */
-.hist-dl-btn {
-  font-size: .75rem;
-  padding: .2rem .65rem;
-  background: rgba(0,230,118,.1);
-  border: 1px solid rgba(0,230,118,.3);
-  color: var(--green);
-  font-family: var(--font-head);
-}
-.hist-dl-btn:hover:not(:disabled) {
-  background: rgba(0,230,118,.2);
-  color: var(--green);
-}
-.hist-dl-btn:disabled {
-  opacity: .5;
-  cursor: not-allowed;
-}

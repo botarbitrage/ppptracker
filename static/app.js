@@ -436,7 +436,7 @@ function handleImport() {
         if (data.error) { showError(data.error); return; }
         renderResults(data);
         showImportSuccess(data);
-        if (data.session_id) {
+        if (data.saved) {
           const b = document.getElementById('saved-badge');
           if (b) b.classList.remove('d-none');
           _loadHistory();
@@ -492,7 +492,9 @@ function renderResults(data) {
   renderHandStats(data.validation || {}, data.stats || {});
   renderRecentHands(data.recent_hands || []);
   renderRecentWonHands(data.recent_won_hands || []);
-  renderTournaments(data.tournaments || []);
+  // Pro users get the persisted cross-session Tournament History via _loadHistory()
+  // (triggered right after this call when data.saved is true) — avoid a render flash.
+  if (!data.saved) renderTournaments(data.tournaments || []);
   updateTzHeaders();
   _updateExportGates();
 
@@ -729,9 +731,7 @@ function _updateExportGates() {
   if (tierCompare) tierCompare.style.display = isPro() ? 'none' : '';
 }
 
-/* ── Session history & Tournament Summary ────────────────── */
-
-const _HIST_RECENT_MS = 90 * 24 * 60 * 60 * 1000; // 90 days in ms
+/* ── Tournament Summary ──────────────────────────────────── */
 
 function _fmtDuration(secs) {
   if (!secs || secs < 0) return '—';
@@ -740,40 +740,37 @@ function _fmtDuration(secs) {
   return h ? `${h}h ${String(m).padStart(2, '0')}m` : `${m}m`;
 }
 
+const _TOURNEY_HISTORY_LIMIT = 20;
+
 async function _loadHistory() {
   if (!isPro() || !_currentUser) return;
   const token = await _currentUser.getIdToken().catch(() => null);
   if (!token) return;
+  const ts = document.getElementById('tournament-summary-section');
   try {
-    const r = await fetch('/api/sessions', { headers: { 'Authorization': `Bearer ${token}` } });
+    const r = await fetch('/api/tournaments', { headers: { 'Authorization': `Bearer ${token}` } });
     if (!r.ok) return;
     const data = await r.json();
-    const sessions = data.sessions || [];
-    const ts = document.getElementById('tournament-summary-section');
-    const sh = document.getElementById('session-history-section');
-    if (!sessions.length) {
+    const tournaments = data.tournaments || [];
+    if (!tournaments.length) {
       if (ts) ts.classList.add('d-none');
-      if (sh) sh.classList.add('d-none');
       return;
     }
-    _renderTournamentSummary(sessions);
-    _renderSessionHistory(sessions);
+    _renderTournamentSummary(tournaments);
+    _renderTournamentHistoryPro(tournaments);
     if (ts) ts.classList.remove('d-none');
-    if (sh) sh.classList.remove('d-none');
   } catch (e) { console.warn('History load failed:', e); }
 }
 
-function _renderTournamentSummary(sessions) {
+function _renderTournamentSummary(tournaments) {
   const tbody = document.getElementById('tourney-summary-tbody');
   if (!tbody) return;
 
   const byRoom = {};
-  for (const s of sessions) {
-    for (const t of (s.tournaments || [])) {
-      const key = t.room_name || '(Unknown)';
-      if (!byRoom[key]) byRoom[key] = [];
-      byRoom[key].push(t);
-    }
+  for (const t of tournaments) {
+    const key = t.room_name || '(Unknown)';
+    if (!byRoom[key]) byRoom[key] = [];
+    byRoom[key].push(t);
   }
 
   const rows = Object.entries(byRoom).sort((a, b) => b[1].length - a[1].length);
@@ -809,61 +806,119 @@ function _renderTournamentSummary(sessions) {
   }).join('');
 }
 
-function _renderSessionHistory(sessions) {
-  const tbody = document.getElementById('session-history-tbody');
+/** Renders the persisted (cross-session) Tournament History for Pro users — top N most recent, with full export. */
+function _renderTournamentHistoryPro(tournaments) {
+  const tbody  = document.getElementById('tournaments-tbody');
+  const strip  = document.getElementById('tourney-strip');
   if (!tbody) return;
 
-  if (!sessions.length) {
-    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">No saved sessions yet. Import a hand history to start.</td></tr>';
+  const top = [...tournaments]
+    .sort((a, b) => (b.earliest_ts || 0) - (a.earliest_ts || 0))
+    .slice(0, _TOURNEY_HISTORY_LIMIT);
+
+  if (strip) {
+    const mttCount = top.filter(t => t.is_mtt).length;
+    const satCount = top.filter(t => (t.room_name || '').toLowerCase().includes('sat')).length;
+    const wonCount = top.filter(t => (t.net || 0) > 0).length;
+    const items = [
+      ['Tourneys',  top.length],
+      ['MTT',       mttCount],
+      ['Satellite', satCount],
+      ['Won',       wonCount],
+    ];
+    strip.innerHTML = items.map(([label, value]) =>
+      `<span class="val-pill"><strong>${value}</strong><span class="val-pill-label">${label}</span></span>`
+    ).join('<span class="val-sep">·</span>');
+  }
+
+  if (!top.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">No tournaments detected</td></tr>';
     return;
   }
 
-  const now = Date.now();
-  const tz  = currentTz();
-  tbody.innerHTML = sessions.map(s => {
-    const isRecent = s.created_at && (now - s.created_at * 1000) < _HIST_RECENT_MS;
-    const dateStr  = s.created_at
-      ? new Date(s.created_at * 1000).toLocaleDateString('en-GB',
-          { day: 'numeric', month: 'short', year: '2-digit', timeZone: tz })
-      : '—';
-    const actionCell = isRecent
-      ? `<button class="btn btn-sm hist-dl-btn" onclick="reDownloadSession('${s.session_id}', this)">⬇ JSON</button>`
-      : `<span class="text-muted" style="font-size:.75rem" title="Detailed data available for 90 days from import">Archived</span>`;
+  const tz = currentTz();
+  tbody.innerHTML = top.map(t => {
+    const typeBadge = t.is_mtt
+      ? '<span class="badge bg-primary">MTT</span>'
+      : '<span class="badge bg-secondary">Cash</span>';
     return `<tr>
-      <td><small>${dateStr}</small></td>
-      <td><small>${s.player_name || '—'}</small></td>
-      <td class="text-center">${s.hand_count || 0}</td>
-      <td class="text-center">${s.tournament_count || 0}</td>
-      <td class="text-center">${actionCell}</td>
+      <td style="white-space:nowrap"><small>${fmtDate(t.earliest_ts, tz)}</small></td>
+      <td class="d-none d-sm-table-cell"><small>${t.room_name || '—'}</small></td>
+      <td class="d-none d-lg-table-cell"><small class="text-muted">${fmtTime(t.earliest_ts, tz)}</small></td>
+      <td class="d-none d-lg-table-cell"><small class="text-muted">${_fmtDuration(t.duration_secs)}</small></td>
+      <td class="d-none d-md-table-cell">${typeBadge}</td>
+      <td class="text-center">${t.hands}</td>
+      <td class="text-center export-col" style="vertical-align:middle">
+        <div class="d-flex gap-2 flex-wrap justify-content-center">
+          <button class="btn export-icon-btn" data-platform="PokerTracker" title="Export for PokerTracker" onclick="exportPersistedTournament('${t.tourney_id}', this)">
+            <img src="https://www.google.com/s2/favicons?domain=pokertracker.com&sz=64" width="22" height="22" alt="PT">
+          </button>
+          <button class="btn export-icon-btn" data-platform="DriveHUD" title="Export for DriveHUD" onclick="exportPersistedTournament('${t.tourney_id}', this)">
+            <img src="https://www.google.com/s2/favicons?domain=drivehud.com&sz=64" width="22" height="22" alt="DH">
+          </button>
+          <button class="btn export-icon-btn" data-platform="GTOWizard" title="Export for GTO Wizard" onclick="exportPersistedTournament('${t.tourney_id}', this)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 32 32"><rect width="32" height="32" rx="5" fill="#0f0f10"/><polyline points="4,8 9,24 16,13 23,24 28,8" fill="none" stroke="#3dff7a" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/></svg>
+          </button>
+          <button class="btn export-icon-btn" title="Export as JSON file" onclick="exportPersistedTournamentJson('${t.tourney_id}', this)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </button>
+        </div>
+      </td>
     </tr>`;
   }).join('');
 }
 
-async function reDownloadSession(sessionId, btn) {
+async function exportPersistedTournament(tourneyId, btn) {
   if (!_currentUser) return;
+  const platform = (btn && btn.dataset.platform) || '';
   const token = await _currentUser.getIdToken().catch(() => null);
   if (!token) return;
-  if (btn) { btn.disabled = true; btn.textContent = '…'; }
+  if (btn) btn.disabled = true;
   try {
-    const r = await fetch(`/api/sessions/${sessionId}/download`,
-      { headers: { 'Authorization': `Bearer ${token}` } });
-    if (r.status === 410) {
-      if (btn) { btn.textContent = 'Archived'; btn.disabled = true; }
-      return;
-    }
+    const r = await fetch(`/api/tournaments/${tourneyId}/export`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ platform }),
+    });
     if (!r.ok) {
       const d = await r.json().catch(() => ({}));
-      throw new Error(d.error || 'Download failed');
+      throw new Error(d.error || 'Export failed');
     }
     const cd = r.headers.get('Content-Disposition') || '';
     const m  = cd.match(/filename[^;=\n]*=([^;\n]*)/);
-    const filename = m ? m[1].replace(/['"]/g, '').trim() : `pppoker_session_${sessionId}.json`;
+    const filename = m ? m[1].replace(/['"]/g, '').trim() : `pppoker_${tourneyId}.txt`;
     const blob = await r.blob();
     _triggerDownload(blob, filename);
-    if (btn) { btn.disabled = false; btn.textContent = '⬇ JSON'; }
   } catch (err) {
-    if (btn) { btn.disabled = false; btn.textContent = '⬇ JSON'; }
-    _rowExportStatus(btn, 'err', err.message, 5000);
+    alert('Export failed: ' + err.message);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function exportPersistedTournamentJson(tourneyId, btn) {
+  if (!_currentUser) return;
+  const token = await _currentUser.getIdToken().catch(() => null);
+  if (!token) return;
+  if (btn) btn.disabled = true;
+  try {
+    const r = await fetch(`/api/tournaments/${tourneyId}/export/json`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (!r.ok) {
+      const d = await r.json().catch(() => ({}));
+      throw new Error(d.error || 'Export failed');
+    }
+    const cd = r.headers.get('Content-Disposition') || '';
+    const m  = cd.match(/filename[^;=\n]*=([^;\n]*)/);
+    const filename = m ? m[1].replace(/['"]/g, '').trim() : `pppoker_${tourneyId}.json`;
+    const blob = await r.blob();
+    _triggerDownload(blob, filename);
+  } catch (err) {
+    alert('Export failed: ' + err.message);
+  } finally {
+    if (btn) btn.disabled = false;
   }
 }
 
@@ -1293,9 +1348,7 @@ function signOutUser() {
     if (results) results.classList.add('d-none');
 
     const ts = document.getElementById('tournament-summary-section');
-    const sh = document.getElementById('session-history-section');
     if (ts) ts.classList.add('d-none');
-    if (sh) sh.classList.add('d-none');
     const savedBadge = document.getElementById('saved-badge');
     if (savedBadge) savedBadge.classList.add('d-none');
 
