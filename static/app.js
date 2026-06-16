@@ -410,8 +410,6 @@ function handleImport() {
   const url = (document.getElementById('url-input').value || '').trim();
   clearError();
   document.getElementById('results-section').classList.add('d-none');
-  const _es = document.getElementById('export-status');
-  if (_es) { _es.classList.add('d-none'); _es.innerHTML = ''; }
   const savedBadge = document.getElementById('saved-badge');
   if (savedBadge) savedBadge.classList.add('d-none');
 
@@ -998,42 +996,17 @@ function _triggerDownload(blob, filename) {
   URL.revokeObjectURL(url);
 }
 
-/**
- * Show a status message in the export panel's #export-status div.
- * btn is passed for context (reserved for future per-row status in panel rows).
- */
-function _panelExportStatus(btn, state, text, autoClear) {
-  const el = document.getElementById('export-status');
-  if (!el) return;
-  el.classList.remove('d-none');
-  if (state === 'loading') {
-    el.innerHTML = `<span style="color:var(--muted)">${text}</span>`;
-  } else if (state === 'ok') {
-    el.innerHTML = `<span class="profit-pos">&#10003; ${text}</span>`;
-  } else {
-    el.innerHTML = `<span class="profit-neg">${text}</span>`;
-  }
-  if (autoClear) setTimeout(() => { el.classList.add('d-none'); el.innerHTML = ''; }, autoClear);
-}
-
 function exportRawJson() {
   const data = window._lastData;
   if (!data) return;
-  const status = document.getElementById('export-status');
-  status.classList.remove('d-none');
   try {
     const blob     = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const ts       = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
     const filename = `pppoker_raw_${ts}.json`;
-    const url      = URL.createObjectURL(blob);
-    const a        = Object.assign(document.createElement('a'), { href: url, download: filename });
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    status.innerHTML = `<span class="profit-pos">✓ Saved as ${filename}</span>`;
+    _triggerDownload(blob, filename);
+    _rowExportStatus(null, 'ok', `Saved as ${filename}`, 5000);
   } catch (e) {
-    status.innerHTML = `<span class="profit-neg">JSON export error: ${e.message}</span>`;
+    _rowExportStatus(null, 'err', `JSON export error: ${e.message}`, 6000);
   }
 }
 
@@ -1041,7 +1014,7 @@ function exportSpecificHandJson(btn) {
   if (!checkExportQuota()) { showUpgradeModal('export'); return; }
   _openExportHandModal(handId => {
     consumeExportQuota();
-    _panelExportStatus(btn, 'loading', 'Building JSON…');
+    _rowExportStatus(btn, 'loading', 'Building JSON…');
     return fetch('/api/export/json/hand', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1056,15 +1029,15 @@ function exportSpecificHandJson(btn) {
       })
       .then(({ blob, filename }) => {
         _triggerDownload(blob, filename);
-        _panelExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
+        _rowExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
       })
-      .catch(err => { _panelExportStatus(btn, 'err', err.message, 6000); throw err; });
+      .catch(err => { _rowExportStatus(btn, 'err', err.message, 6000); throw err; });
   });
 }
 
 function exportAllHandsJson(btn) {
   if (!isPro()) { showUpgradeModal('export'); return; }
-  _panelExportStatus(btn, 'loading', 'Building JSON…');
+  _rowExportStatus(btn, 'loading', 'Building JSON…');
   fetch('/api/export/json/all', { method: 'POST' })
     .then(r => {
       if (!r.ok) return r.json().then(d => { throw new Error(d.error || 'Export failed'); });
@@ -1075,9 +1048,9 @@ function exportAllHandsJson(btn) {
     })
     .then(({ blob, filename }) => {
       _triggerDownload(blob, filename);
-      _panelExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
+      _rowExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
     })
-    .catch(err => _panelExportStatus(btn, 'err', err.message, 6000));
+    .catch(err => _rowExportStatus(btn, 'err', err.message, 6000));
 }
 
 function exportTournamentJson(tourneyId, btn) {
@@ -1108,7 +1081,7 @@ function exportSpecificHand(btn) {
   const platform = (btn && btn.dataset.platform) || '';
   _openExportHandModal(handId => {
     consumeExportQuota();
-    _panelExportStatus(btn, 'loading', 'Looking up hand…');
+    _rowExportStatus(btn, 'loading', 'Looking up hand…');
     return fetch('/api/export/hand', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1123,15 +1096,15 @@ function exportSpecificHand(btn) {
       })
       .then(({ blob, filename }) => {
         _triggerDownload(blob, filename);
-        _panelExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
+        _rowExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
       })
-      .catch(err => { _panelExportStatus(btn, 'err', err.message, 6000); throw err; });
+      .catch(err => { _rowExportStatus(btn, 'err', err.message, 6000); throw err; });
   });
 }
 
 function exportAllHands(btn) {
   if (!isPro()) { showUpgradeModal('export'); return; }
-  _panelExportStatus(btn, 'loading', 'Generating export…');
+  _rowExportStatus(btn, 'loading', 'Generating export…');
 
   const platform = (btn && btn.dataset.platform) || '';
   fetch('/api/export/pokerstars', {
@@ -1148,10 +1121,10 @@ function exportAllHands(btn) {
     })
     .then(({ blob, filename }) => {
       _triggerDownload(blob, filename);
-      _panelExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
+      _rowExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
     })
     .catch(err => {
-      _panelExportStatus(btn, 'err', err.message, 6000);
+      _rowExportStatus(btn, 'err', err.message, 6000);
     });
 }
 
