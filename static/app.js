@@ -775,7 +775,7 @@ function _renderTournamentSummary(tournaments) {
 
   const rows = Object.entries(byRoom).sort((a, b) => b[1].length - a[1].length);
   if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-muted">No tournament data yet. Import a session to start.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No tournament data yet. Import a session to start.</td></tr>';
     return;
   }
 
@@ -784,9 +784,6 @@ function _renderTournamentSummary(tournaments) {
     const count      = entries.length;
     const avgHands   = Math.round(entries.reduce((s, t) => s + (t.hands || 0), 0) / count);
     const avgDurSecs = entries.reduce((s, t) => s + (t.duration_secs || 0), 0) / count;
-    const avgNet     = Math.round(entries.reduce((s, t) => s + (t.net || 0), 0) / count);
-    const bestNet    = Math.max(...entries.map(t => t.net || 0));
-    const bustPct    = Math.round(entries.filter(t => t.finish_busted).length / count * 100);
     const avgVpip    = (entries.reduce((s, t) => s + (t.vpip_pct || 0), 0) / count).toFixed(1);
     const avgPfr     = (entries.reduce((s, t) => s + (t.pfr_pct  || 0), 0) / count).toFixed(1);
     const lastTs     = Math.max(...entries.map(t => t.earliest_ts || 0));
@@ -797,9 +794,6 @@ function _renderTournamentSummary(tournaments) {
       <td class="text-center">${count}</td>
       <td class="text-center d-none d-md-table-cell">${avgHands}</td>
       <td class="text-center d-none d-md-table-cell">${_fmtDuration(avgDurSecs)}</td>
-      <td class="text-center d-none d-sm-table-cell">${fmtProfitHtml(avgNet)}</td>
-      <td class="text-center d-none d-sm-table-cell"><span class="profit-pos">+${bestNet.toLocaleString()}</span></td>
-      <td class="text-center d-none d-lg-table-cell">${bustPct}%</td>
       <td class="text-center d-none d-lg-table-cell">${avgVpip}% / ${avgPfr}%</td>
       <td class="text-center"><small>${lastDate}</small></td>
     </tr>`;
