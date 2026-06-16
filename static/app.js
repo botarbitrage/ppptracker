@@ -1387,6 +1387,8 @@ function signOutUser() {
     if (urlInput) urlInput.value = '';
     const results = document.getElementById('results-section');
     if (results) results.classList.add('d-none');
+    const loadingMsg = document.getElementById('loading-msg');
+    if (loadingMsg) loadingMsg.classList.add('d-none');
 
     const ts = document.getElementById('tournament-summary-section');
     if (ts) ts.classList.add('d-none');
