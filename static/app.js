@@ -437,7 +437,8 @@ function handleImport() {
         if (data.saved) {
           const b = document.getElementById('saved-badge');
           if (b) b.classList.remove('d-none');
-          _loadHistory();
+          _justImportedTourneyIds = new Set((data.tournaments || []).map(t => t.tourney_id));
+          _loadHistory().then(() => { _justImportedTourneyIds = new Set(); });
         }
       })
       .catch(err => {
@@ -739,6 +740,10 @@ function _updateExportGates() {
 
 /* ── Tournament Summary ──────────────────────────────────── */
 
+// tourney_ids touched by the most recent import — used to briefly highlight
+// the corresponding rows in Tournament Summary / History after _loadHistory() renders.
+let _justImportedTourneyIds = new Set();
+
 function _fmtDuration(secs) {
   if (!secs || secs < 0) return '—';
   const h = Math.floor(secs / 3600);
@@ -818,28 +823,27 @@ function _renderTournamentSummary(tournaments) {
         { day: 'numeric', month: 'short', year: '2-digit', timeZone: tz }) : '—';
 
     const sortedEntries = [...entries].sort((a, b) => (b.earliest_ts || 0) - (a.earliest_ts || 0));
+    const isRowNew = entries.some(t => _justImportedTourneyIds.has(t.tourney_id));
     const eventCards = sortedEntries.map(t => {
       const d = t.earliest_ts ? new Date(t.earliest_ts * 1000).toLocaleDateString('en-GB',
           { day: 'numeric', month: 'short', year: '2-digit', timeZone: tz }) : '—';
-      const statusBadge = t.finish_busted
-        ? '<span class="tsum-badge tsum-badge-bust">Busted</span>'
-        : '<span class="tsum-badge tsum-badge-ok">Survived</span>';
+      const evDurHr = (t.duration_secs || 0) / 3600;
+      const evPerHr = evDurHr > 0 ? (t.hands || 0) / evDurHr : 0;
       return `<div class="tsum-event-card">
         <div class="tsum-event-top">
           <span class="tsum-event-date">${d}</span>
-          ${statusBadge}
+          <span class="tsum-stat-pill">${_fmtDuration(t.duration_secs)}</span>
         </div>
         <div class="tsum-event-stats">
-          <span><strong>${t.hands || 0}</strong> hands</span>
-          <span>${_fmtDuration(t.duration_secs)}</span>
-          <span>${(t.vpip_pct || 0).toFixed(1)}% / ${(t.pfr_pct || 0).toFixed(1)}%</span>
-          <span>${fmtProfitHtml(t.net || 0)}</span>
+          <span class="tsum-stat-pill">${t.hands || 0} hands</span>
+          <span class="tsum-stat-pill">${(t.vpip_pct || 0).toFixed(1)}% / ${(t.pfr_pct || 0).toFixed(1)}%</span>
+          <span class="tsum-stat-pill">${evPerHr.toFixed(1)}/hr</span>
         </div>
         <div class="tsum-event-actions">${_TSUM_EXPORT_ICONS(t.tourney_id)}</div>
       </div>`;
     }).join('');
 
-    return `<tr class="tsum-summary-row" onclick="_toggleTourneyDetail('${rowId}')">
+    return `<tr class="tsum-summary-row${isRowNew ? ' row-flash' : ''}" onclick="_toggleTourneyDetail('${rowId}')">
       <td>
         <svg class="tsum-chevron" id="${rowId}-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         <small>${name}</small>
@@ -904,7 +908,8 @@ function _renderTournamentHistoryPro(tournaments) {
     const typeBadge = t.is_mtt
       ? '<span class="badge bg-primary">MTT</span>'
       : '<span class="badge bg-secondary">Cash</span>';
-    return `<tr>
+    const isNew = _justImportedTourneyIds.has(t.tourney_id);
+    return `<tr class="${isNew ? 'row-flash' : ''}">
       <td style="white-space:nowrap"><small>${fmtDate(t.earliest_ts, tz)}</small></td>
       <td class="d-none d-sm-table-cell"><small>${t.room_name || '—'}</small></td>
       <td class="d-none d-lg-table-cell"><small class="text-muted">${fmtTime(t.earliest_ts, tz)}</small></td>

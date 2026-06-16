@@ -674,12 +674,9 @@ body {
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  opacity: 0;
-  transition: opacity .2s, color .2s, border-color .2s, background .2s, transform .15s;
-  flex-shrink: 0;
-}
-tr:hover .copy-hand-btn {
   opacity: 1;
+  transition: color .2s, border-color .2s, background .2s, transform .15s;
+  flex-shrink: 0;
 }
 .copy-hand-btn:hover {
   color: var(--green);
@@ -1342,6 +1339,15 @@ button.auth-chip { background: none; }
   cursor: pointer;
 }
 
+/* Temporary highlight for rows touched by the most recent import */
+@keyframes rowFlash {
+  0%   { background-color: rgba(0,230,118,.3); }
+  100% { background-color: transparent; }
+}
+tr.row-flash > td {
+  animation: rowFlash 2.5s ease-out;
+}
+
 .tsum-chevron {
   display: inline-block;
   vertical-align: -1px;
@@ -1404,31 +1410,24 @@ button.auth-chip { background: none; }
   color: var(--text);
 }
 
-.tsum-badge {
-  font-size: .65rem;
-  padding: 2px 8px;
+.tsum-stat-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: .68rem;
+  padding: 2px 9px;
   border-radius: 12px;
   font-family: var(--font-head);
-  letter-spacing: .03em;
+  letter-spacing: .02em;
   white-space: nowrap;
-}
-.tsum-badge-bust {
-  background: rgba(255,82,82,.12);
-  border: 1px solid rgba(255,82,82,.35);
-  color: var(--red);
-}
-.tsum-badge-ok {
-  background: rgba(0,230,118,.1);
-  border: 1px solid rgba(0,230,118,.3);
-  color: var(--green);
+  background: rgba(64,196,255,.1);
+  border: 1px solid rgba(64,196,255,.3);
+  color: var(--blue);
 }
 
 .tsum-event-stats {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 12px;
-  font-size: .78rem;
-  color: var(--text);
+  gap: 6px;
   margin-bottom: 10px;
 }
 
