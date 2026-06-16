@@ -871,9 +871,9 @@ function _renderTournamentHistoryPro(tournaments) {
 async function exportPersistedTournament(tourneyId, btn) {
   if (!_currentUser) return;
   const platform = (btn && btn.dataset.platform) || '';
+  _rowExportStatus(btn, 'loading');
   const token = await _currentUser.getIdToken().catch(() => null);
-  if (!token) return;
-  if (btn) btn.disabled = true;
+  if (!token) { _rowExportStatus(btn, 'err', 'Not signed in', 5000); return; }
   try {
     const r = await fetch(`/api/tournaments/${tourneyId}/export`, {
       method: 'POST',
@@ -889,18 +889,17 @@ async function exportPersistedTournament(tourneyId, btn) {
     const filename = m ? m[1].replace(/['"]/g, '').trim() : `pppoker_${tourneyId}.txt`;
     const blob = await r.blob();
     _triggerDownload(blob, filename);
+    _rowExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
   } catch (err) {
-    alert('Export failed: ' + err.message);
-  } finally {
-    if (btn) btn.disabled = false;
+    _rowExportStatus(btn, 'err', err.message, 6000);
   }
 }
 
 async function exportPersistedTournamentJson(tourneyId, btn) {
   if (!_currentUser) return;
+  _rowExportStatus(btn, 'loading');
   const token = await _currentUser.getIdToken().catch(() => null);
-  if (!token) return;
-  if (btn) btn.disabled = true;
+  if (!token) { _rowExportStatus(btn, 'err', 'Not signed in', 5000); return; }
   try {
     const r = await fetch(`/api/tournaments/${tourneyId}/export/json`, {
       method: 'POST',
@@ -915,10 +914,9 @@ async function exportPersistedTournamentJson(tourneyId, btn) {
     const filename = m ? m[1].replace(/['"]/g, '').trim() : `pppoker_${tourneyId}.json`;
     const blob = await r.blob();
     _triggerDownload(blob, filename);
+    _rowExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
   } catch (err) {
-    alert('Export failed: ' + err.message);
-  } finally {
-    if (btn) btn.disabled = false;
+    _rowExportStatus(btn, 'err', err.message, 6000);
   }
 }
 
