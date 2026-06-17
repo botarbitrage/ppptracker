@@ -390,7 +390,7 @@ function showImportSuccess(data) {
   const spinner = document.getElementById('loading-spinner');
   const text    = document.getElementById('loading-text');
   const name    = data.player?.name || 'Player';
-  const hands   = data.total_fetched || 0;
+  const hands   = data.new_hands != null ? data.new_hands : (data.total_fetched || 0);
   const tours   = (data.tournaments || []).length;
   spinner.classList.add('d-none');
   text.style.color = 'var(--green)';
@@ -410,8 +410,6 @@ function handleImport() {
   const url = (document.getElementById('url-input').value || '').trim();
   clearError();
   document.getElementById('results-section').classList.add('d-none');
-  const savedBadge = document.getElementById('saved-badge');
-  if (savedBadge) savedBadge.classList.add('d-none');
 
   if (!url) {
     showError('Please enter a PPPoker Hand Review URL.');
@@ -435,8 +433,6 @@ function handleImport() {
         renderResults(data);
         showImportSuccess(data);
         if (data.saved) {
-          const b = document.getElementById('saved-badge');
-          if (b) b.classList.remove('d-none');
           _justImportedTourneyIds = new Set((data.tournaments || []).map(t => t.tourney_id));
           _loadHistory().then(() => { _justImportedTourneyIds = new Set(); });
         }
@@ -488,7 +484,7 @@ function renderResults(data) {
       ? `&nbsp;&nbsp;<span class="text-warning" style="font-size:.8rem">(${data.total_available - data.total_fetched} hands failed to load)</span>`
       : '');
 
-  renderHandStats(data.validation || {}, data.stats || {});
+  renderHandStats(data);
   renderRecentHands(data.recent_hands || []);
   renderRecentWonHands(data.recent_won_hands || []);
   // Pro users get the persisted cross-session Tournament History from the
@@ -748,7 +744,7 @@ function _fmtDuration(secs) {
   if (!secs || secs < 0) return '—';
   const h = Math.floor(secs / 3600);
   const m = Math.floor((secs % 3600) / 60);
-  return h ? `${h}h ${String(m).padStart(2, '0')}m` : `${m}m`;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
 const _TOURNEY_HISTORY_LIMIT = 20;
@@ -829,7 +825,8 @@ function _renderTournamentSummary(tournaments) {
           { day: 'numeric', month: 'short', year: '2-digit', timeZone: tz }) : '—';
       const evDurHr = (t.duration_secs || 0) / 3600;
       const evPerHr = evDurHr > 0 ? (t.hands || 0) / evDurHr : 0;
-      return `<div class="tsum-event-card">
+      const isCardNew = _justImportedTourneyIds.has(t.tourney_id);
+      return `<div class="tsum-event-card${isCardNew ? ' card-flash' : ''}">
         <div class="tsum-event-top">
           <span class="tsum-event-date">${d}</span>
           <span class="tsum-stat-pill">${_fmtDuration(t.duration_secs)}</span>
@@ -837,7 +834,7 @@ function _renderTournamentSummary(tournaments) {
         <div class="tsum-event-stats">
           <span class="tsum-stat-pill">${t.hands || 0} hands</span>
           <span class="tsum-stat-pill">${(t.vpip_pct || 0).toFixed(1)}% / ${(t.pfr_pct || 0).toFixed(1)}%</span>
-          <span class="tsum-stat-pill">${evPerHr.toFixed(1)}/hr</span>
+          <span class="tsum-stat-pill">${evPerHr.toFixed(1)}</span>
         </div>
         <div class="tsum-event-actions">${_TSUM_EXPORT_ICONS(t.tourney_id)}</div>
       </div>`;
@@ -851,7 +848,7 @@ function _renderTournamentSummary(tournaments) {
       <td class="text-center">${count}</td>
       <td class="text-center d-none d-md-table-cell">${avgHands}</td>
       <td class="text-center d-none d-md-table-cell">${_fmtDuration(avgDurSecs)}</td>
-      <td class="text-center d-none d-lg-table-cell">${handsPerHr.toFixed(1)}/hr</td>
+      <td class="text-center d-none d-lg-table-cell">${handsPerHr.toFixed(1)}</td>
       <td class="text-center d-none d-lg-table-cell">${avgVpip}% / ${avgPfr}%</td>
       <td class="text-center"><small>${lastDate}</small></td>
     </tr>
@@ -990,14 +987,18 @@ async function exportPersistedTournamentJson(tourneyId, btn) {
 
 /* ── Export Panel ────────────────────────────────────────── */
 
-function renderHandStats(v, s) {
+function renderHandStats(data) {
+  const v = (data.new_validation || data.validation) || {};
+  const s = (data.new_stats     && data.new_stats[0]) || data.stats || {};
   const _set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val ?? '—'; };
-  _set('hs-hands', v.hands_imported);
+  _set('hs-hands', data.new_hands != null ? data.new_hands : v.hands_imported);
   _set('hs-flop',  s.hands_hero_saw_flop);
   _set('hs-won',   v.hands_won);
   _set('hs-turn',  s.hands_hero_saw_turn);
   _set('hs-river', s.hands_hero_saw_river);
   _set('hs-sd',    s.hands_at_showdown);
+  const row = document.getElementById('loaded-hands-row');
+  if (row) row.classList.remove('d-none');
 }
 
 
@@ -1394,9 +1395,6 @@ function signOutUser() {
     if (ts) ts.classList.add('d-none');
     const th = document.getElementById('tournament-history-pro-section');
     if (th) th.classList.add('d-none');
-    const savedBadge = document.getElementById('saved-badge');
-    if (savedBadge) savedBadge.classList.add('d-none');
-
     _renderAuthBar(null);
     _updateExportGates();
     _loadUserState();

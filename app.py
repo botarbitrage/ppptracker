@@ -198,12 +198,26 @@ def analyze():
     recent_hands, recent_won, stats, tournaments = process_hands(records)
     validation = validate_hands(records)
 
-    saved = _try_save_tournaments(id_token, records, tournaments)
+    saved, new_ids = _try_save_tournaments(id_token, records, tournaments)
+    new_hands = len(new_ids)
+
+    # Compute stats/validation for only the truly-new records so the UI can
+    # show "X new hands loaded" with accurate breakdown counts.
+    if new_ids:
+        new_recs = [r for r in records if r.get('summary', {}).get('D') in new_ids]
+        _, _, new_stats, _ = process_hands(new_recs)
+        new_validation = validate_hands(new_recs)
+    else:
+        new_stats = None
+        new_validation = None
 
     return jsonify({
         "player": {"name": player_name, "uid": uid},
         "total_fetched": len(records),
         "total_available": len(hands),
+        "new_hands": new_hands,
+        "new_stats": new_stats,
+        "new_validation": new_validation,
         "recent_hands": recent_hands,
         "recent_won_hands": recent_won,
         "stats": stats,
@@ -423,13 +437,17 @@ def _merge_tournament(db, bucket, uid, tid, new_records):
     def _txn(transaction):
         snapshot = doc_ref.get(transaction=transaction)
         merged_records = new_records
+        # Default: all incoming IDs are new (no prior stored data for this tournament)
+        new_ids = {r.get('summary', {}).get('D') for r in new_records}
         if snapshot.exists and bucket:
             old_path = snapshot.to_dict().get('storage_path', storage_path)
             blob = bucket.blob(old_path)
             if blob.exists():
                 try:
                     old_records = _jj.loads(blob.download_as_bytes())
-                    seen = {r.get('summary', {}).get('D') for r in new_records}
+                    old_ids = {r.get('summary', {}).get('D') for r in old_records}
+                    seen    = {r.get('summary', {}).get('D') for r in new_records}
+                    new_ids = seen - old_ids
                     merged_records = new_records + [
                         r for r in old_records if r.get('summary', {}).get('D') not in seen
                     ]
@@ -442,7 +460,7 @@ def _merge_tournament(db, bucket, uid, tid, new_records):
 
         _, _, _, recomputed = process_hands(merged_records)
         if not recomputed:
-            return False
+            return 0
         stat = recomputed[0]
 
         if bucket:
@@ -471,7 +489,7 @@ def _merge_tournament(db, bucket, uid, tid, new_records):
             'storage_path':  storage_path,
             'updated_at':    int(_tt.time()),
         })
-        return True
+        return new_ids
 
     return _txn(db.transaction())
 
@@ -481,10 +499,11 @@ def _try_save_tournaments(id_token, records, tournaments):
     Merge each tournament from this import into per-tournament persisted storage.
     On a re-import of the same tourney_id, hands are merged (de-duped by gameid)
     with any previously stored hands for that tournament and stats recomputed
-    from the merged set. Returns True if anything was saved (Pro user), else False.
+    from the merged set. Returns (saved, new_game_ids): saved is True when any
+    tournament was written, new_game_ids is the set of game IDs not previously stored.
     """
     if not id_token or not tournaments:
-        return False
+        return False, set()
     try:
         from hand_parser import extract_tourney_id
 
@@ -494,10 +513,11 @@ def _try_save_tournaments(id_token, records, tournaments):
 
         user_snap = db.collection('users').document(uid).get()
         if not user_snap.exists or not user_snap.to_dict().get('is_pro'):
-            return False
+            return False, set()
 
         bucket = _get_admin_bucket()
 
+        all_new_ids = set()
         for t in tournaments:
             tid = t.get('tourney_id')
             if not tid:
@@ -506,13 +526,15 @@ def _try_save_tournaments(id_token, records, tournaments):
                             if extract_tourney_id(r.get('summary', {}).get('D', '')) == tid]
             if not new_records:
                 continue
-            _merge_tournament(db, bucket, uid, tid, new_records)
-        return True
+            ids = _merge_tournament(db, bucket, uid, tid, new_records)
+            if ids:
+                all_new_ids.update(ids)
+        return True, all_new_ids
     except Exception as exc:
         import traceback
         print(f"[_try_save_tournaments] FAILED: {type(exc).__name__}: {exc}")
         traceback.print_exc()
-        return False
+        return False, set()
 
 
 @app.route('/api/create-checkout-session', methods=['POST'])

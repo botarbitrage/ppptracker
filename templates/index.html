@@ -202,13 +202,22 @@
   <!-- ── Results ──────────────────────────────────────────── -->
   <div id="results-section" class="d-none" style="max-width:1400px;margin:0 auto">
 
-    <!-- Player badge -->
+    <!-- Player badge + Loaded Hands pills ──────────────────── -->
     <div id="player-badge" class="player-badge mb-3">
       <div class="player-badge-top">
         <div class="d-flex align-items-center gap-3">
           <div class="player-avatar" id="player-avatar-text"></div>
-          <span id="player-info"></span>
-          <span id="saved-badge" class="saved-badge d-none">Saved ✓</span>
+          <div>
+            <span id="player-info"></span>
+            <div id="loaded-hands-row" class="loaded-hands-row d-none">
+              <span class="hstat-pill"><span id="hs-hands">—</span>&thinsp;HANDS</span>
+              <span class="hstat-pill"><span id="hs-flop">—</span>&thinsp;FLOP</span>
+              <span class="hstat-pill"><span id="hs-won">—</span>&thinsp;WON</span>
+              <span class="hstat-pill"><span id="hs-turn">—</span>&thinsp;TURN</span>
+              <span class="hstat-pill"><span id="hs-river">—</span>&thinsp;RIVER</span>
+              <span class="hstat-pill"><span id="hs-sd">—</span>&thinsp;SD</span>
+            </div>
+          </div>
         </div>
         <div class="player-tz">
           <span class="tz-label">Timezone</span>
@@ -221,30 +230,6 @@
             <option value="Australia/Sydney">SYD</option>
             <option value="UTC">UTC</option>
           </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- Hand History ───────────────────────────────────────── -->
-    <div class="section-card mb-4">
-      <div class="section-header">
-        <h5 class="d-flex align-items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="5" y="2" width="13" height="18" rx="2" stroke-opacity="0.5"/>
-            <rect x="2" y="4" width="13" height="18" rx="2" fill="var(--panel-alt)"/>
-            <path d="M8.5 10 C8.5 8.5 6 8.5 6 10.5 C6 13 8.5 14.5 8.5 14.5 C8.5 14.5 11 13 11 10.5 C11 8.5 8.5 8.5 8.5 10Z" stroke-width="1.2"/>
-          </svg>
-          Hand History
-        </h5>
-      </div>
-      <div class="px-3 py-3">
-        <div id="hand-stats-grid" class="hand-stats-grid">
-          <div class="hstat-card"><span id="hs-hands" class="hstat-val">—</span><span class="hstat-lbl">HANDS</span></div>
-          <div class="hstat-card"><span id="hs-flop"  class="hstat-val">—</span><span class="hstat-lbl">FLOP</span></div>
-          <div class="hstat-card"><span id="hs-won"   class="hstat-val">—</span><span class="hstat-lbl">WON</span></div>
-          <div class="hstat-card"><span id="hs-turn"  class="hstat-val">—</span><span class="hstat-lbl">TURN</span></div>
-          <div class="hstat-card"><span id="hs-river" class="hstat-val">—</span><span class="hstat-lbl">RIVER</span></div>
-          <div class="hstat-card"><span id="hs-sd"    class="hstat-val">—</span><span class="hstat-lbl">SHOWDOWN</span></div>
         </div>
       </div>
     </div>
