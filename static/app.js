@@ -4,9 +4,21 @@ let _importCount = 0;   // tracks how many times Import has been successfully us
 
 /* ── Freemium tier helpers ────────────────────────────────── */
 
-const FREE_HAND_LIMIT        = 30;
-const FREE_EXPORT_LIMIT      = 5;   // single-hand exports per calendar day (free tier)
+const FREE_HAND_LIMIT   = 30;
+const FREE_EXPORT_LIMIT = 5;   // single-hand exports per calendar day (free tier)
 const _SESSION_KEY      = 'pppha_session_id';
+
+// ── Tier-gated UI element lists ────────────────────────────────────────────────
+// Add/remove IDs here to control which elements are shown per tier.
+// FREE_ONLY_ELS  → visible to non-Pro users; hidden for Pro.
+// PRO_ONLY_ELS   → visible to Pro users; hidden for non-Pro (note: sections managed
+//                  by _loadHistory() are NOT listed here — they handle their own state).
+const FREE_ONLY_ELS = [
+  'tier-compare',       // Free vs Pro marketing cards
+];
+const PRO_ONLY_ELS = [
+  // (tournament sections managed separately by _loadHistory)
+];
 
 // Firebase handles — populated by _initFirebase()
 let _analytics   = null;
@@ -726,12 +738,24 @@ function _renderExportCounter() {
   }
 }
 
+/** Show/hide tier-gated elements based on current Pro status. */
+function _applyTierVisibility() {
+  const pro = isPro();
+  FREE_ONLY_ELS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = pro ? 'none' : '';
+  });
+  PRO_ONLY_ELS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = pro ? '' : 'none';
+  });
+}
+
 /** Call after any state change that could affect export UI. */
 function _updateExportGates() {
   _renderExportAllSection();
   _renderExportCounter();
-  const tierCompare = document.getElementById('tier-compare');
-  if (tierCompare) tierCompare.style.display = isPro() ? 'none' : '';
+  _applyTierVisibility();
 }
 
 /* ── Tournament Summary ──────────────────────────────────── */
