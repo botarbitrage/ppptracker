@@ -771,8 +771,6 @@ function _fmtDuration(secs) {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
-const _TOURNEY_HISTORY_LIMIT = 20;
-
 async function _loadHistory() {
   if (!isPro() || !_currentUser) return;
   const token = await _currentUser.getIdToken().catch(() => null);
@@ -790,7 +788,7 @@ async function _loadHistory() {
       return;
     }
     _renderTournamentSummary(tournaments);
-    _renderTournamentHistoryPro(tournaments);
+    _resetTournamentDetails();
     if (ts) ts.classList.remove('d-none');
     if (th) th.classList.remove('d-none');
   } catch (e) { console.warn('History load failed:', e); }
@@ -814,6 +812,23 @@ function _renderTournamentSummary(tournaments) {
   const tbody = document.getElementById('tourney-summary-tbody');
   if (!tbody) return;
 
+  // Pills strip (moved here from Tournament History) — over ALL tournaments.
+  const strip = document.getElementById('tourney-strip-pro');
+  if (strip) {
+    const mttCount = tournaments.filter(t => t.is_mtt).length;
+    const satCount = tournaments.filter(t => (t.room_name || '').toLowerCase().includes('sat')).length;
+    const wonCount = tournaments.filter(t => (t.net || 0) > 0).length;
+    const items = [
+      ['Tourneys',  tournaments.length],
+      ['MTT',       mttCount],
+      ['Satellite', satCount],
+      ['Won',       wonCount],
+    ];
+    strip.innerHTML = items.map(([label, value]) =>
+      `<span class="val-pill"><strong>${value}</strong><span class="val-pill-label">${label}</span></span>`
+    ).join('<span class="val-sep">·</span>');
+  }
+
   const byRoom = {};
   for (const t of tournaments) {
     const key = t.room_name || '(Unknown)';
@@ -823,7 +838,7 @@ function _renderTournamentSummary(tournaments) {
 
   const rows = Object.entries(byRoom).sort((a, b) => b[1].length - a[1].length);
   if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">No tournament data yet. Import a session to start.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">No tournament data yet. Import a session to start.</td></tr>';
     return;
   }
 
@@ -831,6 +846,7 @@ function _renderTournamentSummary(tournaments) {
   tbody.innerHTML = rows.map(([name, entries], idx) => {
     const rowId       = `tsum-${idx}`;
     const count       = entries.length;
+    const isMtt       = entries.some(t => t.is_mtt);
     const totalHands  = entries.reduce((s, t) => s + (t.hands || 0), 0);
     const totalDurHr  = entries.reduce((s, t) => s + (t.duration_secs || 0), 0) / 3600;
     const handsPerHr  = totalDurHr > 0 ? (totalHands / totalDurHr) : 0;
@@ -850,10 +866,11 @@ function _renderTournamentSummary(tournaments) {
       const evDurHr = (t.duration_secs || 0) / 3600;
       const evPerHr = evDurHr > 0 ? (t.hands || 0) / evDurHr : 0;
       const isCardNew = _justImportedTourneyIds.has(t.tourney_id);
-      return `<div class="tsum-event-card${isCardNew ? ' card-flash' : ''}">
+      return `<div class="tsum-event-card${isCardNew ? ' card-flash' : ''}" data-tid="${t.tourney_id}" onclick="event.stopPropagation();_selectTourneyDetail('${t.tourney_id}', this)">
         <div class="tsum-event-top">
           <span class="tsum-event-date">${d}</span>
-          <span class="tsum-stat-pill">${_fmtDuration(t.duration_secs)}</span>
+          <span class="tsum-stat-pill" title="Sit down time">${fmtTime(t.earliest_ts, tz)}</span>
+          <span class="tsum-stat-pill" title="Time played">${_fmtDuration(t.duration_secs)}</span>
         </div>
         <div class="tsum-event-stats">
           <span class="tsum-stat-pill">${t.hands || 0} hands</span>
@@ -870,6 +887,7 @@ function _renderTournamentSummary(tournaments) {
         <small>${name}</small>
       </td>
       <td class="text-center">${count}</td>
+      <td class="text-center d-none d-md-table-cell">${isMtt ? '<span class="badge bg-primary">MTT</span>' : '<span class="badge bg-secondary">Cash</span>'}</td>
       <td class="text-center d-none d-md-table-cell">${avgHands}</td>
       <td class="text-center d-none d-md-table-cell">${_fmtDuration(avgDurSecs)}</td>
       <td class="text-center d-none d-lg-table-cell">${handsPerHr.toFixed(1)}</td>
@@ -877,7 +895,7 @@ function _renderTournamentSummary(tournaments) {
       <td class="text-center"><small>${lastDate}</small></td>
     </tr>
     <tr class="tsum-detail-row">
-      <td colspan="7">
+      <td colspan="8">
         <div class="tsum-detail-wrap" id="${rowId}-detail">
           <div class="tsum-event-grid">${eventCards}</div>
         </div>
@@ -894,67 +912,68 @@ function _toggleTourneyDetail(rowId) {
   if (chevron) chevron.classList.toggle('tsum-chevron-open');
 }
 
-/** Renders the persisted (cross-session) Tournament History for Pro users — top N most recent, with full export. */
-function _renderTournamentHistoryPro(tournaments) {
-  const tbody  = document.getElementById('tournaments-pro-tbody');
-  const strip  = document.getElementById('tourney-strip-pro');
-  if (!tbody) return;
+/* ── Tournament Details (Pro): hands of the event selected in the Summary ── */
 
-  const top = [...tournaments]
-    .sort((a, b) => (b.earliest_ts || 0) - (a.earliest_ts || 0))
-    .slice(0, _TOURNEY_HISTORY_LIMIT);
+let _selectedTourneyId = null;
 
-  if (strip) {
-    const mttCount = top.filter(t => t.is_mtt).length;
-    const satCount = top.filter(t => (t.room_name || '').toLowerCase().includes('sat')).length;
-    const wonCount = top.filter(t => (t.net || 0) > 0).length;
-    const items = [
-      ['Tourneys',  top.length],
-      ['MTT',       mttCount],
-      ['Satellite', satCount],
-      ['Won',       wonCount],
-    ];
-    strip.innerHTML = items.map(([label, value]) =>
-      `<span class="val-pill"><strong>${value}</strong><span class="val-pill-label">${label}</span></span>`
-    ).join('<span class="val-sep">·</span>');
+/** Clears the Tournament Details table back to its empty placeholder and drops any selection. */
+function _resetTournamentDetails() {
+  const tbody = document.getElementById('tourney-detail-tbody');
+  if (tbody) {
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Select a tournament above to view its hands.</td></tr>';
   }
+  const hint = document.getElementById('tourney-detail-hint');
+  if (hint) hint.textContent = '';
+  document.querySelectorAll('.tsum-event-card.selected').forEach(c => c.classList.remove('selected'));
+  _selectedTourneyId = null;
+}
 
-  if (!top.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">No tournaments detected</td></tr>';
+/** Loads one tournament's hands into the Tournament Details table; clicking the same card again clears it. */
+async function _selectTourneyDetail(tid, cardEl) {
+  // Toggle off when the already-selected card is clicked again.
+  if (cardEl && cardEl.classList.contains('selected')) {
+    _resetTournamentDetails();
     return;
   }
+  document.querySelectorAll('.tsum-event-card.selected').forEach(c => c.classList.remove('selected'));
+  if (cardEl) cardEl.classList.add('selected');
+  _selectedTourneyId = tid;
 
-  const tz = currentTz();
-  tbody.innerHTML = top.map(t => {
-    const typeBadge = t.is_mtt
-      ? '<span class="badge bg-primary">MTT</span>'
-      : '<span class="badge bg-secondary">Cash</span>';
-    const isNew = _justImportedTourneyIds.has(t.tourney_id);
-    return `<tr class="${isNew ? 'row-flash' : ''}">
-      <td style="white-space:nowrap"><small>${fmtDate(t.earliest_ts, tz)}</small></td>
-      <td class="d-none d-sm-table-cell"><small>${t.room_name || '—'}</small></td>
-      <td class="d-none d-lg-table-cell"><small class="text-muted">${fmtTime(t.earliest_ts, tz)}</small></td>
-      <td class="d-none d-lg-table-cell"><small class="text-muted">${_fmtDuration(t.duration_secs)}</small></td>
-      <td class="d-none d-md-table-cell">${typeBadge}</td>
-      <td class="text-center">${t.hands}</td>
-      <td class="text-center export-col" style="vertical-align:middle">
-        <div class="d-flex gap-2 flex-wrap justify-content-center">
-          <button class="btn export-icon-btn" data-platform="PokerTracker" title="Export for PokerTracker" onclick="exportPersistedTournament('${t.tourney_id}', this)">
-            <img src="https://www.google.com/s2/favicons?domain=pokertracker.com&sz=64" width="22" height="22" alt="PT">
-          </button>
-          <button class="btn export-icon-btn" data-platform="DriveHUD" title="Export for DriveHUD" onclick="exportPersistedTournament('${t.tourney_id}', this)">
-            <img src="https://www.google.com/s2/favicons?domain=drivehud.com&sz=64" width="22" height="22" alt="DH">
-          </button>
-          <button class="btn export-icon-btn" data-platform="GTOWizard" title="Export for GTO Wizard" onclick="exportPersistedTournament('${t.tourney_id}', this)">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 32 32"><rect width="32" height="32" rx="5" fill="#0f0f10"/><polyline points="4,8 9,24 16,13 23,24 28,8" fill="none" stroke="#3dff7a" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/></svg>
-          </button>
-          <button class="btn export-icon-btn" title="Export as JSON file" onclick="exportPersistedTournamentJson('${t.tourney_id}', this)">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          </button>
-        </div>
-      </td>
-    </tr>`;
-  }).join('');
+  const tbody   = document.getElementById('tourney-detail-tbody');
+  const hint    = document.getElementById('tourney-detail-hint');
+  const section = document.getElementById('tournament-history-pro-section');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Loading hands…</td></tr>';
+
+  if (!_currentUser) return;
+  const token = await _currentUser.getIdToken().catch(() => null);
+  if (!token) { _resetTournamentDetails(); return; }
+
+  try {
+    const r = await fetch(`/api/tournaments/${tid}/hands`, { headers: { 'Authorization': `Bearer ${token}` } });
+    if (_selectedTourneyId !== tid) return;  // selection changed mid-fetch — drop stale response
+    if (!r.ok) {
+      if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Could not load hands.</td></tr>';
+      return;
+    }
+    const data  = await r.json();
+    const hands = data.hands || [];
+    renderHandsTable(hands, 'tourney-detail-tbody');
+    if (hint) {
+      const dateLabel = cardEl ? (cardEl.querySelector('.tsum-event-date')?.textContent || '') : '';
+      hint.textContent = `${hands.length} hand${hands.length === 1 ? '' : 's'}${dateLabel ? ' · ' + dateLabel : ''}`;
+    }
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const card = section.querySelector('.section-card');
+      if (card) {
+        card.classList.remove('td-flash');
+        void card.offsetWidth;          // restart the highlight animation
+        card.classList.add('td-flash');
+      }
+    }
+  } catch (e) {
+    if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Could not load hands.</td></tr>';
+  }
 }
 
 async function exportPersistedTournament(tourneyId, btn) {

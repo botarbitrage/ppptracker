@@ -173,6 +173,66 @@ def _empty_stats():
     )
 
 
+def _replay_url(share_key):
+    """PPPoker replay URL for a hand, or '#' when there's no share key."""
+    if not share_key:
+        return '#'
+    return (
+        f"https://replay.pppoker.net/new_game_record_publish/Frame/"
+        f"rls_20260526/index.html?lan=en&sharekey={share_key}"
+    )
+
+
+def build_hand_rows(records):
+    """
+    Map persisted tournament records to per-hand display dicts for the
+    Tournament Details table. Same shape as the recent-hand entries built in
+    process_hands (and consumed by renderHandsTable on the client). Input order
+    is preserved — records are stored newest-first.
+    """
+    rows = []
+    for rec in records or []:
+        summary   = rec.get('summary', {})
+        share_key = rec.get('share_key', '')
+        fh        = rec.get('full_hand', {})
+
+        info    = fh.get('info', {})
+        room    = info.get('room', {})
+        players = info.get('players', [])
+        flow    = fh.get('flow', {})
+        sd_res  = flow.get('showdown_result', [])
+
+        gameid      = summary.get('D', '')
+        timestamp   = summary.get('C', 0)
+        profit      = summary.get('H', 0)
+        hole_codes  = info.get('cards') or summary.get('B', [])
+        small_blind = summary.get('G') or room.get('small_blind', 1)
+        big_blind   = small_blind * 2
+
+        hero        = _hero_player(players)
+        hero_seatid = hero.get('seatid') if hero else None
+        hero_uid    = hero.get('uid')    if hero else None
+
+        dealer_seatid = room.get('dealer_seatid')
+        active_seats  = [p.get('seatid') for p in players if p.get('seatid') is not None]
+        position      = calc_position(dealer_seatid, hero_seatid, active_seats)
+
+        result = 'Won' if profit > 0 else ('Lost' if profit < 0 else 'Break even')
+
+        rows.append(dict(
+            hand_num=gameid,
+            ts=timestamp,
+            hole_cards=decode_cards(hole_codes),
+            position=position,
+            last_street=last_street_reached(flow, hero_seatid, sd_res, hero_uid),
+            result=result,
+            profit=profit,
+            big_blind=big_blind,
+            replay_url=_replay_url(share_key),
+        ))
+    return rows
+
+
 def process_hands(records):
     """
     records: list of {summary, share_key, full_hand} dicts (newest-first order).
@@ -296,10 +356,7 @@ def process_hands(records):
         # Build hand entry for the recent-hand lists
         if len(recent_hands) < 3 or (len(recent_won) < 3 and profit > 0):
             result = 'Won' if profit > 0 else ('Lost' if profit < 0 else 'Break even')
-            replay_url = (
-                f"https://replay.pppoker.net/new_game_record_publish/Frame/"
-                f"rls_20260526/index.html?lan=en&sharekey={share_key}"
-            ) if share_key else '#'
+            replay_url = _replay_url(share_key)
 
             entry = dict(
                 hand_num=gameid,
