@@ -14,7 +14,7 @@ from urllib.parse import urlparse, parse_qs
 import requests
 from flask import Flask, jsonify, render_template, request, send_file, send_from_directory, Response
 
-from hand_parser import process_hands
+from hand_parser import process_hands, build_hand_rows
 from hand_exporter import validate_hands, export_pokerstars
 
 # In-memory store for the most recently imported hand records (used by export endpoints)
@@ -660,6 +660,20 @@ def _fetch_tournament_records(uid, tourney_id):
         return None, d
     import json as _jj
     return _jj.loads(blob.download_as_bytes()), d
+
+
+@app.route('/api/tournaments/<tourney_id>/hands', methods=['GET'])
+def tournament_hands(tourney_id):
+    """Per-hand display rows for one persisted tournament (Tournament Details)."""
+    uid = _verify_bearer(request)
+    if not uid:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    records, _doc = _fetch_tournament_records(uid, tourney_id)
+    if records is None:
+        return jsonify({'error': 'Tournament data not available'}), 404
+
+    return jsonify({'hands': build_hand_rows(records)})
 
 
 @app.route('/api/tournaments/<tourney_id>/export', methods=['POST'])

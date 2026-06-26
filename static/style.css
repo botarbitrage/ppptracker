@@ -1370,11 +1370,26 @@ tr.row-flash > td {
   flex: 1 1 200px;
   min-width: 180px;
   max-width: 260px;
+  cursor: pointer;
   transition: transform .15s ease, border-color .15s ease;
 }
 .tsum-event-card:hover {
   transform: translateY(-2px);
   border-color: var(--green);
+}
+.tsum-event-card.selected {
+  border-color: var(--green);
+  background: rgba(0,230,118,.10);
+  box-shadow: 0 0 0 1px var(--green) inset;
+}
+
+/* Tournament Details: brief highlight when a tournament is loaded into it */
+@keyframes tdFlash {
+  0%   { background-color: rgba(0,230,118,.18); }
+  100% { background-color: transparent; }
+}
+.section-card.td-flash {
+  animation: tdFlash 1.6s ease-out;
 }
 
 .tsum-event-top {
