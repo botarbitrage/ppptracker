@@ -1032,7 +1032,7 @@ async function exportPersistedTournamentJson(tourneyId, btn) {
 
 function renderHandStats(data) {
   const v = (data.new_validation || data.validation) || {};
-  const s = (data.new_stats     && data.new_stats[0]) || data.stats || {};
+  const s = data.new_stats || data.stats || {};
   const _set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val ?? '—'; };
   _set('hs-hands', data.new_hands != null ? data.new_hands : v.hands_imported);
   _set('hs-flop',  s.hands_hero_saw_flop);
