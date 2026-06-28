@@ -375,10 +375,10 @@
                     aria-label="Buy-in, ITM%, and finishing position are not available in the PPPoker API data.">ⓘ</button>
           </h2>
           <div class="ts-filter-pills">
-            <button id="ts-filter-all"   class="ts-pill ts-pill-active" onclick="_setTsFilter('all')">All</button>
-            <button id="ts-filter-today" class="ts-pill"                onclick="_setTsFilter('today')">Today</button>
-            <button id="ts-filter-week"  class="ts-pill"                onclick="_setTsFilter('week')">This Week</button>
-            <button id="ts-filter-range" class="ts-pill"                onclick="_openDateRangeModal('ts')" data-bs-toggle="modal" data-bs-target="#modal-date-range">Date Range</button>
+            <div id="ts-filter-all"   class="ts-pill ts-pill-active" role="button" tabindex="0" onclick="_setTsFilter('all')">All</div>
+            <div id="ts-filter-today" class="ts-pill"                role="button" tabindex="0" onclick="_setTsFilter('today')">Today</div>
+            <div id="ts-filter-week"  class="ts-pill"                role="button" tabindex="0" onclick="_setTsFilter('week')">This Week</div>
+            <div id="ts-filter-range" class="ts-pill"                role="button" tabindex="0" onclick="_openDateRangeModal('ts')" data-bs-toggle="modal" data-bs-target="#modal-date-range">Date Range</div>
             <span id="ts-filter-label" class="ts-filter-active-label d-none"></span>
           </div>
         </div>
@@ -447,10 +447,10 @@
             Cash Games Summary
           </h2>
           <div class="ts-filter-pills">
-            <button id="cgs-filter-all"   class="ts-pill ts-pill-active" onclick="_setCgsFilter('all')">All</button>
-            <button id="cgs-filter-today" class="ts-pill"                onclick="_setCgsFilter('today')">Today</button>
-            <button id="cgs-filter-week"  class="ts-pill"                onclick="_setCgsFilter('week')">This Week</button>
-            <button id="cgs-filter-range" class="ts-pill"                onclick="_openDateRangeModal('cgs')" data-bs-toggle="modal" data-bs-target="#modal-date-range">Date Range</button>
+            <div id="cgs-filter-all"   class="ts-pill ts-pill-active" role="button" tabindex="0" onclick="_setCgsFilter('all')">All</div>
+            <div id="cgs-filter-today" class="ts-pill"                role="button" tabindex="0" onclick="_setCgsFilter('today')">Today</div>
+            <div id="cgs-filter-week"  class="ts-pill"                role="button" tabindex="0" onclick="_setCgsFilter('week')">This Week</div>
+            <div id="cgs-filter-range" class="ts-pill"                role="button" tabindex="0" onclick="_openDateRangeModal('cgs')" data-bs-toggle="modal" data-bs-target="#modal-date-range">Date Range</div>
             <span id="cgs-filter-label" class="ts-filter-active-label d-none"></span>
           </div>
         </div>
