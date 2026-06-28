@@ -839,7 +839,7 @@ function _setTsFilter(f) {
   _tsFilter = f;
   ['all','today','week','range'].forEach(k => {
     const btn = document.getElementById('ts-filter-' + k);
-    if (btn) btn.classList.toggle('ts-active', k === f);
+    if (btn) btn.classList.toggle('ts-pill-active', k === f);
   });
   const lbl = document.getElementById('ts-filter-label');
   if (lbl) lbl.classList.add('d-none');
@@ -869,7 +869,7 @@ function _setCgsFilter(f) {
   _cgsFilter = f;
   ['all','today','week','range'].forEach(k => {
     const btn = document.getElementById('cgs-filter-' + k);
-    if (btn) btn.classList.toggle('ts-active', k === f);
+    if (btn) btn.classList.toggle('ts-pill-active', k === f);
   });
   const lbl = document.getElementById('cgs-filter-label');
   if (lbl) lbl.classList.add('d-none');
@@ -930,7 +930,7 @@ function _applyDateRange() {
     _cgsDateRange = { start: s, end: e };
     ['all','today','week','range'].forEach(k => {
       const btn = document.getElementById('cgs-filter-' + k);
-      if (btn) btn.classList.toggle('ts-active', k === 'range');
+      if (btn) btn.classList.toggle('ts-pill-active', k === 'range');
     });
     const lbl = document.getElementById('cgs-filter-label');
     if (lbl) { lbl.textContent = `${s} → ${e}`; lbl.classList.remove('d-none'); }
@@ -940,7 +940,7 @@ function _applyDateRange() {
     _tsDateRange = { start: s, end: e };
     ['all','today','week','range'].forEach(k => {
       const btn = document.getElementById('ts-filter-' + k);
-      if (btn) btn.classList.toggle('ts-active', k === 'range');
+      if (btn) btn.classList.toggle('ts-pill-active', k === 'range');
     });
     const lbl = document.getElementById('ts-filter-label');
     if (lbl) { lbl.textContent = `${s} → ${e}`; lbl.classList.remove('d-none'); }
@@ -990,6 +990,8 @@ function _renderCashGamesSummary(tournaments) {
     return;
   }
   if (cgsSection) cgsSection.classList.remove('d-none');
+  const cgsdSection = document.getElementById('cash-game-detail-section');
+  if (cgsdSection) cgsdSection.classList.remove('d-none');
 
   // Stats strip
   const strip = document.getElementById('cgs-strip');
