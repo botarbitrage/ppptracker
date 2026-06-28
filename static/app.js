@@ -512,6 +512,7 @@ function renderResults(data) {
   }
   updateTzHeaders();
   _updateExportGates();
+  _renderPlayerExportAll();
 
   document.getElementById('results-section').classList.remove('d-none');
   document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -519,7 +520,7 @@ function renderResults(data) {
 
 /* ── Shared hand table renderer ──────────────────────────── */
 
-function renderHandsTable(hands, tbodyId) {
+function renderHandsTable(hands, tbodyId, options = {}) {
   if (!isPro() && hands.length > FREE_HAND_LIMIT) {
     hands = hands.slice(-FREE_HAND_LIMIT);
   }
@@ -530,6 +531,8 @@ function renderHandsTable(hands, tbodyId) {
   }
 
   const tz = currentTz();
+  const showExport = !!options.showExport;
+
   tbody.innerHTML = hands.map(h => {
     const cards = (h.hole_cards || []).map(renderCard).join('');
     const copyBtn = h.hand_num
@@ -537,13 +540,42 @@ function renderHandsTable(hands, tbodyId) {
            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
          </button>`
       : '';
+
+    // Cols 5+6 differ between normal tables (Result, Net P/L) and export tables (Net P/L, Export)
+    let cols56;
+    if (showExport) {
+      const hn = h.hand_num;
+      const exportBtns = hn
+        ? `<div class="d-flex gap-1 flex-wrap justify-content-center">
+            <button class="btn export-icon-btn" data-platform="PokerTracker" title="Export PT4" onclick="exportHandFromRow('${hn}','PokerTracker',this)">
+              <img src="https://www.google.com/s2/favicons?domain=pokertracker.com&sz=64" width="16" height="16" alt="PT">
+            </button>
+            <button class="btn export-icon-btn" data-platform="DriveHUD" title="Export DriveHUD" onclick="exportHandFromRow('${hn}','DriveHUD',this)">
+              <img src="https://www.google.com/s2/favicons?domain=drivehud.com&sz=64" width="16" height="16" alt="DH">
+            </button>
+            <button class="btn export-icon-btn" data-platform="GTOWizard" title="Export GTO Wizard" onclick="exportHandFromRow('${hn}','GTOWizard',this)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 32 32"><rect width="32" height="32" rx="5" fill="#0f0f10"/><polyline points="4,8 9,24 16,13 23,24 28,8" fill="none" stroke="#3dff7a" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/></svg>
+            </button>
+            <button class="btn export-icon-btn" title="Export JSON" onclick="exportHandFromRow('${hn}','',this)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </button>
+          </div>`
+        : '<span class="text-muted">—</span>';
+      // Export mode: Net P/L (BB) | Export
+      cols56 = `<td class="d-none d-lg-table-cell">${fmtProfitBB(h.profit, h.big_blind)}</td>
+      <td class="text-center">${exportBtns}</td>`;
+    } else {
+      // Normal mode: Result | Net P/L (BB)
+      cols56 = `<td class="d-none d-md-table-cell">${resultBadge(h.result)}</td>
+      <td class="d-none d-lg-table-cell">${fmtProfitBB(h.profit, h.big_blind)}</td>`;
+    }
+
     return `<tr>
       <td><span class="hand-when-cell">${fmtHandDateTime(h.ts, tz)}${copyBtn}</span></td>
       <td class="no-wrap">${cards || '—'}</td>
       <td class="d-none d-md-table-cell">${posBadge(h.position)}</td>
       <td>${streetBadge(h.last_street)}</td>
-      <td class="d-none d-md-table-cell">${resultBadge(h.result)}</td>
-      <td class="d-none d-lg-table-cell">${fmtProfitBB(h.profit, h.big_blind)}</td>
+      ${cols56}
       <td>
         ${h.replay_url && h.replay_url !== '#'
           ? `<a class="replay-link" href="${h.replay_url}" target="_blank" rel="noopener" title="Watch replay">▶</a>`
@@ -753,9 +785,8 @@ function _applyTierVisibility() {
 
 /** Call after any state change that could affect export UI. */
 function _updateExportGates() {
-  _renderExportAllSection();
-  _renderExportCounter();
   _applyTierVisibility();
+  _renderPlayerExportAll();
 }
 
 /* ── Tournament Summary ──────────────────────────────────── */
@@ -763,6 +794,396 @@ function _updateExportGates() {
 // tourney_ids touched by the most recent import — used to briefly highlight
 // the corresponding rows in Tournament Summary / History after _loadHistory() renders.
 let _justImportedTourneyIds = new Set();
+
+// ── TS / CGS filter + sort state ─────────────────────────────────────────────
+let _allTournaments     = [];          // cached from _loadHistory
+let _tsFilter           = 'all';       // 'all' | 'today' | 'week' | 'range'
+let _tsDateRange        = { start: null, end: null };
+let _tsSortCol          = null;        // null = default order
+let _tsSortDir          = 'desc';
+
+let _cgsFilter          = 'all';
+let _cgsDateRange       = { start: null, end: null };
+let _cgsSortCol         = null;
+let _cgsSortDir         = 'desc';
+
+let _activeDateTarget   = 'ts';       // which section the date-range modal targets
+
+// ── Date-filter helper ────────────────────────────────────────────────────────
+function _filterTournamentsByDate(tournaments, filter, dateRange) {
+  if (filter === 'all') return tournaments;
+  const tz  = currentTz();
+  const now = new Date();
+  const todayStr = now.toLocaleDateString('en-CA', { timeZone: tz });
+
+  if (filter === 'today') {
+    return tournaments.filter(t => {
+      if (!t.earliest_ts) return false;
+      return new Date(t.earliest_ts * 1000).toLocaleDateString('en-CA', { timeZone: tz }) === todayStr;
+    });
+  }
+  if (filter === 'week') {
+    const cutoff = (now.getTime() - 7 * 86400000) / 1000;
+    return tournaments.filter(t => (t.earliest_ts || 0) >= cutoff);
+  }
+  if (filter === 'range' && dateRange.start && dateRange.end) {
+    const startTs = new Date(dateRange.start).getTime() / 1000;
+    const endTs   = (new Date(dateRange.end).getTime() + 86399000) / 1000; // end of day
+    return tournaments.filter(t => (t.earliest_ts || 0) >= startTs && (t.earliest_ts || 0) <= endTs);
+  }
+  return tournaments;
+}
+
+// ── TS filter / sort ──────────────────────────────────────────────────────────
+function _setTsFilter(f) {
+  _tsFilter = f;
+  ['all','today','week','range'].forEach(k => {
+    const btn = document.getElementById('ts-filter-' + k);
+    if (btn) btn.classList.toggle('ts-active', k === f);
+  });
+  const lbl = document.getElementById('ts-filter-label');
+  if (lbl) lbl.classList.add('d-none');
+  _renderTournamentSummary(_allTournaments);
+}
+
+function _sortTs(col) {
+  if (_tsSortCol === col) {
+    _tsSortDir = _tsSortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    _tsSortCol = col;
+    _tsSortDir = 'desc';
+  }
+  _renderTournamentSummary(_allTournaments);
+}
+
+function _updateTsSortIcons(col, dir) {
+  document.querySelectorAll('#tournament-summary-section .sort-th').forEach(th => {
+    const icon = th.querySelector('.sort-icon');
+    if (!icon) return;
+    icon.textContent = th.dataset.col === col ? (dir === 'asc' ? ' ▲' : ' ▼') : '';
+  });
+}
+
+// ── CGS filter / sort ─────────────────────────────────────────────────────────
+function _setCgsFilter(f) {
+  _cgsFilter = f;
+  ['all','today','week','range'].forEach(k => {
+    const btn = document.getElementById('cgs-filter-' + k);
+    if (btn) btn.classList.toggle('ts-active', k === f);
+  });
+  const lbl = document.getElementById('cgs-filter-label');
+  if (lbl) lbl.classList.add('d-none');
+  _renderCashGamesSummary(_allTournaments);
+}
+
+function _sortCgs(col) {
+  if (_cgsSortCol === col) {
+    _cgsSortDir = _cgsSortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    _cgsSortCol = col;
+    _cgsSortDir = 'desc';
+  }
+  _renderCashGamesSummary(_allTournaments);
+}
+
+function _updateCgsSortIcons(col, dir) {
+  document.querySelectorAll('#cash-games-summary-section .sort-th').forEach(th => {
+    const icon = th.querySelector('.sort-icon');
+    if (!icon) return;
+    icon.textContent = th.dataset.col === col ? (dir === 'asc' ? ' ▲' : ' ▼') : '';
+  });
+}
+
+// ── Date-range modal ──────────────────────────────────────────────────────────
+function _openDateRangeModal(target) {
+  _activeDateTarget = target;
+  const dr = target === 'cgs' ? _cgsDateRange : _tsDateRange;
+  const s = document.getElementById('date-range-start');
+  const e = document.getElementById('date-range-end');
+  if (s) s.value = dr.start || '';
+  if (e) e.value = dr.end   || '';
+  // Default slider to 30 days if nothing set
+  const slider = document.getElementById('date-range-slider');
+  if (slider) slider.value = 30;
+  _updateDateRangeSlider(30);
+}
+
+function _updateDateRangeSlider(days) {
+  const lbl   = document.getElementById('date-range-slider-label');
+  const end   = document.getElementById('date-range-end');
+  const start = document.getElementById('date-range-start');
+  const d     = parseInt(days, 10);
+  if (lbl) lbl.textContent = d >= 365 ? '1 year' : d >= 30 ? `${Math.round(d/30)} month${d >= 60 ? 's' : ''}` : `${d} day${d > 1 ? 's' : ''}`;
+  const now    = new Date();
+  const endStr = now.toISOString().slice(0, 10);
+  const past   = new Date(now.getTime() - d * 86400000).toISOString().slice(0, 10);
+  if (end)   end.value   = endStr;
+  if (start) start.value = past;
+}
+
+function _applyDateRange() {
+  const s = (document.getElementById('date-range-start') || {}).value;
+  const e = (document.getElementById('date-range-end')   || {}).value;
+  if (!s || !e) return;
+  if (_activeDateTarget === 'cgs') {
+    _cgsFilter    = 'range';
+    _cgsDateRange = { start: s, end: e };
+    ['all','today','week','range'].forEach(k => {
+      const btn = document.getElementById('cgs-filter-' + k);
+      if (btn) btn.classList.toggle('ts-active', k === 'range');
+    });
+    const lbl = document.getElementById('cgs-filter-label');
+    if (lbl) { lbl.textContent = `${s} → ${e}`; lbl.classList.remove('d-none'); }
+    _renderCashGamesSummary(_allTournaments);
+  } else {
+    _tsFilter    = 'range';
+    _tsDateRange = { start: s, end: e };
+    ['all','today','week','range'].forEach(k => {
+      const btn = document.getElementById('ts-filter-' + k);
+      if (btn) btn.classList.toggle('ts-active', k === 'range');
+    });
+    const lbl = document.getElementById('ts-filter-label');
+    if (lbl) { lbl.textContent = `${s} → ${e}`; lbl.classList.remove('d-none'); }
+    _renderTournamentSummary(_allTournaments);
+  }
+}
+
+// ── Group sort helper ─────────────────────────────────────────────────────────
+function _sortGroups(rows, col, dir) {
+  if (!col) return rows;
+  const sign = dir === 'asc' ? 1 : -1;
+  return [...rows].sort((a, b) => {
+    let av, bv;
+    switch (col) {
+      case 'name':     av = a[0].toLowerCase(); bv = b[0].toLowerCase(); break;
+      case 'events':   av = a[1].length; bv = b[1].length; break;
+      case 'type':     av = a[1].some(t => t.is_mtt) ? 1 : 0; bv = b[1].some(t => t.is_mtt) ? 1 : 0; break;
+      case 'avgHands': av = a[1].reduce((s, t) => s + (t.hands || 0), 0) / a[1].length;
+                       bv = b[1].reduce((s, t) => s + (t.hands || 0), 0) / b[1].length; break;
+      case 'avgDur':   av = a[1].reduce((s, t) => s + (t.duration_secs || 0), 0) / a[1].length;
+                       bv = b[1].reduce((s, t) => s + (t.duration_secs || 0), 0) / b[1].length; break;
+      case 'handsHr': {
+        const aDurHr = a[1].reduce((s, t) => s + (t.duration_secs || 0), 0) / 3600;
+        const bDurHr = b[1].reduce((s, t) => s + (t.duration_secs || 0), 0) / 3600;
+        av = aDurHr > 0 ? a[1].reduce((s, t) => s + (t.hands || 0), 0) / aDurHr : 0;
+        bv = bDurHr > 0 ? b[1].reduce((s, t) => s + (t.hands || 0), 0) / bDurHr : 0;
+        break;
+      }
+      case 'last':     av = Math.max(...a[1].map(t => t.earliest_ts || 0));
+                       bv = Math.max(...b[1].map(t => t.earliest_ts || 0)); break;
+      default: return 0;
+    }
+    if (av < bv) return -sign;
+    if (av > bv) return  sign;
+    return 0;
+  });
+}
+
+// ── Cash Games Summary ────────────────────────────────────────────────────────
+function _renderCashGamesSummary(tournaments) {
+  const cashOnly = (tournaments || []).filter(t => !t.is_mtt);
+  const filtered = _filterTournamentsByDate(cashOnly, _cgsFilter, _cgsDateRange);
+
+  const cgsSection = document.getElementById('cash-games-summary-section');
+  if (!filtered.length) {
+    if (cgsSection) cgsSection.classList.add('d-none');
+    return;
+  }
+  if (cgsSection) cgsSection.classList.remove('d-none');
+
+  // Stats strip
+  const strip = document.getElementById('cgs-strip');
+  if (strip) {
+    const items = [['Sessions', filtered.length], ['Total Hands', filtered.reduce((s, t) => s + (t.hands || 0), 0)]];
+    strip.innerHTML = items.map(([label, value]) =>
+      `<span class="val-pill"><strong>${value}</strong><span class="val-pill-label">${label}</span></span>`
+    ).join('<span class="val-sep">·</span>');
+  }
+
+  const tbody = document.getElementById('cgs-summary-tbody');
+  if (!tbody) return;
+
+  const byRoom = {};
+  for (const t of filtered) {
+    const key = t.room_name || '(Unknown)';
+    if (!byRoom[key]) byRoom[key] = [];
+    byRoom[key].push(t);
+  }
+
+  let rows = Object.entries(byRoom).sort((a, b) => b[1].length - a[1].length);
+  rows = _sortGroups(rows, _cgsSortCol, _cgsSortDir);
+  _updateCgsSortIcons(_cgsSortCol, _cgsSortDir);
+
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">No cash game data in selected range.</td></tr>';
+    return;
+  }
+
+  const tz = currentTz();
+  tbody.innerHTML = rows.map(([name, entries], idx) => {
+    const rowId       = `cgs-${idx}`;
+    const count       = entries.length;
+    const totalHands  = entries.reduce((s, t) => s + (t.hands || 0), 0);
+    const totalDurHr  = entries.reduce((s, t) => s + (t.duration_secs || 0), 0) / 3600;
+    const handsPerHr  = totalDurHr > 0 ? (totalHands / totalDurHr) : 0;
+    const avgHands    = Math.round(totalHands / count);
+    const avgDurSecs  = entries.reduce((s, t) => s + (t.duration_secs || 0), 0) / count;
+    const avgVpip     = (entries.reduce((s, t) => s + (t.vpip_pct || 0), 0) / count).toFixed(1);
+    const avgPfr      = (entries.reduce((s, t) => s + (t.pfr_pct  || 0), 0) / count).toFixed(1);
+    const lastTs      = Math.max(...entries.map(t => t.earliest_ts || 0));
+    const lastDate    = lastTs ? new Date(lastTs * 1000).toLocaleDateString('en-GB',
+        { day: 'numeric', month: 'short', year: '2-digit', timeZone: tz }) : '—';
+
+    const sortedEntries = [...entries].sort((a, b) => (b.earliest_ts || 0) - (a.earliest_ts || 0));
+    const eventCards = sortedEntries.map(t => {
+      const d = t.earliest_ts ? new Date(t.earliest_ts * 1000).toLocaleDateString('en-GB',
+          { day: 'numeric', month: 'short', year: '2-digit', timeZone: tz }) : '—';
+      const evDurHr = (t.duration_secs || 0) / 3600;
+      const evPerHr = evDurHr > 0 ? (t.hands || 0) / evDurHr : 0;
+      return `<div class="tsum-event-card" data-tid="${t.tourney_id}" onclick="event.stopPropagation();_selectCgsdDetail('${t.tourney_id}', this)">
+        <div class="tsum-event-top">
+          <span class="tsum-event-date">${d}</span>
+          <span class="tsum-stat-pill">${fmtTime(t.earliest_ts, tz)}</span>
+          <span class="tsum-stat-pill">${_fmtDuration(t.duration_secs)}</span>
+        </div>
+        <div class="tsum-event-stats">
+          <span class="tsum-stat-pill">${t.hands || 0} hands</span>
+          <span class="tsum-stat-pill">${(t.vpip_pct || 0).toFixed(1)}% / ${(t.pfr_pct || 0).toFixed(1)}%</span>
+          <span class="tsum-stat-pill">${evPerHr.toFixed(1)}/hr</span>
+        </div>
+        <div class="tsum-event-actions">${_TSUM_EXPORT_ICONS(t.tourney_id)}</div>
+      </div>`;
+    }).join('');
+
+    return `<tr class="tsum-summary-row" onclick="_toggleCgsDetail('${rowId}')">
+      <td>
+        <svg class="tsum-chevron" id="${rowId}-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        <small>${name}</small>
+      </td>
+      <td class="text-center">${count}</td>
+      <td class="text-center d-none d-md-table-cell">${avgHands}</td>
+      <td class="text-center d-none d-md-table-cell">${_fmtDuration(avgDurSecs)}</td>
+      <td class="text-center d-none d-lg-table-cell">${handsPerHr.toFixed(1)}</td>
+      <td class="text-center d-none d-lg-table-cell">${avgVpip}% / ${avgPfr}%</td>
+      <td class="text-center"><small>${lastDate}</small></td>
+    </tr>
+    <tr class="tsum-detail-row">
+      <td colspan="7">
+        <div class="tsum-detail-wrap" id="${rowId}-detail">
+          <div class="tsum-event-grid">${eventCards}</div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function _toggleCgsDetail(rowId) {
+  const detail  = document.getElementById(`${rowId}-detail`);
+  const chevron = document.getElementById(`${rowId}-chevron`);
+  if (!detail) return;
+  detail.classList.toggle('tsum-detail-open');
+  if (chevron) chevron.classList.toggle('tsum-chevron-open');
+}
+
+// ── Cash Game Session Details ─────────────────────────────────────────────────
+let _selectedCgsId = null;
+
+function _resetCgsd() {
+  const tbody = document.getElementById('cgsd-tbody');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Select a cash game session above to view its hands.</td></tr>';
+  const hint = document.getElementById('cgsd-hint');
+  if (hint) hint.textContent = '';
+  document.querySelectorAll('.tsum-event-card.selected').forEach(c => c.classList.remove('selected'));
+  _selectedCgsId = null;
+}
+
+async function _selectCgsdDetail(tid, cardEl) {
+  if (cardEl && cardEl.classList.contains('selected')) {
+    _resetCgsd();
+    return;
+  }
+  document.querySelectorAll('#cash-games-summary-section .tsum-event-card.selected').forEach(c => c.classList.remove('selected'));
+  if (cardEl) cardEl.classList.add('selected');
+  _selectedCgsId = tid;
+
+  const tbody   = document.getElementById('cgsd-tbody');
+  const hint    = document.getElementById('cgsd-hint');
+  const section = document.getElementById('cash-game-detail-section');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Loading hands…</td></tr>';
+  if (section) section.classList.remove('d-none');
+
+  if (!_currentUser) return;
+  const token = await _currentUser.getIdToken().catch(() => null);
+  if (!token) { _resetCgsd(); return; }
+
+  try {
+    const r = await fetch(`/api/tournaments/${tid}/hands`, { headers: { 'Authorization': `Bearer ${token}` } });
+    if (_selectedCgsId !== tid) return;
+    if (!r.ok) {
+      if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Could not load hands.</td></tr>';
+      return;
+    }
+    const data  = await r.json();
+    const hands = data.hands || [];
+    renderHandsTable(hands, 'cgsd-tbody', { showExport: true });
+    if (hint) {
+      const dateLabel = cardEl ? (cardEl.querySelector('.tsum-event-date')?.textContent || '') : '';
+      hint.textContent = `${hands.length} hand${hands.length !== 1 ? 's' : ''}${dateLabel ? ' · ' + dateLabel : ''}`;
+    }
+    if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (e) {
+    if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Could not load hands.</td></tr>';
+  }
+}
+
+// ── Per-row hand export (TD + CGSD) ──────────────────────────────────────────
+async function exportHandFromRow(handNum, platform, btn) {
+  if (!_currentUser) { showUpgradeModal('tourney'); return; }
+  _rowExportStatus(btn, 'loading', 'Exporting…');
+  const token = await _currentUser.getIdToken().catch(() => null);
+  const isJson = !platform;
+  const endpoint = isJson ? '/api/export/json/hand' : '/api/export/hand';
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  try {
+    const r = await fetch(endpoint, {
+      method:  'POST',
+      headers,
+      body: JSON.stringify({ hand_id: handNum, platform }),
+    });
+    if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error || 'Export failed'); }
+    const cd = r.headers.get('Content-Disposition') || '';
+    const m  = cd.match(/filename[^;=\n]*=([^;\n]*)/);
+    const filename = m ? m[1].replace(/['"]/g, '').trim() : `hand_export.${isJson ? 'json' : 'txt'}`;
+    const blob = await r.blob();
+    _triggerDownload(blob, filename);
+    _rowExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
+  } catch (err) {
+    _rowExportStatus(btn, 'err', err.message, 6000);
+  }
+}
+
+// ── Player badge: Export All (moves here from removed section) ────────────────
+function _renderPlayerExportAll() {
+  const wrap = document.getElementById('player-export-all');
+  const btns = document.getElementById('player-export-all-btns');
+  if (!wrap || !btns) return;
+  if (!window._lastData) { wrap.classList.add('d-none'); return; }
+  if (isPro()) {
+    btns.innerHTML = _EXPORT_ALL_BTNS_HTML;
+    wrap.classList.remove('d-none');
+  } else {
+    btns.innerHTML =
+      `<div class="export-gate-wrap" style="min-height:auto">` +
+      `<div class="tourney-gate-blur" aria-hidden="true">${_EXPORT_ALL_BTNS_HTML}</div>` +
+      `<div class="tourney-gate-overlay">` +
+      _LOCK_ICON_SVG +
+      `<span class="tourney-gate-label">Pro only</span>` +
+      `<button class="tourney-gate-btn" onclick="showUpgradeModal('export')">Upgrade · $7.99/mo</button>` +
+      `</div></div>`;
+    wrap.classList.remove('d-none');
+  }
+}
 
 function _fmtDuration(secs) {
   if (!secs || secs < 0) return '—';
@@ -775,22 +1196,42 @@ async function _loadHistory() {
   if (!isPro() || !_currentUser) return;
   const token = await _currentUser.getIdToken().catch(() => null);
   if (!token) return;
-  const ts = document.getElementById('tournament-summary-section');
-  const th = document.getElementById('tournament-history-pro-section');
+  const tsSection  = document.getElementById('tournament-summary-section');
+  const tdSection  = document.getElementById('tournament-history-pro-section');
+  const cgsSection = document.getElementById('cash-games-summary-section');
+  const cgsdSection= document.getElementById('cash-game-detail-section');
   try {
     const r = await fetch('/api/tournaments', { headers: { 'Authorization': `Bearer ${token}` } });
     if (!r.ok) return;
     const data = await r.json();
     const tournaments = data.tournaments || [];
+    _allTournaments = tournaments;
+
     if (!tournaments.length) {
-      if (ts) ts.classList.add('d-none');
-      if (th) th.classList.add('d-none');
+      [tsSection, tdSection, cgsSection, cgsdSection].forEach(el => el && el.classList.add('d-none'));
       return;
     }
-    _renderTournamentSummary(tournaments);
-    _resetTournamentDetails();
-    if (ts) ts.classList.remove('d-none');
-    if (th) th.classList.remove('d-none');
+
+    const hasMtt  = tournaments.some(t =>  t.is_mtt);
+    const hasCash = tournaments.some(t => !t.is_mtt);
+
+    if (hasMtt) {
+      _renderTournamentSummary(tournaments);
+      _resetTournamentDetails();
+      if (tsSection) tsSection.classList.remove('d-none');
+      if (tdSection) tdSection.classList.remove('d-none');
+    } else {
+      if (tsSection) tsSection.classList.add('d-none');
+      if (tdSection) tdSection.classList.add('d-none');
+    }
+
+    if (hasCash) {
+      _renderCashGamesSummary(tournaments);
+      _resetCgsd();
+    } else {
+      if (cgsSection) cgsSection.classList.add('d-none');
+      if (cgsdSection) cgsdSection.classList.add('d-none');
+    }
   } catch (e) { console.warn('History load failed:', e); }
 }
 
@@ -812,33 +1253,34 @@ function _renderTournamentSummary(tournaments) {
   const tbody = document.getElementById('tourney-summary-tbody');
   if (!tbody) return;
 
-  // Pills strip (moved here from Tournament History) — over ALL tournaments.
+  // Exclude Cash games, then apply date filter
+  const mttOnly = (tournaments || []).filter(t => t.is_mtt);
+  const filtered = _filterTournamentsByDate(mttOnly, _tsFilter, _tsDateRange);
+
+  // Pills strip
   const strip = document.getElementById('tourney-strip-pro');
   if (strip) {
-    const mttCount = tournaments.filter(t => t.is_mtt).length;
-    const satCount = tournaments.filter(t => (t.room_name || '').toLowerCase().includes('sat')).length;
-    const wonCount = tournaments.filter(t => (t.net || 0) > 0).length;
-    const items = [
-      ['Tourneys',  tournaments.length],
-      ['MTT',       mttCount],
-      ['Satellite', satCount],
-      ['Won',       wonCount],
-    ];
+    const satCount = filtered.filter(t => (t.room_name || '').toLowerCase().includes('sat')).length;
+    const wonCount = filtered.filter(t => (t.net || 0) > 0).length;
+    const items = [['Tourneys', filtered.length], ['Satellite', satCount], ['Won', wonCount]];
     strip.innerHTML = items.map(([label, value]) =>
       `<span class="val-pill"><strong>${value}</strong><span class="val-pill-label">${label}</span></span>`
     ).join('<span class="val-sep">·</span>');
   }
 
   const byRoom = {};
-  for (const t of tournaments) {
+  for (const t of filtered) {
     const key = t.room_name || '(Unknown)';
     if (!byRoom[key]) byRoom[key] = [];
     byRoom[key].push(t);
   }
 
-  const rows = Object.entries(byRoom).sort((a, b) => b[1].length - a[1].length);
+  let rows = Object.entries(byRoom).sort((a, b) => b[1].length - a[1].length);
+  rows = _sortGroups(rows, _tsSortCol, _tsSortDir);
+  _updateTsSortIcons(_tsSortCol, _tsSortDir);
+
   if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">No tournament data yet. Import a session to start.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">No tournament data in selected range.</td></tr>';
     return;
   }
 
@@ -875,7 +1317,7 @@ function _renderTournamentSummary(tournaments) {
         <div class="tsum-event-stats">
           <span class="tsum-stat-pill">${t.hands || 0} hands</span>
           <span class="tsum-stat-pill">${(t.vpip_pct || 0).toFixed(1)}% / ${(t.pfr_pct || 0).toFixed(1)}%</span>
-          <span class="tsum-stat-pill">${evPerHr.toFixed(1)}</span>
+          <span class="tsum-stat-pill">${evPerHr.toFixed(1)}/hr</span>
         </div>
         <div class="tsum-event-actions">${_TSUM_EXPORT_ICONS(t.tourney_id)}</div>
       </div>`;
@@ -887,7 +1329,7 @@ function _renderTournamentSummary(tournaments) {
         <small>${name}</small>
       </td>
       <td class="text-center">${count}</td>
-      <td class="text-center d-none d-md-table-cell">${isMtt ? '<span class="badge bg-primary">MTT</span>' : '<span class="badge bg-secondary">Cash</span>'}</td>
+      <td class="text-center d-none d-md-table-cell">${isMtt ? '<span class="badge bg-primary">MTT</span>' : '<span class="badge bg-secondary">MTT</span>'}</td>
       <td class="text-center d-none d-md-table-cell">${avgHands}</td>
       <td class="text-center d-none d-md-table-cell">${_fmtDuration(avgDurSecs)}</td>
       <td class="text-center d-none d-lg-table-cell">${handsPerHr.toFixed(1)}</td>
@@ -957,7 +1399,7 @@ async function _selectTourneyDetail(tid, cardEl) {
     }
     const data  = await r.json();
     const hands = data.hands || [];
-    renderHandsTable(hands, 'tourney-detail-tbody');
+    renderHandsTable(hands, 'tourney-detail-tbody', { showExport: true });
     if (hint) {
       const dateLabel = cardEl ? (cardEl.querySelector('.tsum-event-date')?.textContent || '') : '';
       hint.textContent = `${hands.length} hand${hands.length === 1 ? '' : 's'}${dateLabel ? ' · ' + dateLabel : ''}`;

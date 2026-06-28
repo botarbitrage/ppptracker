@@ -504,8 +504,10 @@ TOURNAMENTS = [
             "buy_in_prize": 27.36,
             "buy_in_rake": 3.04,
             "starting_chips": 100000,
-            "level_duration_min": 12,
-            "level_duration_rebuy_min": None,
+            "starting_time": "8:00 PM",
+            "level_duration_min": 12,           # After LR
+            "level_duration_rebuy_min": None,    # No rebuy period
+            "level_duration_ft_min": 10,         # Final Table
             "late_reg_level": 14,
             "rebuy": False,
             "rebuy_type": "none",
@@ -521,7 +523,7 @@ TOURNAMENTS = [
             "player_max": 7000,
             "break_every_min": 55,
             "break_duration_min": 5,
-            "blind_structure_extra": [],
+            "blind_structure_extra": CRAZY2_EXTRA_LEVELS,  # Same 68 levels as CRAZY 2
             "payout_ref": "standard",
             "active": True,
             "created_at": datetime.now(timezone.utc),
@@ -538,8 +540,10 @@ TOURNAMENTS = [
             "buy_in_prize": 6.84,
             "buy_in_rake": 0.76,
             "starting_chips": 20000,
-            "level_duration_min": 10,
-            "level_duration_rebuy_min": 12,
+            "starting_time": "7:00 PM",
+            "level_duration_min": 10,            # After LR
+            "level_duration_rebuy_min": 12,      # Before LR (rebuy period)
+            "level_duration_ft_min": 10,         # Final Table
             "late_reg_level": 12,
             "rebuy": True,
             "rebuy_type": "unlimited",
@@ -555,7 +559,7 @@ TOURNAMENTS = [
             "player_max": 7000,
             "break_every_min": 55,
             "break_duration_min": 5,
-            "blind_structure_extra": CRAZY2_EXTRA_LEVELS,
+            "blind_structure_extra": CRAZY2_EXTRA_LEVELS,  # Same 68 levels as DEEP FREEZE
             "payout_ref": "standard",
             "active": True,
             "created_at": datetime.now(timezone.utc),
@@ -573,7 +577,7 @@ def seed_blind_structure_base(db):
         "note": "Levels 1-51 are identical across all PPPoker MTT formats",
         "updated_at": datetime.now(timezone.utc),
     })
-    print(f"  ✓ blind_structure_base: {len(BLIND_LEVELS_BASE)} levels written")
+    print(f"  OK blind_structure_base: {len(BLIND_LEVELS_BASE)} levels written")
 
 def seed_payout_structure(db):
     ref = db.collection('config').document('payout_structure')
@@ -584,7 +588,7 @@ def seed_payout_structure(db):
                 "1st-place % for 151-200 and 201-250 are estimated (cut off in source screenshots).",
         "updated_at": datetime.now(timezone.utc),
     })
-    print(f"  ✓ payout_structure: {len(PAYOUT_BRACKETS)} brackets written")
+    print(f"  OK payout_structure: {len(PAYOUT_BRACKETS)} brackets written")
 
 def seed_tournaments(db):
     for t in TOURNAMENTS:
@@ -592,18 +596,18 @@ def seed_tournaments(db):
         ref.set(t['data'])
         extras = len(t['data'].get('blind_structure_extra', []))
         total_levels = len(BLIND_LEVELS_BASE) + extras
-        print(f"  ✓ tournaments/{t['id']}: {t['data']['name']} "
+        print(f"  OK tournaments/{t['id']}: {t['data']['name']} "
               f"(AUD {t['data']['buy_in_total']:.2f}, {total_levels} blind levels)")
 
 def seed_admin_config(db):
     ADMIN_UID = os.getenv('ADMIN_UID', '')
     if not ADMIN_UID:
-        print("  ⚠ ADMIN_UID env var not set — skipping admin config seed")
+        print("  WARN: ADMIN_UID env var not set -- skipping admin config seed")
         print("    Set it and re-run, or add manually to /config/admins in Firestore")
         return
     ref = db.collection('config').document('admins')
     ref.set({"uids": [ADMIN_UID], "updated_at": datetime.now(timezone.utc)})
-    print(f"  ✓ config/admins: UID {ADMIN_UID} set as admin")
+    print(f"  OK config/admins: UID {ADMIN_UID} set as admin")
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 

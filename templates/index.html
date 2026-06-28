@@ -25,7 +25,7 @@
     rel="stylesheet"
     crossorigin="anonymous"
   />
-  <link rel="stylesheet" href="/static/style.css?v=30"/>
+  <link rel="stylesheet" href="/static/style.css?v=40"/>
 </head>
 <body>
 <!-- Skip navigation link (Fix 4) -->
@@ -252,6 +252,15 @@
           </select>
         </div>
       </div>
+      <!-- Export All subsection — visible after import -->
+      <div id="player-export-all" class="player-export-all d-none">
+        <div class="player-export-all-label">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export All
+          <button class="info-badge-btn" data-bs-toggle="modal" data-bs-target="#modal-tool" title="About conversion accuracy" aria-label="About conversion accuracy" style="font-size:.75rem">ⓘ</button>
+        </div>
+        <div id="player-export-all-btns" class="player-export-all-btns"></div>
+      </div>
     </div>
 
     <!-- Shared colgroup for hand tables -->
@@ -319,55 +328,6 @@
       </div>
     </div>
 
-    <!-- Export Single Hand ─────────────────────────────────── -->
-    <div class="section-card mb-4">
-      <div class="section-header">
-        <h2 class="d-flex align-items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Export Single Hand
-          <button class="info-badge-btn" data-bs-toggle="modal" data-bs-target="#modal-tool" title="About conversion accuracy" aria-label="About conversion accuracy">ⓘ</button>
-        </h2>
-      </div>
-      <div class="px-4 py-3">
-        <div id="export-hand-grid" class="export-btn-grid">
-          <button class="export-grid-btn" data-platform="PokerTracker" title="Export for PokerTracker" onclick="exportSpecificHand(this)">
-            <img src="https://www.google.com/s2/favicons?domain=pokertracker.com&sz=64" width="28" height="28" alt="">
-            <span>Poker Tracker</span>
-          </button>
-          <button class="export-grid-btn" data-platform="DriveHUD" title="Export for DriveHUD" onclick="exportSpecificHand(this)">
-            <img src="https://www.google.com/s2/favicons?domain=drivehud.com&sz=64" width="28" height="28" alt="">
-            <span>DriveHUD</span>
-          </button>
-          <button class="export-grid-btn" data-platform="GTOWizard" title="Export for GTO Wizard" onclick="exportSpecificHand(this)">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 32 32">
-              <rect width="32" height="32" rx="5" fill="#0f0f10"/>
-              <polyline points="4,8 9,24 16,13 23,24 28,8" fill="none" stroke="#3dff7a" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
-            </svg>
-            <span>GTO Wizard</span>
-          </button>
-          <button class="export-grid-btn" title="Export as JSON" onclick="exportSpecificHandJson(this)">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            <span>JSON File</span>
-          </button>
-        </div>
-        <div id="export-hand-counter" class="export-counter mt-2 d-none"></div>
-      </div>
-    </div>
-
-    <!-- Export All Hands ───────────────────────────────────── -->
-    <div class="section-card mb-4">
-      <div class="section-header">
-        <h2 class="d-flex align-items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Export All Hands
-          <button class="info-badge-btn" data-bs-toggle="modal" data-bs-target="#modal-tool" title="About conversion accuracy" aria-label="About conversion accuracy">ⓘ</button>
-        </h2>
-      </div>
-      <div class="px-4 py-3">
-        <div id="export-all-container"></div>
-      </div>
-    </div>
-
     <!-- Tournament History (free tier — current import only) ─ -->
     <div id="free-tournament-history-card" class="section-card mb-4">
       <div class="section-header d-flex align-items-center justify-content-between flex-wrap gap-2">
@@ -401,7 +361,7 @@
 
   </div><!-- /results -->
 
-  <!-- ── Tournament Summary (Pro, persisted, all-time, independent of any current-session import) ── -->
+  <!-- ── Tournament Summary (Pro, persisted, non-Cash tournaments) ── -->
   <div id="tournament-summary-section" class="d-none" style="max-width:1400px;margin:0 auto">
     <div class="section-card mb-4">
       <div class="section-header d-flex align-items-center justify-content-between flex-wrap gap-2">
@@ -415,18 +375,26 @@
         </h2>
         <div id="tourney-strip-pro" class="val-strip"></div>
       </div>
+      <!-- Filter bar -->
+      <div class="ts-filter-bar px-4 pt-2 pb-1 d-flex align-items-center gap-2 flex-wrap">
+        <button id="ts-filter-all"   class="ts-filter-btn ts-active" onclick="_setTsFilter('all')">All</button>
+        <button id="ts-filter-today" class="ts-filter-btn"           onclick="_setTsFilter('today')">Today</button>
+        <button id="ts-filter-week"  class="ts-filter-btn"           onclick="_setTsFilter('week')">This Week</button>
+        <button id="ts-filter-range" class="ts-filter-btn"           onclick="_openDateRangeModal('ts')" data-bs-toggle="modal" data-bs-target="#modal-date-range">Date Range</button>
+        <span id="ts-filter-label" class="ts-filter-active-label d-none"></span>
+      </div>
       <div class="table-responsive">
         <table class="table table-dark table-striped table-hover mb-0">
           <thead>
             <tr>
-              <th scope="col">Tournament</th>
-              <th scope="col" class="text-center">Events</th>
-              <th scope="col" class="text-center d-none d-md-table-cell">Type</th>
-              <th scope="col" class="text-center d-none d-md-table-cell">Avg Hands</th>
-              <th scope="col" class="text-center d-none d-md-table-cell">Avg Duration</th>
-              <th scope="col" class="text-center d-none d-lg-table-cell">Hands/hr</th>
+              <th scope="col" class="sort-th" onclick="_sortTs('name')" data-col="name">Tournament <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center sort-th" onclick="_sortTs('events')" data-col="events">Events <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center d-none d-md-table-cell sort-th" onclick="_sortTs('type')" data-col="type">Type <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center d-none d-md-table-cell sort-th" onclick="_sortTs('avgHands')" data-col="avgHands">Avg Hands <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center d-none d-md-table-cell sort-th" onclick="_sortTs('avgDur')" data-col="avgDur">Avg Duration <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center d-none d-lg-table-cell sort-th" onclick="_sortTs('handsHr')" data-col="handsHr">Hands/hr <span class="sort-icon"></span></th>
               <th scope="col" class="text-center d-none d-lg-table-cell">VPIP / PFR</th>
-              <th scope="col" class="text-center">Last Played</th>
+              <th scope="col" class="text-center sort-th" onclick="_sortTs('last')" data-col="last">Last Played <span class="sort-icon"></span></th>
             </tr>
           </thead>
           <tbody id="tourney-summary-tbody">
@@ -455,8 +423,8 @@
               <th scope="col">Hole Cards</th>
               <th scope="col" class="d-none d-md-table-cell">Position</th>
               <th scope="col">Street</th>
-              <th scope="col" class="d-none d-md-table-cell">Result</th>
               <th scope="col" class="d-none d-lg-table-cell">Net P/L (BB)</th>
+              <th scope="col" class="text-center">Export</th>
               <th scope="col">Replay</th>
             </tr>
           </thead>
@@ -468,30 +436,115 @@
     </div>
   </div>
 
+  <!-- ── Cash Games Summary (Pro) — only Cash game types ── -->
+  <div id="cash-games-summary-section" class="d-none" style="max-width:1400px;margin:0 auto">
+    <div class="section-card mb-4">
+      <div class="section-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <h2 class="mb-0 d-flex align-items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          Cash Games Summary
+        </h2>
+        <div id="cgs-strip" class="val-strip"></div>
+      </div>
+      <!-- Filter bar -->
+      <div class="ts-filter-bar px-4 pt-2 pb-1 d-flex align-items-center gap-2 flex-wrap">
+        <button id="cgs-filter-all"   class="ts-filter-btn ts-active" onclick="_setCgsFilter('all')">All</button>
+        <button id="cgs-filter-today" class="ts-filter-btn"           onclick="_setCgsFilter('today')">Today</button>
+        <button id="cgs-filter-week"  class="ts-filter-btn"           onclick="_setCgsFilter('week')">This Week</button>
+        <button id="cgs-filter-range" class="ts-filter-btn"           onclick="_openDateRangeModal('cgs')" data-bs-toggle="modal" data-bs-target="#modal-date-range">Date Range</button>
+        <span id="cgs-filter-label" class="ts-filter-active-label d-none"></span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-dark table-striped table-hover mb-0">
+          <thead>
+            <tr>
+              <th scope="col" class="sort-th" onclick="_sortCgs('name')" data-col="name">Session <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center sort-th" onclick="_sortCgs('events')" data-col="events">Sessions <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center d-none d-md-table-cell sort-th" onclick="_sortCgs('avgHands')" data-col="avgHands">Avg Hands <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center d-none d-md-table-cell sort-th" onclick="_sortCgs('avgDur')" data-col="avgDur">Avg Duration <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center d-none d-lg-table-cell sort-th" onclick="_sortCgs('handsHr')" data-col="handsHr">Hands/hr <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center d-none d-lg-table-cell">VPIP / PFR</th>
+              <th scope="col" class="text-center sort-th" onclick="_sortCgs('last')" data-col="last">Last Played <span class="sort-icon"></span></th>
+            </tr>
+          </thead>
+          <tbody id="cgs-summary-tbody">
+            <tr><td colspan="7" class="text-center py-4 text-muted">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Cash Game Session Details (Pro) — hands from the selected cash session ── -->
+  <div id="cash-game-detail-section" class="d-none" style="max-width:1400px;margin:0 auto">
+    <div class="section-card mb-4">
+      <div class="section-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <h2 class="mb-0 d-flex align-items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+          Cash Game Session Details
+        </h2>
+        <div id="cgsd-hint" class="text-muted small"></div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-dark table-striped table-hover hand-table">
+          <thead>
+            <tr>
+              <th scope="col" data-tz-label="When">When</th>
+              <th scope="col">Hole Cards</th>
+              <th scope="col" class="d-none d-md-table-cell">Position</th>
+              <th scope="col">Street</th>
+              <th scope="col" class="d-none d-lg-table-cell">Net P/L (BB)</th>
+              <th scope="col" class="text-center">Export</th>
+              <th scope="col">Replay</th>
+            </tr>
+          </thead>
+          <tbody id="cgsd-tbody">
+            <tr><td colspan="7" class="text-center py-4 text-muted">Select a cash game session above to view its hands.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
 </main><!-- /container -->
 
-<!-- ── Export Hand ID Modal ───────────────────────────────── -->
-<div class="modal fade" id="modal-export-hand" tabindex="-1" aria-hidden="true" aria-labelledby="modal-export-hand-title">
-  <div class="modal-dialog modal-dialog-centered" style="max-width:340px">
+<!-- ── Date Range Filter Modal ────────────────────────────── -->
+<div class="modal fade" id="modal-date-range" tabindex="-1" aria-hidden="true" aria-labelledby="modal-date-range-title">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:380px">
     <div class="modal-content" style="background:var(--panel);border:1px solid var(--border);color:var(--text)">
       <div class="modal-header" style="border-bottom:1px solid var(--border);padding:.75rem 1rem">
-        <h2 class="modal-title" id="modal-export-hand-title" style="font-family:var(--font-head);letter-spacing:.08em;font-size:.85rem;color:var(--muted)">ENTER HAND ID</h2>
+        <h2 class="modal-title" id="modal-date-range-title" style="font-family:var(--font-head);letter-spacing:.08em;font-size:.85rem;color:var(--muted)">DATE RANGE FILTER</h2>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body" style="padding:1rem 1rem .75rem">
-        <input type="text" id="hand-id-input"
-               class="form-control"
-               style="background:var(--bg);border-color:var(--border);color:var(--text);font-family:monospace;font-size:.95rem;letter-spacing:.03em"
-               placeholder="e.g. 001-002-987654321"
-               aria-label="Hand ID"
-               autocomplete="off" spellcheck="false"/>
-        <div id="hand-id-status" class="mt-2" style="min-height:1.4rem;font-size:.84rem"></div>
+      <div class="modal-body" style="padding:1rem">
+        <input type="hidden" id="date-range-target" value="ts">
+        <div class="mb-3">
+          <label class="form-label" style="font-family:var(--font-head);font-size:.75rem;color:var(--muted);letter-spacing:.5px">FROM</label>
+          <input type="date" id="date-range-start" class="form-control"
+                 style="background:var(--bg);border-color:var(--border);color:var(--text)"/>
+        </div>
+        <div class="mb-1">
+          <label class="form-label" style="font-family:var(--font-head);font-size:.75rem;color:var(--muted);letter-spacing:.5px">TO</label>
+          <input type="date" id="date-range-end" class="form-control"
+                 style="background:var(--bg);border-color:var(--border);color:var(--text)"/>
+        </div>
+        <!-- Quick-range slider -->
+        <div class="mt-3">
+          <label class="form-label d-flex justify-content-between" style="font-family:var(--font-head);font-size:.73rem;color:var(--muted);letter-spacing:.4px">
+            <span>QUICK RANGE</span><span id="date-range-slider-label" style="color:var(--green)">30 days</span>
+          </label>
+          <input type="range" id="date-range-slider" class="form-range" min="7" max="365" step="1" value="30"
+                 style="accent-color:var(--green)" oninput="_updateDateRangeSlider(this.value)"/>
+          <div class="d-flex justify-content-between" style="font-size:.7rem;color:var(--muted)">
+            <span>1 week</span><span>1 year</span>
+          </div>
+        </div>
       </div>
-      <div class="modal-footer" style="border-top:1px solid var(--border);justify-content:flex-end;padding:.75rem 1rem">
-        <button type="button" id="hand-id-ok-btn"
-                class="btn btn-sm px-4"
+      <div class="modal-footer" style="border-top:1px solid var(--border);justify-content:flex-end;gap:8px;padding:.75rem 1rem">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-sm px-4"
                 style="background:rgba(0,230,118,.12);border:1px solid rgba(0,230,118,.5);color:var(--green);font-family:var(--font-head);font-size:.8rem;letter-spacing:.5px"
-                onclick="_confirmExportHand()" disabled>OK</button>
+                onclick="_applyDateRange()" data-bs-dismiss="modal">Apply</button>
       </div>
     </div>
   </div>
@@ -791,7 +844,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="/static/app.js?v=38"></script>
+<script src="/static/app.js?v=40"></script>
 <script>
   if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
     navigator.serviceWorker.register('/static/sw.js', { scope: '/' })
