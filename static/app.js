@@ -532,6 +532,7 @@ function renderHandsTable(hands, tbodyId, options = {}) {
 
   const tz = currentTz();
   const showExport = !!options.showExport;
+  const exportTid  = options.exportTid || '';   // if set, route export through storage endpoints
 
   tbody.innerHTML = hands.map(h => {
     const cards = (h.hole_cards || []).map(renderCard).join('');
@@ -545,18 +546,19 @@ function renderHandsTable(hands, tbodyId, options = {}) {
     let cols56;
     if (showExport) {
       const hn = h.hand_num;
+      const tid = exportTid;
       const exportBtns = hn
         ? `<div class="d-flex gap-1 flex-wrap justify-content-center">
-            <button class="btn export-icon-btn" data-platform="PokerTracker" title="Export PT4" onclick="exportHandFromRow('${hn}','PokerTracker',this)">
+            <button class="btn export-icon-btn" data-platform="PokerTracker" title="Export PT4" onclick="exportHandFromRow('${hn}','PokerTracker',this,'${tid}')">
               <img src="https://www.google.com/s2/favicons?domain=pokertracker.com&sz=64" width="16" height="16" alt="PT">
             </button>
-            <button class="btn export-icon-btn" data-platform="DriveHUD" title="Export DriveHUD" onclick="exportHandFromRow('${hn}','DriveHUD',this)">
+            <button class="btn export-icon-btn" data-platform="DriveHUD" title="Export DriveHUD" onclick="exportHandFromRow('${hn}','DriveHUD',this,'${tid}')">
               <img src="https://www.google.com/s2/favicons?domain=drivehud.com&sz=64" width="16" height="16" alt="DH">
             </button>
-            <button class="btn export-icon-btn" data-platform="GTOWizard" title="Export GTO Wizard" onclick="exportHandFromRow('${hn}','GTOWizard',this)">
+            <button class="btn export-icon-btn" data-platform="GTOWizard" title="Export GTO Wizard" onclick="exportHandFromRow('${hn}','GTOWizard',this,'${tid}')">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 32 32"><rect width="32" height="32" rx="5" fill="#0f0f10"/><polyline points="4,8 9,24 16,13 23,24 28,8" fill="none" stroke="#3dff7a" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/></svg>
             </button>
-            <button class="btn export-icon-btn" title="Export JSON" onclick="exportHandFromRow('${hn}','',this)">
+            <button class="btn export-icon-btn" title="Export JSON" onclick="exportHandFromRow('${hn}','',this,'${tid}')">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </button>
           </div>`
@@ -1127,7 +1129,7 @@ async function _selectCgsdDetail(tid, cardEl) {
     }
     const data  = await r.json();
     const hands = data.hands || [];
-    renderHandsTable(hands, 'cgsd-tbody', { showExport: true });
+    renderHandsTable(hands, 'cgsd-tbody', { showExport: true, exportTid: tid });
     if (hint) {
       const dateLabel = cardEl ? (cardEl.querySelector('.tsum-event-date')?.textContent || '') : '';
       hint.textContent = `${hands.length} hand${hands.length !== 1 ? 's' : ''}${dateLabel ? ' · ' + dateLabel : ''}`;
@@ -1139,12 +1141,15 @@ async function _selectCgsdDetail(tid, cardEl) {
 }
 
 // ── Per-row hand export (TD + CGSD) ──────────────────────────────────────────
-async function exportHandFromRow(handNum, platform, btn) {
+async function exportHandFromRow(handNum, platform, btn, tid) {
   if (!_currentUser) { showUpgradeModal('tourney'); return; }
   _rowExportStatus(btn, 'loading', 'Exporting…');
   const token = await _currentUser.getIdToken().catch(() => null);
   const isJson = !platform;
-  const endpoint = isJson ? '/api/export/json/hand' : '/api/export/hand';
+  // If a tournament ID is provided, use storage-backed endpoints (work without a live import session)
+  const endpoint = tid
+    ? (isJson ? `/api/tournaments/${tid}/export/json/hand` : `/api/tournaments/${tid}/export/hand`)
+    : (isJson ? '/api/export/json/hand' : '/api/export/hand');
   const headers = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
   try {
@@ -1401,7 +1406,7 @@ async function _selectTourneyDetail(tid, cardEl) {
     }
     const data  = await r.json();
     const hands = data.hands || [];
-    renderHandsTable(hands, 'tourney-detail-tbody', { showExport: true });
+    renderHandsTable(hands, 'tourney-detail-tbody', { showExport: true, exportTid: tid });
     if (hint) {
       const dateLabel = cardEl ? (cardEl.querySelector('.tsum-event-date')?.textContent || '') : '';
       hint.textContent = `${hands.length} hand${hands.length === 1 ? '' : 's'}${dateLabel ? ' · ' + dateLabel : ''}`;
