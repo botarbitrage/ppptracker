@@ -1432,27 +1432,28 @@ tr.row-flash > td {
   gap: 4px;
 }
 .ts-pill {
-  background: transparent;
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 999px;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 6px;
   color: var(--muted);
   font-family: var(--font-head);
-  font-size: .6rem;
-  font-weight: 700;
-  letter-spacing: .06em;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .04em;
   text-transform: uppercase;
-  padding: 2px 10px;
+  padding: 3px 12px;
   line-height: 1.7;
   cursor: pointer;
   transition: border-color .15s, color .15s, background .15s;
 }
 .ts-pill:hover {
-  border-color: rgba(0,230,118,.4);
+  border-color: rgba(0,230,118,.45);
   color: var(--green);
+  background: rgba(0,230,118,.07);
 }
 .ts-pill.ts-pill-active {
-  background: rgba(0,230,118,.1);
-  border-color: rgba(0,230,118,.5);
+  background: rgba(0,230,118,.12);
+  border-color: var(--green);
   color: var(--green);
 }
 .ts-filter-active-label {
@@ -1475,25 +1476,23 @@ tr.row-flash > td {
 /* ── Player badge: Export All subsection ─────────────────────── */
 .player-export-all {
   border-top: 1px solid var(--border);
-  padding: 10px 16px 12px;
+  padding: 20px 16px 14px;
   display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 10px;
 }
 .player-export-all-label {
   font-family: var(--font-head);
-  font-size: .72rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  letter-spacing: .5px;
-  text-transform: uppercase;
-  color: var(--muted);
+  letter-spacing: 0;
+  color: var(--text);
   display: flex;
   align-items: center;
-  gap: 5px;
-  white-space: nowrap;
+  gap: 6px;
 }
 .player-export-all-btns .export-btn-grid {
+  grid-template-columns: repeat(4, 1fr);
   gap: 6px;
   padding: 0;
 }
