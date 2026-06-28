@@ -92,15 +92,17 @@ def summarize_actions(flow, hero_seatid):
 
 
 def _is_vpip(pre_actions, hero_seatid):
+    # 3=call, 4=raise, 12=all-in call, 13=all-in raise
     return any(
-        a.get('seatid') == hero_seatid and a.get('type') in (3, 4)
+        a.get('seatid') == hero_seatid and a.get('type') in (3, 4, 12, 13)
         for a in pre_actions
     )
 
 
 def _is_pfr(pre_actions, hero_seatid):
+    # 4=raise, 13=all-in raise
     return any(
-        a.get('seatid') == hero_seatid and a.get('type') == 4
+        a.get('seatid') == hero_seatid and a.get('type') in (4, 13)
         for a in pre_actions
     )
 
@@ -112,8 +114,10 @@ def _postflop_af(flow, hero_seatid):
             if a.get('seatid') != hero_seatid:
                 continue
             t = a.get('type')
-            if t in (4, 5): bets += 1
-            elif t == 3:    calls += 1
+            # 4=raise, 7=bet, 13=all-in raise
+            if t in (4, 7, 13): bets += 1
+            # 3=call, 12=all-in call
+            elif t in (3, 12):  calls += 1
     return bets, calls
 
 
