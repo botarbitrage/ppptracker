@@ -94,8 +94,11 @@
 
     .tourney-stats {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: 10px;
+      grid-template-columns: minmax(90px,1fr) minmax(90px,1fr) minmax(130px,1.4fr) minmax(110px,1.2fr) minmax(100px,1fr);
+      gap: 6px 24px;
+    }
+    @media (max-width: 600px) {
+      .tourney-stats { grid-template-columns: 1fr 1fr; }
     }
     .tourney-stat {
       display: flex;
@@ -328,8 +331,11 @@ function renderTourneyCard(id, t) {
           <span class="tourney-stat-value">${chips}</span>
         </div>
         <div class="tourney-stat">
-          <span class="tourney-stat-label">Level time</span>
-          <span class="tourney-stat-value" style="display:flex;align-items:center;gap:4px">${levelTimeHTML}</span>
+          <span class="tourney-stat-label">Level time <button class="info-badge-btn level-time-info"
+              data-bs-toggle="tooltip" data-bs-placement="top"
+              title="Before LR / After LR / Final Table"
+              aria-label="Level time breakdown: Before LR / After LR / Final Table">ⓘ</button></span>
+          <span class="tourney-stat-value">${levelTimeStr}</span>
         </div>
         <div class="tourney-stat">
           <span class="tourney-stat-label">Starting time</span>
