@@ -327,6 +327,8 @@ def process_hands(records):
                 first_chips=hero_chips,
                 last_chips=hero_chips,
                 # records are newest-first: first encountered = latest hand
+                # first_hand_profit lets us detect busting on the final hand
+                first_hand_profit=profit,
                 latest_ts=timestamp,
                 earliest_ts=timestamp,
                 # Per-tournament stat counters
@@ -410,7 +412,7 @@ def process_hands(records):
             net=t['net'],
             first_chips=t['first_chips'],
             last_chips=t['last_chips'],
-            finish_busted=t['last_chips'] == 0,
+            finish_busted=(t['first_chips'] + t['first_hand_profit']) <= 0,
             time_played=_fmt_duration(duration),
             duration_secs=int(duration) if duration is not None else None,
             earliest_ts=earliest,
