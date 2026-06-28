@@ -402,8 +402,8 @@ function showImportSuccess(data) {
   const spinner = document.getElementById('loading-spinner');
   const text    = document.getElementById('loading-text');
   const name    = data.player?.name || 'Player';
-  const hands   = data.new_hands != null ? data.new_hands : (data.total_fetched || 0);
-  const tours   = (data.tournaments || []).length;
+  const hands   = data.new_hands ?? 0;
+  const tours   = hands > 0 ? (data.tournaments || []).length : 0;
   spinner.classList.add('d-none');
   text.style.color = 'var(--green)';
   _importCount++;
@@ -1031,15 +1031,17 @@ async function exportPersistedTournamentJson(tourneyId, btn) {
 /* ── Export Panel ────────────────────────────────────────── */
 
 function renderHandStats(data) {
-  const v = (data.new_validation || data.validation) || {};
-  const s = data.new_stats || data.stats || {};
+  const newHands = data.new_hands ?? 0;
+  // Only use new_stats/new_validation — never fall back to all-time stats for pills
+  const v = (newHands > 0 ? data.new_validation : null) || {};
+  const s = (newHands > 0 ? data.new_stats      : null) || {};
   const _set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val ?? '—'; };
-  _set('hs-hands', data.new_hands != null ? data.new_hands : v.hands_imported);
-  _set('hs-flop',  s.hands_hero_saw_flop);
-  _set('hs-won',   v.hands_won);
-  _set('hs-turn',  s.hands_hero_saw_turn);
-  _set('hs-river', s.hands_hero_saw_river);
-  _set('hs-sd',    s.hands_at_showdown);
+  _set('hs-hands', newHands);
+  _set('hs-flop',  newHands > 0 ? s.hands_hero_saw_flop  : 0);
+  _set('hs-won',   newHands > 0 ? v.hands_won             : 0);
+  _set('hs-turn',  newHands > 0 ? s.hands_hero_saw_turn  : 0);
+  _set('hs-river', newHands > 0 ? s.hands_hero_saw_river : 0);
+  _set('hs-sd',    newHands > 0 ? s.hands_at_showdown    : 0);
   const row = document.getElementById('loaded-hands-row');
   if (row) row.classList.remove('d-none');
 }
