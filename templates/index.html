@@ -28,21 +28,27 @@
   <link rel="stylesheet" href="/static/style.css?v=30"/>
 </head>
 <body>
-<div class="container-fluid py-4 px-3 px-md-5">
+<!-- Skip navigation link (Fix 4) -->
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- Outer container is now <main> for landmark (Fix 5 & 6) -->
+<main id="main-content" class="container-fluid py-4 px-3 px-md-5">
 
   <!-- ── Auth bar ─────────────────────────────────────────── -->
   <div id="auth-bar" class="auth-bar mb-2"></div>
 
   <!-- ── Header ───────────────────────────────────────────── -->
   <div class="text-center mb-3">
-    <h1 class="app-title">♠ PPPoker Hand Analyser ♣</h1>
+    <!-- Decorative emoji hidden from screen readers (Fix 12) -->
+    <h1 class="app-title"><span aria-hidden="true">♠</span> PPPoker Hand Analyser <span aria-hidden="true">♣</span></h1>
     <p class="app-tagline">ANALYSE &nbsp;·&nbsp; STUDY &nbsp;·&nbsp; WIN</p>
   </div>
 
   <!-- ── Feature banner ───────────────────────────────────── -->
   <div class="feature-banner mb-4" style="max-width:1400px;margin:0 auto">
 
-    <!-- Info tiles row -->
+    <!-- Info tiles row — wrapped in <nav> for landmark (Fix 6) -->
+    <nav aria-label="Page sections">
     <div class="info-tiles">
 
 <button class="info-tile" data-bs-toggle="modal" data-bs-target="#modal-tool"
@@ -70,6 +76,7 @@
       </button>
 
     </div>
+    </nav>
 
     <!-- Free vs Pro comparison row -->
     <div id="tier-compare" class="tier-compare">
@@ -105,11 +112,13 @@
   <!-- ── Import card ──────────────────────────────────────── -->
   <div class="import-card mb-4" style="max-width:1400px;margin:0 auto">
     <div class="d-flex gap-2 align-items-center flex-wrap">
+      <!-- aria-label provides accessible name (Fix 1) -->
       <input
         type="text"
         id="url-input"
         class="form-control form-control-lg import-input"
         placeholder="Paste PPPoker replay link…"
+        aria-label="PPPoker replay link"
         autocomplete="off"
         spellcheck="false"
       />
@@ -131,12 +140,12 @@
   </div>
 
   <!-- Export accuracy warning modal -->
-  <div class="modal fade" id="exportWarningModal" tabindex="-1" aria-hidden="true">
+  <div class="modal fade" id="exportWarningModal" tabindex="-1" aria-hidden="true" aria-labelledby="export-warning-title">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content" style="background:var(--panel);border:1px solid var(--border);color:var(--text)">
         <div class="modal-header" style="border-bottom:1px solid var(--border)">
-          <h5 class="modal-title">⚠️ Export Accuracy Notice</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          <h2 class="modal-title h5" id="export-warning-title"><span aria-hidden="true">⚠️</span> Export Accuracy Notice</h2>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body" style="font-size:.88rem;line-height:1.6">
           <p>Hand history exported from PPPokerHA is converted to PokerStars format and <strong>may not be 100% accurate</strong> when imported into third-party tools such as PokerTracker 4, DriveHUD, or GTO Wizard.</p>
@@ -163,15 +172,15 @@
   </div>
 
   <!-- ── Pro Upgrade Modal ──────────────────────────────── -->
-  <div class="modal fade" id="pro-upgrade-modal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+  <div class="modal fade" id="pro-upgrade-modal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true" aria-labelledby="pro-upgrade-title">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content" style="background:var(--panel);border:1px solid var(--border);color:var(--text)">
         <div class="modal-header" style="border-bottom:1px solid var(--border)">
-          <h5 class="modal-title d-flex align-items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <h2 class="modal-title h5 d-flex align-items-center gap-2" id="pro-upgrade-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             Unlock Pro
-          </h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </h2>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body" style="font-size:.9rem;line-height:1.7">
           <p id="pro-modal-reason" class="mb-3" style="color:var(--muted);font-size:.85rem"></p>
@@ -221,7 +230,7 @@
         </div>
         <div class="player-tz">
           <span class="tz-label">Timezone</span>
-          <select id="tz-select" class="tz-select form-select form-select-sm">
+          <select id="tz-select" class="tz-select form-select form-select-sm" aria-label="Timezone">
             <option value="Australia/Adelaide">ADL</option>
             <option value="Australia/Brisbane">BNE</option>
             <option value="Australia/Darwin">DRW</option>
@@ -250,22 +259,22 @@
     <!-- Last 3 Hands ───────────────────────────────────────── -->
     <div class="section-card mb-4">
       <div class="section-header">
-        <h5 class="d-flex align-items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        <h2 class="d-flex align-items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
           Last 3 Hands
-        </h5>
+        </h2>
       </div>
       <div class="table-responsive">
         <table class="table table-dark table-striped table-hover hand-table">
           <thead>
             <tr>
-              <th data-tz-label="When">When</th>
-              <th>Hole Cards</th>
-              <th class="d-none d-md-table-cell">Position</th>
-              <th>Street</th>
-              <th class="d-none d-md-table-cell">Result</th>
-              <th class="d-none d-lg-table-cell">Net P/L (BB)</th>
-              <th>Replay</th>
+              <th scope="col" data-tz-label="When">When</th>
+              <th scope="col">Hole Cards</th>
+              <th scope="col" class="d-none d-md-table-cell">Position</th>
+              <th scope="col">Street</th>
+              <th scope="col" class="d-none d-md-table-cell">Result</th>
+              <th scope="col" class="d-none d-lg-table-cell">Net P/L (BB)</th>
+              <th scope="col">Replay</th>
             </tr>
           </thead>
           <tbody id="recent-hands-tbody"></tbody>
@@ -276,22 +285,22 @@
     <!-- Last 3 Winning Hands ───────────────────────────────── -->
     <div class="section-card mb-4">
       <div class="section-header">
-        <h5 class="d-flex align-items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <h2 class="d-flex align-items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           Last 3 Winning Hands
-        </h5>
+        </h2>
       </div>
       <div class="table-responsive">
         <table class="table table-dark table-striped table-hover hand-table">
           <thead>
             <tr>
-              <th data-tz-label="When">When</th>
-              <th>Hole Cards</th>
-              <th class="d-none d-md-table-cell">Position</th>
-              <th>Street</th>
-              <th class="d-none d-md-table-cell">Result</th>
-              <th class="d-none d-lg-table-cell">Net P/L (BB)</th>
-              <th>Replay</th>
+              <th scope="col" data-tz-label="When">When</th>
+              <th scope="col">Hole Cards</th>
+              <th scope="col" class="d-none d-md-table-cell">Position</th>
+              <th scope="col">Street</th>
+              <th scope="col" class="d-none d-md-table-cell">Result</th>
+              <th scope="col" class="d-none d-lg-table-cell">Net P/L (BB)</th>
+              <th scope="col">Replay</th>
             </tr>
           </thead>
           <tbody id="recent-won-tbody"></tbody>
@@ -302,20 +311,20 @@
     <!-- Export Single Hand ─────────────────────────────────── -->
     <div class="section-card mb-4">
       <div class="section-header">
-        <h5 class="d-flex align-items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <h2 class="d-flex align-items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Export Single Hand
-          <button class="info-badge-btn" data-bs-toggle="modal" data-bs-target="#modal-tool" title="About conversion accuracy">ⓘ</button>
-        </h5>
+          <button class="info-badge-btn" data-bs-toggle="modal" data-bs-target="#modal-tool" title="About conversion accuracy" aria-label="About conversion accuracy">ⓘ</button>
+        </h2>
       </div>
       <div class="px-4 py-3">
         <div id="export-hand-grid" class="export-btn-grid">
           <button class="export-grid-btn" data-platform="PokerTracker" title="Export for PokerTracker" onclick="exportSpecificHand(this)">
-            <img src="https://www.google.com/s2/favicons?domain=pokertracker.com&sz=64" width="28" height="28" alt="PT">
+            <img src="https://www.google.com/s2/favicons?domain=pokertracker.com&sz=64" width="28" height="28" alt="">
             <span>Poker Tracker</span>
           </button>
           <button class="export-grid-btn" data-platform="DriveHUD" title="Export for DriveHUD" onclick="exportSpecificHand(this)">
-            <img src="https://www.google.com/s2/favicons?domain=drivehud.com&sz=64" width="28" height="28" alt="DH">
+            <img src="https://www.google.com/s2/favicons?domain=drivehud.com&sz=64" width="28" height="28" alt="">
             <span>DriveHUD</span>
           </button>
           <button class="export-grid-btn" data-platform="GTOWizard" title="Export for GTO Wizard" onclick="exportSpecificHand(this)">
@@ -337,11 +346,11 @@
     <!-- Export All Hands ───────────────────────────────────── -->
     <div class="section-card mb-4">
       <div class="section-header">
-        <h5 class="d-flex align-items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <h2 class="d-flex align-items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Export All Hands
-          <button class="info-badge-btn" data-bs-toggle="modal" data-bs-target="#modal-tool" title="About conversion accuracy">ⓘ</button>
-        </h5>
+          <button class="info-badge-btn" data-bs-toggle="modal" data-bs-target="#modal-tool" title="About conversion accuracy" aria-label="About conversion accuracy">ⓘ</button>
+        </h2>
       </div>
       <div class="px-4 py-3">
         <div id="export-all-container"></div>
@@ -351,26 +360,27 @@
     <!-- Tournament History (free tier — current import only) ─ -->
     <div id="free-tournament-history-card" class="section-card mb-4">
       <div class="section-header d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <h5 class="mb-0 d-flex align-items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+        <h2 class="mb-0 d-flex align-items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
           Tournament History
           <button class="info-badge-btn"
                   data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-container="body"
-                  title="Buy-in, ITM%, and finishing position are not available in the PPPoker API data.">ⓘ</button>
-        </h5>
+                  title="Buy-in, ITM%, and finishing position are not available in the PPPoker API data."
+                  aria-label="Buy-in, ITM%, and finishing position are not available in the PPPoker API data.">ⓘ</button>
+        </h2>
         <div id="tourney-strip" class="val-strip"></div>
       </div>
       <div class="table-responsive">
         <table id="tournaments-table" class="table table-dark table-striped table-hover">
           <thead>
             <tr>
-              <th style="white-space:nowrap">Date</th>
-              <th class="d-none d-sm-table-cell">Room</th>
-              <th class="d-none d-lg-table-cell" data-tz-label="Sit Down Time">Sit Down Time</th>
-              <th class="d-none d-lg-table-cell">Time Played</th>
-              <th class="d-none d-md-table-cell">Type</th>
-              <th class="text-center">Hands</th>
-              <th class="text-center export-col">Export Format</th>
+              <th scope="col" style="white-space:nowrap">Date</th>
+              <th scope="col" class="d-none d-sm-table-cell">Room</th>
+              <th scope="col" class="d-none d-lg-table-cell" data-tz-label="Sit Down Time">Sit Down Time</th>
+              <th scope="col" class="d-none d-lg-table-cell">Time Played</th>
+              <th scope="col" class="d-none d-md-table-cell">Type</th>
+              <th scope="col" class="text-center">Hands</th>
+              <th scope="col" class="text-center export-col">Export Format</th>
             </tr>
           </thead>
           <tbody id="tournaments-tbody"></tbody>
@@ -384,27 +394,28 @@
   <div id="tournament-summary-section" class="d-none" style="max-width:1400px;margin:0 auto">
     <div class="section-card mb-4">
       <div class="section-header d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <h5 class="mb-0 d-flex align-items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <h2 class="mb-0 d-flex align-items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
           Tournament Summary
           <button class="info-badge-btn"
                   data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-container="body"
-                  title="Buy-in, ITM%, and finishing position are not available in the PPPoker API data.">ⓘ</button>
-        </h5>
+                  title="Buy-in, ITM%, and finishing position are not available in the PPPoker API data."
+                  aria-label="Buy-in, ITM%, and finishing position are not available in the PPPoker API data.">ⓘ</button>
+        </h2>
         <div id="tourney-strip-pro" class="val-strip"></div>
       </div>
       <div class="table-responsive">
         <table class="table table-dark table-striped table-hover mb-0">
           <thead>
             <tr>
-              <th>Tournament</th>
-              <th class="text-center">Events</th>
-              <th class="text-center d-none d-md-table-cell">Type</th>
-              <th class="text-center d-none d-md-table-cell">Avg Hands</th>
-              <th class="text-center d-none d-md-table-cell">Avg Duration</th>
-              <th class="text-center d-none d-lg-table-cell">Hands/hr</th>
-              <th class="text-center d-none d-lg-table-cell">VPIP / PFR</th>
-              <th class="text-center">Last Played</th>
+              <th scope="col">Tournament</th>
+              <th scope="col" class="text-center">Events</th>
+              <th scope="col" class="text-center d-none d-md-table-cell">Type</th>
+              <th scope="col" class="text-center d-none d-md-table-cell">Avg Hands</th>
+              <th scope="col" class="text-center d-none d-md-table-cell">Avg Duration</th>
+              <th scope="col" class="text-center d-none d-lg-table-cell">Hands/hr</th>
+              <th scope="col" class="text-center d-none d-lg-table-cell">VPIP / PFR</th>
+              <th scope="col" class="text-center">Last Played</th>
             </tr>
           </thead>
           <tbody id="tourney-summary-tbody">
@@ -419,23 +430,23 @@
   <div id="tournament-history-pro-section" class="d-none" style="max-width:1400px;margin:0 auto">
     <div class="section-card mb-4">
       <div class="section-header d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <h5 class="mb-0 d-flex align-items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+        <h2 class="mb-0 d-flex align-items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
           Tournament Details
-        </h5>
+        </h2>
         <div id="tourney-detail-hint" class="text-muted small"></div>
       </div>
       <div class="table-responsive">
         <table class="table table-dark table-striped table-hover hand-table">
           <thead>
             <tr>
-              <th data-tz-label="When">When</th>
-              <th>Hole Cards</th>
-              <th class="d-none d-md-table-cell">Position</th>
-              <th>Street</th>
-              <th class="d-none d-md-table-cell">Result</th>
-              <th class="d-none d-lg-table-cell">Net P/L (BB)</th>
-              <th>Replay</th>
+              <th scope="col" data-tz-label="When">When</th>
+              <th scope="col">Hole Cards</th>
+              <th scope="col" class="d-none d-md-table-cell">Position</th>
+              <th scope="col">Street</th>
+              <th scope="col" class="d-none d-md-table-cell">Result</th>
+              <th scope="col" class="d-none d-lg-table-cell">Net P/L (BB)</th>
+              <th scope="col">Replay</th>
             </tr>
           </thead>
           <tbody id="tourney-detail-tbody">
@@ -446,21 +457,22 @@
     </div>
   </div>
 
-</div><!-- /container -->
+</main><!-- /container -->
 
 <!-- ── Export Hand ID Modal ───────────────────────────────── -->
-<div class="modal fade" id="modal-export-hand" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modal-export-hand" tabindex="-1" aria-hidden="true" aria-labelledby="modal-export-hand-title">
   <div class="modal-dialog modal-dialog-centered" style="max-width:340px">
     <div class="modal-content" style="background:var(--panel);border:1px solid var(--border);color:var(--text)">
       <div class="modal-header" style="border-bottom:1px solid var(--border);padding:.75rem 1rem">
-        <h6 class="modal-title" style="font-family:var(--font-head);letter-spacing:.08em;font-size:.85rem;color:var(--muted)">ENTER HAND ID</h6>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <h2 class="modal-title" id="modal-export-hand-title" style="font-family:var(--font-head);letter-spacing:.08em;font-size:.85rem;color:var(--muted)">ENTER HAND ID</h2>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body" style="padding:1rem 1rem .75rem">
         <input type="text" id="hand-id-input"
                class="form-control"
                style="background:var(--bg);border-color:var(--border);color:var(--text);font-family:monospace;font-size:.95rem;letter-spacing:.03em"
                placeholder="e.g. 001-002-987654321"
+               aria-label="Hand ID"
                autocomplete="off" spellcheck="false"/>
         <div id="hand-id-status" class="mt-2" style="min-height:1.4rem;font-size:.84rem"></div>
       </div>
@@ -475,15 +487,15 @@
 </div>
 
 <!-- ── Auth Modal ────────────────────────────────────────── -->
-<div class="modal fade" id="modal-auth" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modal-auth" tabindex="-1" aria-hidden="true" aria-labelledby="modal-auth-title">
   <div class="modal-dialog modal-dialog-centered" style="max-width:420px">
     <div class="modal-content" style="background:var(--panel);border:1px solid var(--border);color:var(--text)">
       <div class="modal-header" style="border-bottom:1px solid var(--border)">
-        <h5 class="modal-title d-flex align-items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <h2 class="modal-title h5 d-flex align-items-center gap-2" id="modal-auth-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           Sign in
-        </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </h2>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body" style="padding:20px 22px">
 
@@ -505,6 +517,7 @@
         <p class="mb-2" style="color:var(--muted);font-size:.84rem">Email a magic link — no password needed.</p>
         <input type="email" id="auth-email-input" class="form-control" autocomplete="email"
                placeholder="your@email.com"
+               aria-label="Email address"
                style="background:var(--panel-alt);border:1px solid var(--border);color:var(--text);font-family:var(--font-body)" />
         <div id="auth-msg" class="mt-2 d-none" style="font-size:.85rem"></div>
       </div>
@@ -571,15 +584,15 @@
 <!-- ── Info Modals ────────────────────────────────────────── -->
 
 <!-- About Me -->
-<div class="modal fade" id="modal-about" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modal-about" tabindex="-1" aria-hidden="true" aria-labelledby="modal-about-title">
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content info-modal-content">
       <div class="modal-header info-modal-header">
-        <h5 class="modal-title">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.2em;margin-right:8px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <h2 class="modal-title h5" id="modal-about-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.2em;margin-right:8px" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           About Me
-        </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </h2>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body info-modal-body">
         <p>Hey everyone! Just a regular Aussie poker player here who got hooked on PPPoker a while back. The games are good, the action is decent, and the community is there. But there's one thing that's always driven me mad: <strong>you can't study your hands.</strong></p>
@@ -592,15 +605,15 @@
 </div>
 
 <!-- The Tool -->
-<div class="modal fade" id="modal-tool" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modal-tool" tabindex="-1" aria-hidden="true" aria-labelledby="modal-tool-title">
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content info-modal-content">
       <div class="modal-header info-modal-header">
-        <h5 class="modal-title">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.2em;margin-right:8px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <h2 class="modal-title h5" id="modal-tool-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.2em;margin-right:8px" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           The Tool
-        </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </h2>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body info-modal-body">
         <p><strong>PPPoker Hand Analyser</strong> bridges the gap between PPPoker and your training software. Here's what it does:</p>
@@ -619,15 +632,15 @@
 </div>
 
 <!-- How to Use -->
-<div class="modal fade" id="modal-howto" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modal-howto" tabindex="-1" aria-hidden="true" aria-labelledby="modal-howto-title">
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content info-modal-content">
       <div class="modal-header info-modal-header">
-        <h5 class="modal-title">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.2em;margin-right:8px"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <h2 class="modal-title h5" id="modal-howto-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.2em;margin-right:8px" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           How to Use
-        </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </h2>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body info-modal-body">
         <ol class="howto-steps">
@@ -670,21 +683,21 @@
 </div>
 
 <!-- Free vs Pro -->
-<div class="modal fade" id="modal-tiers" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modal-tiers" tabindex="-1" aria-hidden="true" aria-labelledby="modal-tiers-title">
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content info-modal-content">
       <div class="modal-header info-modal-header">
-        <h5 class="modal-title">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.2em;margin-right:8px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <h2 class="modal-title h5" id="modal-tiers-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.2em;margin-right:8px" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           Free vs Pro
-        </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </h2>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body info-modal-body">
         <p>PPPoker Hand Analyser is free to use with sensible limits. Pro removes those limits and unlocks everything.</p>
         <table class="tier-table">
           <thead>
-            <tr><th>Feature</th><th>Free</th><th style="color:var(--yellow)">Pro</th></tr>
+            <tr><th scope="col">Feature</th><th scope="col">Free</th><th scope="col" style="color:var(--yellow)">Pro</th></tr>
           </thead>
           <tbody>
             <tr><td>Hand history displayed</td><td>Last 30</td><td>All 200</td></tr>
@@ -704,15 +717,15 @@
 </div>
 
 <!-- Release Notes -->
-<div class="modal fade" id="modal-releases" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modal-releases" tabindex="-1" aria-hidden="true" aria-labelledby="modal-releases-title">
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content info-modal-content">
       <div class="modal-header info-modal-header">
-        <h5 class="modal-title">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.2em;margin-right:8px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <h2 class="modal-title h5" id="modal-releases-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.2em;margin-right:8px" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           Release Notes
-        </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </h2>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body info-modal-body">
 

@@ -24,6 +24,25 @@
   --font-body: 'Exo 2', 'Segoe UI', system-ui, sans-serif;
 }
 
+/* ── Skip link (accessibility Fix 4) ───────────────────────── */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  background: var(--green);
+  color: #000;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: .9rem;
+  padding: .5rem 1rem;
+  z-index: 9999;
+  text-decoration: none;
+  border-radius: 0 0 4px 0;
+}
+.skip-link:focus {
+  top: 0;
+}
+
 /* ── Base ──────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -375,7 +394,8 @@ body {
   padding: 12px 18px;
 }
 
-.section-header h5 {
+.section-header h5,
+.section-header h2 {
   font-family: var(--font-head);
   font-size: 1.05rem;
   font-weight: 700;
@@ -386,8 +406,10 @@ body {
 }
 
 /* Section header — prevent icon+title from wrapping awkwardly */
-.section-header h5 { flex-wrap: nowrap; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.section-header h5 small { white-space: normal; }
+.section-header h5,
+.section-header h2 { flex-wrap: nowrap; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.section-header h5 small,
+.section-header h2 small { white-space: normal; }
 
 /* ── Player badge ─────────────────────────────────────────── */
 .player-badge {
@@ -1401,32 +1423,4 @@ tr.row-flash > td {
 .tsum-event-date {
   font-family: var(--font-head);
   letter-spacing: .03em;
-  font-size: .8rem;
-  color: var(--text);
-}
-
-.tsum-stat-pill {
-  display: inline-flex;
-  align-items: center;
-  font-size: .68rem;
-  padding: 2px 9px;
-  border-radius: 12px;
-  font-family: var(--font-head);
-  letter-spacing: .02em;
-  white-space: nowrap;
-  background: rgba(64,196,255,.1);
-  border: 1px solid rgba(64,196,255,.3);
-  color: var(--blue);
-}
-
-.tsum-event-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 10px;
-}
-
-.tsum-event-actions {
-  display: flex;
-  gap: 6px;
-}
+  font-size: .8rem;
