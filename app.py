@@ -718,6 +718,72 @@ def export_persisted_tournament_json(tourney_id):
                     headers={'Content-Disposition': f'attachment; filename={filename}'})
 
 
+@app.route('/api/tournaments/<tourney_id>/export/hand', methods=['POST'])
+def export_persisted_hand(tourney_id):
+    uid = _verify_bearer(request)
+    if not uid:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    body        = request.get_json(force=True, silent=True) or {}
+    raw_hand_id = (body.get('hand_id') or '').strip()
+    hand_id     = raw_hand_id.replace('-', '')
+    platform    = (body.get('platform') or '').strip()
+    if not hand_id:
+        return jsonify({'error': 'hand_id required'}), 400
+
+    records, _doc = _fetch_tournament_records(uid, tourney_id)
+    if records is None:
+        return jsonify({'error': 'Tournament data not available'}), 404
+
+    match = next(
+        (r for r in records if r.get('summary', {}).get('D', '').replace('-', '') == hand_id),
+        None,
+    )
+    if not match:
+        return jsonify({'error': f"Hand '{raw_hand_id}' not found."}), 404
+
+    try:
+        filepath, _ = export_pokerstars([match], platform=platform)
+        return send_file(
+            os.path.abspath(filepath),
+            as_attachment=True,
+            download_name=os.path.basename(filepath),
+            mimetype='text/plain',
+        )
+    except Exception as exc:
+        return jsonify({'error': str(exc)}), 500
+
+
+@app.route('/api/tournaments/<tourney_id>/export/json/hand', methods=['POST'])
+def export_persisted_hand_json(tourney_id):
+    uid = _verify_bearer(request)
+    if not uid:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    body        = request.get_json(force=True, silent=True) or {}
+    raw_hand_id = (body.get('hand_id') or '').strip()
+    hand_id     = raw_hand_id.replace('-', '')
+    if not hand_id:
+        return jsonify({'error': 'hand_id required'}), 400
+
+    records, _doc = _fetch_tournament_records(uid, tourney_id)
+    if records is None:
+        return jsonify({'error': 'Tournament data not available'}), 404
+
+    match = next(
+        (r for r in records if r.get('summary', {}).get('D', '').replace('-', '') == hand_id),
+        None,
+    )
+    if not match:
+        return jsonify({'error': f"Hand '{raw_hand_id}' not found."}), 404
+
+    import json as _jj
+    filename = f"pppoker_hand_{raw_hand_id}.json"
+    data = _jj.dumps(match, indent=2)
+    return Response(data, mimetype='application/json',
+                    headers={'Content-Disposition': f'attachment; filename={filename}'})
+
+
 _FIREBASE_ENV_KEYS = [
     'FIREBASE_API_KEY',
     'FIREBASE_AUTH_DOMAIN',
