@@ -738,6 +738,10 @@ def firebase_config():
 
 # ── PWA / TWA support ─────────────────────────────────────────────────────────
 
+@app.route('/tournaments')
+def tournaments_page():
+    return render_template('tournaments.html')
+
 @app.route('/offline')
 def offline():
     """Minimal offline fallback page served by the service worker."""
