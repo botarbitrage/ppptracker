@@ -720,6 +720,7 @@ def export_persisted_tournament_json(tourney_id):
 
 @app.route('/api/tournaments/<tourney_id>/export/hand', methods=['POST'])
 def export_persisted_hand(tourney_id):
+    _get_admin_db()  # ensure Firebase Admin SDK is initialized before token verification
     uid = _verify_bearer(request)
     if not uid:
         return jsonify({'error': 'Unauthorized'}), 401
@@ -756,6 +757,7 @@ def export_persisted_hand(tourney_id):
 
 @app.route('/api/tournaments/<tourney_id>/export/json/hand', methods=['POST'])
 def export_persisted_hand_json(tourney_id):
+    _get_admin_db()  # ensure Firebase Admin SDK is initialized before token verification
     uid = _verify_bearer(request)
     if not uid:
         return jsonify({'error': 'Unauthorized'}), 401

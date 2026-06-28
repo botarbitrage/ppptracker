@@ -987,13 +987,10 @@ function _renderCashGamesSummary(tournaments) {
   const filtered = _filterTournamentsByDate(cashOnly, _cgsFilter, _cgsDateRange);
 
   const cgsSection = document.getElementById('cash-games-summary-section');
-  if (!filtered.length) {
-    if (cgsSection) cgsSection.classList.add('d-none');
-    return;
-  }
   if (cgsSection) cgsSection.classList.remove('d-none');
   const cgsdSection = document.getElementById('cash-game-detail-section');
-  if (cgsdSection) cgsdSection.classList.remove('d-none');
+  // Hide session detail when filter produces no results (no sessions to click)
+  if (cgsdSection) cgsdSection.classList.toggle('d-none', !filtered.length);
 
   // Stats strip
   const strip = document.getElementById('cgs-strip');
