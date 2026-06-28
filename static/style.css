@@ -1431,11 +1431,11 @@ tr.row-flash > td {
   align-items: center;
   gap: 4px;
 }
-button.ts-pill {
-  background: var(--panel-alt) !important;
-  border: 1px solid rgba(0,230,118,.3) !important;
+.ts-pill {
+  background: var(--panel-alt);
+  border: 1px solid rgba(0,230,118,.3);
   border-radius: 8px;
-  color: rgba(0,230,118,.55) !important;
+  color: rgba(0,230,118,.55);
   font-family: var(--font-head);
   font-size: .72rem;
   font-weight: 800;
@@ -1444,17 +1444,18 @@ button.ts-pill {
   padding: 4px 14px;
   line-height: 1.6;
   cursor: pointer;
+  user-select: none;
   transition: background .15s, border-color .15s, color .15s, box-shadow .15s;
 }
-button.ts-pill:hover {
-  background: rgba(0,230,118,.1) !important;
-  border-color: rgba(0,230,118,.55) !important;
-  color: var(--green) !important;
+.ts-pill:hover {
+  background: rgba(0,230,118,.1);
+  border-color: rgba(0,230,118,.55);
+  color: var(--green);
 }
-button.ts-pill.ts-pill-active {
-  background: var(--green) !important;
-  border-color: var(--green) !important;
-  color: #000 !important;
+.ts-pill.ts-pill-active {
+  background: var(--green);
+  border-color: var(--green);
+  color: #000;
   box-shadow: 0 0 10px rgba(0,230,118,.3);
 }
 .ts-filter-active-label {
