@@ -206,13 +206,18 @@ def analyze():
     if new_ids:
         from hand_parser import extract_tourney_id as _extract_tid
         new_recs = [r for r in records if r.get('summary', {}).get('D') in new_ids]
-        _, _, new_stats, _ = process_hands(new_recs)
+        _, _, new_stats, new_tourneys = process_hands(new_recs)
         new_validation = validate_hands(new_recs)
         new_tourney_count = len({_extract_tid(r.get('summary', {}).get('D', '')) for r in new_recs})
+        _new_ts = [t.get('earliest_ts') for t in new_tourneys if t.get('earliest_ts')]
+        new_ts_min = min(_new_ts) if _new_ts else None
+        new_ts_max = max(_new_ts) if _new_ts else None
     else:
         new_stats = None
         new_validation = None
         new_tourney_count = 0
+        new_ts_min = None
+        new_ts_max = None
 
     return jsonify({
         "player": {"name": player_name, "uid": uid},
@@ -220,6 +225,8 @@ def analyze():
         "total_available": len(hands),
         "new_hands": new_hands,
         "new_tourney_count": new_tourney_count,
+        "new_ts_min": new_ts_min,
+        "new_ts_max": new_ts_max,
         "new_stats": new_stats,
         "new_validation": new_validation,
         "recent_hands": recent_hands,

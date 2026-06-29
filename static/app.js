@@ -468,19 +468,14 @@ function renderResults(data) {
   window._lastData = data;   // persisted so tz changes can re-render
   _trackEvent('hands_imported', { total: data.total_fetched || 0 });
 
-  // Derive session date span from tournament timestamps
-  const _ts = (data.tournaments || []).map(t => t.earliest_ts).filter(Boolean);
+  // Derive date span from newly-imported hands only
   const _spanStr = (() => {
-    if (!_ts.length) return null;
+    if (!data.new_ts_min) return null;
     const tz   = currentTz();
     const opts = { day: 'numeric', month: 'short', year: '2-digit', timeZone: tz };
-    const min  = new Date(Math.min(..._ts) * 1000);
-    const max  = new Date(Math.max(..._ts) * 1000);
-    const dMin = min.toLocaleDateString('en-GB', opts);
-    const dMax = max.toLocaleDateString('en-GB', opts);
-    return dMin === dMax.replace(/\s\d{4}$/, '')
-      ? dMax                        // same day — show once with year
-      : `${dMin} – ${dMax}`;       // range
+    const dMin = new Date(data.new_ts_min * 1000).toLocaleDateString('en-GB', opts);
+    const dMax = new Date(data.new_ts_max * 1000).toLocaleDateString('en-GB', opts);
+    return dMin === dMax ? dMax : `${dMin} – ${dMax}`;
   })();
 
   // Player avatar initials
@@ -491,7 +486,7 @@ function renderResults(data) {
   document.getElementById('player-info').innerHTML =
     `<strong>${data.player.name}</strong>` +
     `<span style="color:var(--muted);font-size:.8rem">&nbsp;&nbsp;UID: ${data.player.uid}</span>` +
-    (_spanStr ? `<br><span style="color:var(--muted);font-size:.78rem">${_spanStr}</span>` : '') +
+    (_spanStr ? `<span style="color:var(--muted);font-size:.78rem">&nbsp;&nbsp;${_spanStr}</span>` : '') +
     (data.total_fetched < data.total_available
       ? `&nbsp;&nbsp;<span class="text-warning" style="font-size:.8rem">(${data.total_available - data.total_fetched} hands failed to load)</span>`
       : '');
