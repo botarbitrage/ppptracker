@@ -1424,6 +1424,20 @@ tr.row-flash > td {
   font-family: var(--font-head);
   letter-spacing: .03em;
   font-size: .8rem;
+}
+.tsum-stat-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: .68rem;
+  padding: 2px 9px;
+  border-radius: 12px;
+  font-family: var(--font-head);
+  letter-spacing: .02em;
+  white-space: nowrap;
+  background: rgba(64,196,255,.1);
+  border: 1px solid rgba(64,196,255,.3);
+  color: var(--blue);
+}
 /* ── TS / CGS filter bar ──────────────────────────────────────── */
 /* ── Inline filter pills (TS / CGS section headers) ─────────────────────── */
 .ts-filter-pills {
@@ -1431,20 +1445,26 @@ tr.row-flash > td {
   align-items: center;
   gap: 4px;
 }
+.ts-filter-prefix {
+  font-family: var(--font-body);
+  font-size: .7rem;
+  color: var(--muted);
+  white-space: nowrap;
+  margin-right: 2px;
+}
 .ts-pill {
   background: var(--panel-alt);
   border: 1px solid rgba(0,230,118,.3);
-  border-radius: 8px;
-  color: rgba(0,230,118,.55);
-  font-family: var(--font-head);
-  font-size: .72rem;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  padding: 4px 14px;
+  border-radius: 20px;
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: .7rem;
+  font-weight: 600;
+  padding: 2px 9px;
   line-height: 1.6;
   cursor: pointer;
   user-select: none;
+  white-space: nowrap;
   transition: background .15s, border-color .15s, color .15s, box-shadow .15s;
 }
 .ts-pill:hover {

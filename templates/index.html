@@ -25,7 +25,7 @@
     rel="stylesheet"
     crossorigin="anonymous"
   />
-  <link rel="stylesheet" href="/static/style.css?v=41"/>
+  <link rel="stylesheet" href="/static/style.css?v=44"/>
 </head>
 <body>
 <!-- Skip navigation link (Fix 4) -->
@@ -375,6 +375,7 @@
                     aria-label="Buy-in, ITM%, and finishing position are not available in the PPPoker API data.">ⓘ</button>
           </h2>
           <div class="ts-filter-pills">
+            <span class="ts-filter-prefix">Date range</span>
             <div id="ts-filter-all"   class="ts-pill ts-pill-active" role="button" tabindex="0" onclick="_setTsFilter('all')">All</div>
             <div id="ts-filter-today" class="ts-pill"                role="button" tabindex="0" onclick="_setTsFilter('today')">Today</div>
             <div id="ts-filter-week"  class="ts-pill"                role="button" tabindex="0" onclick="_setTsFilter('week')">This Week</div>
@@ -447,6 +448,7 @@
             Cash Games Summary
           </h2>
           <div class="ts-filter-pills">
+            <span class="ts-filter-prefix">Date range</span>
             <div id="cgs-filter-all"   class="ts-pill ts-pill-active" role="button" tabindex="0" onclick="_setCgsFilter('all')">All</div>
             <div id="cgs-filter-today" class="ts-pill"                role="button" tabindex="0" onclick="_setCgsFilter('today')">Today</div>
             <div id="cgs-filter-week"  class="ts-pill"                role="button" tabindex="0" onclick="_setCgsFilter('week')">This Week</div>
