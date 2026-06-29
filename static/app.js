@@ -403,7 +403,7 @@ function showImportSuccess(data) {
   const text    = document.getElementById('loading-text');
   const name    = data.player?.name || 'Player';
   const hands   = data.new_hands ?? 0;
-  const tours   = hands > 0 ? (data.tournaments || []).length : 0;
+  const tours   = data.new_tourney_count ?? 0;
   spinner.classList.add('d-none');
   text.style.color = 'var(--green)';
   _importCount++;

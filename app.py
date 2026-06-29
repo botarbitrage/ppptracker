@@ -204,18 +204,22 @@ def analyze():
     # Compute stats/validation for only the truly-new records so the UI can
     # show "X new hands loaded" with accurate breakdown counts.
     if new_ids:
+        from hand_parser import extract_tourney_id as _extract_tid
         new_recs = [r for r in records if r.get('summary', {}).get('D') in new_ids]
         _, _, new_stats, _ = process_hands(new_recs)
         new_validation = validate_hands(new_recs)
+        new_tourney_count = len({_extract_tid(r.get('summary', {}).get('D', '')) for r in new_recs})
     else:
         new_stats = None
         new_validation = None
+        new_tourney_count = 0
 
     return jsonify({
         "player": {"name": player_name, "uid": uid},
         "total_fetched": len(records),
         "total_available": len(hands),
         "new_hands": new_hands,
+        "new_tourney_count": new_tourney_count,
         "new_stats": new_stats,
         "new_validation": new_validation,
         "recent_hands": recent_hands,
