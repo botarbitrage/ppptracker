@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous"/>
-  <link rel="stylesheet" href="/static/style.css?v=40"/>
+  <link rel="stylesheet" href="/static/style.css?v=44"/>
   <style>
     /* ── Tournaments page extras ── */
     .page-back {
@@ -291,25 +291,33 @@ function renderTourneyCard(id, t) {
   // ── Pills ────────────────────────────────────────────────────────────────────
   const pills = [];
 
-  if (t.rebuy && t.addon) {
-    // Combined rebuy + add-on pill
-    const rm = t.rebuy_cost_multiplier || '';
-    const am = t.addon_cost_multiplier  || '';
-    const label = (rm && am) ? `Rebuy/Add-on x${rm}/x${am}` : 'Rebuy/Add-on';
-    pills.push(`<span class="tourney-pill pill-yes">♻ ${label}</span>`);
-  } else if (t.rebuy) {
-    const rm = t.rebuy_cost_multiplier;
-    const label = rm ? `Rebuy x${rm}` : (t.rebuy_type === 'unlimited' ? 'Unlimited rebuys' : 'Rebuy available');
-    pills.push(`<span class="tourney-pill pill-yes">♻ ${label}</span>`);
-    pills.push(`<span class="tourney-pill pill-no">No add-on</span>`);
-  } else if (t.addon) {
-    const am = t.addon_cost_multiplier;
-    const label = am ? `Add-on x${am}` : 'Add-on available';
-    pills.push(`<span class="tourney-pill pill-no">No rebuy</span>`);
-    pills.push(`<span class="tourney-pill pill-yes">+ ${label}</span>`);
+  // Rebuy
+  if (t.rebuy) {
+    if (t.rebuy_type === 'unlimited' || t.rebuy_max_per_session == null) {
+      pills.push(`<span class="tourney-pill pill-yes">∞ rebuys</span>`);
+    } else {
+      const n = t.rebuy_max_per_session;
+      pills.push(`<span class="tourney-pill pill-yes">x${n} rebuy${n !== 1 ? 's' : ''}</span>`);
+    }
   } else {
     pills.push(`<span class="tourney-pill pill-no">No rebuy</span>`);
+  }
+
+  // Add-on
+  if (t.addon) {
+    const n = t.addon_max_units || 1;
+    pills.push(`<span class="tourney-pill pill-yes">x${n} add-on${n !== 1 ? 's' : ''}</span>`);
+  } else {
     pills.push(`<span class="tourney-pill pill-no">No add-on</span>`);
+  }
+
+  // Extra options (x2/x3 bulk purchase)
+  const _bulkOpts = [...(t.rebuy_bulk_options || []), ...(t.addon_bulk_options || [])].filter(v => v > 1);
+  const _maxBulk = _bulkOpts.length ? Math.max(..._bulkOpts) : 0;
+  if (_maxBulk > 1) {
+    pills.push(`<span class="tourney-pill pill-yes">x${_maxBulk} extra option</span>`);
+  } else {
+    pills.push(`<span class="tourney-pill pill-no">No extra options</span>`);
   }
 
   if (t.is_pko) pills.push(`<span class="tourney-pill pill-yes">🏹 PKO bounties</span>`);

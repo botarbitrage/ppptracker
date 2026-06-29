@@ -87,7 +87,71 @@ BLIND_LEVELS_BASE = [
     {"level": 51, "sb": 10000000,   "bb": 20000000,    "ante": 3000000},
 ]
 
-# CRAZY 2 extends the base structure with levels 52-68
+# ── LUCKY DAY — completely different 60-level structure (not based on BLIND_LEVELS_BASE) ─
+LUCKY_DAY_BLIND_LEVELS = [
+    {"level": 1,  "sb": 50,          "bb": 100,          "ante": 0},
+    {"level": 2,  "sb": 100,         "bb": 200,          "ante": 0},
+    {"level": 3,  "sb": 150,         "bb": 300,          "ante": 50},
+    {"level": 4,  "sb": 200,         "bb": 400,          "ante": 50},
+    {"level": 5,  "sb": 300,         "bb": 600,          "ante": 75},
+    {"level": 6,  "sb": 400,         "bb": 800,          "ante": 100},
+    {"level": 7,  "sb": 500,         "bb": 1000,         "ante": 150},
+    {"level": 8,  "sb": 600,         "bb": 1200,         "ante": 200},
+    {"level": 9,  "sb": 800,         "bb": 1600,         "ante": 200},
+    {"level": 10, "sb": 1000,        "bb": 2000,         "ante": 300},
+    {"level": 11, "sb": 1500,        "bb": 3000,         "ante": 400},
+    {"level": 12, "sb": 2000,        "bb": 4000,         "ante": 500},
+    {"level": 13, "sb": 3000,        "bb": 6000,         "ante": 800},
+    {"level": 14, "sb": 4000,        "bb": 8000,         "ante": 1000},
+    {"level": 15, "sb": 5000,        "bb": 10000,        "ante": 1500},
+    {"level": 16, "sb": 6000,        "bb": 12000,        "ante": 1500},
+    {"level": 17, "sb": 8000,        "bb": 16000,        "ante": 2000},
+    {"level": 18, "sb": 10000,       "bb": 20000,        "ante": 3000},
+    {"level": 19, "sb": 15000,       "bb": 30000,        "ante": 4000},
+    {"level": 20, "sb": 20000,       "bb": 40000,        "ante": 5000},
+    {"level": 21, "sb": 30000,       "bb": 60000,        "ante": 8000},
+    {"level": 22, "sb": 40000,       "bb": 80000,        "ante": 10000},
+    {"level": 23, "sb": 50000,       "bb": 100000,       "ante": 15000},
+    {"level": 24, "sb": 60000,       "bb": 120000,       "ante": 15000},
+    {"level": 25, "sb": 80000,       "bb": 160000,       "ante": 20000},
+    {"level": 26, "sb": 100000,      "bb": 200000,       "ante": 30000},
+    {"level": 27, "sb": 150000,      "bb": 300000,       "ante": 40000},
+    {"level": 28, "sb": 200000,      "bb": 400000,       "ante": 50000},
+    {"level": 29, "sb": 300000,      "bb": 600000,       "ante": 80000},
+    {"level": 30, "sb": 400000,      "bb": 800000,       "ante": 100000},
+    {"level": 31, "sb": 500000,      "bb": 1000000,      "ante": 150000},
+    {"level": 32, "sb": 600000,      "bb": 1200000,      "ante": 175000},
+    {"level": 33, "sb": 800000,      "bb": 1600000,      "ante": 200000},
+    {"level": 34, "sb": 1000000,     "bb": 2000000,      "ante": 300000},
+    {"level": 35, "sb": 1500000,     "bb": 3000000,      "ante": 400000},
+    {"level": 36, "sb": 2000000,     "bb": 4000000,      "ante": 500000},
+    {"level": 37, "sb": 3000000,     "bb": 6000000,      "ante": 700000},
+    {"level": 38, "sb": 4000000,     "bb": 8000000,      "ante": 1000000},
+    {"level": 39, "sb": 5000000,     "bb": 10000000,     "ante": 1500000},
+    {"level": 40, "sb": 6000000,     "bb": 12000000,     "ante": 1750000},
+    {"level": 41, "sb": 8000000,     "bb": 16000000,     "ante": 2000000},
+    {"level": 42, "sb": 10000000,    "bb": 20000000,     "ante": 3000000},
+    {"level": 43, "sb": 15000000,    "bb": 30000000,     "ante": 4000000},
+    {"level": 44, "sb": 20000000,    "bb": 40000000,     "ante": 5000000},
+    {"level": 45, "sb": 30000000,    "bb": 60000000,     "ante": 7000000},
+    {"level": 46, "sb": 40000000,    "bb": 80000000,     "ante": 10000000},
+    {"level": 47, "sb": 50000000,    "bb": 100000000,    "ante": 15000000},
+    {"level": 48, "sb": 60000000,    "bb": 120000000,    "ante": 17500000},
+    {"level": 49, "sb": 80000000,    "bb": 160000000,    "ante": 20000000},
+    {"level": 50, "sb": 100000000,   "bb": 200000000,    "ante": 30000000},
+    {"level": 51, "sb": 150000000,   "bb": 300000000,    "ante": 40000000},
+    {"level": 52, "sb": 200000000,   "bb": 400000000,    "ante": 50000000},
+    {"level": 53, "sb": 300000000,   "bb": 600000000,    "ante": 70000000},
+    {"level": 54, "sb": 400000000,   "bb": 800000000,    "ante": 100000000},
+    {"level": 55, "sb": 500000000,   "bb": 1000000000,   "ante": 150000000},
+    {"level": 56, "sb": 600000000,   "bb": 1200000000,   "ante": 175000000},
+    {"level": 57, "sb": 800000000,   "bb": 1600000000,   "ante": 200000000},
+    {"level": 58, "sb": 1000000000,  "bb": 2000000000,   "ante": 300000000},
+    {"level": 59, "sb": 1500000000,  "bb": 3000000000,   "ante": 400000000},
+    {"level": 60, "sb": 2000000000,  "bb": 4000000000,   "ante": 500000000},
+]
+
+# CRAZY 2 / East PKO SAT share levels 52-68
 CRAZY2_EXTRA_LEVELS = [
     {"level": 52, "sb": 15000000,   "bb": 30000000,    "ante": 3000000},
     {"level": 53, "sb": 20000000,   "bb": 40000000,    "ante": 5000000},
@@ -106,6 +170,12 @@ CRAZY2_EXTRA_LEVELS = [
     {"level": 66, "sb": 800000000,  "bb": 1600000000,  "ante": 200000000},
     {"level": 67, "sb": 1000000000, "bb": 2000000000,  "ante": 300000000},
     {"level": 68, "sb": 1500000000, "bb": 3000000000,  "ante": 300000000},
+]
+
+# East PKO SAT uses BLIND_LEVELS_BASE + CRAZY2_EXTRA_LEVELS + 2 more
+EAST_PKO_SAT_EXTRA_LEVELS = CRAZY2_EXTRA_LEVELS + [
+    {"level": 69, "sb": 2000000000, "bb": 4000000000,  "ante": 500000000},
+    {"level": 70, "sb": 3000000000, "bb": 6000000000,  "ante": 1000000000},
 ]
 
 # ── Payout structure ──────────────────────────────────────────────────────────
@@ -565,6 +635,83 @@ TOURNAMENTS = [
             "created_at": datetime.now(timezone.utc),
         }
     },
+    {
+        "id": "lucky_day",
+        "data": {
+            "name": "LUCKY DAY",
+            "type": "MTT",
+            "is_mtt": True,
+            "is_pko": False,
+            "currency": "AUD",
+            "buy_in_total": 3.04,
+            "buy_in_prize": 2.74,
+            "buy_in_rake": 0.30,
+            "starting_chips": 20000,
+            "starting_time": "9:00 PM",           # placeholder — update if different
+            "level_duration_min": 8,               # After LR
+            "level_duration_rebuy_min": 10,        # Before LR (rebuy period)
+            "level_duration_ft_min": 8,            # Final Table
+            "late_reg_level": 11,
+            "rebuy": True,
+            "rebuy_type": "unlimited",
+            "rebuy_max_per_session": None,
+            "rebuy_cost_multiplier": 1,
+            "rebuy_period_end_level": 11,
+            "rebuy_bulk_options": [1, 2, 3],
+            "addon": True,
+            "addon_cost_multiplier": 3,
+            "addon_max_units": 1,
+            "addon_bulk_options": [1],
+            "player_min": 2,
+            "player_max": 7000,
+            "break_every_min": 55,
+            "break_duration_min": 5,
+            # Full 60-level structure — does NOT use BLIND_LEVELS_BASE
+            "blind_structure_override": True,
+            "blind_structure_extra": LUCKY_DAY_BLIND_LEVELS,
+            "payout_ref": "standard",
+            "active": True,
+            "created_at": datetime.now(timezone.utc),
+        }
+    },
+    {
+        "id": "east_pko_sat",
+        "data": {
+            "name": "East PKO SAT",
+            "type": "SAT",
+            "is_mtt": True,
+            "is_pko": False,
+            "currency": "AUD",
+            "buy_in_total": 1.52,
+            "buy_in_prize": 1.37,
+            "buy_in_rake": 0.15,
+            "starting_chips": 10000,
+            "starting_time": "8:00 PM",           # placeholder — update if different
+            "level_duration_min": 5,               # After LR
+            "level_duration_rebuy_min": 6,         # Before LR (rebuy period)
+            "level_duration_ft_min": 5,            # Final Table
+            "late_reg_level": 10,
+            "rebuy": True,
+            "rebuy_type": "unlimited",
+            "rebuy_max_per_session": None,
+            "rebuy_cost_multiplier": 1,
+            "rebuy_period_end_level": 10,
+            "rebuy_bulk_options": [1, 2, 3],
+            "addon": True,
+            "addon_cost_multiplier": 3,
+            "addon_max_units": 1,
+            "addon_bulk_options": [1],
+            "player_min": 2,
+            "player_max": 7000,
+            "break_every_min": 55,
+            "break_duration_min": 5,
+            # BLIND_LEVELS_BASE (51) + CRAZY2_EXTRA (52-68) + 2 more (69-70) = 70 levels
+            "blind_structure_extra": EAST_PKO_SAT_EXTRA_LEVELS,
+            "payout_ref": "standard",
+            "active": True,
+            "created_at": datetime.now(timezone.utc),
+        }
+    },
 ]
 
 # ── Seed functions ────────────────────────────────────────────────────────────
@@ -595,7 +742,10 @@ def seed_tournaments(db):
         ref = db.collection('tournaments').document(t['id'])
         ref.set(t['data'])
         extras = len(t['data'].get('blind_structure_extra', []))
-        total_levels = len(BLIND_LEVELS_BASE) + extras
+        if t['data'].get('blind_structure_override'):
+            total_levels = extras
+        else:
+            total_levels = len(BLIND_LEVELS_BASE) + extras
         print(f"  OK tournaments/{t['id']}: {t['data']['name']} "
               f"(AUD {t['data']['buy_in_total']:.2f}, {total_levels} blind levels)")
 
