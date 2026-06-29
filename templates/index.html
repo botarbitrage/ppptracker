@@ -25,7 +25,7 @@
     rel="stylesheet"
     crossorigin="anonymous"
   />
-  <link rel="stylesheet" href="/static/style.css?v=44"/>
+  <link rel="stylesheet" href="/static/style.css?v=45"/>
 </head>
 <body>
 <!-- Skip navigation link (Fix 4) -->
@@ -364,26 +364,24 @@
   <!-- ── Tournament Summary (Pro, persisted, non-Cash tournaments) ── -->
   <div id="tournament-summary-section" class="d-none" style="max-width:1400px;margin:0 auto">
     <div class="section-card mb-4">
-      <div class="section-header d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <div class="d-flex align-items-center gap-3 flex-wrap">
-          <h2 class="mb-0 d-flex align-items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-            Tournament Summary
-            <button class="info-badge-btn"
-                    data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-container="body"
-                    title="Buy-in, ITM%, and finishing position are not available in the PPPoker API data."
-                    aria-label="Buy-in, ITM%, and finishing position are not available in the PPPoker API data.">ⓘ</button>
-          </h2>
-          <div class="ts-filter-pills">
-            <span class="ts-filter-prefix">Date range</span>
-            <div id="ts-filter-all"   class="ts-pill ts-pill-active" role="button" tabindex="0" onclick="_setTsFilter('all')">All</div>
-            <div id="ts-filter-today" class="ts-pill"                role="button" tabindex="0" onclick="_setTsFilter('today')">Today</div>
-            <div id="ts-filter-week"  class="ts-pill"                role="button" tabindex="0" onclick="_setTsFilter('week')">This Week</div>
-            <div id="ts-filter-range" class="ts-pill"                role="button" tabindex="0" onclick="_openDateRangeModal('ts')" data-bs-toggle="modal" data-bs-target="#modal-date-range">Date Range</div>
-            <span id="ts-filter-label" class="ts-filter-active-label d-none"></span>
-          </div>
+      <div class="section-header d-flex align-items-center justify-content-between gap-2">
+        <h2 class="mb-0 d-flex align-items-center gap-2 flex-shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          Tournament Summary
+          <button class="info-badge-btn"
+                  data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-container="body"
+                  title="Buy-in, ITM%, and finishing position are not available in the PPPoker API data."
+                  aria-label="Buy-in, ITM%, and finishing position are not available in the PPPoker API data.">ⓘ</button>
+        </h2>
+        <div class="ts-filter-pills">
+          <span class="ts-filter-prefix">Date range</span>
+          <div id="ts-filter-all"   class="ts-pill ts-pill-active" role="button" tabindex="0" onclick="_setTsFilter('all')">All</div>
+          <div id="ts-filter-today" class="ts-pill"                role="button" tabindex="0" onclick="_setTsFilter('today')">Today</div>
+          <div id="ts-filter-week"  class="ts-pill"                role="button" tabindex="0" onclick="_setTsFilter('week')">This Week</div>
+          <div id="ts-filter-range" class="ts-pill"                role="button" tabindex="0" onclick="_openDateRangeModal('ts')" data-bs-toggle="modal" data-bs-target="#modal-date-range">Date Range</div>
+          <span id="ts-filter-label" class="ts-filter-active-label d-none"></span>
         </div>
-        <div id="tourney-strip-pro" class="val-strip"></div>
+        <div id="tourney-strip-pro" class="val-strip flex-shrink-0"></div>
       </div>
       <div class="table-responsive">
         <table class="table table-dark table-striped table-hover mb-0">
@@ -441,22 +439,20 @@
   <!-- ── Cash Games Summary (Pro) — only Cash game types ── -->
   <div id="cash-games-summary-section" class="d-none" style="max-width:1400px;margin:0 auto">
     <div class="section-card mb-4">
-      <div class="section-header d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <div class="d-flex align-items-center gap-3 flex-wrap">
-          <h2 class="mb-0 d-flex align-items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-            Cash Games Summary
-          </h2>
-          <div class="ts-filter-pills">
-            <span class="ts-filter-prefix">Date range</span>
-            <div id="cgs-filter-all"   class="ts-pill ts-pill-active" role="button" tabindex="0" onclick="_setCgsFilter('all')">All</div>
-            <div id="cgs-filter-today" class="ts-pill"                role="button" tabindex="0" onclick="_setCgsFilter('today')">Today</div>
-            <div id="cgs-filter-week"  class="ts-pill"                role="button" tabindex="0" onclick="_setCgsFilter('week')">This Week</div>
-            <div id="cgs-filter-range" class="ts-pill"                role="button" tabindex="0" onclick="_openDateRangeModal('cgs')" data-bs-toggle="modal" data-bs-target="#modal-date-range">Date Range</div>
-            <span id="cgs-filter-label" class="ts-filter-active-label d-none"></span>
-          </div>
+      <div class="section-header d-flex align-items-center justify-content-between gap-2">
+        <h2 class="mb-0 d-flex align-items-center gap-2 flex-shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          Cash Games Summary
+        </h2>
+        <div class="ts-filter-pills">
+          <span class="ts-filter-prefix">Date range</span>
+          <div id="cgs-filter-all"   class="ts-pill ts-pill-active" role="button" tabindex="0" onclick="_setCgsFilter('all')">All</div>
+          <div id="cgs-filter-today" class="ts-pill"                role="button" tabindex="0" onclick="_setCgsFilter('today')">Today</div>
+          <div id="cgs-filter-week"  class="ts-pill"                role="button" tabindex="0" onclick="_setCgsFilter('week')">This Week</div>
+          <div id="cgs-filter-range" class="ts-pill"                role="button" tabindex="0" onclick="_openDateRangeModal('cgs')" data-bs-toggle="modal" data-bs-target="#modal-date-range">Date Range</div>
+          <span id="cgs-filter-label" class="ts-filter-active-label d-none"></span>
         </div>
-        <div id="cgs-strip" class="val-strip"></div>
+        <div id="cgs-strip" class="val-strip flex-shrink-0"></div>
       </div>
       <div class="table-responsive">
         <table class="table table-dark table-striped table-hover mb-0">
