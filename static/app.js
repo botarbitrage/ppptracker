@@ -1199,7 +1199,7 @@ function _renderTournamentSummary(tournaments) {
   const strip = document.getElementById('tourney-strip-pro');
   if (strip) {
     const satCount = filtered.filter(t => (t.room_name || '').toLowerCase().includes('sat')).length;
-    const pkoCount = filtered.filter(t => (t.room_name || '').toLowerCase().includes('pko')).length;
+    const pkoCount = filtered.filter(t => { const r = (t.room_name || '').toLowerCase(); return r.includes('pko') && !r.includes('sat'); }).length;
     const items = [['Tourneys', filtered.length], ['Satellite', satCount], ['PKO', pkoCount]];
     strip.innerHTML = items.map(([label, value]) =>
       `<span class="val-pill"><strong>${value}</strong><span class="val-pill-label">${label}</span></span>`
