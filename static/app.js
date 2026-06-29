@@ -1265,8 +1265,7 @@ function _renderTournamentSummary(tournaments) {
   const strip = document.getElementById('tourney-strip-pro');
   if (strip) {
     const satCount = filtered.filter(t => (t.room_name || '').toLowerCase().includes('sat')).length;
-    const ftCount  = filtered.filter(t => (t.last_chips || 0) > 0).length;
-    const items = [['Tourneys', filtered.length], ['Satellite', satCount], ['Final Tables', ftCount]];
+    const items = [['Tourneys', filtered.length], ['Satellite', satCount]];
     strip.innerHTML = items.map(([label, value]) =>
       `<span class="val-pill"><strong>${value}</strong><span class="val-pill-label">${label}</span></span>`
     ).join('<span class="val-sep">·</span>');
