@@ -1491,8 +1491,14 @@ tr.row-flash > td {
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
+  transition: background .15s, color .15s;
 }
-.sort-th:hover { color: var(--green); }
+.sort-th:hover {
+  color: var(--green);
+  background: rgba(0,230,118,.08);
+  outline: 1px solid rgba(0,230,118,.2);
+  outline-offset: -1px;
+}
 .sort-icon { font-size: .7em; color: var(--green); }
 
 /* ── Export All Hands section ─────────────────────────────────── */
