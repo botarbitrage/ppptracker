@@ -25,7 +25,7 @@
     rel="stylesheet"
     crossorigin="anonymous"
   />
-  <link rel="stylesheet" href="/static/style.css?v=50"/>
+  <link rel="stylesheet" href="/static/style.css?v=51"/>
 </head>
 <body>
 <!-- Skip navigation link (Fix 4) -->
@@ -376,12 +376,14 @@
                   title="Buy-in, ITM%, and finishing position are not available in the PPPoker API data."
                   aria-label="Buy-in, ITM%, and finishing position are not available in the PPPoker API data.">ⓘ</button>
         </h2>
-        <div class="ts-filter-pills d-flex align-items-center flex-nowrap">
-          <span class="ts-filter-prefix">Date range</span>
-          <div id="ts-filter-all"   class="ts-pill ts-pill-active" role="button" tabindex="0" onclick="_setTsFilter('all')">All</div>
-          <div id="ts-filter-today" class="ts-pill"                role="button" tabindex="0" onclick="_setTsFilter('today')">Today</div>
-          <div id="ts-filter-week"  class="ts-pill"                role="button" tabindex="0" onclick="_setTsFilter('week')">This Week</div>
-          <div id="ts-filter-range" class="ts-pill"                role="button" tabindex="0" onclick="_openDateRangeModal('ts')" data-bs-toggle="modal" data-bs-target="#modal-date-range">Date Range</div>
+        <div class="ts-filter-pills d-flex align-items-center flex-nowrap gap-2">
+          <span class="ts-filter-prefix">Interval</span>
+          <select id="ts-filter-select" class="ts-filter-select" onchange="_onTsFilterSelect(this.value)">
+            <option value="all">All</option>
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="range">Custom</option>
+          </select>
           <span id="ts-filter-label" class="ts-filter-active-label d-none"></span>
         </div>
         <div id="tourney-strip-pro" class="val-strip flex-shrink-0"></div>
@@ -447,12 +449,14 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
           Cash Games Summary
         </h2>
-        <div class="ts-filter-pills d-flex align-items-center flex-nowrap">
-          <span class="ts-filter-prefix">Date range</span>
-          <div id="cgs-filter-all"   class="ts-pill ts-pill-active" role="button" tabindex="0" onclick="_setCgsFilter('all')">All</div>
-          <div id="cgs-filter-today" class="ts-pill"                role="button" tabindex="0" onclick="_setCgsFilter('today')">Today</div>
-          <div id="cgs-filter-week"  class="ts-pill"                role="button" tabindex="0" onclick="_setCgsFilter('week')">This Week</div>
-          <div id="cgs-filter-range" class="ts-pill"                role="button" tabindex="0" onclick="_openDateRangeModal('cgs')" data-bs-toggle="modal" data-bs-target="#modal-date-range">Date Range</div>
+        <div class="ts-filter-pills d-flex align-items-center flex-nowrap gap-2">
+          <span class="ts-filter-prefix">Interval</span>
+          <select id="cgs-filter-select" class="ts-filter-select" onchange="_onCgsFilterSelect(this.value)">
+            <option value="all">All</option>
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="range">Custom</option>
+          </select>
           <span id="cgs-filter-label" class="ts-filter-active-label d-none"></span>
         </div>
         <div id="cgs-strip" class="val-strip flex-shrink-0"></div>

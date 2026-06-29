@@ -839,13 +839,19 @@ function _filterTournamentsByDate(tournaments, filter, dateRange) {
 // ── TS filter / sort ──────────────────────────────────────────────────────────
 function _setTsFilter(f) {
   _tsFilter = f;
-  ['all','today','week','range'].forEach(k => {
-    const btn = document.getElementById('ts-filter-' + k);
-    if (btn) btn.classList.toggle('ts-pill-active', k === f);
-  });
+  const sel = document.getElementById('ts-filter-select');
+  if (sel) sel.value = f;
   const lbl = document.getElementById('ts-filter-label');
   if (lbl) lbl.classList.add('d-none');
   _renderTournamentSummary(_allTournaments);
+}
+
+function _onTsFilterSelect(val) {
+  if (val === 'range') {
+    _openDateRangeModal('ts');
+  } else {
+    _setTsFilter(val);
+  }
 }
 
 function _sortTs(col) {
@@ -869,13 +875,19 @@ function _updateTsSortIcons(col, dir) {
 // ── CGS filter / sort ─────────────────────────────────────────────────────────
 function _setCgsFilter(f) {
   _cgsFilter = f;
-  ['all','today','week','range'].forEach(k => {
-    const btn = document.getElementById('cgs-filter-' + k);
-    if (btn) btn.classList.toggle('ts-pill-active', k === f);
-  });
+  const sel = document.getElementById('cgs-filter-select');
+  if (sel) sel.value = f;
   const lbl = document.getElementById('cgs-filter-label');
   if (lbl) lbl.classList.add('d-none');
   _renderCashGamesSummary(_allTournaments);
+}
+
+function _onCgsFilterSelect(val) {
+  if (val === 'range') {
+    _openDateRangeModal('cgs');
+  } else {
+    _setCgsFilter(val);
+  }
 }
 
 function _sortCgs(col) {
@@ -930,20 +942,16 @@ function _applyDateRange() {
   if (_activeDateTarget === 'cgs') {
     _cgsFilter    = 'range';
     _cgsDateRange = { start: s, end: e };
-    ['all','today','week','range'].forEach(k => {
-      const btn = document.getElementById('cgs-filter-' + k);
-      if (btn) btn.classList.toggle('ts-pill-active', k === 'range');
-    });
+    const cSel = document.getElementById('cgs-filter-select');
+    if (cSel) cSel.value = 'range';
     const lbl = document.getElementById('cgs-filter-label');
     if (lbl) { lbl.textContent = `${s} → ${e}`; lbl.classList.remove('d-none'); }
     _renderCashGamesSummary(_allTournaments);
   } else {
     _tsFilter    = 'range';
     _tsDateRange = { start: s, end: e };
-    ['all','today','week','range'].forEach(k => {
-      const btn = document.getElementById('ts-filter-' + k);
-      if (btn) btn.classList.toggle('ts-pill-active', k === 'range');
-    });
+    const tSel = document.getElementById('ts-filter-select');
+    if (tSel) tSel.value = 'range';
     const lbl = document.getElementById('ts-filter-label');
     if (lbl) { lbl.textContent = `${s} → ${e}`; lbl.classList.remove('d-none'); }
     _renderTournamentSummary(_allTournaments);
