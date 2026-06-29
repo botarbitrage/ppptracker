@@ -1495,32 +1495,8 @@ tr.row-flash > td {
 .sort-th:hover { color: var(--green); }
 .sort-icon { font-size: .7em; color: var(--green); }
 
-/* ── Player badge: Export All subsection ─────────────────────── */
-.player-export-all {
-  border-top: 1px solid var(--border);
-  padding: 20px 16px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.player-export-all-label {
-  font-family: var(--font-head);
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: 0;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
+/* ── Export All Hands section ─────────────────────────────────── */
 .player-export-all-btns .export-btn-grid {
   grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  padding: 0;
+  gap: 10px;
 }
-.player-export-all-btns .export-grid-btn {
-  padding: 6px 12px;
-  font-size: .72rem;
-}
-.player-export-all-btns .export-grid-btn img,
-.player-export-all-btns .export-grid-btn svg { width: 18px; height: 18px; }
