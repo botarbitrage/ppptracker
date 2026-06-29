@@ -1815,6 +1815,10 @@ function signOutUser() {
     if (ts) ts.classList.add('d-none');
     const th = document.getElementById('tournament-history-pro-section');
     if (th) th.classList.add('d-none');
+    const cgs = document.getElementById('cash-games-summary-section');
+    if (cgs) cgs.classList.add('d-none');
+    const cgsd = document.getElementById('cash-game-detail-section');
+    if (cgsd) cgsd.classList.add('d-none');
     _renderAuthBar(null);
     _updateExportGates();
     _loadUserState();
