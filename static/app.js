@@ -799,20 +799,16 @@ let _justImportedTourneyIds = new Set();
 
 // ── TS / CGS filter + sort state ─────────────────────────────────────────────
 let _allTournaments     = [];          // cached from _loadHistory
-let _tsFilter           = 'all';       // 'all' | 'today' | 'week' | 'range'
-let _tsDateRange        = { start: null, end: null };
+let _tsFilter           = 'all';       // 'all' | 'today' | 'week' | 'month'
 let _tsSortCol          = null;        // null = default order
 let _tsSortDir          = 'desc';
 
 let _cgsFilter          = 'all';
-let _cgsDateRange       = { start: null, end: null };
 let _cgsSortCol         = null;
 let _cgsSortDir         = 'desc';
 
-let _activeDateTarget   = 'ts';       // which section the date-range modal targets
-
 // ── Date-filter helper ────────────────────────────────────────────────────────
-function _filterTournamentsByDate(tournaments, filter, dateRange) {
+function _filterTournamentsByDate(tournaments, filter) {
   if (filter === 'all') return tournaments;
   const tz  = currentTz();
   const now = new Date();
@@ -828,10 +824,9 @@ function _filterTournamentsByDate(tournaments, filter, dateRange) {
     const cutoff = (now.getTime() - 7 * 86400000) / 1000;
     return tournaments.filter(t => (t.earliest_ts || 0) >= cutoff);
   }
-  if (filter === 'range' && dateRange.start && dateRange.end) {
-    const startTs = new Date(dateRange.start).getTime() / 1000;
-    const endTs   = (new Date(dateRange.end).getTime() + 86399000) / 1000; // end of day
-    return tournaments.filter(t => (t.earliest_ts || 0) >= startTs && (t.earliest_ts || 0) <= endTs);
+  if (filter === 'month') {
+    const cutoff = (now.getTime() - 30 * 86400000) / 1000;
+    return tournaments.filter(t => (t.earliest_ts || 0) >= cutoff);
   }
   return tournaments;
 }
@@ -841,17 +836,7 @@ function _setTsFilter(f) {
   _tsFilter = f;
   const sel = document.getElementById('ts-filter-select');
   if (sel) sel.value = f;
-  const lbl = document.getElementById('ts-filter-label');
-  if (lbl) lbl.classList.add('d-none');
   _renderTournamentSummary(_allTournaments);
-}
-
-function _onTsFilterSelect(val) {
-  if (val === 'range') {
-    _openDateRangeModal('ts');
-  } else {
-    _setTsFilter(val);
-  }
 }
 
 function _sortTs(col) {
@@ -877,17 +862,7 @@ function _setCgsFilter(f) {
   _cgsFilter = f;
   const sel = document.getElementById('cgs-filter-select');
   if (sel) sel.value = f;
-  const lbl = document.getElementById('cgs-filter-label');
-  if (lbl) lbl.classList.add('d-none');
   _renderCashGamesSummary(_allTournaments);
-}
-
-function _onCgsFilterSelect(val) {
-  if (val === 'range') {
-    _openDateRangeModal('cgs');
-  } else {
-    _setCgsFilter(val);
-  }
 }
 
 function _sortCgs(col) {
@@ -908,55 +883,6 @@ function _updateCgsSortIcons(col, dir) {
   });
 }
 
-// ── Date-range modal ──────────────────────────────────────────────────────────
-function _openDateRangeModal(target) {
-  _activeDateTarget = target;
-  const dr = target === 'cgs' ? _cgsDateRange : _tsDateRange;
-  const s = document.getElementById('date-range-start');
-  const e = document.getElementById('date-range-end');
-  if (s) s.value = dr.start || '';
-  if (e) e.value = dr.end   || '';
-  // Default slider to 30 days if nothing set
-  const slider = document.getElementById('date-range-slider');
-  if (slider) slider.value = 30;
-  _updateDateRangeSlider(30);
-}
-
-function _updateDateRangeSlider(days) {
-  const lbl   = document.getElementById('date-range-slider-label');
-  const end   = document.getElementById('date-range-end');
-  const start = document.getElementById('date-range-start');
-  const d     = parseInt(days, 10);
-  if (lbl) lbl.textContent = d >= 365 ? '1 year' : d >= 30 ? `${Math.round(d/30)} month${d >= 60 ? 's' : ''}` : `${d} day${d > 1 ? 's' : ''}`;
-  const now    = new Date();
-  const endStr = now.toISOString().slice(0, 10);
-  const past   = new Date(now.getTime() - d * 86400000).toISOString().slice(0, 10);
-  if (end)   end.value   = endStr;
-  if (start) start.value = past;
-}
-
-function _applyDateRange() {
-  const s = (document.getElementById('date-range-start') || {}).value;
-  const e = (document.getElementById('date-range-end')   || {}).value;
-  if (!s || !e) return;
-  if (_activeDateTarget === 'cgs') {
-    _cgsFilter    = 'range';
-    _cgsDateRange = { start: s, end: e };
-    const cSel = document.getElementById('cgs-filter-select');
-    if (cSel) cSel.value = 'range';
-    const lbl = document.getElementById('cgs-filter-label');
-    if (lbl) { lbl.textContent = `${s} → ${e}`; lbl.classList.remove('d-none'); }
-    _renderCashGamesSummary(_allTournaments);
-  } else {
-    _tsFilter    = 'range';
-    _tsDateRange = { start: s, end: e };
-    const tSel = document.getElementById('ts-filter-select');
-    if (tSel) tSel.value = 'range';
-    const lbl = document.getElementById('ts-filter-label');
-    if (lbl) { lbl.textContent = `${s} → ${e}`; lbl.classList.remove('d-none'); }
-    _renderTournamentSummary(_allTournaments);
-  }
-}
 
 // ── Group sort helper ─────────────────────────────────────────────────────────
 function _sortGroups(rows, col, dir) {
@@ -992,7 +918,7 @@ function _sortGroups(rows, col, dir) {
 // ── Cash Games Summary ────────────────────────────────────────────────────────
 function _renderCashGamesSummary(tournaments) {
   const cashOnly = (tournaments || []).filter(t => !t.is_mtt);
-  const filtered = _filterTournamentsByDate(cashOnly, _cgsFilter, _cgsDateRange);
+  const filtered = _filterTournamentsByDate(cashOnly, _cgsFilter);
 
   const cgsSection = document.getElementById('cash-games-summary-section');
   if (cgsSection) cgsSection.classList.remove('d-none');
@@ -1267,13 +1193,14 @@ function _renderTournamentSummary(tournaments) {
 
   // Exclude Cash games, then apply date filter
   const mttOnly = (tournaments || []).filter(t => t.is_mtt);
-  const filtered = _filterTournamentsByDate(mttOnly, _tsFilter, _tsDateRange);
+  const filtered = _filterTournamentsByDate(mttOnly, _tsFilter);
 
   // Pills strip
   const strip = document.getElementById('tourney-strip-pro');
   if (strip) {
     const satCount = filtered.filter(t => (t.room_name || '').toLowerCase().includes('sat')).length;
-    const items = [['Tourneys', filtered.length], ['Satellite', satCount]];
+    const pkoCount = filtered.filter(t => (t.room_name || '').toLowerCase().includes('pko')).length;
+    const items = [['Tourneys', filtered.length], ['Satellite', satCount], ['PKO', pkoCount]];
     strip.innerHTML = items.map(([label, value]) =>
       `<span class="val-pill"><strong>${value}</strong><span class="val-pill-label">${label}</span></span>`
     ).join('<span class="val-sep">·</span>');
