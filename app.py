@@ -486,6 +486,7 @@ def _merge_tournament(db, bucket, uid, tid, new_records):
             'wtsd_pct':      stat.get('wtsd_pct', 0.0),
             'biggest_win':   stat.get('biggest_win', 0),
             'biggest_loss':  stat.get('biggest_loss', 0),
+            'max_players':   stat.get('max_players', 0),
             'storage_path':  storage_path,
             'updated_at':    int(_tt.time()),
         })

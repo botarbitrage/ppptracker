@@ -341,11 +341,13 @@ def process_hands(records):
                 t_wtsd_elig=0, t_wtsd=0,
                 t_biggest_win=0, t_biggest_loss=0,
                 blind_min=small_blind, blind_max=small_blind,
+                max_players=0,
             )
         t = tourney_map[tid]
         t['hands'] += 1
         t['net']   += profit
         t['last_chips'] = hero_chips
+        t['max_players'] = max(t['max_players'], len(active_seats))
         if timestamp and timestamp < (t['earliest_ts'] or timestamp + 1):
             t['earliest_ts'] = timestamp
         if _h_vpip:     t['vpip_count'] += 1
@@ -428,6 +430,7 @@ def process_hands(records):
             wtsd_pct=round(t['t_wtsd'] / t['t_wtsd_elig'] * 100, 1) if t['t_wtsd_elig'] else 0.0,
             biggest_win=t['t_biggest_win'],
             biggest_loss=t['t_biggest_loss'],
+            max_players=t.get('max_players', 0),
         ))
 
     tournaments = sorted(tourney_list, key=lambda x: x['tourney_id'])
