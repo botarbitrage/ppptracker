@@ -587,8 +587,8 @@ function renderHandsTable(hands, tbodyId, options = {}) {
   }).join('');
 }
 
-function renderRecentHands(hands)    { renderHandsTable(hands, 'recent-hands-tbody'); }
-function renderRecentWonHands(hands) { renderHandsTable(hands, 'recent-won-tbody'); }
+function renderRecentHands(hands)    { renderHandsTable(hands, 'recent-hands-tbody',  { showExport: true }); }
+function renderRecentWonHands(hands) { renderHandsTable(hands, 'recent-won-tbody',     { showExport: true }); }
 
 /* ── Table 2: Stats summary (preserved, not called by default) ── */
 

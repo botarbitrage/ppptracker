@@ -25,7 +25,7 @@
     rel="stylesheet"
     crossorigin="anonymous"
   />
-  <link rel="stylesheet" href="/static/style.css?v=46"/>
+  <link rel="stylesheet" href="/static/style.css?v=47"/>
 </head>
 <body>
 <!-- Skip navigation link (Fix 4) -->
@@ -295,8 +295,8 @@
               <th scope="col">Hole Cards</th>
               <th scope="col" class="d-none d-md-table-cell">Position</th>
               <th scope="col">Street</th>
-              <th scope="col" class="d-none d-md-table-cell">Result</th>
               <th scope="col" class="d-none d-lg-table-cell">Net P/L (BB)</th>
+              <th scope="col" class="text-center">Export</th>
               <th scope="col">Replay</th>
             </tr>
           </thead>
@@ -321,8 +321,8 @@
               <th scope="col">Hole Cards</th>
               <th scope="col" class="d-none d-md-table-cell">Position</th>
               <th scope="col">Street</th>
-              <th scope="col" class="d-none d-md-table-cell">Result</th>
               <th scope="col" class="d-none d-lg-table-cell">Net P/L (BB)</th>
+              <th scope="col" class="text-center">Export</th>
               <th scope="col">Replay</th>
             </tr>
           </thead>
@@ -376,7 +376,7 @@
                   title="Buy-in, ITM%, and finishing position are not available in the PPPoker API data."
                   aria-label="Buy-in, ITM%, and finishing position are not available in the PPPoker API data.">ⓘ</button>
         </h2>
-        <div class="ts-filter-pills">
+        <div class="ts-filter-pills d-flex align-items-center flex-nowrap">
           <span class="ts-filter-prefix">Date range</span>
           <div id="ts-filter-all"   class="ts-pill ts-pill-active" role="button" tabindex="0" onclick="_setTsFilter('all')">All</div>
           <div id="ts-filter-today" class="ts-pill"                role="button" tabindex="0" onclick="_setTsFilter('today')">Today</div>
@@ -447,7 +447,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
           Cash Games Summary
         </h2>
-        <div class="ts-filter-pills">
+        <div class="ts-filter-pills d-flex align-items-center flex-nowrap">
           <span class="ts-filter-prefix">Date range</span>
           <div id="cgs-filter-all"   class="ts-pill ts-pill-active" role="button" tabindex="0" onclick="_setCgsFilter('all')">All</div>
           <div id="cgs-filter-today" class="ts-pill"                role="button" tabindex="0" onclick="_setCgsFilter('today')">Today</div>
