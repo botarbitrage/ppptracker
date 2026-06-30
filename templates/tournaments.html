@@ -240,18 +240,18 @@ function renderTourneyRow(id, t) {
   // Rebuy — symbol only
   const rebuyCell = t.rebuy
     ? `<span class="td-yes">${(t.rebuy_type === 'unlimited' || t.rebuy_max_per_session == null) ? '∞' : 'x' + t.rebuy_max_per_session}</span>`
-    : `<span class="td-no">—</span>`;
+    : `<span class="td-no">No</span>`;
 
   // Add-on — cost multiplier (x3 means costs 3× buy-in)
   const addonCell = t.addon
     ? `<span class="td-yes">x${t.addon_cost_multiplier || 1}</span>`
-    : `<span class="td-no">—</span>`;
+    : `<span class="td-no">No</span>`;
 
-  // x2/x3 bulk — "Yes" when available
-  const hasBulk = [...(t.rebuy_bulk_options || []), ...(t.addon_bulk_options || [])].some(v => v > 1);
+  // x2/x3 bulk — "Yes" when rebuy_bulk_options contains values > 1
+  const hasBulk = (t.rebuy_bulk_options || []).some(v => v > 1);
   const bulkCell = hasBulk
     ? `<span class="td-yes">Yes</span>`
-    : `<span class="td-no">—</span>`;
+    : `<span class="td-no">No</span>`;
 
   return `<tr>
     <td><span class="tourney-name">${t.name || id}</span></td>
