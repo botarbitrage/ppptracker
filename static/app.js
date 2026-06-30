@@ -1484,7 +1484,8 @@ function _renderTournamentChart(hands, meta) {
   const lateRegSecs = (cfg.levelDurRebuyMin || cfg.levelDurMin) * cfg.lateRegLevels * 60;
   const itmSecs     = cfg.itmH * 3600;
   const endSecs     = cfg.endH * 3600;
-  const axisSecs    = endSecs + 30 * 60;
+  const lastHandElapsed = sorted[sorted.length - 1].ts - tournStart;
+  const axisSecs    = Math.max(endSecs + 30 * 60, lastHandElapsed + 15 * 60);
 
   // Build {x: elapsedSecs, y: value} datasets
   const chipDataset = [];
