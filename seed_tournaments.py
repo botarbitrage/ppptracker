@@ -574,7 +574,7 @@ TOURNAMENTS = [
             "buy_in_prize": 27.36,
             "buy_in_rake": 3.04,
             "starting_chips": 100000,
-            "starting_time": "8:00 PM",
+            "starting_time": "6:30 PM",            # ADL time
             "level_duration_min": 12,           # After LR
             "level_duration_rebuy_min": None,    # No rebuy period
             "level_duration_ft_min": 10,         # Final Table
@@ -610,7 +610,7 @@ TOURNAMENTS = [
             "buy_in_prize": 6.84,
             "buy_in_rake": 0.76,
             "starting_chips": 20000,
-            "starting_time": "7:00 PM",
+            "starting_time": "7:30 PM",            # ADL time
             "level_duration_min": 10,            # After LR
             "level_duration_rebuy_min": 12,      # Before LR (rebuy period)
             "level_duration_ft_min": 10,         # Final Table
@@ -647,7 +647,7 @@ TOURNAMENTS = [
             "buy_in_prize": 2.74,
             "buy_in_rake": 0.30,
             "starting_chips": 20000,
-            "starting_time": "9:00 PM",           # placeholder — update if different
+            "starting_time": "6:30 PM",            # ADL time
             "level_duration_min": 8,               # After LR
             "level_duration_rebuy_min": 10,        # Before LR (rebuy period)
             "level_duration_ft_min": 8,            # Final Table
@@ -686,7 +686,7 @@ TOURNAMENTS = [
             "buy_in_prize": 1.37,
             "buy_in_rake": 0.15,
             "starting_chips": 10000,
-            "starting_time": "8:00 PM",           # placeholder — update if different
+            "starting_time": "7:30 PM",            # ADL time
             "level_duration_min": 5,               # After LR
             "level_duration_rebuy_min": 6,         # Before LR (rebuy period)
             "level_duration_ft_min": 5,            # Final Table

@@ -34,8 +34,22 @@
 <!-- Outer container is now <main> for landmark (Fix 5 & 6) -->
 <main id="main-content" class="container-fluid py-4 px-3 px-md-5">
 
-  <!-- ── Auth bar ─────────────────────────────────────────── -->
-  <div id="auth-bar" class="auth-bar mb-2"></div>
+  <!-- ── Auth bar + Timezone row ─────────────────────────── -->
+  <div class="d-flex align-items-center justify-content-between mb-2 gap-2">
+    <div id="auth-bar" class="auth-bar"></div>
+    <div class="player-tz">
+      <span class="tz-label">Timezone</span>
+      <select id="tz-select" class="tz-select form-select form-select-sm" aria-label="Timezone">
+        <option value="Australia/Adelaide">ADL</option>
+        <option value="Australia/Brisbane">BNE</option>
+        <option value="Australia/Darwin">DRW</option>
+        <option value="Australia/Melbourne">MEL</option>
+        <option value="Australia/Perth">PER</option>
+        <option value="Australia/Sydney">SYD</option>
+        <option value="UTC">UTC</option>
+      </select>
+    </div>
+  </div>
 
   <!-- ── Header ───────────────────────────────────────────── -->
   <div class="text-center mb-3">
@@ -238,18 +252,6 @@
               <span class="hstat-pill"><span id="hs-won">—</span>&thinsp;WON</span>
             </div>
           </div>
-        </div>
-        <div class="player-tz">
-          <span class="tz-label">Timezone</span>
-          <select id="tz-select" class="tz-select form-select form-select-sm" aria-label="Timezone">
-            <option value="Australia/Adelaide">ADL</option>
-            <option value="Australia/Brisbane">BNE</option>
-            <option value="Australia/Darwin">DRW</option>
-            <option value="Australia/Melbourne">MEL</option>
-            <option value="Australia/Perth">PER</option>
-            <option value="Australia/Sydney">SYD</option>
-            <option value="UTC">UTC</option>
-          </select>
         </div>
       </div>
     </div>

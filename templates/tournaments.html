@@ -52,94 +52,50 @@
       margin-bottom: 12px;
     }
 
-    /* ── Tournament cards ── */
-    .tourney-card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px 18px;
-      margin-bottom: 12px;
-      transition: border-color .18s;
-    }
-    .tourney-card:hover { border-color: rgba(0,230,118,.35); }
-
-    .tourney-card-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-    .tourney-name {
-      font-family: var(--font-head);
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: .3px;
-    }
+    /* ── Tournament badge ── */
     .tourney-badge {
       display: inline-block;
       font-family: var(--font-head);
-      font-size: .65rem;
+      font-size: .62rem;
       font-weight: 700;
       letter-spacing: .8px;
       text-transform: uppercase;
-      padding: 2px 8px;
+      padding: 2px 7px;
       border-radius: 4px;
-      flex-shrink: 0;
+      white-space: nowrap;
     }
     .tourney-badge-mtt   { background: rgba(64,196,255,.1); color: var(--blue); border: 1px solid rgba(64,196,255,.25); }
     .tourney-badge-pko   { background: rgba(0,230,118,.1); color: var(--green); border: 1px solid rgba(0,230,118,.25); }
     .tourney-badge-sat   { background: rgba(204,204,0,.1); color: var(--yellow); border: 1px solid rgba(204,204,0,.25); }
 
-    .tourney-stats {
-      display: grid;
-      grid-template-columns: minmax(90px,1fr) minmax(90px,1fr) minmax(130px,1.4fr) minmax(110px,1.2fr) minmax(100px,1fr);
-      gap: 6px 24px;
-    }
-    @media (max-width: 600px) {
-      .tourney-stats { grid-template-columns: 1fr 1fr; }
-    }
-    .tourney-stat {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .tourney-stat-label {
+    /* ── Tournament table ── */
+    .tourney-table th {
       font-family: var(--font-head);
-      font-size: .65rem;
-      font-weight: 600;
-      letter-spacing: .7px;
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .8px;
       text-transform: uppercase;
       color: var(--muted);
+      white-space: nowrap;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 12px;
     }
-    .tourney-stat-value {
+    .tourney-table td {
       font-family: var(--font-head);
-      font-size: .9rem;
+      font-size: .84rem;
+      padding: 10px 12px;
+      vertical-align: middle;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+    .tourney-table tr:last-child td { border-bottom: none; }
+    .tourney-name {
       font-weight: 700;
       color: var(--text);
     }
-    .tourney-stat-value.highlight { color: var(--green); }
-
-    .tourney-card-footer {
-      margin-top: 14px;
-      padding-top: 12px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .tourney-pill {
-      font-family: var(--font-body);
-      font-size: .75rem;
-      color: var(--muted);
-      background: var(--panel-alt);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 2px 10px;
-    }
-    .tourney-pill.pill-yes { color: var(--green); border-color: rgba(0,230,118,.22); background: rgba(0,230,118,.06); }
-    .tourney-pill.pill-no  { color: var(--muted); }
+    .td-highlight { color: var(--green); font-weight: 700; }
+    .td-yes { color: var(--green); }
+    .td-no  { color: var(--muted); }
+    .td-muted { color: var(--muted); }
 
     /* ── Coming soon sections ── */
     .coming-soon-card {
@@ -216,6 +172,23 @@
         Loading tournaments…
       </div>
     </div>
+    <!-- Table rendered here by JS -->
+    <div class="table-responsive d-none" id="tourney-table-wrap">
+      <table class="table table-dark table-striped table-hover tourney-table mb-0">
+        <thead>
+          <tr>
+            <th>Tournament</th>
+            <th>Buy-in</th>
+            <th>Start</th>
+            <th>Start Chips</th>
+            <th>Rebuy</th>
+            <th>Add-on</th>
+            <th>x2 / x3</th>
+          </tr>
+        </thead>
+        <tbody id="tourney-table-tbody"></tbody>
+      </table>
+    </div>
   </div>
 
   <!-- ── Bankroll tab ────────────────────────────────────── -->
@@ -273,89 +246,48 @@ function badgeClass(type) {
   return 'tourney-badge-mtt';
 }
 
-function renderTourneyCard(id, t) {
-  const badge = `<span class="tourney-badge ${badgeClass(t.type)}">${t.type || 'MTT'}</span>`;
-  const buyIn = t.buy_in_total ? `AUD ${t.buy_in_total.toFixed(2)}` : '—';
-  const chips = fmtChips(t.starting_chips);
+function renderTourneyRow(id, t) {
+  const badge  = `<span class="tourney-badge ${badgeClass(t.type)}">${t.type || 'MTT'}</span>`;
+  const buyIn  = t.buy_in_total ? `<span class="td-highlight">AUD ${t.buy_in_total.toFixed(2)}</span>` : '<span class="td-muted">—</span>';
+  const chips  = fmtChips(t.starting_chips);
+  const start  = t.starting_time || '—';
 
-  // ── Level time: Before LR / After LR / Final Table ─────────────────────────
-  const beforeLR = t.level_duration_rebuy_min || t.level_duration_min || '—';
-  const afterLR  = t.level_duration_min || '—';
-  const ftMin    = t.level_duration_ft_min || t.level_duration_min || '—';
-  const levelTimeStr  = `${beforeLR}/${afterLR}/${ftMin}min`;
-  const levelTimeHTML = `${levelTimeStr} <button class="info-badge-btn level-time-info"
-      data-bs-toggle="tooltip" data-bs-placement="top"
-      title="Before LR / After LR / Final Table"
-      aria-label="Level time breakdown: Before LR / After LR / Final Table">ⓘ</button>`;
-
-  // ── Pills ────────────────────────────────────────────────────────────────────
-  const pills = [];
-
-  // Rebuy
+  // Rebuy cell
+  let rebuyCell;
   if (t.rebuy) {
     if (t.rebuy_type === 'unlimited' || t.rebuy_max_per_session == null) {
-      pills.push(`<span class="tourney-pill pill-yes">∞ rebuys</span>`);
+      rebuyCell = `<span class="td-yes">∞ unlimited</span>`;
     } else {
-      const n = t.rebuy_max_per_session;
-      pills.push(`<span class="tourney-pill pill-yes">x${n} rebuy${n !== 1 ? 's' : ''}</span>`);
+      rebuyCell = `<span class="td-yes">x${t.rebuy_max_per_session}</span>`;
     }
   } else {
-    pills.push(`<span class="tourney-pill pill-no">No rebuy</span>`);
+    rebuyCell = `<span class="td-no">No</span>`;
   }
 
-  // Add-on
+  // Add-on cell
+  let addonCell;
   if (t.addon) {
     const n = t.addon_max_units || 1;
-    pills.push(`<span class="tourney-pill pill-yes">x${n} add-on${n !== 1 ? 's' : ''}</span>`);
+    addonCell = `<span class="td-yes">x${n}</span>`;
   } else {
-    pills.push(`<span class="tourney-pill pill-no">No add-on</span>`);
+    addonCell = `<span class="td-no">No</span>`;
   }
 
-  // Extra options (x2/x3 bulk purchase)
-  const _bulkOpts = [...(t.rebuy_bulk_options || []), ...(t.addon_bulk_options || [])].filter(v => v > 1);
-  const _maxBulk = _bulkOpts.length ? Math.max(..._bulkOpts) : 0;
-  if (_maxBulk > 1) {
-    pills.push(`<span class="tourney-pill pill-yes">x${_maxBulk} extra option</span>`);
-  } else {
-    pills.push(`<span class="tourney-pill pill-no">No extra options</span>`);
-  }
+  // x2/x3 bulk options
+  const bulkOpts = [...new Set([...(t.rebuy_bulk_options || []), ...(t.addon_bulk_options || [])].filter(v => v > 1))].sort();
+  const bulkCell = bulkOpts.length
+    ? `<span class="td-yes">${bulkOpts.map(v => 'x' + v).join(' / ')}</span>`
+    : `<span class="td-no">—</span>`;
 
-  if (t.is_pko) pills.push(`<span class="tourney-pill pill-yes">🏹 PKO bounties</span>`);
-  pills.push(`<span class="tourney-pill">Late reg lvl ${t.late_reg_level || '—'}</span>`);
-
-  return `
-    <div class="tourney-card">
-      <div class="tourney-card-header">
-        <div class="tourney-name">${t.name || id}</div>
-        ${badge}
-      </div>
-      <div class="tourney-stats">
-        <div class="tourney-stat">
-          <span class="tourney-stat-label">Buy-in</span>
-          <span class="tourney-stat-value highlight">${buyIn}</span>
-        </div>
-        <div class="tourney-stat">
-          <span class="tourney-stat-label">Start chips</span>
-          <span class="tourney-stat-value">${chips}</span>
-        </div>
-        <div class="tourney-stat">
-          <span class="tourney-stat-label">Level time <button class="info-badge-btn level-time-info"
-              data-bs-toggle="tooltip" data-bs-placement="top"
-              title="Before LR / After LR / Final Table"
-              aria-label="Level time breakdown: Before LR / After LR / Final Table">ⓘ</button></span>
-          <span class="tourney-stat-value">${levelTimeStr}</span>
-        </div>
-        <div class="tourney-stat">
-          <span class="tourney-stat-label">Starting time</span>
-          <span class="tourney-stat-value">${t.starting_time || '—'}</span>
-        </div>
-        <div class="tourney-stat">
-          <span class="tourney-stat-label">Break</span>
-          <span class="tourney-stat-value">${t.break_duration_min || '—'}/${t.break_every_min || '—'} min</span>
-        </div>
-      </div>
-      <div class="tourney-card-footer">${pills.join('')}</div>
-    </div>`;
+  return `<tr>
+    <td><span class="tourney-name">${t.name || id}</span>&nbsp;${badge}</td>
+    <td>${buyIn}</td>
+    <td class="td-muted">${start}</td>
+    <td>${chips}</td>
+    <td>${rebuyCell}</td>
+    <td>${addonCell}</td>
+    <td>${bulkCell}</td>
+  </tr>`;
 }
 
 // ── Firebase + data load ──────────────────────────────────────────────────────
@@ -384,6 +316,7 @@ async function loadTournaments() {
 
     if (snap.empty) {
       container.innerHTML = `<p class="text-center" style="color:var(--muted);padding:24px 0">No tournaments found. Run the seed script to populate the list.</p>`;
+      container.classList.remove('d-none');
       return;
     }
 
@@ -391,18 +324,19 @@ async function loadTournaments() {
     snap.forEach(doc => docs.push({ id: doc.id, data: doc.data() }));
     docs.sort((a, b) => (a.data.buy_in_total || 0) - (b.data.buy_in_total || 0));
 
-    let html = '';
-    docs.forEach(({ id, data }) => { html += renderTourneyCard(id, data); });
-    container.innerHTML = html;
-    // Init Bootstrap tooltips for any newly rendered elements
-    container.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
-      new bootstrap.Tooltip(el);
-    });
+    let rows = '';
+    docs.forEach(({ id, data }) => { rows += renderTourneyRow(id, data); });
+    container.classList.add('d-none');
+    const tableWrap = document.getElementById('tourney-table-wrap');
+    const tbody = document.getElementById('tourney-table-tbody');
+    tbody.innerHTML = rows;
+    tableWrap.classList.remove('d-none');
 
   } catch (err) {
     container.innerHTML = `<p class="text-center" style="color:var(--muted);padding:24px 0">
       Could not load tournaments. ${err.message || 'Check console for details.'}
     </p>`;
+    container.classList.remove('d-none');
     console.error('Tournaments load error:', err);
   }
 }
