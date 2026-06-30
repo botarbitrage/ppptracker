@@ -216,6 +216,7 @@ def build_hand_rows(records):
         hero        = _hero_player(players)
         hero_seatid = hero.get('seatid') if hero else None
         hero_uid    = hero.get('uid')    if hero else None
+        hero_chips  = hero.get('hand_chips', 0) if hero else 0
 
         dealer_seatid = room.get('dealer_seatid')
         active_seats  = [p.get('seatid') for p in players if p.get('seatid') is not None]
@@ -232,6 +233,7 @@ def build_hand_rows(records):
             result=result,
             profit=profit,
             big_blind=big_blind,
+            chip_stack=hero_chips,
             replay_url=_replay_url(share_key),
         ))
     return rows

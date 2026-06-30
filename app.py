@@ -681,11 +681,13 @@ def tournament_hands(tourney_id):
     if not uid:
         return jsonify({'error': 'Unauthorized'}), 401
 
-    records, _doc = _fetch_tournament_records(uid, tourney_id)
+    records, doc = _fetch_tournament_records(uid, tourney_id)
     if records is None:
         return jsonify({'error': 'Tournament data not available'}), 404
 
-    return jsonify({'hands': build_hand_rows(records)})
+    meta = {k: (doc or {}).get(k) for k in
+            ['room_name', 'earliest_ts', 'last_chips', 'first_chips', 'finish_busted']}
+    return jsonify({'hands': build_hand_rows(records), 'meta': meta})
 
 
 @app.route('/api/tournaments/<tourney_id>/export', methods=['POST'])

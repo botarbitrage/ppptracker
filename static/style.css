@@ -1508,3 +1508,73 @@ tr.row-flash > td {
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
 }
+
+/* ── Tournament Progress Graph ─────────────────────────────────── */
+.tourney-graph-wrap {
+  border-bottom: 1px solid var(--border);
+  padding: 14px 18px 16px;
+  background: rgba(0,0,0,.12);
+}
+
+.tourney-graph-controls {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.tg-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tg-label {
+  font-family: var(--font-head);
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.tg-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: .75rem;
+  font-weight: 500;
+  padding: 3px 9px;
+  cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s;
+  line-height: 1.4;
+}
+.tg-btn:hover {
+  color: var(--text);
+  border-color: var(--green-dim);
+}
+.tg-btn.active {
+  background: rgba(0,230,118,.12);
+  border-color: var(--green);
+  color: var(--green);
+  font-weight: 600;
+}
+
+.tourney-graph-canvas-wrap {
+  position: relative;
+  height: 260px;
+}
+
+@media (min-width: 768px) {
+  .tourney-graph-canvas-wrap { height: 310px; }
+}
+@media (max-width: 575px) {
+  .tourney-graph-wrap { padding: 10px 12px 14px; }
+  .tourney-graph-canvas-wrap { height: 220px; }
+  .tg-btn { font-size: .7rem; padding: 2px 7px; }
+}

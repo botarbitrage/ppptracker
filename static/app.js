@@ -1287,6 +1287,471 @@ function _toggleTourneyDetail(rowId) {
   if (chevron) chevron.classList.toggle('tsum-chevron-open');
 }
 
+/* ── Tournament Progress Graph ──────────────────────────────────────────── */
+
+let _tgChart  = null;
+let _tgYMode  = 'both';  // 'both' | 'chips' | 'bb'
+let _tgXMode  = 'time';  // 'time' | 'level' | 'hand'
+let _tgState  = null;    // computed chart state shared across toggle updates
+
+// Tournament configs: ITM bubble / expected-end hours from tournament start
+const _TG_CFGS = {
+  'DEEP FREEZE': { itmH: 4.0, endH: 5.5, lateRegLevels: 14, levelDurRebuyMin: null, levelDurMin: 12 },
+  'CRAZY 2':     { itmH: 3.0, endH: 4.0, lateRegLevels: 12, levelDurRebuyMin: 12,   levelDurMin: 10 },
+  'LUCKY DAY':   { itmH: 3.0, endH: 4.0, lateRegLevels: 11, levelDurRebuyMin: 10,   levelDurMin:  8 },
+  'EAST PKO SAT':{ itmH: 3.0, endH: 4.0, lateRegLevels: 10, levelDurRebuyMin:  6,   levelDurMin:  5 },
+};
+const _TG_CFG_DEFAULT = { itmH: 3.0, endH: 4.0, lateRegLevels: 12, levelDurRebuyMin: 12, levelDurMin: 10 };
+
+// BB → Level lookup (base levels 1-51 + Crazy 2 / Deep Freeze extra 52-68)
+const _TG_BB_LVL = (() => {
+  const pairs = [
+    [1,50],[2,100],[3,200],[4,300],[5,400],[6,500],[7,600],[8,800],
+    [9,1000],[10,1200],[11,1600],[12,2000],[13,2400],[14,3000],[15,4000],
+    [16,5000],[17,6000],[18,8000],[19,10000],[20,12000],[21,16000],[22,20000],
+    [23,24000],[24,30000],[25,40000],[26,50000],[27,60000],[28,80000],
+    [29,100000],[30,120000],[31,160000],[32,200000],[33,240000],[34,300000],
+    [35,400000],[36,500000],[37,600000],[38,800000],[39,1000000],[40,1200000],
+    [41,1600000],[42,2000000],[43,3000000],[44,4000000],[45,5000000],
+    [46,6000000],[47,8000000],[48,10000000],[49,12000000],[50,16000000],
+    [51,20000000],
+    [52,30000000],[53,40000000],[54,60000000],[55,80000000],[56,100000000],
+    [57,120000000],[58,160000000],[59,200000000],[60,300000000],[61,400000000],
+    [62,600000000],[63,800000000],[64,1000000000],[65,1200000000],
+    [66,1600000000],[67,2000000000],[68,3000000000],
+  ];
+  const m = {};
+  for (const [lvl, bb] of pairs) m[bb] = lvl;
+  return m;
+})();
+
+// Lucky Day BB → Level (60-level override structure)
+const _TG_LUCKY_BB_LVL = (() => {
+  const bbs = [
+    100,200,300,400,600,800,1000,1200,1600,2000,2400,3000,4000,5000,
+    6000,8000,10000,12000,16000,20000,24000,30000,40000,50000,60000,
+    80000,100000,120000,160000,200000,240000,300000,400000,500000,
+    600000,800000,1000000,1200000,1600000,2000000,3000000,4000000,
+    5000000,6000000,8000000,10000000,12000000,16000000,20000000,
+    24000000,30000000,40000000,50000000,60000000,80000000,100000000,
+    120000000,160000000,200000000,240000000,
+  ];
+  const m = {};
+  bbs.forEach((bb, i) => { m[bb] = i + 1; });
+  return m;
+})();
+
+function _tgGetCfg(roomName) {
+  const up = (roomName || '').toUpperCase();
+  for (const [key, cfg] of Object.entries(_TG_CFGS)) {
+    if (up.includes(key)) return cfg;
+  }
+  return _TG_CFG_DEFAULT;
+}
+
+function _tgInferLevel(bigBlind, roomName) {
+  if (!bigBlind) return null;
+  const isLucky = (roomName || '').toUpperCase().includes('LUCKY DAY');
+  const map = isLucky ? _TG_LUCKY_BB_LVL : _TG_BB_LVL;
+  // Try direct (display units) then /100 (raw units) for robustness
+  return map[bigBlind] || map[Math.round(bigBlind / 100)] || null;
+}
+
+function _tgFmtElapsed(secs) {
+  if (secs < 0) return '-' + _tgFmtElapsed(-secs);
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  return h > 0 ? `${h}h ${String(m).padStart(2, '0')}m` : `${m}m`;
+}
+
+function _tgFmtK(n) {
+  if (n == null) return '—';
+  const a = Math.abs(n);
+  if (a >= 1e9)  return (n / 1e9).toFixed(2).replace(/\.?0+$/, '') + 'B';
+  if (a >= 1e6)  return (n / 1e6).toFixed(2).replace(/\.?0+$/, '') + 'M';
+  if (a >= 1000) return (n / 1000).toFixed(1).replace(/\.?0+$/, '') + 'K';
+  return n.toLocaleString();
+}
+
+// Custom Chart.js plugin — draws dashed vertical reference lines + labels
+const _TG_REFLINES_PLUGIN = {
+  id: 'tgRefLines',
+  afterDraw(chart) {
+    const lines = chart.config.options.tgRefLines;
+    if (!lines || !lines.length) return;
+    const { ctx, chartArea: ca, scales: { x } } = chart;
+    if (!x) return;
+    ctx.save();
+    ctx.font = "10px 'Exo 2', sans-serif";
+    for (const { idx, color, label } of lines) {
+      if (idx < 0 || idx >= chart.data.labels.length) continue;
+      const px = x.getPixelForValue(idx);
+      if (px < ca.left || px > ca.right) continue;
+      ctx.beginPath();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([5, 4]);
+      ctx.moveTo(px, ca.top);
+      ctx.lineTo(px, ca.bottom);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      const parts = label.split('\n');
+      const tw = Math.max(...parts.map(l => ctx.measureText(l).width));
+      const bh = parts.length * 14 + 6;
+      const bw = tw + 10;
+      const bx = Math.min(px + 4, ca.right - bw - 2);
+      const by = ca.top + 5;
+      ctx.fillStyle = 'rgba(13,17,23,0.88)';
+      if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 3); ctx.fill(); }
+      else { ctx.fillRect(bx, by, bw, bh); }
+      ctx.fillStyle = color;
+      parts.forEach((l, i) => ctx.fillText(l, bx + 5, by + 13 + i * 14));
+    }
+    ctx.restore();
+  },
+};
+
+// Custom Chart.js plugin — draws ring + icon markers for biggest win/loss/bust
+const _TG_MARKERS_PLUGIN = {
+  id: 'tgMarkers',
+  afterDatasetsDraw(chart) {
+    const markers = chart.config.options.tgMarkers;
+    if (!markers || !markers.length) return;
+    const { ctx } = chart;
+    const meta0 = chart.getDatasetMeta(0);
+    ctx.save();
+    for (const { idx, color, icon } of markers) {
+      const pt = meta0.data[idx];
+      if (!pt) continue;
+      ctx.fillStyle   = color + '22';
+      ctx.strokeStyle = color;
+      ctx.lineWidth   = 2;
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, 9, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle     = color;
+      ctx.font          = 'bold 9px sans-serif';
+      ctx.textAlign     = 'center';
+      ctx.textBaseline  = 'middle';
+      ctx.fillText(icon, pt.x, pt.y);
+    }
+    ctx.textAlign    = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.restore();
+  },
+};
+
+function _tgGetXLabels(state) {
+  if (_tgXMode === 'level') return state.levelLabels;
+  if (_tgXMode === 'hand')  return state.handLabels;
+  return state.timeLabels;
+}
+
+function _renderTournamentChart(hands, meta) {
+  const wrap = document.getElementById('tourney-graph-wrap');
+  if (!wrap) return;
+  if (_tgChart) { _tgChart.destroy(); _tgChart = null; }
+  _tgState = null;
+
+  if (!hands || !hands.length) { wrap.classList.add('d-none'); return; }
+
+  const sorted = [...hands].filter(h => h.ts).sort((a, b) => a.ts - b.ts);
+  if (!sorted.length) { wrap.classList.add('d-none'); return; }
+
+  const earliestTs     = (meta && meta.earliest_ts) || sorted[0].ts;
+  const roomName       = (meta && meta.room_name)   || '';
+  const isFinishBusted = !!(meta && meta.finish_busted);
+  const cfg            = _tgGetCfg(roomName);
+
+  // Seconds from player's first hand to key milestones
+  const lateRegSecs = ((cfg.levelDurRebuyMin || cfg.levelDurMin) * cfg.lateRegLevels) * 60;
+  const itmSecs     = cfg.itmH * 3600;
+  const endSecs     = cfg.endH * 3600;
+
+  // Extend x-axis by adding phantom (null) points at reference times that fall
+  // after the last real hand, so reference lines are always visible
+  const lastRealTs = sorted[sorted.length - 1].ts;
+  const allPoints  = [...sorted];
+  const addedTs    = new Set();
+  for (const secs of [lateRegSecs, itmSecs, endSecs]) {
+    const refTs = earliestTs + secs;
+    if (refTs > lastRealTs + 45 && !addedTs.has(refTs)) {
+      allPoints.push({ ts: refTs, chip_stack: null, big_blind: null, profit: null, phantom: true });
+      addedTs.add(refTs);
+    }
+  }
+  allPoints.sort((a, b) => a.ts - b.ts);
+
+  // Build per-point data arrays
+  const chipData    = [];
+  const bbData      = [];
+  const timeLabels  = [];
+  const levelLabels = [];
+  const handLabels  = [];
+  let handNum = 0;
+  let bigWinIdx = -1, bigWinVal = -Infinity;
+  let bigLossIdx = -1, bigLossVal = Infinity;
+  let lastRealIdx = -1;
+
+  for (let i = 0; i < allPoints.length; i++) {
+    const h       = allPoints[i];
+    const elapsed = h.ts - earliestTs;
+    const chips   = h.chip_stack != null ? h.chip_stack : null;
+    const bb      = chips != null && h.big_blind ? parseFloat((chips / h.big_blind).toFixed(1)) : null;
+
+    chipData.push(chips);
+    bbData.push(bb);
+    timeLabels.push(_tgFmtElapsed(elapsed));
+
+    if (!h.phantom) {
+      handNum++;
+      lastRealIdx = i;
+      const lvl = _tgInferLevel(h.big_blind, roomName);
+      levelLabels.push(lvl ? `L${lvl}` : '?');
+      handLabels.push(handNum);
+      if ((h.profit || 0) > bigWinVal)  { bigWinVal  = h.profit; bigWinIdx  = i; }
+      if ((h.profit || 0) < bigLossVal) { bigLossVal = h.profit; bigLossIdx = i; }
+    } else {
+      levelLabels.push('');
+      handLabels.push('');
+    }
+  }
+
+  // Find index of the point closest in time to each reference milestone
+  function _refIdx(secs) {
+    const target = earliestTs + secs;
+    let best = 0, bestDiff = Infinity;
+    for (let i = 0; i < allPoints.length; i++) {
+      const d = Math.abs(allPoints[i].ts - target);
+      if (d < bestDiff) { bestDiff = d; best = i; }
+    }
+    return best;
+  }
+
+  const lateRegIdx = _refIdx(lateRegSecs);
+  const itmIdx     = _refIdx(itmSecs);
+  const endIdx     = _refIdx(endSecs);
+
+  // Reference lines (vertical dashed)
+  const refLines = [
+    { idx: lateRegIdx, color: 'rgba(204,204,0,0.9)',  label: 'Late Reg\nClose'         },
+    { idx: itmIdx,     color: 'rgba(255,152,0,0.9)',  label: `ITM Bubble\n${cfg.itmH}h` },
+    { idx: endIdx,     color: 'rgba(255,82,82,0.9)',  label: `Exp. End\n${cfg.endH}h`   },
+  ];
+
+  // Critical point markers (ring + icon drawn over the chip line)
+  const markers = [];
+  if (bigWinIdx  >= 0 && bigWinVal  > 0)    markers.push({ idx: bigWinIdx,  color: '#00e676', icon: '▲' });
+  if (bigLossIdx >= 0 && bigLossVal < 0)    markers.push({ idx: bigLossIdx, color: '#ff5252', icon: '▼' });
+  if (isFinishBusted && lastRealIdx >= 0)   markers.push({ idx: lastRealIdx, color: '#ff5252', icon: '✕' });
+
+  _tgState = { allPoints, chipData, bbData, timeLabels, levelLabels, handLabels,
+               lateRegIdx, itmIdx, endIdx, refLines, markers, earliestTs, roomName };
+
+  _tgBuildChart();
+  wrap.classList.remove('d-none');
+}
+
+function _tgBuildChart() {
+  if (!_tgState) return;
+  const { allPoints, chipData, bbData, refLines, markers, earliestTs, roomName } = _tgState;
+  const canvas = document.getElementById('tourney-graph-canvas');
+  if (!canvas) return;
+
+  const chipColor = 'rgba(64,196,255,1)';
+  const bbColor   = 'rgba(0,230,118,1)';
+  const showLeft  = _tgYMode !== 'bb';
+  const showRight = _tgYMode !== 'chips';
+
+  if (_tgChart) { _tgChart.destroy(); _tgChart = null; }
+
+  if (typeof Chart === 'undefined') {
+    console.warn('Chart.js not loaded yet');
+    return;
+  }
+
+  Chart.register(_TG_REFLINES_PLUGIN, _TG_MARKERS_PLUGIN);
+
+  _tgChart = new Chart(canvas.getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: _tgGetXLabels(_tgState),
+      datasets: [
+        {
+          label: 'Chip Stack',
+          data: chipData,
+          borderColor: chipColor,
+          backgroundColor: 'rgba(64,196,255,0.07)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 2,
+          pointHoverRadius: 6,
+          pointBackgroundColor: chipColor,
+          pointBorderColor: chipColor,
+          yAxisID: 'yLeft',
+          spanGaps: false,
+          hidden: _tgYMode === 'bb',
+          order: 1,
+        },
+        {
+          label: 'BB Count',
+          data: bbData,
+          borderColor: bbColor,
+          backgroundColor: 'rgba(0,230,118,0.05)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 2,
+          pointHoverRadius: 6,
+          pointBackgroundColor: bbColor,
+          pointBorderColor: bbColor,
+          yAxisID: 'yRight',
+          spanGaps: false,
+          hidden: _tgYMode === 'chips',
+          order: 2,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 300 },
+      interaction: { mode: 'index', intersect: false },
+      tgRefLines: refLines,
+      tgMarkers:  markers,
+      plugins: {
+        legend: {
+          display: true,
+          labels: {
+            color: '#d0ddd0',
+            font: { family: "'Exo 2', sans-serif", size: 12 },
+            boxWidth: 12,
+            filter: item => !item.hidden,
+          },
+        },
+        tooltip: {
+          backgroundColor: 'rgba(13,17,23,0.95)',
+          borderColor: '#1e2d1e',
+          borderWidth: 1,
+          titleColor: '#d0ddd0',
+          bodyColor: '#8aaa8a',
+          padding: 10,
+          displayColors: true,
+          boxWidth: 8,
+          boxHeight: 8,
+          filter: item => !item.dataset.hidden,
+          callbacks: {
+            title(items) {
+              if (!items.length) return '';
+              const i   = items[0].dataIndex;
+              const h   = allPoints[i];
+              if (!h || h.phantom) return '';
+              // Count only non-phantom hands up to this index
+              let hn = 0;
+              for (let j = 0; j <= i; j++) if (!allPoints[j].phantom) hn++;
+              const elapsed = _tgFmtElapsed(h.ts - earliestTs);
+              const lvl     = _tgInferLevel(h.big_blind, roomName);
+              return `Hand #${hn} · +${elapsed}${lvl ? ' · L' + lvl : ''}`;
+            },
+            label(item) {
+              const i = item.dataIndex;
+              const h = allPoints[i];
+              if (!h || h.phantom) return null;
+              if (item.datasetIndex === 0) {
+                return `  Chips: ${_tgFmtK(h.chip_stack)}`;
+              } else {
+                const bb = h.chip_stack && h.big_blind
+                  ? (h.chip_stack / h.big_blind).toFixed(1) : '—';
+                return `  BBs:   ${bb}`;
+              }
+            },
+            afterBody(items) {
+              if (!items.length) return [];
+              const i = items[0].dataIndex;
+              const h = allPoints[i];
+              if (!h || h.phantom) return [];
+              const lines = [];
+              if (h.profit) {
+                const sign = h.profit > 0 ? '+' : '';
+                lines.push(`  P/L:   ${sign}${_tgFmtK(h.profit)}`);
+              }
+              if (h.position)                              lines.push(`  Pos:   ${h.position}`);
+              if (h.last_street && h.last_street !== 'Pre') lines.push(`  Street: ${h.last_street}`);
+              if (h.hole_cards?.length) {
+                const cards = h.hole_cards.map(c => c.display || '?').join(' ');
+                lines.push(`  Cards: ${cards}`);
+              }
+              return lines;
+            },
+          },
+        },
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: '#6b8c6b',
+            font: { size: 10, family: "'Exo 2', sans-serif" },
+            maxTicksLimit: 14,
+            maxRotation: 0,
+            autoSkip: true,
+          },
+          grid: { color: 'rgba(30,45,30,0.4)' },
+        },
+        yLeft: {
+          type: 'linear',
+          position: 'left',
+          display: showLeft,
+          ticks: {
+            color: chipColor,
+            font: { size: 10, family: "'Exo 2', sans-serif" },
+            callback: v => _tgFmtK(v),
+          },
+          grid: { color: 'rgba(30,45,30,0.4)' },
+        },
+        yRight: {
+          type: 'linear',
+          position: 'right',
+          display: showRight,
+          ticks: {
+            color: bbColor,
+            font: { size: 10, family: "'Exo 2', sans-serif" },
+            callback: v => `${v}BB`,
+          },
+          grid: { drawOnChartArea: false },
+        },
+      },
+    },
+  });
+}
+
+function _tgSetY(mode) {
+  _tgYMode = mode;
+  document.querySelectorAll('[id^="tg-y-"]').forEach(b => b.classList.remove('active'));
+  document.getElementById(`tg-y-${mode}`)?.classList.add('active');
+  if (!_tgChart) return;
+  _tgChart.data.datasets[0].hidden = (mode === 'bb');
+  _tgChart.data.datasets[1].hidden = (mode === 'chips');
+  _tgChart.options.scales.yLeft.display  = (mode !== 'bb');
+  _tgChart.options.scales.yRight.display = (mode !== 'chips');
+  _tgChart.update();
+}
+
+function _tgSetX(mode) {
+  _tgXMode = mode;
+  document.querySelectorAll('[id^="tg-x-"]').forEach(b => b.classList.remove('active'));
+  document.getElementById(`tg-x-${mode}`)?.classList.add('active');
+  if (!_tgChart || !_tgState) return;
+  _tgChart.data.labels = _tgGetXLabels(_tgState);
+  _tgChart.update();
+}
+
+function _tgDestroy() {
+  if (_tgChart) { _tgChart.destroy(); _tgChart = null; }
+  _tgState = null;
+  const wrap = document.getElementById('tourney-graph-wrap');
+  if (wrap) wrap.classList.add('d-none');
+}
+
 /* ── Tournament Details (Pro): hands of the event selected in the Summary ── */
 
 let _selectedTourneyId = null;
@@ -1301,6 +1766,7 @@ function _resetTournamentDetails() {
   if (hint) hint.textContent = '';
   document.querySelectorAll('.tsum-event-card.selected').forEach(c => c.classList.remove('selected'));
   _selectedTourneyId = null;
+  _tgDestroy();
 }
 
 /** Loads one tournament's hands into the Tournament Details table; clicking the same card again clears it. */
@@ -1332,7 +1798,16 @@ async function _selectTourneyDetail(tid, cardEl) {
     }
     const data  = await r.json();
     const hands = data.hands || [];
+    const meta  = data.meta  || {};
+    // Fall back to _allTournaments for fields the API might not yet return
+    if (!meta.room_name || !meta.earliest_ts) {
+      const cached = (_allTournaments || []).find(t => t.tourney_id === tid) || {};
+      meta.room_name    = meta.room_name    || cached.room_name    || '';
+      meta.earliest_ts  = meta.earliest_ts  || cached.earliest_ts  || null;
+      meta.finish_busted= meta.finish_busted != null ? meta.finish_busted : (cached.finish_busted || false);
+    }
     renderHandsTable(hands, 'tourney-detail-tbody', { showExport: true, exportTid: tid });
+    _renderTournamentChart(hands, meta);
     if (hint) {
       const dateLabel = cardEl ? (cardEl.querySelector('.tsum-event-date')?.textContent || '') : '';
       hint.textContent = `${hands.length} hand${hands.length === 1 ? '' : 's'}${dateLabel ? ' · ' + dateLabel : ''}`;
