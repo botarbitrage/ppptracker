@@ -687,6 +687,19 @@ def tournament_hands(tourney_id):
 
     meta = {k: (doc or {}).get(k) for k in
             ['room_name', 'earliest_ts', 'last_chips', 'first_chips', 'finish_busted']}
+
+    # Enrich with itm_h/end_h from the tournament config doc (if seeded)
+    room = (meta.get('room_name') or '').strip().upper()
+    if room:
+        db2 = _get_admin_db()
+        cfg_snap = db2.collection('tournaments').get()
+        for cfg_doc in cfg_snap:
+            cd = cfg_doc.to_dict()
+            if (cd.get('name') or '').strip().upper() == room:
+                if cd.get('itm_h') is not None: meta['itm_h'] = cd['itm_h']
+                if cd.get('end_h') is not None: meta['end_h'] = cd['end_h']
+                break
+
     return jsonify({'hands': build_hand_rows(records), 'meta': meta})
 
 

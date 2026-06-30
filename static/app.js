@@ -1297,12 +1297,14 @@ let _tgState      = null;     // computed chart state shared across toggle updat
 
 // Tournament configs: ITM bubble / expected-end hours from tournament start
 const _TG_CFGS = {
-  'DEEP FREEZE': { itmH: 4.0, endH: 5.5, lateRegLevels: 14, levelDurRebuyMin: null, levelDurMin: 12 },
-  'CRAZY 2':     { itmH: 3.0, endH: 4.0, lateRegLevels: 12, levelDurRebuyMin: 12,   levelDurMin: 10 },
-  'LUCKY DAY':   { itmH: 3.0, endH: 4.0, lateRegLevels: 11, levelDurRebuyMin: 10,   levelDurMin:  8 },
-  'EAST PKO SAT':{ itmH: 3.0, endH: 4.0, lateRegLevels: 10, levelDurRebuyMin:  6,   levelDurMin:  5 },
+  'DEEP FREEZE':  { itmH: 4.0, endH: 5.5, lateRegLevels: 14, levelDurRebuyMin: null, levelDurMin: 12 },
+  'CRAZY 2':      { itmH: 3.0, endH: 4.0, lateRegLevels: 12, levelDurRebuyMin: 12,   levelDurMin: 10 },
+  'LUCKY DAY':    { itmH: 3.0, endH: 4.0, lateRegLevels: 11, levelDurRebuyMin: 10,   levelDurMin:  8 },
+  'EAST PKO SAT': { itmH: 3.0, endH: 4.0, lateRegLevels: 10, levelDurRebuyMin:  6,   levelDurMin:  5 },
+  'TEXAS':        { itmH: 3.0, endH: 4.0, lateRegLevels: 11, levelDurRebuyMin: 10,   levelDurMin: 10 },
+  'MINI':         { itmH: 4.0, endH: 5.5, lateRegLevels: 12, levelDurRebuyMin:  6,   levelDurMin:  6 },
 };
-const _TG_CFG_DEFAULT = { itmH: 3.0, endH: 4.0, lateRegLevels: 12, levelDurRebuyMin: 12, levelDurMin: 10 };
+const _TG_CFG_DEFAULT = { itmH: 4.0, endH: 5.5, lateRegLevels: 12, levelDurRebuyMin: 12, levelDurMin: 10 };
 
 // BB → Level lookup (base levels 1-51 + Crazy 2 / Deep Freeze extra 52-68)
 const _TG_BB_LVL = (() => {
@@ -1478,7 +1480,9 @@ function _renderTournamentChart(hands, meta) {
   const earliestTs     = (meta && meta.earliest_ts) || sorted[0].ts;
   const roomName       = (meta && meta.room_name)   || '';
   const isFinishBusted = !!(meta && meta.finish_busted);
-  const cfg            = _tgGetCfg(roomName);
+  const cfg            = { ..._tgGetCfg(roomName) };
+  if (meta && meta.itm_h != null) cfg.itmH = meta.itm_h;
+  if (meta && meta.end_h != null) cfg.endH = meta.end_h;
 
   // Seconds from tournament start to key milestones
   const lateRegSecs = ((cfg.levelDurRebuyMin || cfg.levelDurMin) * cfg.lateRegLevels) * 60;

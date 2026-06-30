@@ -594,6 +594,8 @@ TOURNAMENTS = [
             "break_every_min": 55,
             "break_duration_min": 5,
             "blind_structure_extra": CRAZY2_EXTRA_LEVELS,  # Same 68 levels as CRAZY 2
+            "itm_h": 4.0,
+            "end_h": 5.5,
             "payout_ref": "standard",
             "active": True,
             "created_at": datetime.now(timezone.utc),
@@ -630,6 +632,8 @@ TOURNAMENTS = [
             "break_every_min": 55,
             "break_duration_min": 5,
             "blind_structure_extra": CRAZY2_EXTRA_LEVELS,  # Same 68 levels as DEEP FREEZE
+            "itm_h": 3.0,
+            "end_h": 4.0,
             "payout_ref": "standard",
             "active": True,
             "created_at": datetime.now(timezone.utc),
@@ -669,6 +673,8 @@ TOURNAMENTS = [
             # Full 60-level structure — does NOT use BLIND_LEVELS_BASE
             "blind_structure_override": True,
             "blind_structure_extra": LUCKY_DAY_BLIND_LEVELS,
+            "itm_h": 3.0,
+            "end_h": 4.0,
             "payout_ref": "standard",
             "active": True,
             "created_at": datetime.now(timezone.utc),
@@ -707,6 +713,8 @@ TOURNAMENTS = [
             "break_duration_min": 5,
             # BLIND_LEVELS_BASE (51) + CRAZY2_EXTRA (52-68) + 2 more (69-70) = 70 levels
             "blind_structure_extra": EAST_PKO_SAT_EXTRA_LEVELS,
+            "itm_h": 3.0,
+            "end_h": 4.0,
             "payout_ref": "standard",
             "active": True,
             "created_at": datetime.now(timezone.utc),
@@ -746,6 +754,8 @@ TOURNAMENTS = [
             # Same 60-level structure as LUCKY DAY
             "blind_structure_override": True,
             "blind_structure_extra": LUCKY_DAY_BLIND_LEVELS,
+            "itm_h": 3.0,
+            "end_h": 4.0,
             "payout_ref": "standard",
             "active": True,
             "created_at": datetime.now(timezone.utc),
@@ -784,6 +794,8 @@ TOURNAMENTS = [
             "break_duration_min": 5,
             # Same 70-level structure as East PKO SAT
             "blind_structure_extra": EAST_PKO_SAT_EXTRA_LEVELS,
+            "itm_h": 4.0,
+            "end_h": 5.5,
             "payout_ref": "standard",
             "active": True,
             "created_at": datetime.now(timezone.utc),
