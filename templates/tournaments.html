@@ -69,33 +69,11 @@
     .tourney-badge-sat   { background: rgba(204,204,0,.1); color: var(--yellow); border: 1px solid rgba(204,204,0,.25); }
 
     /* ── Tournament table ── */
-    .tourney-table th {
-      font-family: var(--font-head);
-      font-size: .68rem;
-      font-weight: 700;
-      letter-spacing: .8px;
-      text-transform: uppercase;
-      color: var(--muted);
-      white-space: nowrap;
-      border-bottom: 1px solid var(--border);
-      padding: 10px 12px;
-    }
-    .tourney-table td {
-      font-family: var(--font-head);
-      font-size: .84rem;
-      padding: 10px 12px;
-      vertical-align: middle;
-      border-bottom: 1px solid rgba(255,255,255,.05);
-    }
-    .tourney-table tr:last-child td { border-bottom: none; }
-    .tourney-name {
-      font-weight: 700;
-      color: var(--text);
-    }
+    .tourney-name { font-weight: 700; color: var(--text); }
     .td-highlight { color: var(--green); font-weight: 700; }
-    .td-yes { color: var(--green); }
-    .td-no  { color: var(--muted); }
-    .td-muted { color: var(--muted); }
+    .td-yes  { color: var(--green); }
+    .td-no   { color: var(--muted); }
+    .td-muted{ color: var(--muted); }
 
     /* ── Coming soon sections ── */
     .coming-soon-card {
@@ -165,29 +143,36 @@
 
   <!-- ── Tournament List tab ─────────────────────────────── -->
   <div id="panel-list">
-    <div class="section-label">Available Tournaments on PPPoker</div>
-    <div id="tourney-list-container">
-      <div class="tourney-loading">
-        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-        Loading tournaments…
+    <div class="section-card mb-4">
+      <div class="section-header">
+        <h2 class="d-flex align-items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
+          Available Tournaments
+        </h2>
       </div>
-    </div>
-    <!-- Table rendered here by JS -->
-    <div class="table-responsive d-none" id="tourney-table-wrap">
-      <table class="table table-dark table-striped table-hover tourney-table mb-0">
-        <thead>
-          <tr>
-            <th>Tournament</th>
-            <th>Buy-in</th>
-            <th>Start</th>
-            <th>Start Chips</th>
-            <th>Rebuy</th>
-            <th>Add-on</th>
-            <th>x2 / x3</th>
-          </tr>
-        </thead>
-        <tbody id="tourney-table-tbody"></tbody>
-      </table>
+      <div id="tourney-list-container">
+        <div class="tourney-loading">
+          <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+          Loading tournaments…
+        </div>
+      </div>
+      <div class="table-responsive d-none" id="tourney-table-wrap">
+        <table class="table table-dark table-striped table-hover mb-0">
+          <thead>
+            <tr>
+              <th scope="col" class="sort-th" onclick="_sortTourneys('name')" data-col="name">Tournament <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center sort-th" onclick="_sortTourneys('type')" data-col="type">Type <span class="sort-icon"></span></th>
+              <th scope="col" class="sort-th" onclick="_sortTourneys('buyin')" data-col="buyin">Buy-in <span class="sort-icon"></span></th>
+              <th scope="col" class="sort-th" onclick="_sortTourneys('start')" data-col="start">Start <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center sort-th" onclick="_sortTourneys('chips')" data-col="chips">Start Chips <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center">Rebuy</th>
+              <th scope="col" class="text-center">Add-on</th>
+              <th scope="col" class="text-center">x2 / x3</th>
+            </tr>
+          </thead>
+          <tbody id="tourney-table-tbody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -252,42 +237,62 @@ function renderTourneyRow(id, t) {
   const chips  = fmtChips(t.starting_chips);
   const start  = t.starting_time || '—';
 
-  // Rebuy cell
-  let rebuyCell;
-  if (t.rebuy) {
-    if (t.rebuy_type === 'unlimited' || t.rebuy_max_per_session == null) {
-      rebuyCell = `<span class="td-yes">∞ unlimited</span>`;
-    } else {
-      rebuyCell = `<span class="td-yes">x${t.rebuy_max_per_session}</span>`;
-    }
-  } else {
-    rebuyCell = `<span class="td-no">No</span>`;
-  }
+  // Rebuy — symbol only
+  const rebuyCell = t.rebuy
+    ? `<span class="td-yes">${(t.rebuy_type === 'unlimited' || t.rebuy_max_per_session == null) ? '∞' : 'x' + t.rebuy_max_per_session}</span>`
+    : `<span class="td-no">—</span>`;
 
-  // Add-on cell
-  let addonCell;
-  if (t.addon) {
-    const n = t.addon_max_units || 1;
-    addonCell = `<span class="td-yes">x${n}</span>`;
-  } else {
-    addonCell = `<span class="td-no">No</span>`;
-  }
+  // Add-on — cost multiplier (x3 means costs 3× buy-in)
+  const addonCell = t.addon
+    ? `<span class="td-yes">x${t.addon_cost_multiplier || 1}</span>`
+    : `<span class="td-no">—</span>`;
 
-  // x2/x3 bulk options
-  const bulkOpts = [...new Set([...(t.rebuy_bulk_options || []), ...(t.addon_bulk_options || [])].filter(v => v > 1))].sort();
-  const bulkCell = bulkOpts.length
-    ? `<span class="td-yes">${bulkOpts.map(v => 'x' + v).join(' / ')}</span>`
+  // x2/x3 bulk — "Yes" when available
+  const hasBulk = [...(t.rebuy_bulk_options || []), ...(t.addon_bulk_options || [])].some(v => v > 1);
+  const bulkCell = hasBulk
+    ? `<span class="td-yes">Yes</span>`
     : `<span class="td-no">—</span>`;
 
   return `<tr>
-    <td><span class="tourney-name">${t.name || id}</span>&nbsp;${badge}</td>
+    <td><span class="tourney-name">${t.name || id}</span></td>
+    <td class="text-center">${badge}</td>
     <td>${buyIn}</td>
     <td class="td-muted">${start}</td>
-    <td>${chips}</td>
-    <td>${rebuyCell}</td>
-    <td>${addonCell}</td>
-    <td>${bulkCell}</td>
+    <td class="text-center">${chips}</td>
+    <td class="text-center">${rebuyCell}</td>
+    <td class="text-center">${addonCell}</td>
+    <td class="text-center">${bulkCell}</td>
   </tr>`;
+}
+
+// ── Sort ──────────────────────────────────────────────────────────────────────
+let _tourneyDocs = [];
+let _sortCol = 'buyin', _sortDir = 1;
+
+function _sortTourneys(col) {
+  if (_sortCol === col) { _sortDir *= -1; } else { _sortCol = col; _sortDir = 1; }
+  _renderTourneyTable();
+  document.querySelectorAll('[data-col]').forEach(th => {
+    const icon = th.querySelector('.sort-icon');
+    if (!icon) return;
+    icon.textContent = th.dataset.col === col ? (_sortDir === 1 ? ' ▲' : ' ▼') : '';
+  });
+}
+
+function _renderTourneyTable() {
+  const sorted = [..._tourneyDocs].sort((a, b) => {
+    const ta = a.data, tb = b.data;
+    let va, vb;
+    if (_sortCol === 'name')  { va = (ta.name || '').toLowerCase(); vb = (tb.name || '').toLowerCase(); }
+    else if (_sortCol === 'type')  { va = ta.type || ''; vb = tb.type || ''; }
+    else if (_sortCol === 'buyin') { va = ta.buy_in_total || 0; vb = tb.buy_in_total || 0; }
+    else if (_sortCol === 'start') { va = ta.starting_time || ''; vb = tb.starting_time || ''; }
+    else if (_sortCol === 'chips') { va = ta.starting_chips || 0; vb = tb.starting_chips || 0; }
+    else { va = 0; vb = 0; }
+    return va < vb ? -_sortDir : va > vb ? _sortDir : 0;
+  });
+  document.getElementById('tourney-table-tbody').innerHTML =
+    sorted.map(({ id, data }) => renderTourneyRow(id, data)).join('');
 }
 
 // ── Firebase + data load ──────────────────────────────────────────────────────
@@ -324,13 +329,10 @@ async function loadTournaments() {
     snap.forEach(doc => docs.push({ id: doc.id, data: doc.data() }));
     docs.sort((a, b) => (a.data.buy_in_total || 0) - (b.data.buy_in_total || 0));
 
-    let rows = '';
-    docs.forEach(({ id, data }) => { rows += renderTourneyRow(id, data); });
+    _tourneyDocs = docs;
     container.classList.add('d-none');
-    const tableWrap = document.getElementById('tourney-table-wrap');
-    const tbody = document.getElementById('tourney-table-tbody');
-    tbody.innerHTML = rows;
-    tableWrap.classList.remove('d-none');
+    _renderTourneyTable();
+    document.getElementById('tourney-table-wrap').classList.remove('d-none');
 
   } catch (err) {
     container.innerHTML = `<p class="text-center" style="color:var(--muted);padding:24px 0">
