@@ -1289,10 +1289,11 @@ function _toggleTourneyDetail(rowId) {
 
 /* ── Tournament Progress Graph ──────────────────────────────────────────── */
 
-let _tgChart  = null;
-let _tgYMode  = 'both';  // 'both' | 'chips' | 'bb'
-let _tgXMode  = 'time';  // 'time' | 'level' | 'hand'
-let _tgState  = null;    // computed chart state shared across toggle updates
+let _tgChart      = null;
+let _tgYMode      = 'both';   // 'both' | 'chips' | 'bb'
+let _tgXMode      = 'time';   // 'time' | 'level'
+let _tgPlayedOnly = false;    // when true, crop to played hands only
+let _tgState      = null;     // computed chart state shared across toggle updates
 
 // Tournament configs: ITM bubble / expected-end hours from tournament start
 const _TG_CFGS = {
@@ -1442,11 +1443,26 @@ const _TG_MARKERS_PLUGIN = {
   },
 };
 
-function _tgGetXLabels(state) {
-  if (_tgXMode === 'level') return state.levelLabels;
-  if (_tgXMode === 'hand')  return state.handLabels;
-  return state.timeLabels;
+function _tgLevelFromElapsed(elapsedSecs, cfg) {
+  const rebuyDur = (cfg.levelDurRebuyMin || cfg.levelDurMin) * 60;
+  const mainDur  = cfg.levelDurMin * 60;
+  const rebuyEnd = cfg.lateRegLevels * rebuyDur;
+  if (elapsedSecs <= 0) return 1;
+  if (elapsedSecs <= rebuyEnd) return Math.ceil(elapsedSecs / rebuyDur);
+  return cfg.lateRegLevels + Math.ceil((elapsedSecs - rebuyEnd) / mainDur);
 }
+
+function _tgGetXLabels(state) {
+  const src = _tgPlayedOnly ? state.realPoints : state.allPoints;
+  if (_tgXMode === 'level') return _tgPlayedOnly ? state.realLevelLabels : state.levelLabels;
+  return _tgPlayedOnly ? state.realTimeLabels : state.timeLabels;
+}
+
+function _tgGetActivePoints(state) {
+  return _tgPlayedOnly ? state.realPoints : state.allPoints;
+}
+function _tgGetActiveChip(state)  { return _tgPlayedOnly ? state.realChipData  : state.chipData;  }
+function _tgGetActiveBB(state)    { return _tgPlayedOnly ? state.realBBData    : state.bbData;    }
 
 function _renderTournamentChart(hands, meta) {
   const wrap = document.getElementById('tourney-graph-wrap');
@@ -1464,23 +1480,31 @@ function _renderTournamentChart(hands, meta) {
   const isFinishBusted = !!(meta && meta.finish_busted);
   const cfg            = _tgGetCfg(roomName);
 
-  // Seconds from player's first hand to key milestones
+  // Seconds from tournament start to key milestones
   const lateRegSecs = ((cfg.levelDurRebuyMin || cfg.levelDurMin) * cfg.lateRegLevels) * 60;
   const itmSecs     = cfg.itmH * 3600;
   const endSecs     = cfg.endH * 3600;
+  const axisSecs    = endSecs + 30 * 60;  // x-axis extends 30 min past expected end
 
-  // Extend x-axis by adding phantom (null) points at reference times that fall
-  // after the last real hand, so reference lines are always visible
-  const lastRealTs = sorted[sorted.length - 1].ts;
-  const allPoints  = [...sorted];
-  const addedTs    = new Set();
-  for (const secs of [lateRegSecs, itmSecs, endSecs]) {
-    const refTs = earliestTs + secs;
-    if (refTs > lastRealTs + 45 && !addedTs.has(refTs)) {
-      allPoints.push({ ts: refTs, chip_stack: null, big_blind: null, profit: null, phantom: true });
-      addedTs.add(refTs);
-    }
+  // Build full point list: start phantom (level 1) + real hands + reference phantoms + end+30min phantom
+  const allPoints = [];
+  const addedTs   = new Set();
+
+  function _addPhantom(ts) {
+    if (!addedTs.has(ts)) { allPoints.push({ ts, chip_stack: null, big_blind: null, profit: null, phantom: true }); addedTs.add(ts); }
   }
+
+  // Always anchor at tournament start (level 1, elapsed 0)
+  _addPhantom(earliestTs);
+
+  // Real hands
+  for (const h of sorted) allPoints.push(h);
+
+  // Phantom anchors at reference milestones and axis end
+  for (const secs of [lateRegSecs, itmSecs, endSecs, axisSecs]) {
+    _addPhantom(earliestTs + secs);
+  }
+
   allPoints.sort((a, b) => a.ts - b.ts);
 
   // Build per-point data arrays
@@ -1488,8 +1512,6 @@ function _renderTournamentChart(hands, meta) {
   const bbData      = [];
   const timeLabels  = [];
   const levelLabels = [];
-  const handLabels  = [];
-  let handNum = 0;
   let bigWinIdx = -1, bigWinVal = -Infinity;
   let bigLossIdx = -1, bigLossVal = Infinity;
   let lastRealIdx = -1;
@@ -1505,49 +1527,90 @@ function _renderTournamentChart(hands, meta) {
     timeLabels.push(_tgFmtElapsed(elapsed));
 
     if (!h.phantom) {
-      handNum++;
       lastRealIdx = i;
       const lvl = _tgInferLevel(h.big_blind, roomName);
       levelLabels.push(lvl ? `L${lvl}` : '?');
-      handLabels.push(handNum);
       if ((h.profit || 0) > bigWinVal)  { bigWinVal  = h.profit; bigWinIdx  = i; }
       if ((h.profit || 0) < bigLossVal) { bigLossVal = h.profit; bigLossIdx = i; }
     } else {
-      levelLabels.push('');
-      handLabels.push('');
+      const lvl = _tgLevelFromElapsed(elapsed, cfg);
+      levelLabels.push(elapsed === 0 || elapsed === axisSecs ? `L${lvl}` : '');
     }
   }
 
+  // Parallel arrays for "played hands only" mode (no phantoms)
+  const realPoints     = sorted;
+  const realChipData   = [];
+  const realBBData     = [];
+  const realTimeLabels = [];
+  const realLevelLabels= [];
+  let realBigWinIdx = -1, realBigWinVal = -Infinity;
+  let realBigLossIdx= -1, realBigLossVal=  Infinity;
+  let realLastRealIdx = -1;
+
+  for (let i = 0; i < realPoints.length; i++) {
+    const h       = realPoints[i];
+    const elapsed = h.ts - earliestTs;
+    const chips   = h.chip_stack != null ? h.chip_stack : null;
+    const bb      = chips != null && h.big_blind ? parseFloat((chips / h.big_blind).toFixed(1)) : null;
+    realChipData.push(chips);
+    realBBData.push(bb);
+    realTimeLabels.push(_tgFmtElapsed(elapsed));
+    const lvl = _tgInferLevel(h.big_blind, roomName);
+    realLevelLabels.push(lvl ? `L${lvl}` : '?');
+    realLastRealIdx = i;
+    if ((h.profit || 0) > realBigWinVal)  { realBigWinVal  = h.profit; realBigWinIdx  = i; }
+    if ((h.profit || 0) < realBigLossVal) { realBigLossVal = h.profit; realBigLossIdx = i; }
+  }
+
   // Find index of the point closest in time to each reference milestone
-  function _refIdx(secs) {
+  function _refIdx(pts, secs) {
     const target = earliestTs + secs;
     let best = 0, bestDiff = Infinity;
-    for (let i = 0; i < allPoints.length; i++) {
-      const d = Math.abs(allPoints[i].ts - target);
+    for (let i = 0; i < pts.length; i++) {
+      const d = Math.abs(pts[i].ts - target);
       if (d < bestDiff) { bestDiff = d; best = i; }
     }
     return best;
   }
 
-  const lateRegIdx = _refIdx(lateRegSecs);
-  const itmIdx     = _refIdx(itmSecs);
-  const endIdx     = _refIdx(endSecs);
+  const lateRegIdx     = _refIdx(allPoints, lateRegSecs);
+  const itmIdx         = _refIdx(allPoints, itmSecs);
+  const endIdx         = _refIdx(allPoints, endSecs);
+  const realLateRegIdx = _refIdx(realPoints, lateRegSecs);
+  const realItmIdx     = _refIdx(realPoints, itmSecs);
+  const realEndIdx     = _refIdx(realPoints, endSecs);
 
-  // Reference lines (vertical dashed)
+  // Reference lines (vertical dashed) — full view
   const refLines = [
-    { idx: lateRegIdx, color: 'rgba(204,204,0,0.9)',  label: 'Late Reg\nClose'         },
-    { idx: itmIdx,     color: 'rgba(255,152,0,0.9)',  label: `ITM Bubble\n${cfg.itmH}h` },
-    { idx: endIdx,     color: 'rgba(255,82,82,0.9)',  label: `Exp. End\n${cfg.endH}h`   },
+    { idx: lateRegIdx, color: 'rgba(204,204,0,0.9)',  label: `Late Reg\nL${cfg.lateRegLevels}` },
+    { idx: itmIdx,     color: 'rgba(255,152,0,0.9)',  label: `ITM Bubble\n${cfg.itmH}h`         },
+    { idx: endIdx,     color: 'rgba(255,82,82,0.9)',  label: `Exp. End\n${cfg.endH}h`            },
+  ];
+  // Reference lines for played-only view
+  const realRefLines = [
+    { idx: realLateRegIdx, color: 'rgba(204,204,0,0.9)',  label: `Late Reg\nL${cfg.lateRegLevels}` },
+    { idx: realItmIdx,     color: 'rgba(255,152,0,0.9)',  label: `ITM Bubble\n${cfg.itmH}h`         },
+    { idx: realEndIdx,     color: 'rgba(255,82,82,0.9)',  label: `Exp. End\n${cfg.endH}h`            },
   ];
 
-  // Critical point markers (ring + icon drawn over the chip line)
+  // Critical point markers
   const markers = [];
-  if (bigWinIdx  >= 0 && bigWinVal  > 0)    markers.push({ idx: bigWinIdx,  color: '#00e676', icon: '▲' });
-  if (bigLossIdx >= 0 && bigLossVal < 0)    markers.push({ idx: bigLossIdx, color: '#ff5252', icon: '▼' });
-  if (isFinishBusted && lastRealIdx >= 0)   markers.push({ idx: lastRealIdx, color: '#ff5252', icon: '✕' });
+  if (bigWinIdx  >= 0 && bigWinVal  > 0)  markers.push({ idx: bigWinIdx,  color: '#00e676', icon: '▲' });
+  if (bigLossIdx >= 0 && bigLossVal < 0)  markers.push({ idx: bigLossIdx, color: '#ff5252', icon: '▼' });
+  if (isFinishBusted && lastRealIdx >= 0) markers.push({ idx: lastRealIdx, color: '#ff5252', icon: '✕' });
+  const realMarkers = [];
+  if (realBigWinIdx  >= 0 && realBigWinVal  > 0)  realMarkers.push({ idx: realBigWinIdx,  color: '#00e676', icon: '▲' });
+  if (realBigLossIdx >= 0 && realBigLossVal < 0)  realMarkers.push({ idx: realBigLossIdx, color: '#ff5252', icon: '▼' });
+  if (isFinishBusted && realLastRealIdx >= 0)      realMarkers.push({ idx: realLastRealIdx, color: '#ff5252', icon: '✕' });
 
-  _tgState = { allPoints, chipData, bbData, timeLabels, levelLabels, handLabels,
-               lateRegIdx, itmIdx, endIdx, refLines, markers, earliestTs, roomName };
+  _tgState = {
+    allPoints, chipData, bbData, timeLabels, levelLabels,
+    realPoints, realChipData, realBBData, realTimeLabels, realLevelLabels,
+    lateRegIdx, itmIdx, endIdx, refLines, markers,
+    realRefLines, realMarkers,
+    earliestTs, roomName, cfg,
+  };
 
   _tgBuildChart();
   wrap.classList.remove('d-none');
@@ -1555,7 +1618,13 @@ function _renderTournamentChart(hands, meta) {
 
 function _tgBuildChart() {
   if (!_tgState) return;
-  const { allPoints, chipData, bbData, refLines, markers, earliestTs, roomName } = _tgState;
+  const s = _tgState;
+  const activePoints = _tgGetActivePoints(s);
+  const activeChip   = _tgGetActiveChip(s);
+  const activeBB     = _tgGetActiveBB(s);
+  const activeRef    = _tgPlayedOnly ? s.realRefLines  : s.refLines;
+  const activeMark   = _tgPlayedOnly ? s.realMarkers   : s.markers;
+  const { earliestTs, roomName } = s;
   const canvas = document.getElementById('tourney-graph-canvas');
   if (!canvas) return;
 
@@ -1580,7 +1649,7 @@ function _tgBuildChart() {
       datasets: [
         {
           label: 'Chip Stack',
-          data: chipData,
+          data: activeChip,
           borderColor: chipColor,
           backgroundColor: 'rgba(64,196,255,0.07)',
           fill: true,
@@ -1596,7 +1665,7 @@ function _tgBuildChart() {
         },
         {
           label: 'BB Count',
-          data: bbData,
+          data: activeBB,
           borderColor: bbColor,
           backgroundColor: 'rgba(0,230,118,0.05)',
           fill: true,
@@ -1617,8 +1686,8 @@ function _tgBuildChart() {
       maintainAspectRatio: false,
       animation: { duration: 300 },
       interaction: { mode: 'index', intersect: false },
-      tgRefLines: refLines,
-      tgMarkers:  markers,
+      tgRefLines: activeRef,
+      tgMarkers:  activeMark,
       plugins: {
         legend: {
           display: true,
@@ -1643,19 +1712,18 @@ function _tgBuildChart() {
           callbacks: {
             title(items) {
               if (!items.length) return '';
-              const i   = items[0].dataIndex;
-              const h   = allPoints[i];
+              const i = items[0].dataIndex;
+              const h = activePoints[i];
               if (!h || h.phantom) return '';
-              // Count only non-phantom hands up to this index
               let hn = 0;
-              for (let j = 0; j <= i; j++) if (!allPoints[j].phantom) hn++;
+              for (let j = 0; j <= i; j++) if (!activePoints[j].phantom) hn++;
               const elapsed = _tgFmtElapsed(h.ts - earliestTs);
               const lvl     = _tgInferLevel(h.big_blind, roomName);
               return `Hand #${hn} · +${elapsed}${lvl ? ' · L' + lvl : ''}`;
             },
             label(item) {
               const i = item.dataIndex;
-              const h = allPoints[i];
+              const h = activePoints[i];
               if (!h || h.phantom) return null;
               if (item.datasetIndex === 0) {
                 return `  Chips: ${_tgFmtK(h.chip_stack)}`;
@@ -1668,7 +1736,7 @@ function _tgBuildChart() {
             afterBody(items) {
               if (!items.length) return [];
               const i = items[0].dataIndex;
-              const h = allPoints[i];
+              const h = activePoints[i];
               if (!h || h.phantom) return [];
               const lines = [];
               if (h.profit) {
@@ -1745,9 +1813,17 @@ function _tgSetX(mode) {
   _tgChart.update();
 }
 
+function _tgSetPlayedOnly(checked) {
+  _tgPlayedOnly = checked;
+  _tgBuildChart();
+}
+
 function _tgDestroy() {
   if (_tgChart) { _tgChart.destroy(); _tgChart = null; }
   _tgState = null;
+  _tgPlayedOnly = false;
+  const cb = document.getElementById('tg-played-only');
+  if (cb) cb.checked = false;
   const wrap = document.getElementById('tourney-graph-wrap');
   if (wrap) wrap.classList.add('d-none');
 }

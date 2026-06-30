@@ -25,7 +25,7 @@
     rel="stylesheet"
     crossorigin="anonymous"
   />
-  <link rel="stylesheet" href="/static/style.css?v=53"/>
+  <link rel="stylesheet" href="/static/style.css?v=54"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" crossorigin="anonymous" defer></script>
 </head>
 <body>
@@ -428,15 +428,18 @@
         <div class="tourney-graph-controls">
           <div class="tg-group">
             <span class="tg-label">Stack</span>
-            <button class="tg-btn active" id="tg-y-both"  onclick="_tgSetY('both')">Both</button>
             <button class="tg-btn"        id="tg-y-chips" onclick="_tgSetY('chips')">Chips</button>
             <button class="tg-btn"        id="tg-y-bb"    onclick="_tgSetY('bb')">BBs</button>
+            <button class="tg-btn active" id="tg-y-both"  onclick="_tgSetY('both')">Both</button>
           </div>
-          <div class="tg-group">
-            <span class="tg-label">X-axis</span>
+          <label class="tg-played-label">
+            <input type="checkbox" id="tg-played-only" onchange="_tgSetPlayedOnly(this.checked)">
+            <span>Show played hands only</span>
+          </label>
+          <div class="tg-group tg-group-xaxis">
+            <span class="tg-label">X-Axis</span>
             <button class="tg-btn active" id="tg-x-time"  onclick="_tgSetX('time')">Time</button>
             <button class="tg-btn"        id="tg-x-level" onclick="_tgSetX('level')">Level</button>
-            <button class="tg-btn"        id="tg-x-hand"  onclick="_tgSetX('hand')">Hand #</button>
           </div>
         </div>
         <div class="tourney-graph-canvas-wrap">

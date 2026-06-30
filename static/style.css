@@ -1524,6 +1524,28 @@ tr.row-flash > td {
   margin-bottom: 12px;
 }
 
+.tg-group-xaxis {
+  margin-left: auto;
+}
+
+.tg-played-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: .75rem;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+}
+.tg-played-label input[type="checkbox"] {
+  accent-color: var(--green);
+  width: 13px;
+  height: 13px;
+  cursor: pointer;
+}
+.tg-played-label:hover { color: var(--text); }
+
 .tg-group {
   display: flex;
   align-items: center;
