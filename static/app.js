@@ -1483,13 +1483,12 @@ function _renderTournamentChart(hands, meta) {
   if (meta && meta.itm_h != null) cfg.itmH = meta.itm_h;
   if (meta && meta.end_h != null) cfg.endH = meta.end_h;
 
-  // Back-calculate tournament start from the first hand's blind level
+  // Anchor x=0 at the hero's own first hand of this entry. We have no
+  // reliable ground-truth blind schedule to back-calculate a "true" Level 1
+  // moment from the big blind size (the same bb value can appear at more
+  // than one real level), so treat this entry's own start as t=0.
   const firstHand   = sorted[0];
-  const firstLevel  = _tgInferLevel(firstHand.big_blind, roomName, firstHand.chip_stack) || 1;
-  const rebuyDurSec = (cfg.levelDurRebuyMin || cfg.levelDurMin) * 60;
-  const mainDurSec  = cfg.levelDurMin * 60;
-  const firstLvlDur = firstLevel <= cfg.lateRegLevels ? rebuyDurSec : mainDurSec;
-  const tournStart  = firstHand.ts - (firstLevel - 1) * firstLvlDur;
+  const tournStart  = firstHand.ts;
 
   // Seconds from tournament start to key milestones
   const lateRegSecs = (cfg.levelDurRebuyMin || cfg.levelDurMin) * cfg.lateRegLevels * 60;
@@ -1525,9 +1524,20 @@ function _renderTournamentChart(hands, meta) {
     pointList.push(h);
   }
 
+  // If the hero busted out on the final hand, add a terminal point at y=0
+  // so the line visibly touches bottom instead of stopping mid-air.
+  let bustPoint = null;
+  if (isFinishBusted) {
+    const lastHand = sorted[sorted.length - 1];
+    bustPoint = { x: (lastHand.ts - tournStart) + 5, y: 0 };
+    chipDataset.push(bustPoint);
+    bbDataset.push({ x: bustPoint.x, y: 0 });
+    pointList.push(null);
+  }
+
   // Track played range for "played only" zoom
   const playedMinSecs = sorted[0].ts - tournStart;
-  const playedMaxSecs = sorted[sorted.length - 1].ts - tournStart;
+  const playedMaxSecs = bustPoint ? bustPoint.x : sorted[sorted.length - 1].ts - tournStart;
 
   // Reference lines at fixed second positions
   const refLines = [
@@ -1554,7 +1564,7 @@ function _renderTournamentChart(hands, meta) {
   const markers = [];
   if (bigWinH  && bigWinVal  > 0) markers.push(_mkMarker(bigWinH,  '#00e676', '▲'));
   if (bigLossH && bigLossVal < 0) markers.push(_mkMarker(bigLossH, '#ff5252', '▼'));
-  if (isFinishBusted && lastH)    markers.push(_mkMarker(lastH,    '#ff5252', '✕'));
+  if (bustPoint) markers.push({ secs: bustPoint.x, chipY: 0, bbY: 0, color: '#ff5252', icon: '✕' });
 
   _tgState = {
     chipDataset, bbDataset, pointList,
