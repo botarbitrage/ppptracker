@@ -1352,12 +1352,23 @@ function _tgGetCfg(roomName) {
   return _TG_CFG_DEFAULT;
 }
 
-function _tgInferLevel(bigBlind, roomName) {
+function _tgInferLevel(bigBlind, roomName, chipStack) {
   if (!bigBlind) return null;
   const isLucky = (roomName || '').toUpperCase().includes('LUCKY DAY');
   const map = isLucky ? _TG_LUCKY_BB_LVL : _TG_BB_LVL;
-  // Try direct (display units) then /100 (raw units) for robustness
-  return map[bigBlind] || map[Math.round(bigBlind / 100)] || null;
+  const direct = map[bigBlind] || null;
+  const scaled = map[Math.round(bigBlind / 100)] || null;
+  // Both candidates can exist (the table contains values 100x apart); disambiguate
+  // using the BB count implied by the hero's stack — a real tournament BB count
+  // is almost always in the 1-300 range, so whichever candidate lands there wins.
+  if (direct && scaled && chipStack) {
+    const bbDirect = chipStack / bigBlind;
+    const bbScaled = chipStack / (bigBlind / 100);
+    const plausible = v => v >= 1 && v <= 300;
+    if (plausible(bbDirect) && !plausible(bbScaled)) return direct;
+    if (plausible(bbScaled) && !plausible(bbDirect)) return scaled;
+  }
+  return direct || scaled || null;
 }
 
 function _tgFmtElapsed(secs) {
@@ -1474,7 +1485,7 @@ function _renderTournamentChart(hands, meta) {
 
   // Back-calculate tournament start from the first hand's blind level
   const firstHand   = sorted[0];
-  const firstLevel  = _tgInferLevel(firstHand.big_blind, roomName) || 1;
+  const firstLevel  = _tgInferLevel(firstHand.big_blind, roomName, firstHand.chip_stack) || 1;
   const rebuyDurSec = (cfg.levelDurRebuyMin || cfg.levelDurMin) * 60;
   const mainDurSec  = cfg.levelDurMin * 60;
   const firstLvlDur = firstLevel <= cfg.lateRegLevels ? rebuyDurSec : mainDurSec;
@@ -1487,15 +1498,28 @@ function _renderTournamentChart(hands, meta) {
   const lastHandElapsed = sorted[sorted.length - 1].ts - tournStart;
   const axisSecs    = Math.max(endSecs + 30 * 60, lastHandElapsed + 15 * 60);
 
-  // Build {x: elapsedSecs, y: value} datasets
+  // Build {x: elapsedSecs, y: value} datasets. When two consecutive hands are
+  // separated by a long real-time pause (busted & later re-entered), insert a
+  // null point so Chart.js breaks the line instead of drawing a diagonal
+  // connector across the gap.
+  const GAP_BREAK_SECS = 15 * 60;
   const chipDataset = [];
   const bbDataset   = [];
   const pointList   = [];  // parallel to dataset for tooltip lookup
 
-  for (const h of sorted) {
+  for (let i = 0; i < sorted.length; i++) {
+    const h = sorted[i];
     const elapsed = h.ts - tournStart;
-    const chips   = h.chip_stack != null ? h.chip_stack : null;
-    const bb      = chips != null && h.big_blind ? parseFloat((chips / h.big_blind).toFixed(1)) : null;
+
+    if (i > 0 && (h.ts - sorted[i - 1].ts) > GAP_BREAK_SECS) {
+      const midX = (sorted[i - 1].ts - tournStart + elapsed) / 2;
+      chipDataset.push({ x: midX, y: null });
+      bbDataset.push({ x: midX, y: null });
+      pointList.push(null);
+    }
+
+    const chips = h.chip_stack != null ? h.chip_stack : null;
+    const bb    = chips != null && h.big_blind ? parseFloat((chips / h.big_blind).toFixed(1)) : null;
     chipDataset.push({ x: elapsed, y: chips });
     bbDataset.push({ x: elapsed, y: bb });
     pointList.push(h);
@@ -1657,8 +1681,10 @@ function _tgBuildChart() {
               const h = pointList[i];
               if (!h) return '';
               const elapsed = _tgFmtElapsed(h.ts - tournStart);
-              const lvl     = _tgInferLevel(h.big_blind, roomName);
-              return `Hand #${i + 1} · +${elapsed}${lvl ? ' · L' + lvl : ''}`;
+              const lvl     = _tgInferLevel(h.big_blind, roomName, h.chip_stack);
+              let hn = 0;
+              for (let j = 0; j <= i; j++) if (pointList[j]) hn++;
+              return `Hand #${hn} · +${elapsed}${lvl ? ' · L' + lvl : ''}`;
             },
             label(item) {
               const i = item.dataIndex;
