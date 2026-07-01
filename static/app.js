@@ -977,9 +977,9 @@ function _renderCashGamesSummary(tournaments) {
           <span class="tsum-stat-pill">${_fmtDuration(t.duration_secs)}</span>
         </div>
         <div class="tsum-event-stats">
-          <span class="tsum-stat-pill">${t.hands || 0} hands</span>
-          <span class="tsum-stat-pill">${(t.vpip_pct || 0).toFixed(1)}% / ${(t.pfr_pct || 0).toFixed(1)}%</span>
-          <span class="tsum-stat-pill">${evPerHr.toFixed(1)}/hr</span>
+          <span class="tsum-stat-pill" title="Hands played">${t.hands || 0} hands</span>
+          <span class="tsum-stat-pill" title="VPIP / PFR">${(t.vpip_pct || 0).toFixed(1)}% / ${(t.pfr_pct || 0).toFixed(1)}%</span>
+          <span class="tsum-stat-pill" title="Hands per hour">${evPerHr.toFixed(1)}/hr</span>
         </div>
         <div class="tsum-event-actions">${_TSUM_EXPORT_ICONS(t.tourney_id)}</div>
       </div>`;
@@ -1248,9 +1248,9 @@ function _renderTournamentSummary(tournaments) {
           <span class="tsum-stat-pill" title="Time played">${_fmtDuration(t.duration_secs)}</span>
         </div>
         <div class="tsum-event-stats">
-          <span class="tsum-stat-pill">${t.hands || 0} hands</span>
-          <span class="tsum-stat-pill">${(t.vpip_pct || 0).toFixed(1)}% / ${(t.pfr_pct || 0).toFixed(1)}%</span>
-          <span class="tsum-stat-pill">${evPerHr.toFixed(1)}/hr</span>
+          <span class="tsum-stat-pill" title="Hands played">${t.hands || 0} hands</span>
+          <span class="tsum-stat-pill" title="VPIP / PFR">${(t.vpip_pct || 0).toFixed(1)}% / ${(t.pfr_pct || 0).toFixed(1)}%</span>
+          <span class="tsum-stat-pill" title="Hands per hour">${evPerHr.toFixed(1)}/hr</span>
         </div>
         <div class="tsum-event-actions">${_TSUM_EXPORT_ICONS(t.tourney_id)}</div>
       </div>`;

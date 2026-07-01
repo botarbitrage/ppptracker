@@ -1378,20 +1378,20 @@ tr.row-flash > td {
 }
 
 .tsum-event-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 10px;
   padding: 14px 18px;
+  align-items: stretch;
 }
 
 .tsum-event-card {
+  display: flex;
+  flex-direction: column;
   background: var(--panel-alt);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 10px 14px;
-  flex: 1 1 200px;
-  min-width: 180px;
-  max-width: 260px;
+  padding: 10px 14px 12px;
   cursor: pointer;
   transition: transform .15s ease, border-color .15s ease;
 }
@@ -1403,6 +1403,26 @@ tr.row-flash > td {
   border-color: var(--green);
   background: rgba(0,230,118,.10);
   box-shadow: 0 0 0 1px var(--green) inset;
+}
+
+.tsum-event-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.tsum-event-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.tsum-event-actions .export-icon-btn {
+  width: 32px;
+  height: 32px;
 }
 
 /* Tournament Details: brief highlight when a tournament is loaded into it */
@@ -1417,7 +1437,9 @@ tr.row-flash > td {
 .tsum-event-top {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   justify-content: space-between;
+  gap: 6px;
   margin-bottom: 8px;
 }
 .tsum-event-date {
