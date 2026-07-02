@@ -445,8 +445,8 @@ function handleImport() {
         renderResults(data);
         showImportSuccess(data);
         if (data.saved) {
-          _justImportedTourneyIds = new Set((data.tournaments || []).map(t => t.tourney_id));
-          _loadHistory().then(() => { _justImportedTourneyIds = new Set(); });
+          _startImportHighlights((data.tournaments || []).map(t => t.tourney_id).filter(Boolean));
+          _loadHistory();
         }
       })
       .catch(err => {
@@ -791,6 +791,25 @@ function _updateExportGates() {
 // tourney_ids touched by the most recent import — used to briefly highlight
 // the corresponding rows in Tournament Summary / History after _loadHistory() renders.
 let _justImportedTourneyIds = new Set();
+let _importHighlightTimer = null;
+const IMPORT_HIGHLIGHT_MS = 60000;
+
+function _startImportHighlights(tourneyIds) {
+  _justImportedTourneyIds = new Set(tourneyIds || []);
+  if (_importHighlightTimer) clearTimeout(_importHighlightTimer);
+  _importHighlightTimer = setTimeout(() => {
+    _justImportedTourneyIds = new Set();
+    _importHighlightTimer = null;
+    document.querySelectorAll('.row-flash, .card-flash').forEach(el => {
+      el.classList.remove('row-flash', 'card-flash');
+    });
+  }, IMPORT_HIGHLIGHT_MS);
+}
+
+function _dismissImportHighlight(el) {
+  if (!el) return;
+  el.classList.remove('row-flash', 'card-flash');
+}
 
 // ── TS / CGS filter + sort state ─────────────────────────────────────────────
 let _allTournaments     = [];          // cached from _loadHistory
@@ -965,12 +984,14 @@ function _renderCashGamesSummary(tournaments) {
         { day: 'numeric', month: 'short', year: '2-digit', timeZone: tz }) : '—';
 
     const sortedEntries = [...entries].sort((a, b) => (b.earliest_ts || 0) - (a.earliest_ts || 0));
+    const isRowNew = entries.some(t => _justImportedTourneyIds.has(t.tourney_id));
     const eventCards = sortedEntries.map(t => {
       const d = t.earliest_ts ? new Date(t.earliest_ts * 1000).toLocaleDateString('en-GB',
           { day: 'numeric', month: 'short', year: '2-digit', timeZone: tz }) : '—';
       const evDurHr = (t.duration_secs || 0) / 3600;
       const evPerHr = evDurHr > 0 ? (t.hands || 0) / evDurHr : 0;
-      return `<div class="tsum-event-card" data-tid="${t.tourney_id}" onclick="event.stopPropagation();_selectCgsdDetail('${t.tourney_id}', this)">
+      const isCardNew = _justImportedTourneyIds.has(t.tourney_id);
+      return `<div class="tsum-event-card${isCardNew ? ' card-flash' : ''}" data-tid="${t.tourney_id}" onclick="event.stopPropagation();_dismissImportHighlight(this);_selectCgsdDetail('${t.tourney_id}', this)">
         <div class="tsum-event-top">
           <span class="tsum-event-date">${d}</span>
           <span class="tsum-stat-pill">${fmtTime(t.earliest_ts, tz)}</span>
@@ -985,7 +1006,7 @@ function _renderCashGamesSummary(tournaments) {
       </div>`;
     }).join('');
 
-    return `<tr class="tsum-summary-row" onclick="_toggleCgsDetail('${rowId}')">
+    return `<tr class="tsum-summary-row${isRowNew ? ' row-flash' : ''}" onclick="_dismissImportHighlight(this);_toggleCgsDetail('${rowId}')">
       <td>
         <svg class="tsum-chevron" id="${rowId}-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         <small>${name}</small>
@@ -1241,7 +1262,7 @@ function _renderTournamentSummary(tournaments) {
       const evDurHr = (t.duration_secs || 0) / 3600;
       const evPerHr = evDurHr > 0 ? (t.hands || 0) / evDurHr : 0;
       const isCardNew = _justImportedTourneyIds.has(t.tourney_id);
-      return `<div class="tsum-event-card${isCardNew ? ' card-flash' : ''}" data-tid="${t.tourney_id}" onclick="event.stopPropagation();_selectTourneyDetail('${t.tourney_id}', this)">
+      return `<div class="tsum-event-card${isCardNew ? ' card-flash' : ''}" data-tid="${t.tourney_id}" onclick="event.stopPropagation();_dismissImportHighlight(this);_selectTourneyDetail('${t.tourney_id}', this)">
         <div class="tsum-event-top">
           <span class="tsum-event-date">${d}</span>
           <span class="tsum-stat-pill" title="Sit down time">${fmtTime(t.earliest_ts, tz)}</span>
@@ -1256,7 +1277,7 @@ function _renderTournamentSummary(tournaments) {
       </div>`;
     }).join('');
 
-    return `<tr class="tsum-summary-row${isRowNew ? ' row-flash' : ''}" onclick="_toggleTourneyDetail('${rowId}')">
+    return `<tr class="tsum-summary-row${isRowNew ? ' row-flash' : ''}" onclick="_dismissImportHighlight(this);_toggleTourneyDetail('${rowId}')">
       <td>
         <svg class="tsum-chevron" id="${rowId}-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         <small>${name}</small>

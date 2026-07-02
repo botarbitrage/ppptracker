@@ -1339,7 +1339,7 @@ button.auth-chip { background: none; }
   100% { background-color: transparent; }
 }
 tr.row-flash > td {
-  animation: rowFlash 4s ease-out;
+  animation: rowFlash 60s ease-out forwards;
 }
 
 @keyframes cardFlash {
@@ -1347,7 +1347,7 @@ tr.row-flash > td {
   100% { background-color: var(--panel-alt);   border-color: var(--border); }
 }
 .tsum-event-card.card-flash {
-  animation: cardFlash 4s ease-out forwards;
+  animation: cardFlash 60s ease-out forwards;
 }
 
 .tsum-chevron {
