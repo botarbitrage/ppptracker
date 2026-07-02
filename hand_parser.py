@@ -33,6 +33,22 @@ def _hero_player(players):
     return None
 
 
+def _hero_prehand_paid(flow, hero_seatid):
+    """Chips the hero posted as ante/SB/BB this hand.
+
+    PPPoker's `hand_chips` is the hero's stack AFTER these forced bets are
+    deducted, so callers add this back to recover the stack the hero actually
+    sat down to the hand with (what the tournament/session graph should plot).
+    """
+    if hero_seatid is None:
+        return 0
+    total = 0
+    for a in flow.get('pre_flop', {}).get('actions', []):
+        if a.get('type') in (8, 9, 10) and a.get('seatid') == hero_seatid:
+            total += a.get('chips') or 0
+    return total
+
+
 def calc_position(dealer_seatid, hero_seatid, active_seatids):
     if dealer_seatid is None or hero_seatid is None or not active_seatids:
         return '?'
@@ -217,6 +233,9 @@ def build_hand_rows(records):
         hero_seatid = hero.get('seatid') if hero else None
         hero_uid    = hero.get('uid')    if hero else None
         hero_chips  = hero.get('hand_chips', 0) if hero else 0
+        # Restore the pre-hand stack (hand_chips is post-ante/blind) so the
+        # graph shows what the hero actually had sitting down to the hand.
+        chip_stack  = hero_chips + _hero_prehand_paid(flow, hero_seatid)
 
         dealer_seatid = room.get('dealer_seatid')
         active_seats  = [p.get('seatid') for p in players if p.get('seatid') is not None]
@@ -233,7 +252,7 @@ def build_hand_rows(records):
             result=result,
             profit=profit,
             big_blind=big_blind,
-            chip_stack=hero_chips,
+            chip_stack=chip_stack,
             replay_url=_replay_url(share_key),
         ))
     return rows

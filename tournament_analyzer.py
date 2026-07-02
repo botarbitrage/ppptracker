@@ -18,7 +18,7 @@ skill triggered by time or on user request. The caller resolves `cfg` from the
 Firebase config docs.
 """
 
-from hand_parser import _seq_num, _hero_player
+from hand_parser import _seq_num, _hero_player, _hero_prehand_paid
 
 # Minimum unexplained top-up (in big blinds) to treat a stack jump as an add-on.
 # Filters out small stack/profit reconciliation noise while still catching a
@@ -33,7 +33,10 @@ def _hand_fields(rec):
     info    = fh.get('info', {}) or {}
     room    = info.get('room', {}) or {}
     players = info.get('players', []) or []
+    flow    = fh.get('flow', {}) or {}
     hero    = _hero_player(players)
+    hero_seatid = hero.get('seatid') if hero else None
+    hero_chips  = (hero.get('hand_chips', 0) if hero else 0) or 0
 
     sb = summary.get('G') or room.get('small_blind', 0) or 0
     return {
@@ -41,7 +44,15 @@ def _hand_fields(rec):
         'ts':        summary.get('C', 0) or 0,
         'profit':    summary.get('H', 0) or 0,
         'big_blind': sb * 2 if sb else 0,
-        'chips':     (hero.get('hand_chips', 0) if hero else 0) or 0,
+        # Pre-hand stack (hand_chips is post-ante/blind) — the stack the hero
+        # actually sat down to the hand with. Used for scale detection and for
+        # comparing against the PRIOR hand's post-hand stack when hunting for
+        # unexplained stack jumps (rebuys/add-ons).
+        'chips':     hero_chips + _hero_prehand_paid(flow, hero_seatid),
+        # Raw post-ante/blind stack — combines with `profit` (which PPPoker
+        # reports relative to this post-blind baseline) to get the hero's
+        # stack at the END of this hand.
+        'chips_raw': hero_chips,
     }
 
 
@@ -168,7 +179,10 @@ def analyze_tournament(records, cfg):
                 spots.append({'type': 'addon', 'gameid': h['gameid'],
                               'ts': h['ts'], 'level': lvl})
 
-        prev_post = h['chips'] + h['profit']
+        # `chips_raw` (post-ante/blind) + `profit` gives the stack at the END
+        # of this hand; compared next iteration against the NEXT hand's
+        # pre-hand `chips` to catch busts/rebuys/add-ons.
+        prev_post = h['chips_raw'] + h['profit']
         prev_bb   = h['big_blind']
 
     return {
