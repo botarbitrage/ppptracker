@@ -1461,9 +1461,11 @@ function _tgLevelFromElapsed(elapsedSecs, cfg) {
   const rebuyDur = (cfg.levelDurRebuyMin || cfg.levelDurMin) * 60;
   const mainDur  = cfg.levelDurMin * 60;
   const rebuyEnd = cfg.lateRegLevels * rebuyDur;
-  if (elapsedSecs <= 0) return 1;
-  if (elapsedSecs <= rebuyEnd) return Math.ceil(elapsedSecs / rebuyDur);
-  return cfg.lateRegLevels + Math.ceil((elapsedSecs - rebuyEnd) / mainDur);
+  let lvl;
+  if (elapsedSecs <= 0) lvl = 1;
+  else if (elapsedSecs <= rebuyEnd) lvl = Math.ceil(elapsedSecs / rebuyDur);
+  else lvl = cfg.lateRegLevels + Math.ceil((elapsedSecs - rebuyEnd) / mainDur);
+  return cfg.maxBlinds ? Math.min(lvl, cfg.maxBlinds) : lvl;
 }
 
 function _renderTournamentChart(hands, meta) {
@@ -1479,9 +1481,20 @@ function _renderTournamentChart(hands, meta) {
 
   const roomName       = (meta && meta.room_name) || '';
   const isFinishBusted = !!(meta && meta.finish_busted);
+  // Prefer DB-resolved config from the backend (meta); the hardcoded table is
+  // only a fallback for fields the API didn't provide.
   const cfg            = { ..._tgGetCfg(roomName) };
-  if (meta && meta.itm_h != null) cfg.itmH = meta.itm_h;
-  if (meta && meta.end_h != null) cfg.endH = meta.end_h;
+  if (meta) {
+    if (meta.itm_h != null)              cfg.itmH          = meta.itm_h;
+    if (meta.end_h != null)              cfg.endH          = meta.end_h;
+    if (meta.ft_h  != null)              cfg.ftH           = meta.ft_h;
+    if (meta.late_reg_level != null)     cfg.lateRegLevels = meta.late_reg_level;
+    if (meta.level_duration_min != null) cfg.levelDurMin   = meta.level_duration_min;
+    if (meta.max_blinds != null)         cfg.maxBlinds     = meta.max_blinds;
+    // rebuy-phase duration: DB truth wins, including a null "no rebuy period"
+    if ('level_duration_rebuy_min' in meta) cfg.levelDurRebuyMin = meta.level_duration_rebuy_min;
+  }
+  if (cfg.ftH == null) cfg.ftH = 3.5;  // final-table default so the ref line still draws
 
   // Anchor x=0 at the hero's own first hand of this entry. We have no
   // reliable ground-truth blind schedule to back-calculate a "true" Level 1
@@ -1494,6 +1507,7 @@ function _renderTournamentChart(hands, meta) {
   const lateRegSecs = (cfg.levelDurRebuyMin || cfg.levelDurMin) * cfg.lateRegLevels * 60;
   const itmSecs     = cfg.itmH * 3600;
   const endSecs     = cfg.endH * 3600;
+  const ftSecs      = cfg.ftH * 3600;
   const lastHandElapsed = sorted[sorted.length - 1].ts - tournStart;
   const axisSecs    = Math.max(endSecs + 30 * 60, lastHandElapsed + 15 * 60);
 
@@ -1541,9 +1555,10 @@ function _renderTournamentChart(hands, meta) {
 
   // Reference lines at fixed second positions
   const refLines = [
-    { secs: lateRegSecs, color: 'rgba(204,204,0,0.9)',  label: `Late Reg\nL${cfg.lateRegLevels}` },
-    { secs: itmSecs,     color: 'rgba(255,152,0,0.9)',  label: `ITM Bubble\n${cfg.itmH}h`         },
-    { secs: endSecs,     color: 'rgba(255,82,82,0.9)',  label: `Exp. End\n${cfg.endH}h`            },
+    { secs: lateRegSecs, color: 'rgba(204,204,0,0.9)',   label: `Late Reg\nL${cfg.lateRegLevels}` },
+    { secs: ftSecs,      color: 'rgba(179,136,255,0.9)', label: `Final Table\n${cfg.ftH}h`         },
+    { secs: itmSecs,     color: 'rgba(255,152,0,0.9)',   label: `ITM Bubble\n${cfg.itmH}h`         },
+    { secs: endSecs,     color: 'rgba(255,82,82,0.9)',   label: `Exp. End\n${cfg.endH}h`            },
   ];
 
   // Critical point markers — store secs + y-values for both axes
@@ -1565,6 +1580,18 @@ function _renderTournamentChart(hands, meta) {
   if (bigWinH  && bigWinVal  > 0) markers.push(_mkMarker(bigWinH,  '#00e676', '▲'));
   if (bigLossH && bigLossVal < 0) markers.push(_mkMarker(bigLossH, '#ff5252', '▼'));
   if (bustPoint) markers.push({ secs: bustPoint.x, chipY: 0, bbY: 0, color: '#ff5252', icon: '✕' });
+
+  // Rebuy / add-on spots detected by the backend analyser (marked at the hand
+  // where the chip injection was observed).
+  const _findHandByTs = ts => sorted.find(x => x.ts === ts);
+  for (const rb of (meta && meta.rebuys) || []) {
+    const h = _findHandByTs(rb.ts);
+    if (h) markers.push(_mkMarker(h, '#ffb300', 'R'));
+  }
+  for (const ad of (meta && meta.addons) || []) {
+    const h = _findHandByTs(ad.ts);
+    if (h) markers.push(_mkMarker(h, '#40c4ff', 'A'));
+  }
 
   _tgState = {
     chipDataset, bbDataset, pointList,
@@ -1691,7 +1718,9 @@ function _tgBuildChart() {
               const h = pointList[i];
               if (!h) return '';
               const elapsed = _tgFmtElapsed(h.ts - tournStart);
-              const lvl     = _tgInferLevel(h.big_blind, roomName, h.chip_stack);
+              const lvl     = (h.level != null)
+                ? h.level
+                : _tgInferLevel(h.big_blind, roomName, h.chip_stack);
               let hn = 0;
               for (let j = 0; j <= i; j++) if (pointList[j]) hn++;
               return `Hand #${hn} · +${elapsed}${lvl ? ' · L' + lvl : ''}`;

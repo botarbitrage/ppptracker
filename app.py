@@ -16,6 +16,7 @@ from flask import Flask, jsonify, render_template, request, send_file, send_from
 
 from hand_parser import process_hands, build_hand_rows
 from hand_exporter import validate_hands, export_pokerstars
+from tournament_analyzer import analyze_tournament
 
 # In-memory store for the most recently imported hand records (used by export endpoints)
 _session_records = None
@@ -674,6 +675,60 @@ def _fetch_tournament_records(uid, tourney_id):
     return _jj.loads(blob.download_as_bytes()), d
 
 
+def _resolve_tournament_cfg(room_name):
+    """
+    Resolve the static config for a tournament instance, matched by room name.
+    Per-tournament values win; missing scalars fall back to
+    /config/tournament_defaults. The blind ladder is composed as base+extra
+    (or the override ladder for LUCKY DAY / TEXAS), falling back to the canonical
+    80-level ladder when no config doc matches. Returns a plain dict.
+    """
+    db = _get_admin_db()
+    room = (room_name or '').strip().upper()
+
+    cfg_doc = {}
+    if room:
+        for snap in db.collection('tournaments').get():
+            cd = snap.to_dict()
+            if (cd.get('name') or '').strip().upper() == room:
+                cfg_doc = cd
+                break
+
+    def _config(name):
+        snap = db.collection('config').document(name).get()
+        return snap.to_dict() if snap.exists else {}
+
+    defaults         = _config('tournament_defaults')
+    base_levels      = _config('blind_structure_base').get('levels', [])
+    canonical_levels = _config('blind_ladder_canonical').get('levels', [])
+
+    if cfg_doc:
+        extra = cfg_doc.get('blind_structure_extra') or []
+        levels = (list(extra) if cfg_doc.get('blind_structure_override')
+                  else list(base_levels) + list(extra))
+    else:
+        levels = canonical_levels
+
+    def pick(key):
+        v = cfg_doc.get(key)
+        return v if v is not None else defaults.get(key)
+
+    return {
+        'name':                     cfg_doc.get('name', room_name),
+        'blind_levels':             levels,
+        'itm_h':                    pick('itm_h'),
+        'end_h':                    pick('end_h'),
+        'ft_h':                     pick('ft_h'),
+        'max_blinds':               pick('max_blinds'),
+        'late_reg_level':           pick('late_reg_level'),
+        'level_duration_min':       pick('level_duration_min'),
+        'level_duration_rebuy_min': pick('level_duration_rebuy_min'),
+        'level_duration_ft_min':    pick('level_duration_ft_min'),
+        'starting_chips':           pick('starting_chips'),
+        'rebuy_period_end_level':   pick('rebuy_period_end_level'),
+    }
+
+
 @app.route('/api/tournaments/<tourney_id>/hands', methods=['GET'])
 def tournament_hands(tourney_id):
     """Per-hand display rows for one persisted tournament (Tournament Details)."""
@@ -688,19 +743,28 @@ def tournament_hands(tourney_id):
     meta = {k: (doc or {}).get(k) for k in
             ['room_name', 'earliest_ts', 'last_chips', 'first_chips', 'finish_busted']}
 
-    # Enrich with itm_h/end_h from the tournament config doc (if seeded)
-    room = (meta.get('room_name') or '').strip().upper()
-    if room:
-        db2 = _get_admin_db()
-        cfg_snap = db2.collection('tournaments').get()
-        for cfg_doc in cfg_snap:
-            cd = cfg_doc.to_dict()
-            if (cd.get('name') or '').strip().upper() == room:
-                if cd.get('itm_h') is not None: meta['itm_h'] = cd['itm_h']
-                if cd.get('end_h') is not None: meta['end_h'] = cd['end_h']
-                break
+    # Resolve the tournament's static config from Firebase (per-tournament values
+    # with a canonical fallback) and run the post-tournament analyser so the
+    # graphs get the ACTUAL level per hand plus rebuy/add-on spots. This may be
+    # slow on large tournaments — acceptable for now; it is a pure function
+    # designed to be reused later by an asynchronous Cowork skill.
+    cfg = _resolve_tournament_cfg(meta.get('room_name') or '')
+    analysis = analyze_tournament(records, cfg)
 
-    return jsonify({'hands': build_hand_rows(records), 'meta': meta})
+    for key in ('itm_h', 'end_h', 'ft_h', 'max_blinds', 'late_reg_level',
+                'level_duration_min', 'level_duration_rebuy_min',
+                'level_duration_ft_min', 'blind_levels'):
+        meta[key] = cfg.get(key)
+    meta['rebuys'] = analysis['rebuys']
+    meta['addons'] = analysis['addons']
+    meta['spots']  = analysis['spots']
+
+    rows = build_hand_rows(records)
+    hand_levels = analysis['hand_levels']
+    for row in rows:
+        row['level'] = hand_levels.get(row.get('hand_num'))
+
+    return jsonify({'hands': rows, 'meta': meta})
 
 
 @app.route('/api/tournaments/<tourney_id>/export', methods=['POST'])

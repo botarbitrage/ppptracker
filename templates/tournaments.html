@@ -193,7 +193,9 @@
               <th scope="col" class="text-center">Add-on</th>
               <th scope="col" class="text-center">x2 / x3</th>
               <th scope="col" class="text-center sort-th" onclick="_sortTourneys('itm')" data-col="itm">ITM Time <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center sort-th" onclick="_sortTourneys('ft')" data-col="ft">Final Table <span class="sort-icon"></span></th>
               <th scope="col" class="text-center sort-th" onclick="_sortTourneys('end')" data-col="end">End of Game <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center sort-th" onclick="_sortTourneys('maxb')" data-col="maxb">Max Blinds <span class="sort-icon"></span></th>
             </tr>
           </thead>
           <tbody id="tourney-table-tbody"></tbody>
@@ -360,7 +362,9 @@ function renderTourneyRow(id, t) {
     <td class="text-center">${addonCell}</td>
     <td class="text-center">${bulkCell}</td>
     <td class="text-center td-muted">${t.itm_h != null ? t.itm_h + 'h' : '—'}</td>
+    <td class="text-center td-muted">${t.ft_h != null ? t.ft_h + 'h' : '—'}</td>
     <td class="text-center td-muted">${t.end_h != null ? t.end_h + 'h' : '—'}</td>
+    <td class="text-center td-muted">${t.max_blinds != null ? t.max_blinds : '—'}</td>
   </tr>`;
 }
 
@@ -388,7 +392,9 @@ function _renderTourneyTable() {
     else if (_sortCol === 'start') { va = ta.starting_time || ''; vb = tb.starting_time || ''; }
     else if (_sortCol === 'chips') { va = ta.starting_chips || 0; vb = tb.starting_chips || 0; }
     else if (_sortCol === 'itm')   { va = ta.itm_h || 0; vb = tb.itm_h || 0; }
+    else if (_sortCol === 'ft')    { va = ta.ft_h || 0; vb = tb.ft_h || 0; }
     else if (_sortCol === 'end')   { va = ta.end_h || 0; vb = tb.end_h || 0; }
+    else if (_sortCol === 'maxb')  { va = ta.max_blinds || 0; vb = tb.max_blinds || 0; }
     else { va = 0; vb = 0; }
     return va < vb ? -_sortDir : va > vb ? _sortDir : 0;
   });
