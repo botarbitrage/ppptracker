@@ -794,9 +794,9 @@ let _justImportedTourneyIds = new Set();
 
 // ── TS / CGS filter + sort state ─────────────────────────────────────────────
 let _allTournaments     = [];          // cached from _loadHistory
-let _tsFilter           = 'all';       // 'all' | 'today' | 'week' | 'month'
-let _tsSortCol          = null;        // null = default order
-let _tsSortDir          = 'desc';
+let _tsFilter           = 'week';      // 'all' | 'today' | 'week' | 'month'
+let _tsSortCol          = 'last';      // null = default order
+let _tsSortDir          = 'asc';
 
 let _cgsFilter          = 'all';
 let _cgsSortCol         = null;
@@ -1233,7 +1233,7 @@ function _renderTournamentSummary(tournaments) {
     const lastDate    = lastTs ? new Date(lastTs * 1000).toLocaleDateString('en-GB',
         { day: 'numeric', month: 'short', year: '2-digit', timeZone: tz }) : '—';
 
-    const sortedEntries = [...entries].sort((a, b) => (b.earliest_ts || 0) - (a.earliest_ts || 0));
+    const sortedEntries = [...entries].sort((a, b) => (a.earliest_ts || 0) - (b.earliest_ts || 0));
     const isRowNew = entries.some(t => _justImportedTourneyIds.has(t.tourney_id));
     const eventCards = sortedEntries.map(t => {
       const d = t.earliest_ts ? new Date(t.earliest_ts * 1000).toLocaleDateString('en-GB',
