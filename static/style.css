@@ -1538,6 +1538,15 @@ tr.row-flash > td {
   background: rgba(0,0,0,.12);
 }
 
+.tourney-graph-warning {
+  border-bottom: 1px solid var(--border);
+  padding: 12px 18px;
+  background: rgba(255, 193, 7, .08);
+  color: #ffd166;
+  font-family: var(--font-body);
+  font-size: .86rem;
+}
+
 .tourney-graph-title {
   font-family: var(--font-head);
   letter-spacing: .03em;

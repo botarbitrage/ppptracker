@@ -1487,11 +1487,18 @@ function _renderTournamentChart(hands, meta) {
   if (!wrap) return;
   if (_tgChart) { _tgChart.destroy(); _tgChart = null; }
   _tgState = null;
+  _tgSetGraphWarning('');
 
   if (!hands || !hands.length) { wrap.classList.add('d-none'); return; }
 
   const sorted = [...hands].filter(h => h.ts).sort((a, b) => a.ts - b.ts);
   if (!sorted.length) { wrap.classList.add('d-none'); return; }
+
+  if (meta && meta.graph_ready === false) {
+    wrap.classList.add('d-none');
+    _tgSetGraphWarning(meta.graph_warning || 'Graph cannot be displayed because this tournament configuration is incomplete.');
+    return;
+  }
 
   const roomName       = (meta && meta.room_name) || '';
   const isFinishBusted = !!(meta && meta.finish_busted);
@@ -1652,6 +1659,13 @@ function _renderTournamentChart(hands, meta) {
 
   _tgBuildChart();
   wrap.classList.remove('d-none');
+}
+
+function _tgSetGraphWarning(message) {
+  const el = document.getElementById('tourney-graph-warning');
+  if (!el) return;
+  el.textContent = message || '';
+  el.classList.toggle('d-none', !message);
 }
 
 function _tgBuildChart() {
@@ -1889,6 +1903,7 @@ function _tgDestroy() {
   _tgPlayedOnly = false;
   const cb = document.getElementById('tg-played-only');
   if (cb) cb.checked = false;
+  _tgSetGraphWarning('');
   const wrap = document.getElementById('tourney-graph-wrap');
   if (wrap) wrap.classList.add('d-none');
 }
@@ -1925,6 +1940,7 @@ async function _selectTourneyDetail(tid, cardEl) {
   const hint    = document.getElementById('tourney-detail-hint');
   const section = document.getElementById('tournament-history-pro-section');
   if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Loading hands…</td></tr>';
+  _tgDestroy();
 
   if (!_currentUser) return;
   const token = await _currentUser.getIdToken().catch(() => null);

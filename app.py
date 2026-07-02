@@ -818,6 +818,15 @@ def _resolve_tournament_cfg(room_name):
     else:
         levels = canonical_levels
 
+    graph_required = (
+        'itm_h', 'end_h', 'ft_h', 'max_blinds',
+        'late_reg_level', 'level_duration_min',
+    )
+    missing_graph_fields = [key for key in graph_required if cfg_doc.get(key) is None]
+    if not levels:
+        missing_graph_fields.append('blind_levels')
+    graph_ready = bool(cfg_doc) and not missing_graph_fields and bool(levels)
+
     def pick(key):
         v = cfg_doc.get(key)
         return v if v is not None else defaults.get(key)
@@ -835,6 +844,9 @@ def _resolve_tournament_cfg(room_name):
         'level_duration_ft_min':    pick('level_duration_ft_min'),
         'starting_chips':           pick('starting_chips'),
         'rebuy_period_end_level':   pick('rebuy_period_end_level'),
+        'graph_ready':              graph_ready,
+        'graph_missing_fields':     missing_graph_fields,
+        'graph_config_found':       bool(cfg_doc),
     }
 
 
@@ -877,8 +889,21 @@ def tournament_hands(tourney_id):
 
     for key in ('itm_h', 'end_h', 'ft_h', 'max_blinds', 'late_reg_level',
                 'level_duration_min', 'level_duration_rebuy_min',
-                'level_duration_ft_min', 'blind_levels'):
+                'level_duration_ft_min', 'blind_levels', 'graph_ready',
+                'graph_missing_fields', 'graph_config_found'):
         meta[key] = cfg.get(key)
+    if not meta.get('graph_ready'):
+        if not meta.get('graph_config_found'):
+            meta['graph_warning'] = (
+                'Graph cannot be displayed because this tournament has no matching '
+                'configuration in the tournaments table.'
+            )
+        else:
+            fields = ', '.join(meta.get('graph_missing_fields') or [])
+            meta['graph_warning'] = (
+                'Graph cannot be displayed because this tournament configuration '
+                f'is missing: {fields}.'
+            )
     meta['rebuys'] = analysis['rebuys']
     meta['addons'] = analysis['addons']
     meta['spots']  = analysis['spots']
