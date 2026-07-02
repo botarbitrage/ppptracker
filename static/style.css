@@ -1543,7 +1543,8 @@ tr.row-flash > td {
   letter-spacing: .03em;
   font-size: .95rem;
   color: var(--green);
-  margin-bottom: 10px;
+  text-align: center;
+  flex: 1 1 auto;
 }
 
 .tourney-graph-controls {
@@ -1552,6 +1553,19 @@ tr.row-flash > td {
   gap: 18px;
   flex-wrap: wrap;
   margin-bottom: 12px;
+}
+
+.tg-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+@media (max-width: 767px) {
+  .tourney-graph-title { flex-basis: 100%; order: 2; margin: 4px 0; }
+  .tg-controls-right { order: 3; }
 }
 
 .tg-group-xaxis {

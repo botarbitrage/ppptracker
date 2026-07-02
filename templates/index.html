@@ -425,7 +425,6 @@
 
       <!-- Tournament Progress Graph -->
       <div id="tourney-graph-wrap" class="tourney-graph-wrap d-none">
-        <div id="tourney-graph-title" class="tourney-graph-title"></div>
         <div class="tourney-graph-controls">
           <div class="tg-group">
             <span class="tg-label">Stack</span>
@@ -433,14 +432,17 @@
             <button class="tg-btn"        id="tg-y-bb"    onclick="_tgSetY('bb')">BBs</button>
             <button class="tg-btn active" id="tg-y-both"  onclick="_tgSetY('both')">Both</button>
           </div>
-          <label class="tg-played-label">
-            <input type="checkbox" id="tg-played-only" onchange="_tgSetPlayedOnly(this.checked)">
-            <span>Show played hands only</span>
-          </label>
-          <div class="tg-group tg-group-xaxis">
-            <span class="tg-label">X-Axis</span>
-            <button class="tg-btn active" id="tg-x-time"  onclick="_tgSetX('time')">Time</button>
-            <button class="tg-btn"        id="tg-x-level" onclick="_tgSetX('level')">Level</button>
+          <div id="tourney-graph-title" class="tourney-graph-title"></div>
+          <div class="tg-controls-right">
+            <label class="tg-played-label">
+              <input type="checkbox" id="tg-played-only" onchange="_tgSetPlayedOnly(this.checked)">
+              <span>Show played hands only</span>
+            </label>
+            <div class="tg-group tg-group-xaxis">
+              <span class="tg-label">X-Axis</span>
+              <button class="tg-btn active" id="tg-x-time"  onclick="_tgSetX('time')">Time</button>
+              <button class="tg-btn"        id="tg-x-level" onclick="_tgSetX('level')">Level</button>
+            </div>
           </div>
         </div>
         <div class="tourney-graph-canvas-wrap">
