@@ -55,29 +55,41 @@ def _bb_level_map(levels):
     return m
 
 
-def _infer_level(big_blind, chips, bb_map):
+def _detect_scale(hands, bb_map, starting_chips):
     """
-    Map an observed big blind to a level number using the tournament's ladder.
-    The PPPoker export sometimes scales blinds/chips by 100, so the same bb
-    value can match two levels 100x apart; disambiguate with the hero's implied
-    BB count (a real count is almost always 1..300). This mirrors the previous
-    client-side heuristic but reads the ladder from the DB instead of a
-    hardcoded table.
+    PPPoker exports a whole tournament at one consistent chip scale — raw, or
+    multiplied by 100. Because both blinds AND stacks are scaled together, the
+    per-hand BB count is scale-invariant and cannot reveal the scale (the same
+    observed big blind maps to two ladder levels 100x apart, e.g. 80000 → the
+    "raw" level 22 or, ÷100, the real level 6).
+
+    The one unscaled anchor is `starting_chips`: a hero entering a tournament
+    holds ~1 starting stack, so dividing their entry stack by the true scale
+    lands near `starting_chips` (~1x), while the wrong scale lands ~100x off.
+    We pick the scale (100 preferred) whose divided-down big blinds all match a
+    real ladder level and whose entry stack isn't an impossible pile of stacks.
     """
+    bbs = [h['big_blind'] for h in hands if h['big_blind']]
+    if not bbs:
+        return 1
+    entry_chips = next((h['chips'] for h in hands if h['chips']), 0)
+    for scale in (100, 1):
+        if not all(round(bb / scale) in bb_map for bb in bbs):
+            continue
+        if starting_chips and entry_chips:
+            # You can't hold ~100 starting stacks on your first recorded hand;
+            # that only happens when the export scale is 100x too large.
+            if (entry_chips / scale) / starting_chips > 20:
+                continue
+        return scale
+    return 1
+
+
+def _infer_level(big_blind, scale, bb_map):
+    """Map an observed big blind to a level, correcting for the export scale."""
     if not big_blind:
         return None
-    direct = bb_map.get(big_blind)
-    scaled = bb_map.get(round(big_blind / 100)) if big_blind >= 100 else None
-    if direct and scaled and chips:
-        def plausible(v):
-            return 1 <= v <= 300
-        bb_direct = chips / big_blind
-        bb_scaled = chips / (big_blind / 100)
-        if plausible(bb_direct) and not plausible(bb_scaled):
-            return direct
-        if plausible(bb_scaled) and not plausible(bb_direct):
-            return scaled
-    return direct or scaled or None
+    return bb_map.get(round(big_blind / scale))
 
 
 def analyze_tournament(records, cfg):
@@ -103,22 +115,12 @@ def analyze_tournament(records, cfg):
     max_blinds      = cfg.get('max_blinds')
     rebuy_end_level = cfg.get('rebuy_period_end_level')
     starting_chips  = cfg.get('starting_chips')
-    level_bb        = {lv.get('level'): lv.get('bb')
-                       for lv in (cfg.get('blind_levels') or []) if lv.get('level')}
 
     start_ts = min((h['ts'] for h in hands if h['ts']), default=0)
 
-    # PPPoker exports a whole tournament at a consistent scale (raw, or x100).
-    # Detect it by comparing observed big blinds to the ladder so add-on sizing
-    # can be judged against the (unscaled) starting stack.
-    scale_votes = {}
-    for h in hands:
-        tb = level_bb.get(_infer_level(h['big_blind'], h['chips'], bb_map))
-        if tb:
-            s = round(h['big_blind'] / tb)
-            if s in (1, 100):
-                scale_votes[s] = scale_votes.get(s, 0) + 1
-    scale = max(scale_votes, key=scale_votes.get) if scale_votes else 1
+    # Resolve the export's chip scale once (raw vs x100) so both level lookup
+    # and add-on sizing work against the real (unscaled) ladder / starting stack.
+    scale = _detect_scale(hands, bb_map, starting_chips)
     # An add-on injects roughly a starting stack; require at least half of one
     # (scale-aware) so ordinary hand-to-hand stack changes aren't misread.
     addon_min_chips = 0.5 * starting_chips * scale if starting_chips else None
@@ -130,7 +132,7 @@ def analyze_tournament(records, cfg):
     prev_post = None   # hero stack after the previous hand (chips + profit)
     prev_bb   = None
     for h in hands:
-        lvl = _infer_level(h['big_blind'], h['chips'], bb_map)
+        lvl = _infer_level(h['big_blind'], scale, bb_map)
         if lvl and max_blinds:
             lvl = min(lvl, max_blinds)
         if h['gameid']:

@@ -783,13 +783,19 @@ def _resolve_tournament_cfg(room_name):
     80-level ladder when no config doc matches. Returns a plain dict.
     """
     db = _get_admin_db()
-    room = (room_name or '').strip().upper()
+    # Room names carry a leading platform emoji (e.g. "🌐 LUCKY DAY") while the
+    # config docs are stored clean ("LUCKY DAY"). Normalise both to letters /
+    # digits / spaces before matching so the emoji doesn't force a fallback to
+    # the canonical ladder.
+    def _norm_name(s):
+        return _re.sub(r'[^A-Z0-9 ]', '', (s or '').upper()).strip()
+    room = _norm_name(room_name)
 
     cfg_doc = {}
     if room:
         for snap in db.collection('tournaments').get():
             cd = snap.to_dict()
-            if (cd.get('name') or '').strip().upper() == room:
+            if _norm_name(cd.get('name')) == room:
                 cfg_doc = cd
                 break
 
