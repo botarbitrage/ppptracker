@@ -1025,11 +1025,7 @@ function _renderCashGamesSummary(tournaments) {
 }
 
 function _toggleCgsDetail(rowId) {
-  const detail  = document.getElementById(`${rowId}-detail`);
-  const chevron = document.getElementById(`${rowId}-chevron`);
-  if (!detail) return;
-  detail.classList.toggle('tsum-detail-open');
-  if (chevron) chevron.classList.toggle('tsum-chevron-open');
+  _toggleTsumDetail('cgs-summary-tbody', rowId);
 }
 
 // ── Cash Game Session Details ─────────────────────────────────────────────────
@@ -1324,9 +1320,25 @@ function _renderTournamentSummary(tournaments) {
 }
 
 function _toggleTourneyDetail(rowId) {
+  _toggleTsumDetail('tourney-summary-tbody', rowId);
+}
+
+// Accordion toggle shared by the Tournament Summary and Cash Game Summary
+// tables: opening a row's detail closes any other open row in the same tbody.
+function _toggleTsumDetail(tbodyId, rowId) {
+  const tbody   = document.getElementById(tbodyId);
   const detail  = document.getElementById(`${rowId}-detail`);
   const chevron = document.getElementById(`${rowId}-chevron`);
   if (!detail) return;
+  const opening = !detail.classList.contains('tsum-detail-open');
+  if (tbody && opening) {
+    tbody.querySelectorAll('.tsum-detail-wrap.tsum-detail-open').forEach(el => {
+      if (el !== detail) el.classList.remove('tsum-detail-open');
+    });
+    tbody.querySelectorAll('.tsum-chevron-open').forEach(el => {
+      if (el !== chevron) el.classList.remove('tsum-chevron-open');
+    });
+  }
   detail.classList.toggle('tsum-detail-open');
   if (chevron) chevron.classList.toggle('tsum-chevron-open');
 }
