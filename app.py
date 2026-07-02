@@ -259,7 +259,8 @@ def export_hand():
         return jsonify({"error": f"Hand '{hand_id}' not found in the imported data."}), 404
 
     try:
-        filepath, _ = export_pokerstars([match], platform=platform)
+        filepath, _ = export_pokerstars([match], platform=platform,
+                                         blind_levels_by_room=_blind_levels_by_room([match]))
         return send_file(
             os.path.abspath(filepath),
             as_attachment=True,
@@ -287,7 +288,8 @@ def export_tournament():
         return jsonify({"error": f"No hands found for tournament '{tid}'."}), 404
 
     try:
-        filepath, _ = export_pokerstars(records, platform=platform)
+        filepath, _ = export_pokerstars(records, platform=platform,
+                                         blind_levels_by_room=_blind_levels_by_room(records))
         return send_file(
             os.path.abspath(filepath),
             as_attachment=True,
@@ -307,7 +309,8 @@ def export_ps():
         limit    = body.get("limit")          # None = all hands
         platform = (body.get("platform") or "").strip()
         records  = _session_records[:limit] if limit else _session_records
-        filepath, log = export_pokerstars(records, platform=platform)
+        filepath, log = export_pokerstars(records, platform=platform,
+                                           blind_levels_by_room=_blind_levels_by_room(records))
         return send_file(
             os.path.abspath(filepath),
             as_attachment=True,
@@ -774,6 +777,12 @@ def _fetch_tournament_records(uid, tourney_id):
     return _jj.loads(blob.download_as_bytes()), d
 
 
+def _norm_room_name(s):
+    """Strip platform emoji/punctuation so room names compare cleanly, e.g.
+    "🌐 LUCKY DAY" (as stored on hand records) == "LUCKY DAY" (config doc name)."""
+    return _re.sub(r'[^A-Z0-9 ]', '', (s or '').upper()).strip()
+
+
 def _resolve_tournament_cfg(room_name):
     """
     Resolve the static config for a tournament instance, matched by room name.
@@ -783,19 +792,13 @@ def _resolve_tournament_cfg(room_name):
     80-level ladder when no config doc matches. Returns a plain dict.
     """
     db = _get_admin_db()
-    # Room names carry a leading platform emoji (e.g. "🌐 LUCKY DAY") while the
-    # config docs are stored clean ("LUCKY DAY"). Normalise both to letters /
-    # digits / spaces before matching so the emoji doesn't force a fallback to
-    # the canonical ladder.
-    def _norm_name(s):
-        return _re.sub(r'[^A-Z0-9 ]', '', (s or '').upper()).strip()
-    room = _norm_name(room_name)
+    room = _norm_room_name(room_name)
 
     cfg_doc = {}
     if room:
         for snap in db.collection('tournaments').get():
             cd = snap.to_dict()
-            if _norm_name(cd.get('name')) == room:
+            if _norm_room_name(cd.get('name')) == room:
                 cfg_doc = cd
                 break
 
@@ -831,6 +834,21 @@ def _resolve_tournament_cfg(room_name):
         'level_duration_ft_min':    pick('level_duration_ft_min'),
         'starting_chips':           pick('starting_chips'),
         'rebuy_period_end_level':   pick('rebuy_period_end_level'),
+    }
+
+
+def _blind_levels_by_room(records):
+    """{normalized_room_name: blind_levels} for every distinct room among
+    `records`, for hand_exporter's per-hand "Level" header — a session export
+    (e.g. /api/export/pokerstars) can span several different tournaments."""
+    rooms = {
+        (r.get('full_hand', {}).get('info', {}).get('room', {}).get('room_name') or '')
+        for r in records
+    }
+    rooms.discard('')
+    return {
+        _norm_room_name(room): _resolve_tournament_cfg(room).get('blind_levels')
+        for room in rooms
     }
 
 
@@ -885,7 +903,8 @@ def export_persisted_tournament(tourney_id):
     body     = request.get_json(force=True, silent=True) or {}
     platform = (body.get('platform') or '').strip()
     try:
-        filepath, _ = export_pokerstars(records, platform=platform)
+        filepath, _ = export_pokerstars(records, platform=platform,
+                                         blind_levels_by_room=_blind_levels_by_room(records))
         return send_file(
             os.path.abspath(filepath),
             as_attachment=True,
@@ -940,7 +959,8 @@ def export_persisted_hand(tourney_id):
         return jsonify({'error': f"Hand '{raw_hand_id}' not found."}), 404
 
     try:
-        filepath, _ = export_pokerstars([match], platform=platform)
+        filepath, _ = export_pokerstars([match], platform=platform,
+                                         blind_levels_by_room=_blind_levels_by_room([match]))
         return send_file(
             os.path.abspath(filepath),
             as_attachment=True,

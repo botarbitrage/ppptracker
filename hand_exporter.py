@@ -8,7 +8,37 @@ import os
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
+from tournament_analyzer import _bb_level_map
+
 _ADELAIDE_TZ = ZoneInfo('Australia/Adelaide')
+
+# ── Tournament level label ──────────────────────────────────────────────────
+# PokerStars hand histories label the blind level as a Roman numeral
+# ("Level VI"). The real level number is looked up from the tournament's
+# resolved blind ladder (matched on the already-rescaled big blind); callers
+# without a ladder (cash games, or exports where the ladder couldn't be
+# resolved) fall back to the literal "Level I" PokerStars uses for cash-game
+# blind announcements.
+_ROMAN_TABLE = [
+    (1000, 'M'), (900, 'CM'), (500, 'D'), (400, 'CD'),
+    (100, 'C'), (90, 'XC'), (50, 'L'), (40, 'XL'),
+    (10, 'X'), (9, 'IX'), (5, 'V'), (4, 'IV'), (1, 'I'),
+]
+
+def _to_roman(n):
+    if not n or n < 1:
+        return 'I'
+    out = []
+    for value, sym in _ROMAN_TABLE:
+        count, n = divmod(n, value)
+        out.append(sym * count)
+    return ''.join(out)
+
+def _level_label(big_blind, ante, blind_levels):
+    """'Level <roman>' using the real level matched from the ladder, else 'Level I'."""
+    bb_map = _bb_level_map(blind_levels) if blind_levels else {}
+    lvl = bb_map.get(big_blind)
+    return f'Level {_to_roman(lvl)}' if lvl else 'Level I'
 
 # ── Chip denomination ───────────────────────────────────────────────────────
 # PPPoker's API returns chip values 100× the in-game display amount.
@@ -192,13 +222,15 @@ def _fold_street(flow, seatid):
 
 # ── Single-hand converter ───────────────────────────────────────────────────
 
-def hand_to_ps_block(record, tz=None, stack_overrides=None):
+def hand_to_ps_block(record, tz=None, stack_overrides=None, blind_levels=None):
     """
     Convert one hand record to a PokerStars-style block.
     Returns (block_str, warnings_list, player_end_stacks).
     Returns (None, [reason], {}) if the hand is unrecoverable.
     player_end_stacks: {user_name: end_stack} computed from action data.
     stack_overrides:   {user_name: chips} — replaces hand_chips in seat listing.
+    blind_levels:      resolved tournament ladder ([{level, bb, ...}]) used to
+                        label the real level, e.g. "Level VI" instead of "Level I".
     """
     if tz is None:
         tz = _ADELAIDE_TZ
@@ -251,7 +283,7 @@ def hand_to_ps_block(record, tz=None, stack_overrides=None):
     # ── Header ──────────────────────────────────────────────────────────────
     # Blinds in the Level string must be bare integers (no commas) — parsers
     # use strict regexes and will reject "400,000/800,000".
-    level = f"Level I ({small_blind}/{big_blind}"
+    level = f"{_level_label(big_blind, ante, blind_levels)} ({small_blind}/{big_blind}"
     if ante:
         level += f" ante {ante}"
     level += ")"
@@ -743,13 +775,22 @@ def validate_hands(records):
 
 # ── Full export ─────────────────────────────────────────────────────────────
 
-def export_pokerstars(records, tz=None, platform=None):
+def export_pokerstars(records, tz=None, platform=None, blind_levels_by_room=None):
     """
     Write all records to a PokerStars-style TXT file.
     Returns (filepath, log_dict).
+    blind_levels_by_room: optional {normalized_room_name: blind_levels list} so
+                           each hand's "Level" header reflects its own
+                           tournament's real ladder (a session export can span
+                           several different tournaments/room types).
     """
     if tz is None:
         tz = _ADELAIDE_TZ
+    blind_levels_by_room = blind_levels_by_room or {}
+
+    def _norm_room(name):
+        import re as _re2
+        return _re2.sub(r'[^A-Z0-9 ]', '', (name or '').upper()).strip()
 
     os.makedirs(os.path.join('exports', 'pokerstars'), exist_ok=True)
 
@@ -825,8 +866,11 @@ def export_pokerstars(records, tz=None, platform=None):
                 continue                             # large diff: likely rebuy or cascade error
             stack_overrides[_nm_r] = _computed
 
+        _room_r = _info_r.get('room', {}).get('room_name', '')
+        _levels_r = blind_levels_by_room.get(_norm_room(_room_r))
+
         try:
-            block, w, end_stacks = hand_to_ps_block(rec, tz, stack_overrides or None)
+            block, w, end_stacks = hand_to_ps_block(rec, tz, stack_overrides or None, _levels_r)
             computed_stacks.update(end_stacks)
             if block is None:
                 skipped += 1
