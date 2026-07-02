@@ -1193,20 +1193,26 @@ function _tsumStatPills(hands, vpip, pfr, perHr) {
   const vpipR = Math.round(vpip);
   const pfrR  = Math.round(pfr);
   return `
-    <span class="tsum-stat-pill tsum-stat-stacked" title="Hands played">
+    <span class="tsum-stat-item" title="Hands played">
       ${_TSUM_ICON_HANDS}
-      <span class="tsum-stat-full">${hands} hands</span>
-      <span class="tsum-stat-short">${hands}</span>
+      <span class="tsum-stat-pill tsum-stat-stacked">
+        <span class="tsum-stat-full">${hands} hands</span>
+        <span class="tsum-stat-short">${hands}</span>
+      </span>
     </span>
-    <span class="tsum-stat-pill tsum-stat-stacked" title="VPIP / PFR">
+    <span class="tsum-stat-item" title="VPIP / PFR">
       ${_TSUM_ICON_PERCENT}
-      <span class="tsum-stat-full">${vpip.toFixed(1)}% / ${pfr.toFixed(1)}%</span>
-      <span class="tsum-stat-short">${vpipR}/${pfrR}</span>
+      <span class="tsum-stat-pill tsum-stat-stacked">
+        <span class="tsum-stat-full">${vpip.toFixed(1)}% / ${pfr.toFixed(1)}%</span>
+        <span class="tsum-stat-short">${vpipR}/${pfrR}</span>
+      </span>
     </span>
-    <span class="tsum-stat-pill tsum-stat-stacked" title="Hands per hour">
+    <span class="tsum-stat-item" title="Hands per hour">
       ${_TSUM_ICON_CLOCK}
-      <span class="tsum-stat-full">${perHr.toFixed(1)}/hr</span>
-      <span class="tsum-stat-short">${perHr.toFixed(1)}</span>
+      <span class="tsum-stat-pill tsum-stat-stacked">
+        <span class="tsum-stat-full">${perHr.toFixed(1)}/hr</span>
+        <span class="tsum-stat-short">${perHr.toFixed(1)}</span>
+      </span>
     </span>`;
 }
 

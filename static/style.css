@@ -1414,19 +1414,24 @@ tr.row-flash > td {
   margin-bottom: 10px;
 }
 
-.tsum-stat-stacked {
+.tsum-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
   flex: 1 1 0;
   min-width: 0;
-  flex-direction: column;
-  justify-content: center;
-  gap: 2px;
+}
+.tsum-stat-stacked {
+  min-width: 0;
   padding: 4px 3px;
 }
 .tsum-stat-icon {
   width: 12px;
   height: 12px;
-  opacity: .75;
+  opacity: .6;
   flex-shrink: 0;
+  color: var(--blue);
 }
 .tsum-stat-full,
 .tsum-stat-short {
@@ -1500,6 +1505,11 @@ tr.row-flash > td {
   background: rgba(64,196,255,.1);
   border: 1px solid rgba(64,196,255,.3);
   color: var(--blue);
+}
+.tsum-event-top .tsum-stat-pill {
+  background: rgba(0,230,118,.08);
+  border: 1px solid rgba(0,230,118,.4);
+  color: var(--green);
 }
 /* ── TS / CGS filter bar ──────────────────────────────────────── */
 /* ── Inline filter pills (TS / CGS section headers) ─────────────────────── */
