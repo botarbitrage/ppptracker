@@ -1468,6 +1468,20 @@ function _tgLevelFromElapsed(elapsedSecs, cfg) {
   return cfg.maxBlinds ? Math.min(lvl, cfg.maxBlinds) : lvl;
 }
 
+// Inverse of _tgLevelFromElapsed: seconds from tournament start to the START of
+// a given level. Used to anchor a hero who late-registers at (say) level 6 at
+// the real tournament time that level began, instead of at t=0 — so the data
+// lines up with the fixed Late Reg / ITM / End reference lines.
+function _tgLevelStartSecs(level, cfg) {
+  if (!level || level <= 1) return 0;
+  const rebuyDur = (cfg.levelDurRebuyMin || cfg.levelDurMin) * 60;
+  const mainDur  = cfg.levelDurMin * 60;
+  const lr       = cfg.lateRegLevels;
+  const completed = level - 1;            // levels fully elapsed before this one
+  if (completed <= lr) return completed * rebuyDur;
+  return lr * rebuyDur + (completed - lr) * mainDur;
+}
+
 function _renderTournamentChart(hands, meta) {
   const wrap = document.getElementById('tourney-graph-wrap');
   if (!wrap) return;
@@ -1496,12 +1510,17 @@ function _renderTournamentChart(hands, meta) {
   }
   if (cfg.ftH == null) cfg.ftH = 3.5;  // final-table default so the ref line still draws
 
-  // Anchor x=0 at the hero's own first hand of this entry. We have no
-  // reliable ground-truth blind schedule to back-calculate a "true" Level 1
-  // moment from the big blind size (the same bb value can appear at more
-  // than one real level), so treat this entry's own start as t=0.
+  // Anchor x=0 at the REAL tournament start. The backend reconciles each hand's
+  // actual blind level from the DB ladder, so a hero who late-registers at
+  // (say) level 6 gets placed at the real time that level began rather than at
+  // t=0 — keeping the data aligned with the fixed Late Reg / ITM / End lines.
+  // `entryOffset` is the seconds from tournament start to the first hand's
+  // level; hero wall-clock deltas are added on top. Falls back to 0 when the
+  // level is unknown (behaves like the old first-hand anchoring).
   const firstHand   = sorted[0];
   const tournStart  = firstHand.ts;
+  const entryOffset = _tgLevelStartSecs(firstHand.level, cfg);
+  const elapsedOf   = ts => (ts - tournStart) + entryOffset;
 
   const titleEl = document.getElementById('tourney-graph-title');
   if (titleEl) {
@@ -1515,7 +1534,7 @@ function _renderTournamentChart(hands, meta) {
   const itmSecs     = cfg.itmH * 3600;
   const endSecs     = cfg.endH * 3600;
   const ftSecs      = cfg.ftH * 3600;
-  const lastHandElapsed = sorted[sorted.length - 1].ts - tournStart;
+  const lastHandElapsed = elapsedOf(sorted[sorted.length - 1].ts);
   const axisSecs    = Math.max(endSecs + 30 * 60, lastHandElapsed + 15 * 60);
 
   // Build {x: elapsedSecs, y: value} datasets. When two consecutive hands are
@@ -1523,16 +1542,31 @@ function _renderTournamentChart(hands, meta) {
   // null point so Chart.js breaks the line instead of drawing a diagonal
   // connector across the gap.
   const GAP_BREAK_SECS = 15 * 60;
+  const rebuyTsSet = new Set(((meta && meta.rebuys) || []).map(r => r.ts));
   const chipDataset = [];
   const bbDataset   = [];
   const pointList   = [];  // parallel to dataset for tooltip lookup
 
   for (let i = 0; i < sorted.length; i++) {
     const h = sorted[i];
-    const elapsed = h.ts - tournStart;
+    const elapsed = elapsedOf(h.ts);
 
-    if (i > 0 && (h.ts - sorted[i - 1].ts) > GAP_BREAK_SECS) {
-      const midX = (sorted[i - 1].ts - tournStart + elapsed) / 2;
+    if (i > 0 && rebuyTsSet.has(h.ts)) {
+      // Backend detected a bust-and-rebuy right before this hand: the prior
+      // hand's stack actually went to zero, not just to whatever its
+      // pre-hand chip_stack shows. Plant an explicit zero point there so the
+      // line visibly busts before the break, instead of just jumping to the
+      // new buy-in's stack.
+      const prevElapsed = elapsedOf(sorted[i - 1].ts);
+      chipDataset.push({ x: prevElapsed + 1, y: 0 });
+      bbDataset.push({ x: prevElapsed + 1, y: 0 });
+      pointList.push(null);
+      const midX = (prevElapsed + elapsed) / 2;
+      chipDataset.push({ x: midX, y: null });
+      bbDataset.push({ x: midX, y: null });
+      pointList.push(null);
+    } else if (i > 0 && (h.ts - sorted[i - 1].ts) > GAP_BREAK_SECS) {
+      const midX = (elapsedOf(sorted[i - 1].ts) + elapsed) / 2;
       chipDataset.push({ x: midX, y: null });
       bbDataset.push({ x: midX, y: null });
       pointList.push(null);
@@ -1550,15 +1584,15 @@ function _renderTournamentChart(hands, meta) {
   let bustPoint = null;
   if (isFinishBusted) {
     const lastHand = sorted[sorted.length - 1];
-    bustPoint = { x: (lastHand.ts - tournStart) + 5, y: 0 };
+    bustPoint = { x: elapsedOf(lastHand.ts) + 5, y: 0 };
     chipDataset.push(bustPoint);
     bbDataset.push({ x: bustPoint.x, y: 0 });
     pointList.push(null);
   }
 
   // Track played range for "played only" zoom
-  const playedMinSecs = sorted[0].ts - tournStart;
-  const playedMaxSecs = bustPoint ? bustPoint.x : sorted[sorted.length - 1].ts - tournStart;
+  const playedMinSecs = elapsedOf(sorted[0].ts);
+  const playedMaxSecs = bustPoint ? bustPoint.x : elapsedOf(sorted[sorted.length - 1].ts);
 
   // Reference lines at fixed second positions
   const refLines = [
@@ -1578,7 +1612,7 @@ function _renderTournamentChart(hands, meta) {
     lastH = h;
   }
   function _mkMarker(h, color, icon) {
-    const secs  = h.ts - tournStart;
+    const secs  = elapsedOf(h.ts);
     const chips = h.chip_stack != null ? h.chip_stack : null;
     const bb    = chips != null && h.big_blind ? parseFloat((chips / h.big_blind).toFixed(1)) : null;
     return { secs, chipY: chips, bbY: bb, color, icon };
@@ -1593,7 +1627,15 @@ function _renderTournamentChart(hands, meta) {
   const _findHandByTs = ts => sorted.find(x => x.ts === ts);
   for (const rb of (meta && meta.rebuys) || []) {
     const h = _findHandByTs(rb.ts);
-    if (h) markers.push(_mkMarker(h, '#ffb300', 'R'));
+    if (!h) continue;
+    markers.push(_mkMarker(h, '#ffb300', 'R'));
+    // Also flag the bust that preceded this rebuy, at the zero point planted
+    // in the dataset above.
+    const idx = sorted.indexOf(h);
+    if (idx > 0) {
+      const prevElapsed = elapsedOf(sorted[idx - 1].ts);
+      markers.push({ secs: prevElapsed + 1, chipY: 0, bbY: 0, color: '#ff5252', icon: '✕' });
+    }
   }
   for (const ad of (meta && meta.addons) || []) {
     const h = _findHandByTs(ad.ts);
@@ -1603,7 +1645,7 @@ function _renderTournamentChart(hands, meta) {
   _tgState = {
     chipDataset, bbDataset, pointList,
     refLines, markers,
-    tournStart, axisSecs,
+    tournStart, entryOffset, axisSecs,
     playedMinSecs, playedMaxSecs,
     roomName, cfg,
   };
@@ -1615,7 +1657,7 @@ function _renderTournamentChart(hands, meta) {
 function _tgBuildChart() {
   if (!_tgState) return;
   const s = _tgState;
-  const { chipDataset, bbDataset, pointList, refLines, markers, tournStart, axisSecs,
+  const { chipDataset, bbDataset, pointList, refLines, markers, tournStart, entryOffset, axisSecs,
           playedMinSecs, playedMaxSecs, roomName, cfg } = s;
   const canvas = document.getElementById('tourney-graph-canvas');
   if (!canvas) return;
@@ -1724,7 +1766,7 @@ function _tgBuildChart() {
               const i = items[0].dataIndex;
               const h = pointList[i];
               if (!h) return '';
-              const elapsed = _tgFmtElapsed(h.ts - tournStart);
+              const elapsed = _tgFmtElapsed((h.ts - tournStart) + entryOffset);
               const lvl     = (h.level != null)
                 ? h.level
                 : _tgInferLevel(h.big_blind, roomName, h.chip_stack);
