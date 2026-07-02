@@ -82,6 +82,62 @@
     .td-no   { color: var(--muted); }
     .td-muted{ color: var(--muted); }
 
+    /* ── Grouped 2-row header ── */
+    #tourney-table-wrap thead .group-th {
+      font-size: .64rem; letter-spacing: .5px; text-transform: uppercase;
+      color: var(--muted); font-weight: 700; border-bottom: 1px solid var(--border);
+    }
+    #tourney-table-wrap thead .sub-th { font-size: .7rem; }
+    #tourney-table-wrap thead th.align-middle { vertical-align: middle; }
+
+    /* ── Admin controls (visible only when body.is-admin) ── */
+    .admin-col, .admin-only { display: none; }
+    body.is-admin .admin-col { display: table-cell; }
+    body.is-admin .add-tourney-btn.admin-only { display: inline-flex; }
+    .edit-tourney-btn {
+      background: rgba(64,196,255,.12); border: 1px solid rgba(64,196,255,.3);
+      color: var(--blue); border-radius: 6px; padding: 2px 8px;
+      font-size: .85rem; line-height: 1.2; cursor: pointer;
+    }
+    .edit-tourney-btn:hover { background: rgba(64,196,255,.22); }
+    .add-tourney-btn {
+      align-items: center; gap: 6px;
+      background: rgba(0,230,118,.12); border: 1px solid rgba(0,230,118,.35);
+      color: var(--green); border-radius: 8px; padding: 6px 12px;
+      font-family: var(--font-head); font-size: .78rem; font-weight: 700;
+      letter-spacing: .4px; cursor: pointer;
+    }
+    .add-tourney-btn:hover { background: rgba(0,230,118,.2); }
+    .admin-hint { font-size: .72rem; color: var(--muted); }
+
+    /* ── Add/Edit tournament modal (dark) ── */
+    #tourney-form-modal .modal-content {
+      background: var(--panel); color: var(--text); border: 1px solid var(--border);
+    }
+    #tourney-form-modal .modal-header,
+    #tourney-form-modal .modal-footer { border-color: var(--border); }
+    #tourney-form-modal .form-label {
+      font-size: .68rem; color: var(--muted); margin-bottom: 2px;
+      text-transform: uppercase; letter-spacing: .3px;
+    }
+    #tourney-form-modal .form-control,
+    #tourney-form-modal .form-select {
+      background: var(--panel-alt); border: 1px solid var(--border);
+      color: var(--text); font-size: .85rem;
+    }
+    #tourney-form-modal .form-control:focus {
+      border-color: var(--green); box-shadow: 0 0 0 .15rem rgba(0,230,118,.15);
+      background: var(--panel-alt); color: var(--text);
+    }
+    #tourney-form-modal .form-check-label { font-size: .8rem; color: var(--text); }
+    #tourney-form-modal .btn-close { filter: invert(1) grayscale(1); }
+    #tourney-form-modal .form-section-title {
+      font-family: var(--font-head); font-size: .72rem; font-weight: 700;
+      letter-spacing: .6px; text-transform: uppercase; color: var(--green);
+      margin: 14px 0 6px; border-bottom: 1px solid var(--border); padding-bottom: 4px;
+    }
+    #tourney-form-error { color: #ff5252; font-size: .8rem; }
+
     /* ── Coming soon sections ── */
     .coming-soon-card {
       background: var(--panel-alt);
@@ -168,11 +224,15 @@
   <!-- ── Tournament List tab ─────────────────────────────── -->
   <div id="panel-list">
     <div class="section-card mb-4">
-      <div class="section-header">
-        <h2 class="d-flex align-items-center gap-2">
+      <div class="section-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <h2 class="d-flex align-items-center gap-2 mb-0">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
           Available Tournaments
         </h2>
+        <div class="d-flex align-items-center gap-2">
+          <span id="admin-hint" class="admin-hint"></span>
+          <button type="button" class="add-tourney-btn admin-only" onclick="openTourneyForm()">+ Add Tournament</button>
+        </div>
       </div>
       <div id="tourney-list-container">
         <div class="tourney-loading">
@@ -184,18 +244,23 @@
         <table class="table table-dark table-striped table-hover mb-0">
           <thead>
             <tr>
-              <th scope="col" class="sort-th" onclick="_sortTourneys('name')" data-col="name">Tournament <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center sort-th" onclick="_sortTourneys('type')" data-col="type">Type <span class="sort-icon"></span></th>
-              <th scope="col" class="sort-th" onclick="_sortTourneys('buyin')" data-col="buyin">Buy-in <span class="sort-icon"></span></th>
-              <th scope="col" class="sort-th" onclick="_sortTourneys('start')" data-col="start">Start <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center sort-th" onclick="_sortTourneys('chips')" data-col="chips">Start Chips <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center">Rebuy</th>
-              <th scope="col" class="text-center">Add-on</th>
-              <th scope="col" class="text-center">x2 / x3</th>
-              <th scope="col" class="text-center sort-th" onclick="_sortTourneys('itm')" data-col="itm">ITM Time <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center sort-th" onclick="_sortTourneys('ft')" data-col="ft">Final Table <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center sort-th" onclick="_sortTourneys('end')" data-col="end">End of Game <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center sort-th" onclick="_sortTourneys('maxb')" data-col="maxb">Max Blinds <span class="sort-icon"></span></th>
+              <th rowspan="2" scope="col" class="align-middle sort-th" onclick="_sortTourneys('name')" data-col="name">Tournament <span class="sort-icon"></span></th>
+              <th rowspan="2" scope="col" class="align-middle text-center sort-th" onclick="_sortTourneys('type')" data-col="type">Type <span class="sort-icon"></span></th>
+              <th rowspan="2" scope="col" class="align-middle sort-th" onclick="_sortTourneys('buyin')" data-col="buyin">Buy-in (AUD) <span class="sort-icon"></span></th>
+              <th rowspan="2" scope="col" class="align-middle sort-th" onclick="_sortTourneys('start')" data-col="start">Start <span class="sort-icon"></span></th>
+              <th rowspan="2" scope="col" class="align-middle text-center sort-th" onclick="_sortTourneys('chips')" data-col="chips">Start Chips <span class="sort-icon"></span></th>
+              <th colspan="3" scope="colgroup" class="text-center group-th">Rebuy / Add-on</th>
+              <th colspan="3" scope="colgroup" class="text-center group-th">Milestones (h)</th>
+              <th rowspan="2" scope="col" class="align-middle text-center sort-th" onclick="_sortTourneys('maxb')" data-col="maxb">Max<br>Blinds <span class="sort-icon"></span></th>
+              <th rowspan="2" scope="col" class="align-middle text-center admin-col">Edit</th>
+            </tr>
+            <tr>
+              <th scope="col" class="text-center sub-th">Rebuy</th>
+              <th scope="col" class="text-center sub-th">Add-on</th>
+              <th scope="col" class="text-center sub-th">x2/x3</th>
+              <th scope="col" class="text-center sub-th sort-th" onclick="_sortTourneys('itm')" data-col="itm">ITM <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center sub-th sort-th" onclick="_sortTourneys('ft')" data-col="ft">Final <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center sub-th sort-th" onclick="_sortTourneys('end')" data-col="end">End <span class="sort-icon"></span></th>
             </tr>
           </thead>
           <tbody id="tourney-table-tbody"></tbody>
@@ -224,6 +289,98 @@
     </div>
   </div>
 
+</div>
+
+<!-- ── Add/Edit Tournament modal ── -->
+<div class="modal fade" id="tourney-form-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="tourney-form-title">Add Tournament</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="tourney-form" onsubmit="event.preventDefault(); submitTourneyForm();">
+          <div class="form-section-title">Identity</div>
+          <div class="row g-2">
+            <div class="col-6 col-md-3" id="f-id-row">
+              <label class="form-label" for="f-id">Doc ID</label>
+              <input class="form-control" id="f-id" placeholder="auto from name">
+            </div>
+            <div class="col-6 col-md-5">
+              <label class="form-label" for="f-name">Name *</label>
+              <input class="form-control" id="f-name" required>
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label" for="f-type">Type</label>
+              <input class="form-control" id="f-type" placeholder="MTT">
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label" for="f-currency">Currency</label>
+              <input class="form-control" id="f-currency" placeholder="AUD">
+            </div>
+          </div>
+          <div class="row g-2 mt-1">
+            <div class="col-auto form-check ms-2"><input class="form-check-input" type="checkbox" id="f-is_mtt"><label class="form-check-label" for="f-is_mtt">MTT</label></div>
+            <div class="col-auto form-check"><input class="form-check-input" type="checkbox" id="f-is_pko"><label class="form-check-label" for="f-is_pko">PKO</label></div>
+            <div class="col-auto form-check"><input class="form-check-input" type="checkbox" id="f-active"><label class="form-check-label" for="f-active">Active</label></div>
+          </div>
+
+          <div class="form-section-title">Buy-in (AUD)</div>
+          <div class="row g-2">
+            <div class="col-4"><label class="form-label" for="f-buy_in_total">Total</label><input type="number" step="0.01" class="form-control" id="f-buy_in_total"></div>
+            <div class="col-4"><label class="form-label" for="f-buy_in_prize">Prize</label><input type="number" step="0.01" class="form-control" id="f-buy_in_prize"></div>
+            <div class="col-4"><label class="form-label" for="f-buy_in_rake">Rake</label><input type="number" step="0.01" class="form-control" id="f-buy_in_rake"></div>
+          </div>
+
+          <div class="form-section-title">Structure</div>
+          <div class="row g-2">
+            <div class="col-6 col-md-3"><label class="form-label" for="f-starting_chips">Start Chips</label><input type="number" class="form-control" id="f-starting_chips"></div>
+            <div class="col-6 col-md-3"><label class="form-label" for="f-starting_time">Start (24h)</label><input type="time" class="form-control" id="f-starting_time"></div>
+            <div class="col-6 col-md-3"><label class="form-label" for="f-late_reg_level">Late Reg Lvl</label><input type="number" class="form-control" id="f-late_reg_level"></div>
+            <div class="col-6 col-md-3"><label class="form-label" for="f-max_blinds">Max Blinds</label><input type="number" class="form-control" id="f-max_blinds"></div>
+            <div class="col-4"><label class="form-label" for="f-level_duration_min">Lvl Dur (min)</label><input type="number" class="form-control" id="f-level_duration_min"></div>
+            <div class="col-4"><label class="form-label" for="f-level_duration_rebuy_min">Lvl Dur Rebuy</label><input type="number" class="form-control" id="f-level_duration_rebuy_min"></div>
+            <div class="col-4"><label class="form-label" for="f-level_duration_ft_min">Lvl Dur FT</label><input type="number" class="form-control" id="f-level_duration_ft_min"></div>
+          </div>
+
+          <div class="form-section-title">Rebuy</div>
+          <div class="row g-2 align-items-end">
+            <div class="col-auto form-check ms-2 mb-1"><input class="form-check-input" type="checkbox" id="f-rebuy"><label class="form-check-label" for="f-rebuy">Rebuy</label></div>
+            <div class="col-6 col-md-3"><label class="form-label" for="f-rebuy_type">Type</label><input class="form-control" id="f-rebuy_type" placeholder="unlimited"></div>
+            <div class="col-6 col-md-2"><label class="form-label" for="f-rebuy_cost_multiplier">Cost x</label><input type="number" step="0.1" class="form-control" id="f-rebuy_cost_multiplier"></div>
+            <div class="col-6 col-md-2"><label class="form-label" for="f-rebuy_period_end_level">End Lvl</label><input type="number" class="form-control" id="f-rebuy_period_end_level"></div>
+            <div class="col-6 col-md-3"><label class="form-label" for="f-rebuy_bulk_options">Bulk (csv)</label><input class="form-control" id="f-rebuy_bulk_options" placeholder="1, 2, 3"></div>
+          </div>
+
+          <div class="form-section-title">Add-on</div>
+          <div class="row g-2 align-items-end">
+            <div class="col-auto form-check ms-2 mb-1"><input class="form-check-input" type="checkbox" id="f-addon"><label class="form-check-label" for="f-addon">Add-on</label></div>
+            <div class="col-6 col-md-3"><label class="form-label" for="f-addon_cost_multiplier">Cost x</label><input type="number" step="0.1" class="form-control" id="f-addon_cost_multiplier"></div>
+            <div class="col-6 col-md-3"><label class="form-label" for="f-addon_max_units">Max Units</label><input type="number" class="form-control" id="f-addon_max_units"></div>
+            <div class="col-6 col-md-4"><label class="form-label" for="f-addon_bulk_options">Bulk (csv)</label><input class="form-control" id="f-addon_bulk_options" placeholder="1"></div>
+          </div>
+
+          <div class="form-section-title">Milestones (hours) &amp; Players</div>
+          <div class="row g-2">
+            <div class="col-4 col-md-2"><label class="form-label" for="f-itm_h">ITM h</label><input type="number" step="0.1" class="form-control" id="f-itm_h"></div>
+            <div class="col-4 col-md-2"><label class="form-label" for="f-ft_h">Final h</label><input type="number" step="0.1" class="form-control" id="f-ft_h"></div>
+            <div class="col-4 col-md-2"><label class="form-label" for="f-end_h">End h</label><input type="number" step="0.1" class="form-control" id="f-end_h"></div>
+            <div class="col-6 col-md-3"><label class="form-label" for="f-player_min">Player Min</label><input type="number" class="form-control" id="f-player_min"></div>
+            <div class="col-6 col-md-3"><label class="form-label" for="f-player_max">Player Max</label><input type="number" class="form-control" id="f-player_max"></div>
+            <div class="col-6 col-md-3"><label class="form-label" for="f-break_every_min">Break Every</label><input type="number" class="form-control" id="f-break_every_min"></div>
+            <div class="col-6 col-md-3"><label class="form-label" for="f-break_duration_min">Break Dur</label><input type="number" class="form-control" id="f-break_duration_min"></div>
+          </div>
+
+          <div id="tourney-form-error" class="mt-3"></div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-success btn-sm" id="tourney-form-save" onclick="submitTourneyForm()">Save</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
@@ -268,11 +425,17 @@ function _initTzSelect() {
  */
 function fmtStartTime(timeStr, targetTz) {
   if (!timeStr) return '—';
-  const m = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
-  if (!m) return timeStr;
-  let h = +m[1], min = +m[2];
-  if (m[3].toUpperCase() === 'PM' && h < 12) h += 12;
-  if (m[3].toUpperCase() === 'AM' && h === 12) h = 0;
+  let h, min;
+  const ampm = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (ampm) {
+    h = +ampm[1]; min = +ampm[2];
+    if (ampm[3].toUpperCase() === 'PM' && h < 12) h += 12;
+    if (ampm[3].toUpperCase() === 'AM' && h === 12) h = 0;
+  } else {
+    const h24 = timeStr.match(/^\s*(\d{1,2}):(\d{2})\s*$/);
+    if (!h24) return timeStr;
+    h = +h24[1]; min = +h24[2];
+  }
 
   // Get Adelaide's current UTC offset in minutes
   const parts = new Intl.DateTimeFormat('en', {
@@ -289,9 +452,23 @@ function fmtStartTime(timeStr, targetTz) {
   const utcM = ((utcMin % 1440) + 1440) % 1440 % 60;
   const utcDate = new Date(`${todayADL}T${String(utcH).padStart(2,'0')}:${String(utcM).padStart(2,'0')}:00Z`);
 
-  return utcDate.toLocaleTimeString('en-AU', {
-    timeZone: targetTz, hour: 'numeric', minute: '2-digit', hour12: true
+  return utcDate.toLocaleTimeString('en-GB', {
+    timeZone: targetTz, hour: '2-digit', minute: '2-digit', hour12: false
   });
+}
+
+// Normalise a stored start time ("6:30 PM" or "18:30") to 24h "HH:MM" for form inputs.
+function to24h(timeStr) {
+  if (!timeStr) return '';
+  const ampm = String(timeStr).match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (ampm) {
+    let h = +ampm[1];
+    if (ampm[3].toUpperCase() === 'PM' && h < 12) h += 12;
+    if (ampm[3].toUpperCase() === 'AM' && h === 12) h = 0;
+    return String(h).padStart(2, '0') + ':' + ampm[2].padStart(2, '0');
+  }
+  const h24 = String(timeStr).match(/^\s*(\d{1,2}):(\d{2})\s*$/);
+  return h24 ? h24[1].padStart(2, '0') + ':' + h24[2] : '';
 }
 
 // ── Auth bar ──────────────────────────────────────────────────────────────────
@@ -332,7 +509,7 @@ function badgeClass(type) {
 
 function renderTourneyRow(id, t) {
   const badge  = `<span class="tourney-badge ${badgeClass(t.type)}">${t.type || 'MTT'}</span>`;
-  const buyIn  = t.buy_in_total ? `<span class="td-highlight">AUD ${t.buy_in_total.toFixed(2)}</span>` : '<span class="td-muted">—</span>';
+  const buyIn  = t.buy_in_total ? `<span class="td-highlight">${t.buy_in_total.toFixed(2)}</span>` : '<span class="td-muted">—</span>';
   const chips  = fmtChips(t.starting_chips);
   const start  = fmtStartTime(t.starting_time, currentTz());
 
@@ -365,6 +542,7 @@ function renderTourneyRow(id, t) {
     <td class="text-center td-muted">${t.ft_h != null ? t.ft_h + 'h' : '—'}</td>
     <td class="text-center td-muted">${t.end_h != null ? t.end_h + 'h' : '—'}</td>
     <td class="text-center td-muted">${t.max_blinds != null ? t.max_blinds : '—'}</td>
+    <td class="text-center admin-col">${_isAdmin ? `<button type="button" class="edit-tourney-btn" title="Edit" onclick="openTourneyForm('${id}')">✎</button>` : ''}</td>
   </tr>`;
 }
 
@@ -402,6 +580,115 @@ function _renderTourneyTable() {
     sorted.map(({ id, data }) => renderTourneyRow(id, data)).join('');
 }
 
+// ── Admin: add / edit tournament ───────────────────────────────────────────────
+let _isAdmin = false;
+let _editingTid = null;
+let _tourneyModal = null;
+
+// [field key, kind] — kind drives read/coerce from the form
+const TOURNEY_FORM_FIELDS = [
+  ['name','text'],['type','text'],['currency','text'],
+  ['is_pko','bool'],['is_mtt','bool'],['active','bool'],
+  ['buy_in_total','num'],['buy_in_prize','num'],['buy_in_rake','num'],
+  ['starting_chips','num'],['starting_time','text'],
+  ['level_duration_min','num'],['level_duration_rebuy_min','num'],['level_duration_ft_min','num'],
+  ['late_reg_level','num'],['max_blinds','num'],
+  ['rebuy','bool'],['rebuy_type','text'],['rebuy_cost_multiplier','num'],['rebuy_period_end_level','num'],['rebuy_bulk_options','csv'],
+  ['addon','bool'],['addon_cost_multiplier','num'],['addon_max_units','num'],['addon_bulk_options','csv'],
+  ['player_min','num'],['player_max','num'],['break_every_min','num'],['break_duration_min','num'],
+  ['itm_h','num'],['end_h','num'],['ft_h','num'],
+];
+
+async function _checkAdmin(user) {
+  _isAdmin = false;
+  const hintEl = document.getElementById('admin-hint');
+  try {
+    if (user) {
+      const snap = await firebase.firestore().collection('config').doc('admins').get();
+      const uids = (snap.exists && snap.data().uids) || [];
+      _isAdmin = uids.includes(user.uid);
+      if (hintEl) hintEl.textContent = _isAdmin ? '' : `Not admin · your UID: ${user.uid}`;
+    } else if (hintEl) {
+      hintEl.textContent = '';
+    }
+  } catch (e) {
+    console.warn('admin check failed', e);
+  }
+  document.body.classList.toggle('is-admin', _isAdmin);
+  if (_tourneyDocs.length) _renderTourneyTable();  // re-render so Edit buttons appear
+}
+
+function _formError(msg) {
+  const el = document.getElementById('tourney-form-error');
+  if (el) el.textContent = msg || '';
+}
+
+function openTourneyForm(id) {
+  if (!_isAdmin) return;
+  const editing = !!id;
+  _editingTid = editing ? id : null;
+  _formError('');
+  const doc = editing ? ((_tourneyDocs.find(d => d.id === id) || {}).data || {}) : {};
+  document.getElementById('tourney-form-title').textContent = editing ? `Edit: ${doc.name || id}` : 'Add Tournament';
+  const idInput = document.getElementById('f-id');
+  idInput.value = id || '';
+  idInput.disabled = editing;
+  document.getElementById('f-id-row').style.display = editing ? 'none' : '';
+
+  for (const [key, kind] of TOURNEY_FORM_FIELDS) {
+    const el = document.getElementById('f-' + key);
+    if (!el) continue;
+    const v = doc[key];
+    if (kind === 'bool')              el.checked = !!v;
+    else if (kind === 'csv')          el.value = Array.isArray(v) ? v.join(', ') : (v == null ? '' : v);
+    else if (key === 'starting_time') el.value = to24h(v);
+    else                              el.value = (v == null ? '' : v);
+  }
+  if (!editing) {
+    document.getElementById('f-active').checked = true;
+    document.getElementById('f-currency').value = 'AUD';
+  }
+  if (_tourneyModal) _tourneyModal.show();
+}
+
+async function submitTourneyForm() {
+  if (!_isAdmin) return;
+  const payload = {};
+  for (const [key, kind] of TOURNEY_FORM_FIELDS) {
+    const el = document.getElementById('f-' + key);
+    if (!el) continue;
+    payload[key] = (kind === 'bool') ? el.checked : el.value;
+  }
+  if (!payload.name || !payload.name.trim()) { _formError('Name is required'); return; }
+
+  const user = firebase.auth().currentUser;
+  const token = user ? await user.getIdToken().catch(() => null) : null;
+  if (!token) { _formError('Not signed in'); return; }
+
+  const editing = !!_editingTid;
+  const url = editing ? `/api/admin/tournaments/${_editingTid}` : '/api/admin/tournaments';
+  if (!editing) payload.id = (document.getElementById('f-id').value || '').trim();
+
+  const saveBtn = document.getElementById('tourney-form-save');
+  saveBtn.disabled = true;
+  _formError('');
+  try {
+    const r = await fetch(url, {
+      method: editing ? 'PUT' : 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) { _formError(data.error || `Request failed (${r.status})`); return; }
+    if (_tourneyModal) _tourneyModal.hide();
+    await loadTournaments();
+  } catch (e) {
+    _formError(e.message || 'Request failed');
+  } finally {
+    saveBtn.disabled = false;
+  }
+}
+
 // ── Firebase + data load ──────────────────────────────────────────────────────
 async function loadTournaments() {
   const container = document.getElementById('tourney-list-container');
@@ -421,7 +708,10 @@ async function loadTournaments() {
       measurementId:     cfg.FIREBASE_MEASUREMENT_ID,
     });
     const db = firebase.firestore();
-    firebase.auth().onAuthStateChanged(user => _renderAuthBar(user ? user.email : null));
+    firebase.auth().onAuthStateChanged(user => {
+      _renderAuthBar(user ? user.email : null);
+      _checkAdmin(user);
+    });
 
     const snap = await db.collection('tournaments')
       .where('active', '==', true)
@@ -451,7 +741,12 @@ async function loadTournaments() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => { _initTzSelect(); loadTournaments(); });
+document.addEventListener('DOMContentLoaded', () => {
+  _initTzSelect();
+  const modalEl = document.getElementById('tourney-form-modal');
+  if (modalEl && window.bootstrap) _tourneyModal = new bootstrap.Modal(modalEl);
+  loadTournaments();
+});
 </script>
 </body>
 </html>

@@ -640,6 +640,17 @@ def _verify_bearer(req):
         return None
 
 
+def _is_admin(uid):
+    """True if uid is listed in /config/admins.uids (publicly readable doc)."""
+    if not uid:
+        return False
+    try:
+        snap = _get_admin_db().collection('config').document('admins').get()
+        return snap.exists and uid in (snap.to_dict().get('uids') or [])
+    except Exception:
+        return False
+
+
 @app.route('/api/tournaments', methods=['GET'])
 def list_tournaments():
     db  = _get_admin_db()  # ensures firebase_admin.initialize_app() has run
@@ -655,6 +666,94 @@ def list_tournaments():
         tournaments.append(d)
 
     return jsonify({'tournaments': tournaments})
+
+
+# ── Admin: tournament-config CRUD (writes via Admin SDK, gated to /config/admins) ─
+_TOURNEY_FIELDS = {
+    'name': str, 'type': str, 'is_pko': bool, 'is_mtt': bool, 'currency': str,
+    'buy_in_total': float, 'buy_in_prize': float, 'buy_in_rake': float,
+    'starting_chips': int, 'starting_time': str,
+    'level_duration_min': int, 'level_duration_rebuy_min': int,
+    'level_duration_ft_min': int, 'late_reg_level': int,
+    'rebuy': bool, 'rebuy_type': str, 'rebuy_cost_multiplier': float,
+    'rebuy_period_end_level': int, 'rebuy_bulk_options': list,
+    'addon': bool, 'addon_cost_multiplier': float, 'addon_max_units': int,
+    'addon_bulk_options': list,
+    'player_min': int, 'player_max': int,
+    'break_every_min': int, 'break_duration_min': int,
+    'itm_h': float, 'end_h': float, 'ft_h': float, 'max_blinds': int,
+    'active': bool,
+}
+
+
+def _coerce_tourney_payload(body):
+    """Coerce a client JSON body to typed, whitelisted tournament-config fields.
+    Empty string / None -> None; unparseable values fall back to None."""
+    data = {}
+    for key, typ in _TOURNEY_FIELDS.items():
+        if key not in body:
+            continue
+        v = body[key]
+        if v is None or (isinstance(v, str) and v.strip() == ''):
+            data[key] = None
+            continue
+        try:
+            if typ is bool:
+                data[key] = v if isinstance(v, bool) else str(v).strip().lower() in ('1', 'true', 'yes', 'on')
+            elif typ is int:
+                data[key] = int(float(v))
+            elif typ is float:
+                data[key] = float(v)
+            elif typ is list:
+                seq = v if isinstance(v, list) else str(v).split(',')
+                data[key] = [int(float(x)) for x in seq if str(x).strip() != '']
+            else:
+                data[key] = str(v).strip()
+        except (ValueError, TypeError):
+            data[key] = None
+    return data
+
+
+@app.route('/api/admin/tournaments', methods=['POST'])
+def admin_create_tournament():
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+    body = request.get_json(silent=True) or {}
+    data = _coerce_tourney_payload(body)
+    if not data.get('name'):
+        return jsonify({'error': 'Name is required'}), 400
+    raw_id = (body.get('id') or data['name'] or '').strip().lower()
+    tid = _re.sub(r'[^a-z0-9]+', '_', raw_id).strip('_')
+    if not tid:
+        return jsonify({'error': 'Could not derive a valid id from name/id'}), 400
+    db = _get_admin_db()
+    ref = db.collection('tournaments').document(tid)
+    if ref.get().exists:
+        return jsonify({'error': f'Tournament "{tid}" already exists'}), 409
+    data.setdefault('active', True)
+    data.setdefault('currency', 'AUD')
+    data['created_at'] = int(time.time())
+    ref.set(data)
+    return jsonify({'ok': True, 'id': tid})
+
+
+@app.route('/api/admin/tournaments/<tid>', methods=['PUT', 'PATCH'])
+def admin_update_tournament(tid):
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+    body = request.get_json(silent=True) or {}
+    data = _coerce_tourney_payload(body)
+    if not data:
+        return jsonify({'error': 'No valid fields to update'}), 400
+    db = _get_admin_db()
+    ref = db.collection('tournaments').document(tid)
+    if not ref.get().exists:
+        return jsonify({'error': 'Tournament not found'}), 404
+    data['updated_at'] = int(time.time())
+    ref.update(data)  # merge — preserves blind_structure_extra / override, etc.
+    return jsonify({'ok': True, 'id': tid})
 
 
 def _fetch_tournament_records(uid, tourney_id):
