@@ -1503,6 +1503,13 @@ function _renderTournamentChart(hands, meta) {
   const firstHand   = sorted[0];
   const tournStart  = firstHand.ts;
 
+  const titleEl = document.getElementById('tourney-graph-title');
+  if (titleEl) {
+    const dateStr = new Date(tournStart * 1000).toLocaleDateString('en-GB',
+        { day: 'numeric', month: 'short', year: 'numeric', timeZone: currentTz() });
+    titleEl.textContent = roomName ? `${roomName} — ${dateStr}` : dateStr;
+  }
+
   // Seconds from tournament start to key milestones
   const lateRegSecs = (cfg.levelDurRebuyMin || cfg.levelDurMin) * cfg.lateRegLevels * 60;
   const itmSecs     = cfg.itmH * 3600;

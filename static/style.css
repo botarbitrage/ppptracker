@@ -1538,6 +1538,14 @@ tr.row-flash > td {
   background: rgba(0,0,0,.12);
 }
 
+.tourney-graph-title {
+  font-family: var(--font-head);
+  letter-spacing: .03em;
+  font-size: .95rem;
+  color: var(--green);
+  margin-bottom: 10px;
+}
+
 .tourney-graph-controls {
   display: flex;
   align-items: center;
