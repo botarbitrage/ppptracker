@@ -997,11 +997,7 @@ function _renderCashGamesSummary(tournaments) {
           <span class="tsum-stat-pill">${fmtTime(t.earliest_ts, tz)}</span>
           <span class="tsum-stat-pill">${_fmtDuration(t.duration_secs)}</span>
         </div>
-        <div class="tsum-event-stats">
-          <span class="tsum-stat-pill" title="Hands played">${t.hands || 0} hands</span>
-          <span class="tsum-stat-pill" title="VPIP / PFR">${(t.vpip_pct || 0).toFixed(1)}% / ${(t.pfr_pct || 0).toFixed(1)}%</span>
-          <span class="tsum-stat-pill" title="Hands per hour">${evPerHr.toFixed(1)}/hr</span>
-        </div>
+        <div class="tsum-event-stats">${_tsumStatPills(t.hands || 0, t.vpip_pct || 0, t.pfr_pct || 0, evPerHr)}</div>
         <div class="tsum-event-actions">${_TSUM_EXPORT_ICONS(t.tourney_id)}</div>
       </div>`;
     }).join('');
@@ -1189,6 +1185,31 @@ async function _loadHistory() {
   } catch (e) { console.warn('History load failed:', e); }
 }
 
+const _TSUM_ICON_HANDS   = `<svg class="tsum-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><line x1="2" y1="11" x2="22" y2="11"/></svg>`;
+const _TSUM_ICON_PERCENT = `<svg class="tsum-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><line x1="19" y1="5" x2="5" y2="19"/></svg>`;
+const _TSUM_ICON_CLOCK    = `<svg class="tsum-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>`;
+
+function _tsumStatPills(hands, vpip, pfr, perHr) {
+  const vpipR = Math.round(vpip);
+  const pfrR  = Math.round(pfr);
+  return `
+    <span class="tsum-stat-pill tsum-stat-stacked" title="Hands played">
+      ${_TSUM_ICON_HANDS}
+      <span class="tsum-stat-full">${hands} hands</span>
+      <span class="tsum-stat-short">${hands}</span>
+    </span>
+    <span class="tsum-stat-pill tsum-stat-stacked" title="VPIP / PFR">
+      ${_TSUM_ICON_PERCENT}
+      <span class="tsum-stat-full">${vpip.toFixed(1)}% / ${pfr.toFixed(1)}%</span>
+      <span class="tsum-stat-short">${vpipR}/${pfrR}</span>
+    </span>
+    <span class="tsum-stat-pill tsum-stat-stacked" title="Hands per hour">
+      ${_TSUM_ICON_CLOCK}
+      <span class="tsum-stat-full">${perHr.toFixed(1)}/hr</span>
+      <span class="tsum-stat-short">${perHr.toFixed(1)}</span>
+    </span>`;
+}
+
 const _TSUM_EXPORT_ICONS = (tourneyId) => `
   <button class="btn export-icon-btn" data-platform="PokerTracker" title="Export for PokerTracker" onclick="event.stopPropagation();exportPersistedTournament('${tourneyId}', this)">
     <img src="https://www.google.com/s2/favicons?domain=pokertracker.com&sz=64" width="16" height="16" alt="PT">
@@ -1268,11 +1289,7 @@ function _renderTournamentSummary(tournaments) {
           <span class="tsum-stat-pill" title="Sit down time">${fmtTime(t.earliest_ts, tz)}</span>
           <span class="tsum-stat-pill" title="Time played">${_fmtDuration(t.duration_secs)}</span>
         </div>
-        <div class="tsum-event-stats">
-          <span class="tsum-stat-pill" title="Hands played">${t.hands || 0} hands</span>
-          <span class="tsum-stat-pill" title="VPIP / PFR">${(t.vpip_pct || 0).toFixed(1)}% / ${(t.pfr_pct || 0).toFixed(1)}%</span>
-          <span class="tsum-stat-pill" title="Hands per hour">${evPerHr.toFixed(1)}/hr</span>
-        </div>
+        <div class="tsum-event-stats">${_tsumStatPills(t.hands || 0, t.vpip_pct || 0, t.pfr_pct || 0, evPerHr)}</div>
         <div class="tsum-event-actions">${_TSUM_EXPORT_ICONS(t.tourney_id)}</div>
       </div>`;
     }).join('');

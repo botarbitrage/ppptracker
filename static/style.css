@@ -1379,7 +1379,7 @@ tr.row-flash > td {
 
 .tsum-event-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 320px));
   gap: 10px;
   padding: 14px 18px;
   align-items: stretch;
@@ -1394,6 +1394,8 @@ tr.row-flash > td {
   padding: 10px 14px 12px;
   cursor: pointer;
   transition: transform .15s ease, border-color .15s ease;
+  container-type: inline-size;
+  container-name: tsumcard;
 }
 .tsum-event-card:hover {
   transform: translateY(-2px);
@@ -1407,21 +1409,50 @@ tr.row-flash > td {
 
 .tsum-event-stats {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-wrap: nowrap;
+  gap: 4px;
   margin-bottom: 10px;
+}
+
+.tsum-stat-stacked {
+  flex: 1 1 0;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px 3px;
+}
+.tsum-stat-icon {
+  width: 12px;
+  height: 12px;
+  opacity: .75;
+  flex-shrink: 0;
+}
+.tsum-stat-full,
+.tsum-stat-short {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.tsum-stat-short { display: none; }
+@container tsumcard (max-width: 265px) {
+  .tsum-stat-full  { display: none; }
+  .tsum-stat-short { display: inline; }
 }
 
 .tsum-event-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 6px;
   margin-top: auto;
   padding-top: 10px;
   border-top: 1px solid var(--border);
 }
 .tsum-event-actions .export-icon-btn {
-  width: 32px;
+  flex: 1 1 0;
+  min-width: 0;
+  width: auto;
   height: 32px;
 }
 
@@ -1437,19 +1468,29 @@ tr.row-flash > td {
 .tsum-event-top {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: space-between;
   gap: 6px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.tsum-event-top > * {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .tsum-event-date {
   font-family: var(--font-head);
   letter-spacing: .03em;
   font-size: .8rem;
+  white-space: nowrap;
 }
 .tsum-stat-pill {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   font-size: .68rem;
   padding: 2px 9px;
   border-radius: 12px;
