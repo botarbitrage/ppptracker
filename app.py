@@ -637,6 +637,7 @@ def _verify_bearer(req):
     if not auth_hdr.startswith('Bearer '):
         return None
     try:
+        _get_admin_db()  # ensure Firebase Admin SDK is initialized before token verification
         decoded = admin_auth.verify_id_token(auth_hdr[7:])
         return decoded['uid']
     except Exception:
