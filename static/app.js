@@ -1185,7 +1185,7 @@ async function _loadHistory() {
   } catch (e) { console.warn('History load failed:', e); }
 }
 
-const _TSUM_ICON_HANDS   = `<svg class="tsum-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><line x1="2" y1="11" x2="22" y2="11"/></svg>`;
+const _TSUM_ICON_HANDS   = `<svg class="tsum-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="11" height="15" rx="1.5" transform="rotate(-12 8.5 13.5)"/><rect x="10" y="4" width="11" height="15" rx="1.5"/></svg>`;
 const _TSUM_ICON_PERCENT = `<svg class="tsum-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><line x1="19" y1="5" x2="5" y2="19"/></svg>`;
 const _TSUM_ICON_CLOCK    = `<svg class="tsum-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>`;
 
@@ -1193,7 +1193,7 @@ function _tsumStatPills(hands, vpip, pfr, perHr) {
   const vpipR = Math.round(vpip);
   const pfrR  = Math.round(pfr);
   return `
-    <span class="tsum-stat-item" title="Hands played">
+    <span class="tsum-stat-item" title="Total hands">
       ${_TSUM_ICON_HANDS}
       <span class="tsum-stat-pill tsum-stat-stacked">
         <span class="tsum-stat-full">${hands} hands</span>
