@@ -451,6 +451,9 @@ def _merge_tournament(db, bucket, uid, tid, new_records):
     @gcf.transactional
     def _txn(transaction):
         snapshot = doc_ref.get(transaction=transaction)
+        # Preserve the first-import timestamp across re-imports; new docs get "now".
+        first_seen = (snapshot.to_dict() if snapshot.exists else {}).get('first_seen') \
+            or int(_tt.time())
         merged_records = new_records
         # Default: all incoming IDs are new (no prior stored data for this tournament)
         new_ids = {r.get('summary', {}).get('D') for r in new_records}
@@ -503,6 +506,7 @@ def _merge_tournament(db, bucket, uid, tid, new_records):
             'biggest_loss':  stat.get('biggest_loss', 0),
             'max_players':   stat.get('max_players', 0),
             'storage_path':  storage_path,
+            'first_seen':    first_seen,
             'updated_at':    int(_tt.time()),
         })
         return new_ids
