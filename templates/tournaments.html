@@ -350,30 +350,34 @@
 
           <div class="form-section-title">Structure</div>
           <div class="row g-2">
-            <div class="col-6 col-md-3"><label class="form-label" for="f-starting_chips">Start Chips</label><input type="number" class="form-control" id="f-starting_chips"></div>
+            <div class="col-6 col-md-3"><label class="form-label" for="f-starting_chips">Starting Chips</label><input type="number" class="form-control" id="f-starting_chips"></div>
             <div class="col-6 col-md-3"><label class="form-label" for="f-starting_time">Start (24h)</label><input type="time" class="form-control" id="f-starting_time"></div>
             <div class="col-6 col-md-3"><label class="form-label" for="f-late_reg_level">Late Reg Lvl</label><input type="number" class="form-control" id="f-late_reg_level"></div>
             <div class="col-6 col-md-3"><label class="form-label" for="f-max_blinds">Max Blinds</label><input type="number" class="form-control" id="f-max_blinds"></div>
-            <div class="col-4"><label class="form-label" for="f-level_duration_rebuy_min">Rebuy</label><input type="number" class="form-control" id="f-level_duration_rebuy_min"></div>
-            <div class="col-4"><label class="form-label" for="f-level_duration_min">(MIN)</label><input type="number" class="form-control" id="f-level_duration_min"></div>
-            <div class="col-4"><label class="form-label" for="f-level_duration_ft_min">FT</label><input type="number" class="form-control" id="f-level_duration_ft_min"></div>
           </div>
 
-          <div class="form-section-title">Rebuy</div>
+          <div class="form-section-title">Blinds Up (min)</div>
+          <div class="row g-2">
+            <div class="col-4"><label class="form-label" for="f-level_duration_rebuy_min">Before LR</label><input type="number" class="form-control" id="f-level_duration_rebuy_min"></div>
+            <div class="col-4"><label class="form-label" for="f-level_duration_min">After LR</label><input type="number" class="form-control" id="f-level_duration_min"></div>
+            <div class="col-4"><label class="form-label" for="f-level_duration_ft_min">Final Table</label><input type="number" class="form-control" id="f-level_duration_ft_min"></div>
+          </div>
+
+          <div class="form-section-title">Options</div>
           <div class="row g-2 align-items-end">
             <div class="col-auto form-check ms-2 mb-1"><input class="form-check-input" type="checkbox" id="f-rebuy"><label class="form-check-label" for="f-rebuy">Rebuy</label></div>
-            <div class="col-6 col-md-3"><label class="form-label" for="f-rebuy_type">Type</label><input class="form-control" id="f-rebuy_type" placeholder="unlimited"></div>
+            <div class="col-6 col-md-3"><label class="form-label" for="f-rebuy_type">Max Units</label><input class="form-control" id="f-rebuy_type" placeholder="unlimited"></div>
             <div class="col-6 col-md-2"><label class="form-label" for="f-rebuy_cost_multiplier">Cost x</label><input type="number" step="0.1" class="form-control" id="f-rebuy_cost_multiplier"></div>
-            <div class="col-6 col-md-2"><label class="form-label" for="f-rebuy_period_end_level">End Lvl</label><input type="number" class="form-control" id="f-rebuy_period_end_level"></div>
             <div class="col-auto form-check ms-2 mb-1"><input class="form-check-input" type="checkbox" id="f-rebuy_bulk_options"><label class="form-check-label" for="f-rebuy_bulk_options">Bulk (x2/x3)</label></div>
           </div>
-
-          <div class="form-section-title">Add-on</div>
-          <div class="row g-2 align-items-end">
+          <div class="row g-2 align-items-end mt-1">
             <div class="col-auto form-check ms-2 mb-1"><input class="form-check-input" type="checkbox" id="f-addon"><label class="form-check-label" for="f-addon">Add-on</label></div>
-            <div class="col-6 col-md-3"><label class="form-label" for="f-addon_cost_multiplier">Cost x</label><input type="number" step="0.1" class="form-control" id="f-addon_cost_multiplier"></div>
             <div class="col-6 col-md-3"><label class="form-label" for="f-addon_max_units">Max Units</label><input type="number" class="form-control" id="f-addon_max_units"></div>
+            <div class="col-6 col-md-2"><label class="form-label" for="f-addon_cost_multiplier">Cost x</label><input type="number" step="0.1" class="form-control" id="f-addon_cost_multiplier"></div>
             <div class="col-auto form-check ms-2 mb-1"><input class="form-check-input" type="checkbox" id="f-addon_bulk_options"><label class="form-check-label" for="f-addon_bulk_options">Bulk (x2/x3)</label></div>
+          </div>
+          <div class="row g-2 align-items-end mt-1">
+            <div class="col-6 col-md-4"><label class="form-label" for="f-rebuy_period_end_level">End Lvl (rebuy &amp; add-on)</label><input type="number" class="form-control" id="f-rebuy_period_end_level" title="Last level at which rebuys and add-ons are offered — applies to both"></div>
           </div>
 
           <div class="form-section-title">Milestones (hours) &amp; Breaks</div>
