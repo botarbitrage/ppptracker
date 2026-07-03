@@ -77,6 +77,21 @@
     }
     #tourney-table-wrap table th { font-size: .75rem; }
     .tourney-name { font-weight: 700; color: var(--text); }
+    .tourney-new {
+      display: inline-block;
+      margin-left: 6px;
+      font-family: var(--font-head);
+      font-size: .58rem;
+      font-weight: 700;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      padding: 1px 6px;
+      border-radius: 4px;
+      vertical-align: middle;
+      background: rgba(255,82,82,.12);
+      color: #ff5252;
+      border: 1px solid rgba(255,82,82,.35);
+    }
     .td-highlight { color: var(--green); font-weight: 700; }
     .td-yes  { color: var(--green); }
     .td-no   { color: var(--muted); }
@@ -507,7 +522,21 @@ function badgeClass(type) {
   return 'tourney-badge-mtt';
 }
 
+// A tournament config is "New" (pending manual review) for this many days after
+// it was added via the admin form. Seed-script baseline tourneys have no
+// created_at and are never flagged.
+const NEW_TOURNEY_WINDOW_DAYS = 1;
+
+function isNewTourney(t) {
+  if (!t.created_at) return false;
+  const ageSecs = (Date.now() / 1000) - t.created_at;
+  return ageSecs >= 0 && ageSecs <= NEW_TOURNEY_WINDOW_DAYS * 86400;
+}
+
 function renderTourneyRow(id, t) {
+  const newMark = isNewTourney(t)
+    ? `<span class="tourney-new" title="Recently added — pending manual review">New</span>`
+    : '';
   const badge  = `<span class="tourney-badge ${badgeClass(t.type)}">${t.type || 'MTT'}</span>`;
   const buyIn  = t.buy_in_total ? `<span class="td-highlight">${t.buy_in_total.toFixed(2)}</span>` : '<span class="td-muted">—</span>';
   const chips  = fmtChips(t.starting_chips);
@@ -530,7 +559,7 @@ function renderTourneyRow(id, t) {
     : `<span class="td-no">No</span>`;
 
   return `<tr>
-    <td><span class="tourney-name">${t.name || id}</span></td>
+    <td><span class="tourney-name">${t.name || id}</span>${newMark}</td>
     <td class="text-center">${badge}</td>
     <td>${buyIn}</td>
     <td class="td-muted">${start}</td>
