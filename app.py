@@ -764,6 +764,28 @@ def admin_update_tournament(tid):
     return jsonify({'ok': True, 'id': tid})
 
 
+@app.route('/api/admin/tournaments/stamp-new', methods=['POST'])
+def admin_stamp_new_tournaments():
+    """Stamp created_at (epoch secs) on any tournament config missing it.
+
+    Tournaments added by the disposable seed script carry no created_at, so the
+    tournaments-page "New" marker has nothing to key on. Calling this (admin-only,
+    triggered when an admin loads the page) back-fills the timestamp the first time
+    a doc is seen, which starts its review window. Docs that already have a
+    created_at are left untouched. Returns the list of ids that were stamped."""
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+    db = _get_admin_db()
+    now = int(time.time())
+    stamped = []
+    for doc in db.collection('tournaments').get():
+        if doc.to_dict().get('created_at') is None:
+            doc.reference.update({'created_at': now})
+            stamped.append(doc.id)
+    return jsonify({'ok': True, 'stamped': stamped})
+
+
 def _fetch_tournament_records(uid, tourney_id):
     """Returns (records, doc_dict) for a persisted tournament, or (None, None)."""
     db  = _get_admin_db()

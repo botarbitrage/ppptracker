@@ -523,14 +523,26 @@ function badgeClass(type) {
 }
 
 // A tournament config is "New" (pending manual review) for this many days after
-// it was added via the admin form. Seed-script baseline tourneys have no
-// created_at and are never flagged.
+// it was first seen. created_at is back-filled server-side the first time an
+// admin loads the page (see /api/admin/tournaments/stamp-new), so seed-script
+// tourneys get flagged too.
 const NEW_TOURNEY_WINDOW_DAYS = 1;
 
+// created_at may be a numeric epoch (seconds or ms) or a Firestore Timestamp
+// object ({seconds} / toDate()); normalize to epoch milliseconds.
+function _createdAtMs(v) {
+  if (v == null) return null;
+  if (typeof v === 'number') return v < 1e12 ? v * 1000 : v;  // seconds vs ms
+  if (typeof v.toMillis === 'function') return v.toMillis();
+  if (typeof v.seconds === 'number') return v.seconds * 1000;
+  return null;
+}
+
 function isNewTourney(t) {
-  if (!t.created_at) return false;
-  const ageSecs = (Date.now() / 1000) - t.created_at;
-  return ageSecs >= 0 && ageSecs <= NEW_TOURNEY_WINDOW_DAYS * 86400;
+  const ms = _createdAtMs(t.created_at);
+  if (ms == null) return false;
+  const ageMs = Date.now() - ms;
+  return ageMs >= 0 && ageMs <= NEW_TOURNEY_WINDOW_DAYS * 86400 * 1000;
 }
 
 function renderTourneyRow(id, t) {
@@ -645,6 +657,7 @@ async function _checkAdmin(user) {
   }
   document.body.classList.toggle('is-admin', _isAdmin);
   if (_tourneyDocs.length) _renderTourneyTable();  // re-render so Edit buttons appear
+  if (_isAdmin && user) _stampNewTourneys(user);   // back-fill created_at → "New" marker
 }
 
 function _formError(msg) {
@@ -736,30 +749,12 @@ async function loadTournaments() {
       appId:             cfg.FIREBASE_APP_ID,
       measurementId:     cfg.FIREBASE_MEASUREMENT_ID,
     });
-    const db = firebase.firestore();
     firebase.auth().onAuthStateChanged(user => {
       _renderAuthBar(user ? user.email : null);
       _checkAdmin(user);
     });
 
-    const snap = await db.collection('tournaments')
-      .where('active', '==', true)
-      .get();
-
-    if (snap.empty) {
-      container.innerHTML = `<p class="text-center" style="color:var(--muted);padding:24px 0">No tournaments found. Run the seed script to populate the list.</p>`;
-      container.classList.remove('d-none');
-      return;
-    }
-
-    const docs = [];
-    snap.forEach(doc => docs.push({ id: doc.id, data: doc.data() }));
-    docs.sort((a, b) => (a.data.buy_in_total || 0) - (b.data.buy_in_total || 0));
-
-    _tourneyDocs = docs;
-    container.classList.add('d-none');
-    _renderTourneyTable();
-    document.getElementById('tourney-table-wrap').classList.remove('d-none');
+    await _fetchTourneys();
 
   } catch (err) {
     container.innerHTML = `<p class="text-center" style="color:var(--muted);padding:24px 0">
@@ -767,6 +762,50 @@ async function loadTournaments() {
     </p>`;
     container.classList.remove('d-none');
     console.error('Tournaments load error:', err);
+  }
+}
+
+// Query the active tournament configs and render. Safe to re-run (e.g. after an
+// admin back-fills created_at) without re-initializing Firebase.
+async function _fetchTourneys() {
+  const container = document.getElementById('tourney-list-container');
+  const snap = await firebase.firestore().collection('tournaments')
+    .where('active', '==', true)
+    .get();
+
+  if (snap.empty) {
+    container.innerHTML = `<p class="text-center" style="color:var(--muted);padding:24px 0">No tournaments found. Run the seed script to populate the list.</p>`;
+    container.classList.remove('d-none');
+    return;
+  }
+
+  const docs = [];
+  snap.forEach(doc => docs.push({ id: doc.id, data: doc.data() }));
+  docs.sort((a, b) => (a.data.buy_in_total || 0) - (b.data.buy_in_total || 0));
+
+  _tourneyDocs = docs;
+  container.classList.add('d-none');
+  _renderTourneyTable();
+  document.getElementById('tourney-table-wrap').classList.remove('d-none');
+}
+
+// Admin-only: ask the server to stamp created_at on any tournament missing it,
+// then refresh so the just-stamped tourneys show their "New" marker. Runs once
+// per page load. Idempotent — the server no-ops docs that already have created_at.
+let _stampAttempted = false;
+async function _stampNewTourneys(user) {
+  if (_stampAttempted) return;
+  _stampAttempted = true;
+  try {
+    const token = await user.getIdToken().catch(() => null);
+    if (!token) return;
+    const r = await fetch('/api/admin/tournaments/stamp-new', {
+      method: 'POST', headers: { 'Authorization': `Bearer ${token}` },
+    });
+    const data = await r.json().catch(() => ({}));
+    if (r.ok && (data.stamped || []).length) await _fetchTourneys();
+  } catch (e) {
+    console.warn('stamp-new failed', e);
   }
 }
 
