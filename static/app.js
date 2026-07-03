@@ -1443,14 +1443,23 @@ function _tgFmtK(n) {
   return n.toLocaleString();
 }
 
-// Custom Chart.js plugin — draws dashed vertical reference lines + labels
+// Custom Chart.js plugin — draws dashed vertical reference lines; labels show on hover
 const _TG_REFLINES_PLUGIN = {
   id: 'tgRefLines',
+  // Track cursor position so labels only render for the line being hovered.
+  afterEvent(chart, args) {
+    const e = args.event;
+    const prev = chart._tgHoverX;
+    if (e.type === 'mousemove')      chart._tgHoverX = e.x;
+    else if (e.type === 'mouseout')  chart._tgHoverX = null;
+    if (chart._tgHoverX !== prev) args.changed = true;
+  },
   afterDraw(chart) {
     const lines = chart.config.options.tgRefLines;
     if (!lines || !lines.length) return;
     const { ctx, chartArea: ca, scales: { x } } = chart;
     if (!x) return;
+    const hoverX = chart._tgHoverX;
     ctx.save();
     ctx.font = "10px 'Exo 2', sans-serif";
     for (const { secs, color, label } of lines) {
@@ -1458,12 +1467,14 @@ const _TG_REFLINES_PLUGIN = {
       if (px < ca.left || px > ca.right) continue;
       ctx.beginPath();
       ctx.strokeStyle = color;
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 1;
       ctx.setLineDash([5, 4]);
       ctx.moveTo(px, ca.top);
       ctx.lineTo(px, ca.bottom);
       ctx.stroke();
       ctx.setLineDash([]);
+      // Only draw the label box when the cursor is near this line.
+      if (hoverX == null || Math.abs(hoverX - px) > 8) continue;
       const parts = label.split('\n');
       const tw = Math.max(...parts.map(l => ctx.measureText(l).width));
       const bh = parts.length * 14 + 6;
@@ -1774,6 +1785,7 @@ function _tgBuildChart() {
           borderColor: chipColor,
           backgroundColor: 'rgba(64,196,255,0.07)',
           fill: true,
+          borderWidth: 1.5,
           tension: 0.3,
           pointRadius: 2,
           pointHoverRadius: 6,
@@ -1790,6 +1802,7 @@ function _tgBuildChart() {
           borderColor: bbColor,
           backgroundColor: 'rgba(0,230,118,0.05)',
           fill: true,
+          borderWidth: 1.5,
           tension: 0.3,
           pointRadius: 2,
           pointHoverRadius: 6,
