@@ -35,3 +35,6 @@ pppoker_collection_output.txt
 # OS
 .DS_Store
 Thumbs.db
+
+# Claude session data
+.claude/
