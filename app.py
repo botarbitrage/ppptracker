@@ -680,7 +680,7 @@ def list_tournaments():
 _TOURNEY_FIELDS = {
     'name': str, 'type': str, 'is_pko': bool, 'is_mtt': bool, 'currency': str,
     'buy_in_total': float, 'buy_in_prize': float, 'buy_in_rake': float,
-    'starting_chips': int, 'starting_time': str,
+    'starting_chips': int, 'starting_time': 'strlist',
     'level_duration_min': int, 'level_duration_rebuy_min': int,
     'level_duration_ft_min': int, 'late_reg_level': int,
     'rebuy': bool, 'rebuy_type': str, 'rebuy_cost_multiplier': float,
@@ -715,6 +715,9 @@ def _coerce_tourney_payload(body):
             elif typ is list:
                 seq = v if isinstance(v, list) else str(v).split(',')
                 data[key] = [int(float(x)) for x in seq if str(x).strip() != '']
+            elif typ == 'strlist':
+                seq = v if isinstance(v, list) else str(v).split(',')
+                data[key] = [s for s in (str(x).strip() for x in seq) if s] or None
             else:
                 data[key] = str(v).strip()
         except (ValueError, TypeError):

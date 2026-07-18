@@ -351,7 +351,7 @@
           <div class="form-section-title">Structure</div>
           <div class="row g-2">
             <div class="col-6 col-md-3"><label class="form-label" for="f-starting_chips">Starting Chips</label><input type="number" class="form-control" id="f-starting_chips"></div>
-            <div class="col-6 col-md-3"><label class="form-label" for="f-starting_time">Start (24h)</label><input type="time" class="form-control" id="f-starting_time"></div>
+            <div class="col-6 col-md-3"><label class="form-label" for="f-starting_time">Start times (24h)</label><input type="text" class="form-control" id="f-starting_time" placeholder="e.g. 18:30, 23:30"></div>
             <div class="col-6 col-md-3"><label class="form-label" for="f-late_reg_level">Late Reg Lvl</label><input type="number" class="form-control" id="f-late_reg_level"></div>
             <div class="col-6 col-md-3"><label class="form-label" for="f-max_blinds">Max Blinds</label><input type="number" class="form-control" id="f-max_blinds"></div>
           </div>
@@ -442,6 +442,7 @@ function _initTzSelect() {
  */
 function fmtStartTime(timeStr, targetTz) {
   if (!timeStr) return '—';
+  timeStr = String(timeStr);
   let h, min;
   const ampm = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
   if (ampm) {
@@ -472,6 +473,13 @@ function fmtStartTime(timeStr, targetTz) {
   return utcDate.toLocaleTimeString('en-GB', {
     timeZone: targetTz, hour: '2-digit', minute: '2-digit', hour12: false
   });
+}
+
+// starting_time may be a single string ("18:30") or a list of daily start times
+// (["23:30", "05:30", ...]); normalise to an array for display/sort/edit.
+function startTimesArr(v) {
+  if (Array.isArray(v)) return v.filter(Boolean);
+  return v ? [v] : [];
 }
 
 // Normalise a stored start time ("6:30 PM" or "18:30") to 24h "HH:MM" for form inputs.
@@ -554,7 +562,7 @@ function renderTourneyRow(id, t) {
   const badge  = `<span class="tourney-badge ${badgeClass(t.type)}">${t.type || 'MTT'}</span>`;
   const buyIn  = t.buy_in_total ? `<span class="td-highlight">${t.buy_in_total.toFixed(2)}</span>` : '<span class="td-muted">—</span>';
   const chips  = fmtChips(t.starting_chips);
-  const start  = fmtStartTime(t.starting_time, currentTz());
+  const start  = startTimesArr(t.starting_time).map(s => fmtStartTime(s, currentTz())).join(', ') || '—';
 
   // Rebuy — symbol only
   const rebuyCell = t.rebuy
@@ -610,7 +618,7 @@ function _renderTourneyTable() {
     if (_sortCol === 'name')  { va = (ta.name || '').toLowerCase(); vb = (tb.name || '').toLowerCase(); }
     else if (_sortCol === 'type')  { va = ta.type || ''; vb = tb.type || ''; }
     else if (_sortCol === 'buyin') { va = ta.buy_in_total || 0; vb = tb.buy_in_total || 0; }
-    else if (_sortCol === 'start') { va = ta.starting_time || ''; vb = tb.starting_time || ''; }
+    else if (_sortCol === 'start') { va = to24h(startTimesArr(ta.starting_time)[0]) || ''; vb = to24h(startTimesArr(tb.starting_time)[0]) || ''; }
     else if (_sortCol === 'chips') { va = ta.starting_chips || 0; vb = tb.starting_chips || 0; }
     else if (_sortCol === 'itm')   { va = ta.itm_h || 0; vb = tb.itm_h || 0; }
     else if (_sortCol === 'ft')    { va = ta.ft_h || 0; vb = tb.ft_h || 0; }
@@ -685,7 +693,7 @@ function openTourneyForm(id) {
     const v = doc[key];
     if (kind === 'bool')              el.checked = !!v;
     else if (kind === 'bulk')         el.checked = Array.isArray(v) && v.some(x => x > 1);
-    else if (key === 'starting_time') el.value = to24h(v);
+    else if (key === 'starting_time') el.value = startTimesArr(v).map(to24h).filter(Boolean).join(', ');
     else                              el.value = (v == null ? '' : v);
   }
   if (!editing) {
