@@ -1,208 +1,2188 @@
 {
   "_meta": {
     "source": "BBZ Leak Finder UI (dashboard.bbzpoker.com/mtt-leak-finder/report/2245), harvested from screenshots 2026-07-30",
-    "status": "all 6 positions harvested (163 evaluated cells: BTN 21, CO 27, MP 29, EP 26, BB 29, SB 31)",
+    "status": "all 6 positions harvested and cross-validated against the By Action tab (163 cells; per-stat transposition sums to 163 All / 14 Good / 149 Bad)",
     "verdict_model": "result = LOW if hero < min, GOOD if min <= hero <= max, HIGH if hero > max; Bad = LOW or HIGH",
     "rec_action_model": "per-stat verb pair chosen by direction: LOW -> '<verb> more', HIGH -> '<verb> less' (verb varies per stat, see rows); GOOD -> 'Good job'",
     "notes": [
       "Rows below are exactly the stats BBZ evaluated per position for this dataset (the membership mask). Stats with zero opportunities in the source data are absent and must be back-filled when observed (~12 cells of BBZ's 175-cell grid).",
       "'observed' blocks are Caio's own values from the 3,454-hand report — kept for validation only; the durable data is label/target/rec.",
       "Every observed value and count cross-checked against the PT4 CSV export (ReportExport.csv) — exact match, confirming BBZ renders the PT4 report values unchanged.",
-      "Rows flagged 'verify': target digits read from screenshot with lower confidence — eyeball against the BBZ UI before relying on them."
+      "By Action tab confirmed to be a pure transposition of the same 163 cells (stat-major grouping, same values/targets/verdicts) — no separate data or engine work needed."
     ]
   },
   "positions": {
     "EP": {
-      "winrate_allin_adj_bb": 53, "hands": 481, "all": 26, "good": 1, "bad": 25,
+      "winrate_allin_adj_bb": 53,
+      "hands": 481,
+      "all": 26,
+      "good": 1,
+      "bad": 25,
       "stats": [
-        {"label": "Raise First",                    "target": [16, 20], "rec": "Raise more",       "observed": {"hero": 12.85, "count": 467, "result": "LOW"}},
-        {"label": "Call PF 2Bet",                   "target": [3, 6],   "rec": "Call less",        "observed": {"hero": 56.52, "count": 23,  "result": "HIGH"}},
-        {"label": "3Bet PF",                        "target": [5, 7],   "rec": "3-bet more",       "observed": {"hero": 0,     "count": 19,  "result": "LOW"}},
-        {"label": "3Bet NAI <35",                   "target": [3, 6],   "rec": "Good job",         "observed": {"hero": 4.48,  "count": 713, "result": "GOOD"}},
-        {"label": "Raise & 4Bet+ PF",               "target": [15, 20], "rec": "4-bet less",       "observed": {"hero": 50,    "count": 4,   "result": "HIGH"}},
-        {"label": "2Bet PF & Fold",                 "target": [45, 55], "rec": "Fold more",        "observed": {"hero": 22.22, "count": 9,   "result": "LOW"}},
-        {"label": "Fold to PF 4Bet After 3Bet <30", "target": [35, 45], "rec": "Fold more",        "observed": {"hero": 0,     "count": 4,   "result": "LOW"}},
-        {"label": "CBet F OOP (HU)",                "target": [35, 45], "rec": "Bet more",         "observed": {"hero": 32.08, "count": 53,  "result": "LOW"}},
-        {"label": "CBet F IP (HU)",                 "target": [80, 90], "rec": "Bet more",         "observed": {"hero": 60.23, "count": 88,  "result": "LOW"}},
-        {"label": "Float F HU",                     "target": [45, 55], "rec": "Bet more",         "observed": {"hero": 25,    "count": 8,   "result": "LOW"}},
-        {"label": "Fold to F Cbet (HU)",            "target": [33, 38], "rec": "Fold less",        "observed": {"hero": 56.67, "count": 80,  "result": "HIGH"}},
-        {"label": "Fold to F CBet (3B)",            "target": [35, 45], "rec": "Fold more",        "observed": {"hero": 0,     "count": 1,   "result": "LOW"}},
-        {"label": "Fold to F Float HU",             "target": [30, 40], "rec": "Fold less",        "observed": {"hero": 50,    "count": 8,   "result": "HIGH"}},
-        {"label": "CBet F & Fold (HU)",             "target": [33, 43], "rec": "Fold less",        "observed": {"hero": 57.14, "count": 7,   "result": "HIGH"}},
-        {"label": "Raise F CBet (HU)",              "target": [14, 18], "rec": "Raise more",       "observed": {"hero": 3.33,  "count": 60,  "result": "LOW"}},
-        {"label": "XR Flop HU",                     "target": [16, 20], "rec": "Raise more",       "observed": {"hero": 2.7,   "count": 74,  "result": "LOW"}},
-        {"label": "Raise F CBet (3B)",              "target": [12, 18], "rec": "Raise more",       "observed": {"hero": 0,     "count": 1,   "result": "LOW"}},
-        {"label": "Donk T (HU)",                    "target": [5, 7],   "rec": "Donk less",        "observed": {"hero": 34.62, "count": 26,  "result": "HIGH"}},
-        {"label": "CBet T (HU)",                    "target": [47, 57], "rec": "Bet less",         "observed": {"hero": 72.73, "count": 33,  "result": "HIGH"}},
-        {"label": "Probe T (HU)",                   "target": [35, 45], "rec": "Bet less",         "observed": {"hero": 57.89, "count": 19,  "result": "HIGH"}},
-        {"label": "Fold to T CBet",                 "target": [35, 45], "rec": "Fold more",        "observed": {"hero": 25,    "count": 4,   "result": "LOW"}},
-        {"label": "F to T Pr (HU)",                 "target": [30, 40], "rec": "Fold more",        "observed": {"hero": 30,    "count": 20,  "result": "LOW"}},
-        {"label": "Raise T CBet",                   "target": [7, 10],  "rec": "Raise more",       "observed": {"hero": 0,     "count": 4,   "result": "LOW"}},
-        {"label": "Raise T Probe (HU)",             "target": [7, 10],  "rec": "Raise more",       "observed": {"hero": 5,     "count": 20,  "result": "LOW"}},
-        {"label": "CBet R",                         "target": [47, 57], "rec": "Bet less",         "observed": {"hero": 100,   "count": 1,   "result": "HIGH"}},
-        {"label": "Fold to R CBet",                 "target": [40, 50], "rec": "Fold more",        "observed": {"hero": 0,     "count": 1,   "result": "LOW"}}
+        {
+          "label": "Raise First",
+          "target": [
+            16,
+            20
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 12.85,
+            "count": 467,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Call PF 2Bet",
+          "target": [
+            3,
+            6
+          ],
+          "rec": "Call less",
+          "observed": {
+            "hero": 56.52,
+            "count": 23,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "3Bet PF",
+          "target": [
+            5,
+            7
+          ],
+          "rec": "3-bet more",
+          "observed": {
+            "hero": 0,
+            "count": 19,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "3Bet NAI <35",
+          "target": [
+            3,
+            6
+          ],
+          "rec": "Good job",
+          "observed": {
+            "hero": 4.48,
+            "count": 713,
+            "result": "GOOD"
+          }
+        },
+        {
+          "label": "Raise & 4Bet+ PF",
+          "target": [
+            15,
+            20
+          ],
+          "rec": "4-bet less",
+          "observed": {
+            "hero": 50,
+            "count": 4,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "2Bet PF & Fold",
+          "target": [
+            45,
+            55
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 22.22,
+            "count": 9,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Fold to PF 4Bet After 3Bet <30",
+          "target": [
+            35,
+            45
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 0,
+            "count": 4,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "CBet F OOP (HU)",
+          "target": [
+            35,
+            45
+          ],
+          "rec": "Bet more",
+          "observed": {
+            "hero": 32.08,
+            "count": 53,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "CBet F IP (HU)",
+          "target": [
+            80,
+            90
+          ],
+          "rec": "Bet more",
+          "observed": {
+            "hero": 60.23,
+            "count": 88,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Float F HU",
+          "target": [
+            45,
+            55
+          ],
+          "rec": "Bet more",
+          "observed": {
+            "hero": 25,
+            "count": 8,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Fold to F Cbet (HU)",
+          "target": [
+            33,
+            38
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 56.67,
+            "count": 80,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Fold to F CBet (3B)",
+          "target": [
+            35,
+            45
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 0,
+            "count": 1,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Fold to F Float HU",
+          "target": [
+            30,
+            40
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 50,
+            "count": 8,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "CBet F & Fold (HU)",
+          "target": [
+            33,
+            43
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 57.14,
+            "count": 7,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Raise F CBet (HU)",
+          "target": [
+            14,
+            18
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 3.33,
+            "count": 60,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "XR Flop HU",
+          "target": [
+            16,
+            20
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 2.7,
+            "count": 74,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Raise F CBet (3B)",
+          "target": [
+            12,
+            18
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 0,
+            "count": 1,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Donk T (HU)",
+          "target": [
+            5,
+            7
+          ],
+          "rec": "Donk less",
+          "observed": {
+            "hero": 34.62,
+            "count": 26,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "CBet T (HU)",
+          "target": [
+            47,
+            57
+          ],
+          "rec": "Bet less",
+          "observed": {
+            "hero": 72.73,
+            "count": 33,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Probe T (HU)",
+          "target": [
+            35,
+            45
+          ],
+          "rec": "Bet less",
+          "observed": {
+            "hero": 57.89,
+            "count": 19,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Fold to T CBet",
+          "target": [
+            35,
+            45
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 25,
+            "count": 4,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "F to T Pr (HU)",
+          "target": [
+            30,
+            40
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 30,
+            "count": 20,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Raise T CBet",
+          "target": [
+            7,
+            10
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 0,
+            "count": 4,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Raise T Probe (HU)",
+          "target": [
+            7,
+            10
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 5,
+            "count": 20,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "CBet R",
+          "target": [
+            47,
+            57
+          ],
+          "rec": "Bet less",
+          "observed": {
+            "hero": 100,
+            "count": 1,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Fold to R CBet",
+          "target": [
+            40,
+            50
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 0,
+            "count": 1,
+            "result": "LOW"
+          }
+        }
       ]
     },
     "MP": {
-      "winrate_allin_adj_bb": -18, "hands": 716, "all": 29, "good": 3, "bad": 26,
+      "winrate_allin_adj_bb": -18,
+      "hands": 716,
+      "all": 29,
+      "good": 3,
+      "bad": 26,
       "stats": [
-        {"label": "Raise First",                    "target": [24, 27], "rec": "Good job",         "observed": {"hero": 24.74, "count": 485, "result": "GOOD"}},
-        {"label": "Call PF 2Bet",                   "target": [4, 7],   "rec": "Call less",        "observed": {"hero": 14.39, "count": 132, "result": "HIGH"}},
-        {"label": "3Bet PF",                        "target": [6, 8],   "rec": "3-bet more",       "observed": {"hero": 2.42,  "count": 124, "result": "LOW"}},
-        {"label": "3Bet NAI <35",                   "target": [3, 6],   "rec": "Good job",         "observed": {"hero": 4.48,  "count": 713, "result": "GOOD"}},
-        {"label": "Raise & 4Bet+ PF",               "target": [15, 20], "rec": "4-bet more",       "observed": {"hero": 4.17,  "count": 24,  "result": "LOW"}},
-        {"label": "2Bet PF & Fold",                 "target": [45, 55], "rec": "Fold more",        "observed": {"hero": 37.5,  "count": 32,  "result": "LOW"}},
-        {"label": "3Bet PF & Fold",                 "target": [40, 50], "rec": "Fold more",        "observed": {"hero": 0,     "count": 1,   "result": "LOW"}},
-        {"label": "Fold to PF 4Bet After 3Bet <30", "target": [35, 45], "rec": "Fold more",        "observed": {"hero": 0,     "count": 4,   "result": "LOW"}},
-        {"label": "PF Squeeze",                     "target": [5, 7],   "rec": "Squeeze more",     "observed": {"hero": 3.85,  "count": 26,  "result": "LOW"}},
-        {"label": "CBet F OOP (HU)",                "target": [30, 40], "rec": "Good job",         "observed": {"hero": 32.08, "count": 53,  "result": "GOOD"}},
-        {"label": "CBet F IP (HU)",                 "target": [75, 85], "rec": "Bet more",         "observed": {"hero": 60.23, "count": 88,  "result": "LOW"}},
-        {"label": "Float F HU",                     "target": [45, 55], "rec": "Bet more",         "observed": {"hero": 25,    "count": 8,   "result": "LOW"}},
-        {"label": "Fold to F Cbet (HU)",            "target": [33, 38], "rec": "Fold less",        "observed": {"hero": 56.67, "count": 60,  "result": "HIGH"}},
-        {"label": "Fold to F CBet (3B)",            "target": [35, 45], "rec": "Fold less",        "observed": {"hero": 50,    "count": 2,   "result": "HIGH"}},
-        {"label": "Fold to F Float HU",             "target": [30, 40], "rec": "Fold less",        "observed": {"hero": 50,    "count": 8,   "result": "HIGH"}},
-        {"label": "CBet F & Fold (HU)",             "target": [33, 43], "rec": "Fold less",        "observed": {"hero": 57.14, "count": 7,   "result": "HIGH"}},
-        {"label": "Raise F CBet (HU)",              "target": [14, 18], "rec": "Raise more",       "observed": {"hero": 3.33,  "count": 60,  "result": "LOW"}},
-        {"label": "XR Flop HU",                     "target": [16, 20], "rec": "Raise more",       "observed": {"hero": 2.7,   "count": 74,  "result": "LOW"}},
-        {"label": "Raise F CBet (3B)",              "target": [12, 18], "rec": "Raise more",       "observed": {"hero": 0,     "count": 2,   "result": "LOW"}},
-        {"label": "Donk T (HU)",                    "target": [5, 7],   "rec": "Donk less",        "observed": {"hero": 34.62, "count": 26,  "result": "HIGH"}},
-        {"label": "CBet T (HU)",                    "target": [47, 57], "rec": "Bet less",         "observed": {"hero": 72.73, "count": 33,  "result": "HIGH"}},
-        {"label": "Float T",                        "target": [45, 55], "rec": "Bet less",         "observed": {"hero": 100,   "count": 1,   "result": "HIGH"}},
-        {"label": "Probe T (HU)",                   "target": [35, 45], "rec": "Bet less",         "observed": {"hero": 57.89, "count": 19,  "result": "HIGH"}},
-        {"label": "Fold to T CBet",                 "target": [35, 45], "rec": "Fold less",        "observed": {"hero": 100,   "count": 2,   "result": "HIGH"}},
-        {"label": "F to T Pr (HU)",                 "target": [30, 40], "rec": "Fold more",        "observed": {"hero": 30,    "count": 20,  "result": "LOW"}},
-        {"label": "Raise T CBet",                   "target": [7, 10],  "rec": "Raise more",       "observed": {"hero": 0,     "count": 2,   "result": "LOW"}},
-        {"label": "Raise T Probe (HU)",             "target": [7, 10],  "rec": "Raise less",       "observed": {"hero": 25,    "count": 20,  "result": "HIGH"}},
-        {"label": "Donk R",                         "target": [6, 9],   "rec": "Donk more",        "observed": {"hero": 0,     "count": 1,   "result": "LOW"}},
-        {"label": "CBet R",                         "target": [47, 57], "rec": "Bet more",         "observed": {"hero": 0,     "count": 2,   "result": "LOW"}}
+        {
+          "label": "Raise First",
+          "target": [
+            24,
+            27
+          ],
+          "rec": "Good job",
+          "observed": {
+            "hero": 24.74,
+            "count": 485,
+            "result": "GOOD"
+          }
+        },
+        {
+          "label": "Call PF 2Bet",
+          "target": [
+            4,
+            7
+          ],
+          "rec": "Call less",
+          "observed": {
+            "hero": 14.39,
+            "count": 132,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "3Bet PF",
+          "target": [
+            6,
+            8
+          ],
+          "rec": "3-bet more",
+          "observed": {
+            "hero": 2.42,
+            "count": 124,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "3Bet NAI <35",
+          "target": [
+            3,
+            6
+          ],
+          "rec": "Good job",
+          "observed": {
+            "hero": 4.48,
+            "count": 713,
+            "result": "GOOD"
+          }
+        },
+        {
+          "label": "Raise & 4Bet+ PF",
+          "target": [
+            15,
+            20
+          ],
+          "rec": "4-bet more",
+          "observed": {
+            "hero": 4.17,
+            "count": 24,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "2Bet PF & Fold",
+          "target": [
+            45,
+            55
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 37.5,
+            "count": 32,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "3Bet PF & Fold",
+          "target": [
+            40,
+            50
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 0,
+            "count": 1,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Fold to PF 4Bet After 3Bet <30",
+          "target": [
+            35,
+            45
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 0,
+            "count": 4,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "PF Squeeze",
+          "target": [
+            5,
+            7
+          ],
+          "rec": "Squeeze more",
+          "observed": {
+            "hero": 3.85,
+            "count": 26,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "CBet F OOP (HU)",
+          "target": [
+            30,
+            40
+          ],
+          "rec": "Good job",
+          "observed": {
+            "hero": 32.08,
+            "count": 53,
+            "result": "GOOD"
+          }
+        },
+        {
+          "label": "CBet F IP (HU)",
+          "target": [
+            75,
+            85
+          ],
+          "rec": "Bet more",
+          "observed": {
+            "hero": 60.23,
+            "count": 88,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Float F HU",
+          "target": [
+            45,
+            55
+          ],
+          "rec": "Bet more",
+          "observed": {
+            "hero": 25,
+            "count": 8,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Fold to F Cbet (HU)",
+          "target": [
+            33,
+            38
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 56.67,
+            "count": 60,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Fold to F CBet (3B)",
+          "target": [
+            35,
+            45
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 50,
+            "count": 2,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Fold to F Float HU",
+          "target": [
+            30,
+            40
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 50,
+            "count": 8,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "CBet F & Fold (HU)",
+          "target": [
+            33,
+            43
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 57.14,
+            "count": 7,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Raise F CBet (HU)",
+          "target": [
+            14,
+            18
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 3.33,
+            "count": 60,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "XR Flop HU",
+          "target": [
+            16,
+            20
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 2.7,
+            "count": 74,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Raise F CBet (3B)",
+          "target": [
+            12,
+            18
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 0,
+            "count": 2,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Donk T (HU)",
+          "target": [
+            5,
+            7
+          ],
+          "rec": "Donk less",
+          "observed": {
+            "hero": 34.62,
+            "count": 26,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "CBet T (HU)",
+          "target": [
+            47,
+            57
+          ],
+          "rec": "Bet less",
+          "observed": {
+            "hero": 72.73,
+            "count": 33,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Float T",
+          "target": [
+            45,
+            55
+          ],
+          "rec": "Bet less",
+          "observed": {
+            "hero": 100,
+            "count": 1,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Probe T (HU)",
+          "target": [
+            35,
+            45
+          ],
+          "rec": "Bet less",
+          "observed": {
+            "hero": 57.89,
+            "count": 19,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Fold to T CBet",
+          "target": [
+            35,
+            45
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 100,
+            "count": 2,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "F to T Pr (HU)",
+          "target": [
+            30,
+            40
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 30,
+            "count": 20,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Raise T CBet",
+          "target": [
+            7,
+            10
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 0,
+            "count": 2,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Raise T Probe (HU)",
+          "target": [
+            7,
+            10
+          ],
+          "rec": "Raise less",
+          "observed": {
+            "hero": 25,
+            "count": 20,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Donk R",
+          "target": [
+            6,
+            9
+          ],
+          "rec": "Donk more",
+          "observed": {
+            "hero": 0,
+            "count": 1,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "CBet R",
+          "target": [
+            47,
+            57
+          ],
+          "rec": "Bet more",
+          "observed": {
+            "hero": 0,
+            "count": 2,
+            "result": "LOW"
+          }
+        }
       ]
     },
     "CO": {
-      "winrate_allin_adj_bb": -14, "hands": 554, "all": 27, "good": 2, "bad": 25,
+      "winrate_allin_adj_bb": -14,
+      "hands": 554,
+      "all": 27,
+      "good": 2,
+      "bad": 25,
       "stats": [
-        {"label": "Raise First",                    "target": [35, 38], "rec": "Raise more",       "observed": {"hero": 33.93, "count": 280, "result": "LOW"}},
-        {"label": "Call PF 2Bet",                   "target": [6, 9],   "rec": "Call less",        "observed": {"hero": 16.76, "count": 173, "result": "HIGH"}},
-        {"label": "3Bet PF",                        "target": [7, 10],  "rec": "3-bet more",       "observed": {"hero": 5.42,  "count": 166, "result": "LOW"}},
-        {"label": "3Bet NAI <35",                   "target": [3, 6],   "rec": "Good job",         "observed": {"hero": 4.48,  "count": 713, "result": "GOOD"}},
-        {"label": "Raise & 4Bet+ PF",               "target": [12, 18], "rec": "4-bet more",       "observed": {"hero": 11.11, "count": 9,   "result": "LOW"}},
-        {"label": "2Bet PF & Fold",                 "target": [47, 55], "rec": "Fold less",        "verify": true, "observed": {"hero": 60, "count": 15, "result": "HIGH"}},
-        {"label": "Fold to PF 4Bet After 3Bet <30", "target": [35, 45], "rec": "Fold more",        "observed": {"hero": 0,     "count": 4,   "result": "LOW"}},
-        {"label": "PF Squeeze",                     "target": [6, 9],   "rec": "Good job",         "observed": {"hero": 7.14,  "count": 28,  "result": "GOOD"}},
-        {"label": "CBet F OOP (HU)",                "target": [25, 30], "rec": "Bet less",         "observed": {"hero": 32.08, "count": 53,  "result": "HIGH"}},
-        {"label": "CBet F IP (HU)",                 "target": [75, 85], "rec": "Bet more",         "observed": {"hero": 60.23, "count": 88,  "result": "LOW"}},
-        {"label": "Float F HU",                     "target": [45, 55], "rec": "Bet more",         "observed": {"hero": 25,    "count": 8,   "result": "LOW"}},
-        {"label": "Fold to F Cbet (HU)",            "target": [28, 35], "rec": "Fold less",        "observed": {"hero": 56.67, "count": 60,  "result": "HIGH"}},
-        {"label": "Fold to F CBet (3B)",            "target": [30, 35], "rec": "Fold more",        "observed": {"hero": 0,     "count": 1,   "result": "LOW"}},
-        {"label": "Fold to F Float HU",             "target": [30, 40], "rec": "Fold less",        "observed": {"hero": 50,    "count": 8,   "result": "HIGH"}},
-        {"label": "CBet F & Fold (HU)",             "target": [33, 43], "rec": "Fold less",        "observed": {"hero": 57.14, "count": 7,   "result": "HIGH"}},
-        {"label": "Raise F CBet (HU)",              "target": [12, 18], "rec": "Raise more",       "observed": {"hero": 3.33,  "count": 60,  "result": "LOW"}},
-        {"label": "XR Flop HU",                     "target": [18, 20], "rec": "Raise more",       "verify": true, "observed": {"hero": 2.7, "count": 74, "result": "LOW"}},
-        {"label": "Raise F CBet (3B)",              "target": [8, 14],  "rec": "Raise more",       "observed": {"hero": 0,     "count": 1,   "result": "LOW"}},
-        {"label": "Donk T (HU)",                    "target": [4, 8],   "rec": "Donk less",        "observed": {"hero": 34.62, "count": 26,  "result": "HIGH"}},
-        {"label": "CBet T (HU)",                    "target": [47, 57], "rec": "Bet less",         "observed": {"hero": 72.73, "count": 33,  "result": "HIGH"}},
-        {"label": "Float T",                        "target": [45, 55], "rec": "Bet more",         "observed": {"hero": 0,     "count": 1,   "result": "LOW"}},
-        {"label": "Probe T (HU)",                   "target": [35, 45], "rec": "Bet less",         "observed": {"hero": 57.89, "count": 19,  "result": "HIGH"}},
-        {"label": "Fold to T CBet",                 "target": [33, 43], "rec": "Fold less",        "observed": {"hero": 50,    "count": 2,   "result": "HIGH"}},
-        {"label": "F to T Pr (HU)",                 "target": [30, 40], "rec": "Fold more",        "observed": {"hero": 30,    "count": 20,  "result": "LOW"}},
-        {"label": "Raise T CBet",                   "target": [7, 10],  "rec": "Raise more",       "observed": {"hero": 0,     "count": 2,   "result": "LOW"}},
-        {"label": "Raise T Probe (HU)",             "target": [7, 10],  "rec": "Raise more",       "observed": {"hero": 0,     "count": 20,  "result": "LOW"}},
-        {"label": "CBet R",                         "target": [47, 57], "rec": "Bet less",         "observed": {"hero": 75,    "count": 4,   "result": "HIGH"}}
+        {
+          "label": "Raise First",
+          "target": [
+            35,
+            38
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 33.93,
+            "count": 280,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Call PF 2Bet",
+          "target": [
+            6,
+            9
+          ],
+          "rec": "Call less",
+          "observed": {
+            "hero": 16.76,
+            "count": 173,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "3Bet PF",
+          "target": [
+            7,
+            10
+          ],
+          "rec": "3-bet more",
+          "observed": {
+            "hero": 5.42,
+            "count": 166,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "3Bet NAI <35",
+          "target": [
+            3,
+            6
+          ],
+          "rec": "Good job",
+          "observed": {
+            "hero": 4.48,
+            "count": 713,
+            "result": "GOOD"
+          }
+        },
+        {
+          "label": "Raise & 4Bet+ PF",
+          "target": [
+            12,
+            18
+          ],
+          "rec": "4-bet more",
+          "observed": {
+            "hero": 11.11,
+            "count": 9,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "2Bet PF & Fold",
+          "target": [
+            47,
+            55
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 60,
+            "count": 15,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Fold to PF 4Bet After 3Bet <30",
+          "target": [
+            35,
+            45
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 0,
+            "count": 4,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "PF Squeeze",
+          "target": [
+            6,
+            9
+          ],
+          "rec": "Good job",
+          "observed": {
+            "hero": 7.14,
+            "count": 28,
+            "result": "GOOD"
+          }
+        },
+        {
+          "label": "CBet F OOP (HU)",
+          "target": [
+            25,
+            30
+          ],
+          "rec": "Bet less",
+          "observed": {
+            "hero": 32.08,
+            "count": 53,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "CBet F IP (HU)",
+          "target": [
+            75,
+            85
+          ],
+          "rec": "Bet more",
+          "observed": {
+            "hero": 60.23,
+            "count": 88,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Float F HU",
+          "target": [
+            45,
+            55
+          ],
+          "rec": "Bet more",
+          "observed": {
+            "hero": 25,
+            "count": 8,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Fold to F Cbet (HU)",
+          "target": [
+            28,
+            35
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 56.67,
+            "count": 60,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Fold to F CBet (3B)",
+          "target": [
+            30,
+            35
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 0,
+            "count": 1,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Fold to F Float HU",
+          "target": [
+            30,
+            40
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 50,
+            "count": 8,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "CBet F & Fold (HU)",
+          "target": [
+            33,
+            43
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 57.14,
+            "count": 7,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Raise F CBet (HU)",
+          "target": [
+            12,
+            18
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 3.33,
+            "count": 60,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "XR Flop HU",
+          "target": [
+            16,
+            20
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 2.7,
+            "count": 74,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Raise F CBet (3B)",
+          "target": [
+            8,
+            14
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 0,
+            "count": 1,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Donk T (HU)",
+          "target": [
+            4,
+            6
+          ],
+          "rec": "Donk less",
+          "observed": {
+            "hero": 34.62,
+            "count": 26,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "CBet T (HU)",
+          "target": [
+            47,
+            57
+          ],
+          "rec": "Bet less",
+          "observed": {
+            "hero": 72.73,
+            "count": 33,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Float T",
+          "target": [
+            45,
+            55
+          ],
+          "rec": "Bet more",
+          "observed": {
+            "hero": 0,
+            "count": 1,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Probe T (HU)",
+          "target": [
+            35,
+            45
+          ],
+          "rec": "Bet less",
+          "observed": {
+            "hero": 57.89,
+            "count": 19,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Fold to T CBet",
+          "target": [
+            33,
+            43
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 50,
+            "count": 2,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "F to T Pr (HU)",
+          "target": [
+            30,
+            40
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 30,
+            "count": 20,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Raise T CBet",
+          "target": [
+            7,
+            10
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 0,
+            "count": 2,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Raise T Probe (HU)",
+          "target": [
+            7,
+            10
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 0,
+            "count": 20,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "CBet R",
+          "target": [
+            47,
+            57
+          ],
+          "rec": "Bet less",
+          "observed": {
+            "hero": 75,
+            "count": 4,
+            "result": "HIGH"
+          }
+        }
       ]
     },
     "BTN": {
-      "winrate_allin_adj_bb": 68, "hands": 556, "all": 21, "good": 4, "bad": 17,
+      "winrate_allin_adj_bb": 68,
+      "hands": 556,
+      "all": 21,
+      "good": 4,
+      "bad": 17,
       "stats": [
-        {"label": "Raise First",                    "target": [47, 55], "rec": "Good job",         "observed": {"hero": 49.72, "count": 181, "result": "GOOD"}},
-        {"label": "Call PF 2Bet",                   "target": [9, 13],  "rec": "Call less",        "observed": {"hero": 16.02, "count": 231, "result": "HIGH"}},
-        {"label": "3Bet PF",                        "target": [8, 12],  "rec": "3-bet more",       "observed": {"hero": 7.76,  "count": 219, "result": "LOW"}},
-        {"label": "3Bet NAI <35",                   "target": [3, 8],   "rec": "Good job",         "observed": {"hero": 4.49,  "count": 713, "result": "GOOD"}},
-        {"label": "Raise & 4Bet+ PF",               "target": [12, 18], "rec": "4-bet more",       "observed": {"hero": 0,     "count": 12,  "result": "LOW"}},
-        {"label": "2Bet PF & Fold",                 "target": [50, 57], "rec": "Fold more",        "observed": {"hero": 46.67, "count": 15,  "result": "LOW"}},
-        {"label": "Fold to PF 4Bet After 3Bet <30", "target": [35, 45], "rec": "Fold more",        "observed": {"hero": 0,     "count": 4,   "result": "LOW"}},
-        {"label": "PF Squeeze",                     "target": [8, 12],  "rec": "Good job",         "observed": {"hero": 10.26, "count": 39,  "result": "GOOD"}},
-        {"label": "CBet F IP (HU)",                 "target": [70, 80], "rec": "Bet more",         "observed": {"hero": 60.23, "count": 88,  "result": "LOW"}},
-        {"label": "Float F HU",                     "target": [45, 55], "rec": "Bet more",         "observed": {"hero": 25,    "count": 8,   "result": "LOW"}},
-        {"label": "Fold to F Cbet (HU)",            "target": [27, 33], "rec": "Fold less",        "observed": {"hero": 56.67, "count": 60,  "result": "HIGH"}},
-        {"label": "CBet F & Fold (HU)",             "target": [33, 43], "rec": "Fold less",        "observed": {"hero": 57.14, "count": 7,   "result": "HIGH"}},
-        {"label": "Raise F CBet (HU)",              "target": [7, 10],  "rec": "Raise more",       "observed": {"hero": 3.33,  "count": 60,  "result": "LOW"}},
-        {"label": "CBet T (HU)",                    "target": [47, 57], "rec": "Bet less",         "observed": {"hero": 72.73, "count": 33,  "result": "HIGH"}},
-        {"label": "Float T",                        "target": [45, 55], "rec": "Good job",         "observed": {"hero": 50,    "count": 2,   "result": "GOOD"}},
-        {"label": "Fold to T CBet",                 "target": [33, 43], "rec": "Fold more",        "observed": {"hero": 25,    "count": 4,   "result": "LOW"}},
-        {"label": "F to T Pr (HU)",                 "target": [30, 40], "rec": "Fold more",        "observed": {"hero": 30,    "count": 20,  "result": "LOW"}},
-        {"label": "Raise T CBet",                   "target": [7, 10],  "rec": "Raise more",       "observed": {"hero": 0,     "count": 4,   "result": "LOW"}},
-        {"label": "Raise T Probe (HU)",             "target": [7, 10],  "rec": "Raise less",       "observed": {"hero": 20,    "count": 20,  "result": "HIGH"}},
-        {"label": "CBet R",                         "target": [47, 57], "rec": "Bet less",         "observed": {"hero": 100,   "count": 2,   "result": "HIGH"}},
-        {"label": "Fold to R CBet",                 "target": [40, 50], "rec": "Fold less",        "observed": {"hero": 100,   "count": 1,   "result": "HIGH"}}
+        {
+          "label": "Raise First",
+          "target": [
+            47,
+            55
+          ],
+          "rec": "Good job",
+          "observed": {
+            "hero": 49.72,
+            "count": 181,
+            "result": "GOOD"
+          }
+        },
+        {
+          "label": "Call PF 2Bet",
+          "target": [
+            9,
+            13
+          ],
+          "rec": "Call less",
+          "observed": {
+            "hero": 16.02,
+            "count": 231,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "3Bet PF",
+          "target": [
+            8,
+            12
+          ],
+          "rec": "3-bet more",
+          "observed": {
+            "hero": 7.76,
+            "count": 219,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "3Bet NAI <35",
+          "target": [
+            3,
+            6
+          ],
+          "rec": "Good job",
+          "observed": {
+            "hero": 4.49,
+            "count": 713,
+            "result": "GOOD"
+          }
+        },
+        {
+          "label": "Raise & 4Bet+ PF",
+          "target": [
+            12,
+            18
+          ],
+          "rec": "4-bet more",
+          "observed": {
+            "hero": 0,
+            "count": 12,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "2Bet PF & Fold",
+          "target": [
+            50,
+            57
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 46.67,
+            "count": 15,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Fold to PF 4Bet After 3Bet <30",
+          "target": [
+            35,
+            45
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 0,
+            "count": 4,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "PF Squeeze",
+          "target": [
+            8,
+            12
+          ],
+          "rec": "Good job",
+          "observed": {
+            "hero": 10.26,
+            "count": 39,
+            "result": "GOOD"
+          }
+        },
+        {
+          "label": "CBet F IP (HU)",
+          "target": [
+            70,
+            80
+          ],
+          "rec": "Bet more",
+          "observed": {
+            "hero": 60.23,
+            "count": 88,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Float F HU",
+          "target": [
+            45,
+            55
+          ],
+          "rec": "Bet more",
+          "observed": {
+            "hero": 25,
+            "count": 8,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Fold to F Cbet (HU)",
+          "target": [
+            27,
+            33
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 56.67,
+            "count": 60,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "CBet F & Fold (HU)",
+          "target": [
+            33,
+            43
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 57.14,
+            "count": 7,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Raise F CBet (HU)",
+          "target": [
+            7,
+            10
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 3.33,
+            "count": 60,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "CBet T (HU)",
+          "target": [
+            47,
+            57
+          ],
+          "rec": "Bet less",
+          "observed": {
+            "hero": 72.73,
+            "count": 33,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Float T",
+          "target": [
+            45,
+            55
+          ],
+          "rec": "Good job",
+          "observed": {
+            "hero": 50,
+            "count": 2,
+            "result": "GOOD"
+          }
+        },
+        {
+          "label": "Fold to T CBet",
+          "target": [
+            33,
+            43
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 25,
+            "count": 4,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "F to T Pr (HU)",
+          "target": [
+            30,
+            40
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 30,
+            "count": 20,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Raise T CBet",
+          "target": [
+            7,
+            10
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 0,
+            "count": 4,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Raise T Probe (HU)",
+          "target": [
+            7,
+            10
+          ],
+          "rec": "Raise less",
+          "observed": {
+            "hero": 20,
+            "count": 20,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "CBet R",
+          "target": [
+            47,
+            57
+          ],
+          "rec": "Bet less",
+          "observed": {
+            "hero": 100,
+            "count": 2,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Fold to R CBet",
+          "target": [
+            40,
+            50
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 100,
+            "count": 1,
+            "result": "HIGH"
+          }
+        }
       ]
     },
     "SB": {
-      "winrate_allin_adj_bb": -48, "hands": 562, "all": 31, "good": 2, "bad": 29,
+      "winrate_allin_adj_bb": -48,
+      "hands": 562,
+      "all": 31,
+      "good": 2,
+      "bad": 29,
       "stats": [
-        {"label": "Raise First",                    "target": [25, 30], "rec": "Raise less",       "observed": {"hero": 36.89, "count": 122, "result": "HIGH"}},
-        {"label": "Limp Open",                      "target": [55, 65], "rec": "Limp more",        "observed": {"hero": 9.8,   "count": 1653,"result": "LOW"}},
-        {"label": "Limp/Raise",                     "target": [10, 14], "rec": "Raise more",       "observed": {"hero": 0,     "count": 21,  "result": "LOW"}},
-        {"label": "Limp/Call",                      "target": [45, 55], "rec": "Call more",        "observed": {"hero": 23.81, "count": 21,  "result": "LOW"}},
-        {"label": "Limp/Fold",                      "target": [35, 45], "rec": "Fold less",        "observed": {"hero": 76.19, "count": 21,  "result": "HIGH"}},
-        {"label": "Fold to Steal",                  "target": [70, 75], "rec": "Good job",         "observed": {"hero": 71.11, "count": 90,  "result": "GOOD"}},
-        {"label": "Call PF 2Bet",                   "target": [10, 14], "rec": "Call less",        "observed": {"hero": 21.45, "count": 289, "result": "HIGH"}},
-        {"label": "3Bet PF",                        "target": [10, 14], "rec": "3-bet more",       "observed": {"hero": 6.02,  "count": 266, "result": "LOW"}},
-        {"label": "3Bet Steal",                     "target": [16, 19], "rec": "3-bet steal more", "observed": {"hero": 8.24,  "count": 85,  "result": "LOW"}},
-        {"label": "3Bet NAI <35",                   "target": [5, 8],   "rec": "3-bet more",       "observed": {"hero": 4.49,  "count": 713, "result": "LOW"}},
-        {"label": "Raise & 4Bet+ PF",               "target": [12, 18], "rec": "4-bet more",       "observed": {"hero": 0,     "count": 5,   "result": "LOW"}},
-        {"label": "2Bet PF & Fold",                 "target": [45, 55], "rec": "Fold more",        "observed": {"hero": 0,     "count": 5,   "result": "LOW"}},
-        {"label": "3Bet PF & Fold",                 "target": [40, 50], "rec": "Fold more",        "observed": {"hero": 0,     "count": 3,   "result": "LOW"}},
-        {"label": "Fold to PF 4Bet After 3Bet <30", "target": [35, 45], "rec": "Fold more",        "observed": {"hero": 0,     "count": 4,   "result": "LOW"}},
-        {"label": "PF Squeeze",                     "target": [7, 11],  "rec": "Squeeze more",     "observed": {"hero": 4,     "count": 75,  "result": "LOW"}},
-        {"label": "CBet F OOP (HU)",                "target": [60, 75], "rec": "Bet more",         "observed": {"hero": 32.08, "count": 53,  "result": "LOW"}},
-        {"label": "Fold to F Cbet (HU)",            "target": [33, 38], "rec": "Fold less",        "observed": {"hero": 56.67, "count": 60,  "result": "HIGH"}},
-        {"label": "Fold to F CBet (3B)",            "target": [30, 40], "rec": "Good job",         "observed": {"hero": 33.33, "count": 3,   "result": "GOOD"}},
-        {"label": "Fold to F Float HU",             "target": [25, 35], "rec": "Fold less",        "observed": {"hero": 50,    "count": 8,   "result": "HIGH"}},
-        {"label": "CBet F & Fold (HU)",             "target": [33, 43], "rec": "Fold less",        "observed": {"hero": 57.14, "count": 7,   "result": "HIGH"}},
-        {"label": "Raise F CBet (HU)",              "target": [16, 20], "rec": "Raise more",       "observed": {"hero": 3.33,  "count": 60,  "result": "LOW"}},
-        {"label": "XR Flop HU",                     "target": [16, 20], "rec": "Raise more",       "observed": {"hero": 2.7,   "count": 74,  "result": "LOW"}},
-        {"label": "Raise F CBet (3B)",              "target": [15, 19], "rec": "Raise more",       "observed": {"hero": 0,     "count": 3,   "result": "LOW"}},
-        {"label": "Donk T (HU)",                    "target": [5, 8],   "rec": "Donk less",        "observed": {"hero": 34.62, "count": 26,  "result": "HIGH"}},
-        {"label": "CBet T (HU)",                    "target": [47, 57], "rec": "Bet less",         "observed": {"hero": 72.73, "count": 33,  "result": "HIGH"}},
-        {"label": "Probe T (HU)",                   "target": [35, 45], "rec": "Bet less",         "observed": {"hero": 57.89, "count": 19,  "result": "HIGH"}},
-        {"label": "Probe T HU & Bet R",             "target": [55, 65], "rec": "Bet more",         "observed": {"hero": 33.33, "count": 3,   "result": "LOW"}},
-        {"label": "Fold to T CBet",                 "target": [35, 45], "rec": "Fold less",        "observed": {"hero": 100,   "count": 2,   "result": "HIGH"}},
-        {"label": "Raise T CBet",                   "target": [7, 10],  "rec": "Raise more",       "observed": {"hero": 0,     "count": 2,   "result": "LOW"}},
-        {"label": "Donk R",                         "target": [6, 9],   "rec": "Donk less",        "observed": {"hero": 33.33, "count": 6,   "result": "HIGH"}},
-        {"label": "CBet R",                         "target": [47, 57], "rec": "Bet more",         "observed": {"hero": 0,     "count": 1,   "result": "LOW"}}
+        {
+          "label": "Raise First",
+          "target": [
+            25,
+            30
+          ],
+          "rec": "Raise less",
+          "observed": {
+            "hero": 36.89,
+            "count": 122,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Limp Open",
+          "target": [
+            55,
+            65
+          ],
+          "rec": "Limp more",
+          "observed": {
+            "hero": 9.8,
+            "count": 1653,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Limp/Raise",
+          "target": [
+            10,
+            14
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 0,
+            "count": 21,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Limp/Call",
+          "target": [
+            45,
+            55
+          ],
+          "rec": "Call more",
+          "observed": {
+            "hero": 23.81,
+            "count": 21,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Limp/Fold",
+          "target": [
+            35,
+            45
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 76.19,
+            "count": 21,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Fold to Steal",
+          "target": [
+            70,
+            75
+          ],
+          "rec": "Good job",
+          "observed": {
+            "hero": 71.11,
+            "count": 90,
+            "result": "GOOD"
+          }
+        },
+        {
+          "label": "Call PF 2Bet",
+          "target": [
+            10,
+            14
+          ],
+          "rec": "Call less",
+          "observed": {
+            "hero": 21.45,
+            "count": 289,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "3Bet PF",
+          "target": [
+            10,
+            14
+          ],
+          "rec": "3-bet more",
+          "observed": {
+            "hero": 6.02,
+            "count": 266,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "3Bet Steal",
+          "target": [
+            16,
+            19
+          ],
+          "rec": "3-bet steal more",
+          "observed": {
+            "hero": 8.24,
+            "count": 85,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "3Bet NAI <35",
+          "target": [
+            5,
+            8
+          ],
+          "rec": "3-bet more",
+          "observed": {
+            "hero": 4.49,
+            "count": 713,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Raise & 4Bet+ PF",
+          "target": [
+            12,
+            18
+          ],
+          "rec": "4-bet more",
+          "observed": {
+            "hero": 0,
+            "count": 5,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "2Bet PF & Fold",
+          "target": [
+            45,
+            55
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 0,
+            "count": 5,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "3Bet PF & Fold",
+          "target": [
+            40,
+            50
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 0,
+            "count": 3,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Fold to PF 4Bet After 3Bet <30",
+          "target": [
+            35,
+            45
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 0,
+            "count": 4,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "PF Squeeze",
+          "target": [
+            7,
+            11
+          ],
+          "rec": "Squeeze more",
+          "observed": {
+            "hero": 4,
+            "count": 75,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "CBet F OOP (HU)",
+          "target": [
+            60,
+            75
+          ],
+          "rec": "Bet more",
+          "observed": {
+            "hero": 32.08,
+            "count": 53,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Fold to F Cbet (HU)",
+          "target": [
+            33,
+            38
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 56.67,
+            "count": 60,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Fold to F CBet (3B)",
+          "target": [
+            30,
+            40
+          ],
+          "rec": "Good job",
+          "observed": {
+            "hero": 33.33,
+            "count": 3,
+            "result": "GOOD"
+          }
+        },
+        {
+          "label": "Fold to F Float HU",
+          "target": [
+            25,
+            35
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 50,
+            "count": 8,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "CBet F & Fold (HU)",
+          "target": [
+            33,
+            43
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 57.14,
+            "count": 7,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Raise F CBet (HU)",
+          "target": [
+            16,
+            20
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 3.33,
+            "count": 60,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "XR Flop HU",
+          "target": [
+            16,
+            20
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 2.7,
+            "count": 74,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Raise F CBet (3B)",
+          "target": [
+            15,
+            19
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 0,
+            "count": 3,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Donk T (HU)",
+          "target": [
+            5,
+            8
+          ],
+          "rec": "Donk less",
+          "observed": {
+            "hero": 34.62,
+            "count": 26,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "CBet T (HU)",
+          "target": [
+            47,
+            57
+          ],
+          "rec": "Bet less",
+          "observed": {
+            "hero": 72.73,
+            "count": 33,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Probe T (HU)",
+          "target": [
+            35,
+            45
+          ],
+          "rec": "Bet less",
+          "observed": {
+            "hero": 57.89,
+            "count": 19,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Probe T HU & Bet R",
+          "target": [
+            55,
+            65
+          ],
+          "rec": "Bet more",
+          "observed": {
+            "hero": 33.33,
+            "count": 3,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Fold to T CBet",
+          "target": [
+            35,
+            45
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 100,
+            "count": 2,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Raise T CBet",
+          "target": [
+            7,
+            10
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 0,
+            "count": 2,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Donk R",
+          "target": [
+            6,
+            9
+          ],
+          "rec": "Donk less",
+          "observed": {
+            "hero": 33.33,
+            "count": 6,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "CBet R",
+          "target": [
+            47,
+            57
+          ],
+          "rec": "Bet more",
+          "observed": {
+            "hero": 0,
+            "count": 1,
+            "result": "LOW"
+          }
+        }
       ]
     },
     "BB": {
-      "winrate_allin_adj_bb": -36, "hands": 585, "all": 29, "good": 2, "bad": 27,
+      "winrate_allin_adj_bb": -36,
+      "hands": 585,
+      "all": 29,
+      "good": 2,
+      "bad": 27,
       "stats": [
-        {"label": "Raise SB Open Limp",             "target": [40, 45], "rec": "Raise more",       "observed": {"hero": 35.48, "count": 62,  "result": "LOW"}},
-        {"label": "Fold BB v SB",                   "target": [35, 45], "rec": "Fold less",        "observed": {"hero": 51.16, "count": 43,  "result": "HIGH"}},
-        {"label": "Fold to Steal",                  "target": [30, 35], "rec": "Fold less",        "observed": {"hero": 53.64, "count": 110, "result": "HIGH"}},
-        {"label": "Call PF 2Bet",                   "target": [45, 55], "rec": "Call more",        "observed": {"hero": 38.1,  "count": 313, "result": "LOW"}},
-        {"label": "3Bet PF",                        "target": [9, 13],  "rec": "3-bet more",       "observed": {"hero": 6.14,  "count": 277, "result": "LOW"}},
-        {"label": "3Bet Steal",                     "target": [16, 19], "rec": "3-bet steal more", "observed": {"hero": 9.89,  "count": 91,  "result": "LOW"}},
-        {"label": "3Bet NAI <35",                   "target": [5, 8],   "rec": "3-bet more",       "observed": {"hero": 4.49,  "count": 713, "result": "LOW"}},
-        {"label": "2Bet PF & Fold",                 "target": [45, 55], "rec": "Fold more",        "observed": {"hero": 0,     "count": 2,   "result": "LOW"}},
-        {"label": "3Bet PF & Fold",                 "target": [40, 50], "rec": "Fold more",        "observed": {"hero": 0,     "count": 1,   "result": "LOW"}},
-        {"label": "Fold to PF 4Bet After 3Bet <30", "target": [35, 45], "rec": "Fold more",        "observed": {"hero": 0,     "count": 4,   "result": "LOW"}},
-        {"label": "PF Squeeze",                     "target": [9, 15],  "rec": "Squeeze more",     "observed": {"hero": 5.94,  "count": 101, "result": "LOW"}},
-        {"label": "CBet F OOP (HU)",                "target": [70, 85], "rec": "Bet more",         "observed": {"hero": 32.08, "count": 53,  "result": "LOW"}},
-        {"label": "CBet F IP (HU)",                 "target": [55, 65], "rec": "Good job",         "observed": {"hero": 60.23, "count": 88,  "result": "GOOD"}},
-        {"label": "Float F HU",                     "target": [40, 50], "rec": "Bet more",         "observed": {"hero": 25,    "count": 8,   "result": "LOW"}},
-        {"label": "Fold to F Cbet (HU)",            "target": [30, 43], "rec": "Fold less",        "verify": true, "observed": {"hero": 56.67, "count": 60, "result": "HIGH"}},
-        {"label": "CBet F & Fold (HU)",             "target": [33, 43], "rec": "Fold less",        "observed": {"hero": 57.14, "count": 7,   "result": "HIGH"}},
-        {"label": "Raise F CBet (HU)",              "target": [16, 20], "rec": "Raise more",       "observed": {"hero": 3.33,  "count": 60,  "result": "LOW"}},
-        {"label": "XR Flop HU",                     "target": [16, 20], "rec": "Raise more",       "observed": {"hero": 2.7,   "count": 74,  "result": "LOW"}},
-        {"label": "Donk T (HU)",                    "target": [7, 11],  "rec": "Donk less",        "observed": {"hero": 34.62, "count": 26,  "result": "HIGH"}},
-        {"label": "CBet T (HU)",                    "target": [47, 57], "rec": "Bet less",         "observed": {"hero": 72.73, "count": 33,  "result": "HIGH"}},
-        {"label": "Float T",                        "target": [45, 55], "rec": "Bet less",         "observed": {"hero": 100,   "count": 1,   "result": "HIGH"}},
-        {"label": "Probe T (HU)",                   "target": [35, 45], "rec": "Bet less",         "observed": {"hero": 57.89, "count": 19,  "result": "HIGH"}},
-        {"label": "Probe T HU & Bet R",             "target": [55, 65], "rec": "Bet more",         "observed": {"hero": 33.33, "count": 5,   "result": "LOW"}},
-        {"label": "Fold to T CBet",                 "target": [35, 45], "rec": "Good job",         "observed": {"hero": 44.44, "count": 9,   "result": "GOOD"}},
-        {"label": "F to T Pr (HU)",                 "target": [30, 40], "rec": "Fold more",        "observed": {"hero": 30,    "count": 20,  "result": "LOW"}},
-        {"label": "Raise T CBet",                   "target": [7, 10],  "rec": "Raise less",       "observed": {"hero": 11.11, "count": 9,   "result": "HIGH"}},
-        {"label": "Raise T Probe (HU)",             "target": [7, 10],  "rec": "Raise more",       "observed": {"hero": 0,     "count": 20,  "result": "LOW"}},
-        {"label": "Donk R",                         "target": [6, 9],   "rec": "Donk less",        "observed": {"hero": 37.5,  "count": 8,   "result": "HIGH"}},
-        {"label": "CBet R",                         "target": [47, 57], "rec": "Bet less",         "observed": {"hero": 100,   "count": 1,   "result": "HIGH"}}
+        {
+          "label": "Raise SB Open Limp",
+          "target": [
+            40,
+            45
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 35.48,
+            "count": 62,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Fold BB v SB",
+          "target": [
+            35,
+            45
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 51.16,
+            "count": 43,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Fold to Steal",
+          "target": [
+            30,
+            35
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 53.64,
+            "count": 110,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Call PF 2Bet",
+          "target": [
+            45,
+            55
+          ],
+          "rec": "Call more",
+          "observed": {
+            "hero": 36.1,
+            "count": 313,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "3Bet PF",
+          "target": [
+            9,
+            13
+          ],
+          "rec": "3-bet more",
+          "observed": {
+            "hero": 6.14,
+            "count": 277,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "3Bet Steal",
+          "target": [
+            16,
+            19
+          ],
+          "rec": "3-bet steal more",
+          "observed": {
+            "hero": 9.89,
+            "count": 91,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "3Bet NAI <35",
+          "target": [
+            5,
+            8
+          ],
+          "rec": "3-bet more",
+          "observed": {
+            "hero": 4.49,
+            "count": 713,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "2Bet PF & Fold",
+          "target": [
+            45,
+            55
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 0,
+            "count": 2,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "3Bet PF & Fold",
+          "target": [
+            40,
+            50
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 0,
+            "count": 1,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Fold to PF 4Bet After 3Bet <30",
+          "target": [
+            35,
+            45
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 0,
+            "count": 4,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "PF Squeeze",
+          "target": [
+            9,
+            15
+          ],
+          "rec": "Squeeze more",
+          "observed": {
+            "hero": 5.94,
+            "count": 101,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "CBet F OOP (HU)",
+          "target": [
+            70,
+            85
+          ],
+          "rec": "Bet more",
+          "observed": {
+            "hero": 32.08,
+            "count": 53,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "CBet F IP (HU)",
+          "target": [
+            55,
+            65
+          ],
+          "rec": "Good job",
+          "observed": {
+            "hero": 60.23,
+            "count": 88,
+            "result": "GOOD"
+          }
+        },
+        {
+          "label": "Float F HU",
+          "target": [
+            40,
+            50
+          ],
+          "rec": "Bet more",
+          "observed": {
+            "hero": 25,
+            "count": 8,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Fold to F Cbet (HU)",
+          "target": [
+            40,
+            45
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 56.67,
+            "count": 60,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "CBet F & Fold (HU)",
+          "target": [
+            33,
+            43
+          ],
+          "rec": "Fold less",
+          "observed": {
+            "hero": 57.14,
+            "count": 7,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Raise F CBet (HU)",
+          "target": [
+            16,
+            20
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 3.33,
+            "count": 60,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "XR Flop HU",
+          "target": [
+            16,
+            20
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 2.7,
+            "count": 74,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Donk T (HU)",
+          "target": [
+            7,
+            11
+          ],
+          "rec": "Donk less",
+          "observed": {
+            "hero": 34.62,
+            "count": 26,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "CBet T (HU)",
+          "target": [
+            47,
+            57
+          ],
+          "rec": "Bet less",
+          "observed": {
+            "hero": 72.73,
+            "count": 33,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Float T",
+          "target": [
+            45,
+            55
+          ],
+          "rec": "Bet less",
+          "observed": {
+            "hero": 100,
+            "count": 1,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Probe T (HU)",
+          "target": [
+            35,
+            45
+          ],
+          "rec": "Bet less",
+          "observed": {
+            "hero": 57.89,
+            "count": 19,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Probe T HU & Bet R",
+          "target": [
+            55,
+            65
+          ],
+          "rec": "Bet more",
+          "observed": {
+            "hero": 33.33,
+            "count": 5,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Fold to T CBet",
+          "target": [
+            35,
+            45
+          ],
+          "rec": "Good job",
+          "observed": {
+            "hero": 44.44,
+            "count": 9,
+            "result": "GOOD"
+          }
+        },
+        {
+          "label": "F to T Pr (HU)",
+          "target": [
+            30,
+            40
+          ],
+          "rec": "Fold more",
+          "observed": {
+            "hero": 30,
+            "count": 20,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Raise T CBet",
+          "target": [
+            7,
+            10
+          ],
+          "rec": "Raise less",
+          "observed": {
+            "hero": 11.11,
+            "count": 9,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Raise T Probe (HU)",
+          "target": [
+            7,
+            10
+          ],
+          "rec": "Raise more",
+          "observed": {
+            "hero": 0,
+            "count": 20,
+            "result": "LOW"
+          }
+        },
+        {
+          "label": "Donk R",
+          "target": [
+            6,
+            9
+          ],
+          "rec": "Donk less",
+          "observed": {
+            "hero": 37.5,
+            "count": 8,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "CBet R",
+          "target": [
+            47,
+            57
+          ],
+          "rec": "Bet less",
+          "observed": {
+            "hero": 100,
+            "count": 1,
+            "result": "HIGH"
+          }
+        }
       ]
     }
   }

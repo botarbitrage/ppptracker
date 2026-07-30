@@ -121,6 +121,9 @@ a new **"Leak Report"** `info-tile` on both `/` and `/tournaments`. No redesign 
 Layout mirrors the BBZ screenshot, built from components we already have:
 
 - **By Position / By Action** tabs (same tab pattern as `tournaments.html`'s list/bankroll/schedule).
+  Confirmed from the BBZ UI: **By Action is a pure transposition of the same cells** — stat-major
+  grouping (one expandable card per stat, position rows inside) over identical values, targets and
+  verdicts. Both tabs render from the same `aggregate()` output; no extra engine work.
 - One expandable row per position (BTN/CO/MP/EP/BB/SB), each showing **Winrate (all-in adj bb)**,
   **Hands**, and **All / Good / Bad** pills — the same pill component as the `hstat-pill` row.
 - Expanding a row reveals that position's stat list with the same columns as BBZ's detail view
@@ -189,8 +192,10 @@ What the harvest established:
   PT4 CSV cell-for-cell (verified across all six positions). BBZ = PT4 report values + this
   target table + the verdict model above. Full parity is therefore: our engine (matching the CSV,
   §5) + this harvested table.
-- **Three low-confidence cells** are flagged `"verify": true` in the JSON (CO "2Bet PF & Fold"
-  target, CO "XR Flop HU" target, BB "Fold to F Cbet (HU)" target) — eyeball against the BBZ UI.
+- **Cross-validated against the By Action tab** (full text capture, 2026-07-30): the tab's
+  per-stat groups transpose to exactly the same 163 cells (sums check out: 163 All / 14 Good /
+  149 Bad), which corrected five screenshot-read cells and cleared all `verify` flags. The
+  harvest is now considered authoritative.
 
 ## 8. Risks & mitigations
 
@@ -294,7 +299,8 @@ PT4's mapping; the Phase-0 gate (per-position Hands counts vs the CSV) confirms 
 
 - [x] Harvest BBZ's numeric ranges (§7) — **done 2026-07-30** → `data/bbz_leak_ranges.json`, all 6 positions.
 - [x] Confirm column-label alignments (Appendix A) — confirmed by the BBZ UI screenshots.
-- [ ] Eyeball the 3 `verify:true` target cells in `data/bbz_leak_ranges.json` against the BBZ UI (§7).
-- [ ] Screenshot the **By Action** tab once (grouping only — the `.pt4rpt` category labels likely predict it, but one screenshot confirms).
+- [x] Verify low-confidence target cells — resolved via the By Action tab capture (5 cells corrected, all flags cleared).
+- [x] Confirm the By Action tab — pure transposition of the same 163 cells (§4); no extra data needed.
+- [ ] Back-fill targets for the ~12 zero-sample cells of the 175 grid if/when they appear in a future BBZ report (nice-to-have; many can be deduced from neighbouring positions' bands).
 - [ ] Confirm action-code semantics 12/13 against real hands (§8) — Phase 0 prerequisite.
 - [ ] Pick equity library (`eval7` vs `treys` vs `pokerkit`) — Phase 3.
