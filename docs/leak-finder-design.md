@@ -11,8 +11,17 @@ Collapse the current three-tool pipeline
 PPPokerHA (export .txt) → PokerTracker 4 (compute report → .csv) → BBZ Leak Finder (visual report)
 ```
 
-into a single feature **inside PPPokerHA**: import hands → click **Leak Report** → see a
-by-position / by-action stat table with good/bad verdicts, equivalent to the BBZ screenshots.
+into a single feature **inside PPPokerHA**. The hands are **already in the app** (persisted
+per-tournament in Firestore/Storage by the existing import flow) — the Leak Finder reads them
+directly. **No file import, no export step, no dependency on the exporting page/process.** The
+existing PokerStars-export functionality stays on the main page untouched; exports remain useful
+for users who want PT4, but the Leak Finder never touches them at runtime (the `.txt`/CSV files
+appear only in the offline validation harness, §5).
+
+Flow: open **Leak Finder** page → filter saved tournaments (by tournament, buy-in value, dates)
+→ the engine aggregates the matching persisted hands → by-position / by-action stat report with
+good/bad verdicts, equivalent to the BBZ screenshots. Initial phases ship with a single report
+over **all** saved tournaments; the filters arrive in a later phase (§9).
 
 We already own the raw material for every column. This document specifies the engine, how it
 slots into the existing app, and a phased plan where **every phase ships something visible in the
@@ -83,10 +92,10 @@ GET  /api/leaks/validate  (dev/admin)    -> our counts vs the imported PT4 CSV, 
 
 ### Data model additions (Firestore)
 
-- **`/config/leak_ranges`** — the BBZ target table. Shape:
-  `{ stats: [ { key, label, street, min, max, per_position?: { SB:{min,max}, ... } } ] }`.
-  The engine is agnostic to the numbers; swapping in BBZ's real values is a data edit, not a
-  code change (§7).
+- **`/config/leak_ranges`** — the BBZ target table, seeded from the harvested
+  `data/bbz_leak_ranges.json` (§7). Per-position: each position carries its own list of
+  evaluated stats (the membership mask) with `target: [min, max]` bands. The engine is agnostic
+  to the numbers; updating ranges is a data edit, not a code change.
 - **Per-tournament cache (optimization, Phase 5):** store the aggregated count-vector
   (`{position: {stat: {made, opp}}}` + all-in sums) on each `users/{uid}/tournaments/{tid}` doc
   at import time. The cross-tournament report then sums vectors (~480 numbers/tournament) instead
@@ -95,10 +104,13 @@ GET  /api/leaks/validate  (dev/admin)    -> our counts vs the imported PT4 CSV, 
 
 ### Report scope
 
-The BBZ report is a **cross-tournament aggregate over a date range** (screenshot: 3,454 hands /
-84 tournaments). So `/api/leaks` aggregates across the hero's persisted tournaments, with optional
-`from`/`to`/`tourney` filters (filters land in Phase 5). Pro-gated, exactly like the existing
-persisted-tournament features.
+The BBZ report is a **cross-tournament aggregate** (screenshot: 3,454 hands / 84 tournaments).
+So `/api/leaks` aggregates across the hero's persisted tournaments. The page gets a filter bar
+with three filters — **tournament, buy-in value, and date range** — that select which saved
+tournaments feed the report (buy-in resolves from the tournament-config docs via the existing
+room-name matching, `_norm_room_name`/`_resolve_tournament_cfg`). Initial phases ship a single
+report over **all** saved tournaments; the filter bar lands in Phase 5. Pro-gated, exactly like
+the existing persisted-tournament features.
 
 ## 4. UI plan (reuse existing components)
 
@@ -111,11 +123,13 @@ Layout mirrors the BBZ screenshot, built from components we already have:
 - **By Position / By Action** tabs (same tab pattern as `tournaments.html`'s list/bankroll/schedule).
 - One expandable row per position (BTN/CO/MP/EP/BB/SB), each showing **Winrate (all-in adj bb)**,
   **Hands**, and **All / Good / Bad** pills — the same pill component as the `hstat-pill` row.
-- Expanding a row reveals that position's stat list, each stat coloured **good/bad/insufficient**
-  and showing `pct` + `made/opp` sample.
+- Expanding a row reveals that position's stat list with the same columns as BBZ's detail view
+  (confirmed from the expanded screenshots): **Name** (with opportunity count as subscript),
+  **Hero** (his %), **Result** (`LOW` / `GOOD` / `HIGH` badge), **Target** (`min% – max%`),
+  **Rec. action** ("Raise more/less", "Fold more/less", …, or "Good job").
 
 Verdict colours reuse the existing `--green` / danger palette; "insufficient data" renders greyed
-(our honesty improvement over the screenshot — see §8).
+(our honesty improvement over the source — see §8).
 
 ## 5. Validation harness (built first, used every phase)
 
@@ -152,22 +166,31 @@ Rule, hero-only:
 Non-all-in and unknown-card pots fall straight through to the realised bb result the app already
 computes (`process_hands` → `bb_100`).
 
-## 7. Verdict ranges — sourcing BBZ's targets (honest dependency)
+## 7. Verdict ranges — HARVESTED ✅ (`data/bbz_leak_ranges.json`)
 
-We decided to **use BBZ's ranges** rather than invent our own. Important: **those exact numeric
-ranges are not in any file provided** — the CSVs contain values, the screenshots show good/bad
-_counts_, but not the thresholds themselves.
+We use **BBZ's ranges**, and they have now been harvested from screenshots of the expanded BBZ
+report (all six positions, 2026-07-30) into **`data/bbz_leak_ranges.json`**, which seeds
+`/config/leak_ranges`.
 
-- The engine reads ranges from `/config/leak_ranges`; it works the moment that doc is populated.
-- **Recommended way to obtain BBZ's numbers:** Caio has access to the BBZ tool — the per-stat
-  detail (the "+" expanders) exposes each stat's acceptable band. Harvest those into the config
-  doc (one-time data-entry task). Reverse-inferring thresholds from good/bad counts alone is
-  under-determined and not recommended.
-- Until harvested, ship a **placeholder** range set (solver-sane defaults) so the UI is fully
-  functional; swapping in BBZ's real values is a config edit with zero code change.
+What the harvest established:
 
-This keeps the build unblocked while being upfront that exact BBZ-verdict parity depends on a data
-input we still need to collect.
+- **Verdict model:** `LOW` if hero% < target-min · `GOOD` if within band · `HIGH` if above.
+  "Bad" = LOW or HIGH. **Rec. action** is a per-stat verb pair chosen by direction
+  ("Raise more/less", "Fold more/less", "Bet more/less", …; `GOOD` → "Good job").
+- **Per-position targets confirmed** — the same stat carries different bands per position
+  (e.g. Fold to F Cbet (HU): BTN 27–33, CO 28–35, EP/MP/SB 33–38). Globally-computed stats
+  (e.g. 3Bet NAI <35, identical value on every row) are still scored against per-position bands,
+  producing different verdicts per position.
+- **Membership mask captured:** which stats BBZ evaluates under each position —
+  BTN 21 · CO 27 · MP 29 · EP 26 · BB 29 · SB 31 = **163 cells** (matches 14 good + 149 bad).
+  BBZ advertises **175**; the ~12-cell gap is stats with zero opportunities in this dataset,
+  which the UI simply omits. Back-fill those rows' targets if/when they appear in a future report.
+- **BBZ is a pure renderer:** every hero value and opportunity count in the BBZ UI matches the
+  PT4 CSV cell-for-cell (verified across all six positions). BBZ = PT4 report values + this
+  target table + the verdict model above. Full parity is therefore: our engine (matching the CSV,
+  §5) + this harvested table.
+- **Three low-confidence cells** are flagged `"verify": true` in the JSON (CO "2Bet PF & Fold"
+  target, CO "XR Flop HU" target, BB "Fold to F Cbet (HU)" target) — eyeball against the BBZ UI.
 
 ## 8. Risks & mitigations
 
@@ -176,8 +199,8 @@ input we still need to collect.
 | **Action-code ambiguity** — `hand_parser.py` treats 12=all-in call / 13=all-in raise, `hand_exporter.py` treats 12=fold-muck / 13=first-to-act check. Flags depend on this. | **Phase 0 prerequisite:** script over real hands to nail the canonical action model; document it once; both modules reconcile to it. |
 | **Definitional edge cases** (dead blinds, walks, all-in-preflop killing postflop opps, multiway "position") | Found automatically by the CSV diff (§5); reconcile until green. |
 | **`.txt` round-trip is lossy** — PT4 computes off our exporter's corrected text, so "match PT4" and "be correct" can mildly diverge. | Validate through the `.txt` path first to _prove parity_; optionally compute direct-from-JSON afterwards for accuracy, accepting small principled diffs. |
-| **Thin samples** — true per-position × ~40 stats → single-digit denominators. | Sample-size gate in `classify()`: below a threshold render **insufficient/grey**, never a red/green verdict. More honest than the source. |
-| **BBZ range data missing** (§7) | Placeholder ranges + config-driven swap-in. |
+| **Thin samples** — true per-position × ~40 stats → single-digit denominators. | Sample-size gate in `classify()`: below a threshold render **insufficient/grey**, never a red/green verdict. More honest than the source (BBZ verdicts a 1-sample stat). |
+| **Range-harvest residuals** (§7) | 3 cells flagged `verify:true`; ~12 zero-sample cells of the 175 grid lack targets until observed. Neither blocks any phase. |
 
 ## 9. Phased delivery — each phase ends with a visible, validated UI increment
 
@@ -187,16 +210,17 @@ input we still need to collect.
 | **1 — Preflop** | All preflop flags (RFI, limp family, 3-bet/opp, fold-to-steal, call-2bet, 4-bet, squeeze, BB-v-SB); `aggregate()` | **`/leaks` page**: by-position table, preflop columns, coloured cells | Preflop columns match PT4 CSV |
 | **2 — Postflop** | Flop/turn/river flags (c-bet/float/probe/donk/check-raise/fold-to; HU & 3-bet variants) | **By Position + By Action tabs**, postflop rows added | Postflop columns match (true per-position) |
 | **3 — Headline winrate** | `equity.py`; all-in-adj bb/100 per position | **"Winrate: X bb"** on each position row + total | All-In Adj BB/100 matches CSV |
-| **4 — Verdicts** | Load BBZ ranges; `classify()`; sample-size gating | **All / Good / Bad pills** + expandable per-stat detail with sample counts | Good/Bad counts reproduce BBZ (given harvested ranges) |
-| **5 — Cut the cord** | Date/tourney filters; count-vector caching; remove "export→PT4→BBZ" guidance; nav entry | **Filters + polished standalone Leak Finder**; single-click flow | End-to-end: import → report with no external tools |
+| **4 — Verdicts** | Seed `/config/leak_ranges` from `data/bbz_leak_ranges.json`; `classify()`; sample-size gating | **All / Good / Bad pills** + expandable per-stat detail (Hero / Result / Target / Rec. action) | Good/Bad counts reproduce the BBZ screenshots (BTN 4/17, CO 2/25, MP 3/26, EP 1/25, BB 2/27, SB 2/29) |
+| **5 — Cut the cord** | Filter bar (tournament / buy-in value / date range); count-vector caching; remove "export→PT4→BBZ" guidance; nav entry | **Filters + polished standalone Leak Finder**; single-click flow | End-to-end: saved tournaments → report with no external tools |
 
 Estimate: **~2 weeks to a solid v1** (Phases 0–4) that matches PT4 numbers on the validation set;
 Phase 5 + exact-parity edge cases follow.
 
 ## Appendix A — Stat → formula map (from the `.pt4rpt`)
 
-All stats are `numerator / denominator × 100`. Grouped by street. (A few CSV column labels vs
-flag names to be confirmed against the CSV during Phase 0 — marked ⚠.)
+All stats are `numerator / denominator × 100`. Grouped by street. Label alignments previously
+marked uncertain are now **confirmed** by the BBZ UI screenshots (row labels + "Fold more/less"
+rec-actions match the fold-frequency interpretation).
 
 ### Preflop
 | Report column | Numerator | Denominator |
@@ -213,9 +237,9 @@ flag names to be confirmed against the CSV during Phase 0 — marked ⚠.)
 | 3Bet PF | `cnt_p_3bet` | `cnt_p_3bet_opp` |
 | 3Bet Steal | `cnt_steal_def_action_raise` | `cnt_steal_def_3bet_opp` |
 | 3Bet NAI <35 | `cnt_p_3bet_NAI_u35` | `cnt_p_3bet_opp_u35` |
-| 2Bet PF & Fold ⚠ (fold to 3bet after open) | `cnt_p_3bet_def_action_fold_when_open_raised` | `cnt_p_3bet_def_opp_when_open_raised` |
+| 2Bet PF & Fold (fold to 3bet after open — confirmed) | `cnt_p_3bet_def_action_fold_when_open_raised` | `cnt_p_3bet_def_opp_when_open_raised` |
 | Raise & 4Bet+ PF | `cnt_p_4bet_after_raising` | `cnt_p_4bet_opp_when_open_raised` |
-| 3Bet PF & Fold ⚠ (fold to 4bet after 3bet) | `cnt_p_4bet_def_action_fold_after_3b` | `cnt_p_4bet_def_opp_after_3b` |
+| 3Bet PF & Fold (fold to 4bet after 3bet — confirmed) | `cnt_p_4bet_def_action_fold_after_3b` | `cnt_p_4bet_def_opp_after_3b` |
 | Fold to PF 4Bet After 3Bet <30 | `cnt_p_4bet_def_action_fold_after_3b_30` | `cnt_p_4bet_def_opp_after_3b_30` |
 | PF Squeeze | `cnt_p_squeeze` | `cnt_p_squeeze_opp` |
 
@@ -268,7 +292,9 @@ PT4's mapping; the Phase-0 gate (per-position Hands counts vs the CSV) confirms 
 
 ## Appendix C — Open items before/at build
 
-- [ ] Harvest BBZ's numeric ranges into `/config/leak_ranges` (§7) — data task, unblocks Phase 4 verdict parity.
+- [x] Harvest BBZ's numeric ranges (§7) — **done 2026-07-30** → `data/bbz_leak_ranges.json`, all 6 positions.
+- [x] Confirm column-label alignments (Appendix A) — confirmed by the BBZ UI screenshots.
+- [ ] Eyeball the 3 `verify:true` target cells in `data/bbz_leak_ranges.json` against the BBZ UI (§7).
+- [ ] Screenshot the **By Action** tab once (grouping only — the `.pt4rpt` category labels likely predict it, but one screenshot confirms).
 - [ ] Confirm action-code semantics 12/13 against real hands (§8) — Phase 0 prerequisite.
-- [ ] Confirm the three ⚠ column-label alignments against the CSV (Appendix A) — Phase 0/1.
 - [ ] Pick equity library (`eval7` vs `treys` vs `pokerkit`) — Phase 3.
