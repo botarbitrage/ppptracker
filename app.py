@@ -1075,6 +1075,25 @@ def firebase_config():
     return jsonify(cfg)
 
 
+# ── Leak Finder (Phase 0: validation harness dev page) ──────────────────────
+# Compares leak_engine output against the PT4 report CSV ground truth stored
+# in data/validation/. Dev/diagnostic tool: exposes only aggregate counts from
+# committed fixtures, so it is intentionally unauthenticated.
+
+@app.route('/leaks/validate')
+def leaks_validate_page():
+    return render_template('leaks_validate.html')
+
+
+@app.route('/api/leaks/validate')
+def leaks_validate_api():
+    from leak_validation import run_validation
+    try:
+        return jsonify(run_validation())
+    except Exception as exc:
+        return jsonify({'error': str(exc)}), 500
+
+
 # ── PWA / TWA support ─────────────────────────────────────────────────────────
 
 @app.route('/tournaments')

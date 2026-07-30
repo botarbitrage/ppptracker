@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Leak Finder Validation — PPPoker Hand Analyser</title>
+  <link rel="icon" type="image/svg+xml" href="/static/icons/icon.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous"/>
+  <link rel="stylesheet" href="/static/style.css?v=54"/>
+  <style>
+    .page-back {
+      display:inline-flex; align-items:center; gap:6px; color:var(--muted);
+      font-family:var(--font-head); font-size:.78rem; font-weight:600;
+      letter-spacing:.4px; text-decoration:none; padding:4px 0; transition:color .15s;
+    }
+    .page-back:hover { color:var(--green); }
+    .page-title {
+      font-family:var(--font-head); font-size:clamp(.95rem,3.5vw,1.4rem);
+      font-weight:800; color:var(--green);
+    }
+    .vld-meta { color:var(--muted); font-size:.85rem; }
+    .vld-note {
+      border:1px solid #b58a2e66; background:#b58a2e14; color:#e0b95c;
+      border-radius:8px; padding:10px 14px; font-size:.85rem;
+    }
+    td.vld-ok   { color:var(--green); font-weight:700; }
+    td.vld-bad  { color:#ff5470;      font-weight:700; }
+    .vld-share  { color:var(--muted); font-size:.78rem; }
+  </style>
+</head>
+<body>
+<main class="container-fluid py-4 px-3 px-md-5" style="max-width:900px;margin:0 auto">
+
+  <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <a href="/" class="page-back">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to Analyser
+    </a>
+    <span class="page-title">🔬 Leak Finder Validation</span>
+    <div style="width:110px"></div>
+  </div>
+
+  <div class="section-card mb-4">
+    <div class="section-card-header p-3 pb-0">
+      <h2 class="d-flex align-items-center gap-2">Engine vs PokerTracker 4 (ground truth)</h2>
+      <p class="vld-meta mb-2">
+        Our <code>leak_engine</code> parses the same hand-history text PT4 imported and must
+        reproduce PT4's report numbers cell-for-cell. Phase 0 gate: per-position hand counts.
+        Fixtures live in <code>data/validation/</code>.
+      </p>
+      <div id="vld-meta" class="vld-meta mb-2"></div>
+      <div id="vld-note" class="vld-note mb-3 d-none"></div>
+      <div id="vld-error" class="alert alert-danger py-2 d-none"></div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-dark table-striped table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Stat</th><th>Position</th>
+            <th class="text-end">Ours</th><th class="text-end">PT4</th>
+            <th class="text-end">Ours %</th><th class="text-end">PT4 %</th>
+            <th class="text-center">Match</th>
+          </tr>
+        </thead>
+        <tbody id="vld-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+<script>
+(async () => {
+  const tbody = document.getElementById('vld-tbody');
+  const meta  = document.getElementById('vld-meta');
+  const note  = document.getElementById('vld-note');
+  const errEl = document.getElementById('vld-error');
+  try {
+    const res  = await fetch('/api/leaks/validate');
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    meta.textContent = `txt: ${data.txt_files.join(', ')} · csv: ${data.csv_file}` +
+      ` · hero: ${data.hero} · hands parsed: ${data.hands_parsed}` +
+      ` · unmapped positions: ${data.unmapped}`;
+    if (data.coverage_note) {
+      note.textContent = data.coverage_note;
+      note.classList.remove('d-none');
+    }
+    tbody.innerHTML = data.cells.map(c => `
+      <tr${c.position === 'total' ? ' style="border-top:2px solid var(--green)"' : ''}>
+        <td>${c.stat}</td>
+        <td>${c.position.toUpperCase()}</td>
+        <td class="text-end">${c.ours ?? '—'}</td>
+        <td class="text-end">${c.pt4 ?? '—'}</td>
+        <td class="text-end vld-share">${c.ours_share != null ? c.ours_share + '%' : ''}</td>
+        <td class="text-end vld-share">${c.pt4_share != null ? c.pt4_share + '%' : ''}</td>
+        <td class="text-center ${c.match ? 'vld-ok' : 'vld-bad'}">${c.match ? '✓' : '✗'}</td>
+      </tr>`).join('');
+  } catch (e) {
+    errEl.textContent = 'Validation failed: ' + e.message;
+    errEl.classList.remove('d-none');
+  }
+})();
+</script>
+</body>
+</html>

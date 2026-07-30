@@ -1,6 +1,7 @@
 # Leak Finder — Design & Delivery Plan
 
-_Status: proposed. No code beyond this document yet._
+_Status: Phase 0 implemented (validation harness live at `/leaks/validate`); full gate
+pending the second DEEPFREEZE fixture (see §5)._
 _Owner: Caio · Consulting engineer: Claude_
 
 ## 1. Goal
@@ -148,6 +149,13 @@ Verdict colours reuse the existing `--green` / danger palette; "insufficient dat
 First gate is the cheapest and highest-signal: **per-position `Hands` counts must match**
 (DeepFreeze: SB 34 / BB 30 / EP 58 / MP 70 / CO 32 / BTN 33 / total 257). If the position buckets
 match, the mapper is right; then we layer stats on top.
+
+**Phase-0 finding:** the DeepFreeze CSV was built from **257** hands but the provided txt covers
+**128** (one of two DEEPFREEZE tournament exports) — so exact matching is blocked on data, not
+code. The harness handles N fixture txts and reports a coverage note plus share-of-total
+comparison meanwhile. To complete the gate, either (a) export the second DEEPFREEZE tournament
+from the app into `data/validation/`, or (b) re-export the PT4 CSV filtered to tournament
+#10002806 only.
 
 ## 6. All-in adjusted BB/100 (the headline "Winrate")
 
@@ -302,5 +310,7 @@ PT4's mapping; the Phase-0 gate (per-position Hands counts vs the CSV) confirms 
 - [x] Verify low-confidence target cells — resolved via the By Action tab capture (5 cells corrected, all flags cleared).
 - [x] Confirm the By Action tab — pure transposition of the same 163 cells (§4); no extra data needed.
 - [ ] Back-fill targets for the ~12 zero-sample cells of the 175 grid if/when they appear in a future BBZ report (nice-to-have; many can be deduced from neighbouring positions' bands).
-- [ ] Confirm action-code semantics 12/13 against real hands (§8) — Phase 0 prerequisite.
+- [x] Canonical action model documented — `docs/pppoker-action-model.md` (exporter semantics adopted; `hand_parser` 12/13 flagged as probable bug).
+- [ ] Empirically confirm 12/13 via `python leak_validation.py --audit-actions <records.json>` on a raw JSON export (§8, action-model doc).
+- [ ] Complete the Phase-0 gate: add the second DEEPFREEZE txt to `data/validation/` (or a PT4 CSV filtered to tournament #10002806).
 - [ ] Pick equity library (`eval7` vs `treys` vs `pokerkit`) — Phase 3.
