@@ -5,6 +5,7 @@ Card encoding, player/flow structure are the same as hand_parser.py.
 This module operates on already-parsed records (no file I/O of raw JSON).
 """
 import os
+import re
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
@@ -144,10 +145,14 @@ def _format_action(action, seat_map, current_bet):
             return line, chips
         return f"{name}: calls {chips}{sfx}", current_bet
     if t in _RAISE_TYPES:
+        if chips <= 0:
+            return f"{name}: checks", current_bet   # degenerate zero raise → check
         raise_by = max(0, chips - current_bet)
         line = f"{name}: raises {raise_by} to {chips}{sfx}"
         return line, chips
     if t in _BET_TYPES:
+        if chips <= 0:
+            return f"{name}: checks", current_bet   # degenerate zero bet → check
         return f"{name}: bets {chips}{sfx}", chips
     # Truly unknown type
     return f"# UNKNOWN action type={t} seatid={seatid} chips={chips}", current_bet
@@ -218,6 +223,105 @@ def _fold_street(flow, seatid):
             if a.get('seatid') == seatid and a.get('type') in _FOLD_TYPES:
                 return street
     return None
+
+
+# ── Pot reconstruction from the emitted lines ────────────────────────────────
+# Poker Tracker 4 (and every PokerStars-format parser) validates a hand by
+# re-deriving the pot from the action lines it reads — antes + blinds + bets +
+# calls + raises, minus any "Uncalled bet returned" — and rejects the hand with
+# "Invalid pot size" when that total disagrees with the "Total pot" / "collected"
+# amounts we declare.  Historically the exporter computed the declared pot in a
+# separate pre-pass that had to stay perfectly in sync with the code that emits
+# the action lines; the two drifted apart in edge cases (all-in caps, type-4→call
+# conversions, incremental-raise fixes, chips_back suppression, stack overrides),
+# and the gap frequently equalled a multiple of the ante — which read as "the
+# ante was dropped from the pot".  We now compute the declared pot from the very
+# lines we emit, so the two are equal by construction for every hand.
+
+_ANTE_RE   = re.compile(r'^(?P<name>.+?): posts the ante (?P<amt>\d+)$')
+_BLIND_RE  = re.compile(r'^(?P<name>.+?): posts (?:small|big) blind (?P<amt>\d+)$')
+_BET_RE    = re.compile(r'^(?P<name>.+?): bets (?P<amt>\d+)')
+_CALL_RE   = re.compile(r'^(?P<name>.+?): calls (?P<amt>\d+)')
+_RAISE_RE  = re.compile(r'^(?P<name>.+?): raises \d+ to (?P<to>\d+)')
+_UNCALL_RE = re.compile(r'^Uncalled bet \((?P<amt>\d+)\) returned to (?P<name>.+)$')
+_STREET_RE = re.compile(r'^\*\*\* (?:FLOP|TURN|RIVER) \*\*\*')
+
+
+def _pot_from_ps_lines(lines):
+    """Re-derive the pot exactly as a PokerStars-format parser does.
+
+    Returns (total_pot, per_name_net) where per_name_net[name] is that player's
+    net chips left in the pot (gross wagered minus any uncalled bet returned).
+    Antes are dead money — added to the pot but not to the per-street bet used
+    to size raises.  Parsing stops at showdown/summary so post-hand
+    "collected"/"Seat N:" lines can never be miscounted as wagers.  Bet/call/
+    raise patterns intentionally don't anchor the end of the line so the
+    " and is all-in" suffix is tolerated.
+    """
+    total = 0
+    net = {}            # name -> net chips contributed to the pot
+    street_bet = {}     # name -> chips committed on the current street
+    for raw in lines:
+        line = raw.strip()
+        if line.startswith('*** SHOW DOWN') or line.startswith('*** SUMMARY'):
+            break
+        if _STREET_RE.match(line):
+            street_bet = {}
+            continue
+        m = _ANTE_RE.match(line)
+        if m:
+            amt = int(m.group('amt'))
+            total += amt
+            net[m.group('name')] = net.get(m.group('name'), 0) + amt
+            continue
+        m = _BLIND_RE.match(line) or _BET_RE.match(line) or _CALL_RE.match(line)
+        if m:
+            name, amt = m.group('name'), int(m.group('amt'))
+            total += amt
+            net[name] = net.get(name, 0) + amt
+            street_bet[name] = street_bet.get(name, 0) + amt
+            continue
+        m = _RAISE_RE.match(line)
+        if m:
+            name, to = m.group('name'), int(m.group('to'))
+            delta = to - street_bet.get(name, 0)
+            total += delta
+            net[name] = net.get(name, 0) + delta
+            street_bet[name] = to
+            continue
+        m = _UNCALL_RE.match(line)
+        if m:
+            name, amt = m.group('name'), int(m.group('amt'))
+            total -= amt
+            net[name] = net.get(name, 0) - amt
+            continue
+    return total, net
+
+
+def _distribute(total, weights):
+    """Split `total` into integer parts ~proportional to `weights`, summing
+    EXACTLY to `total`.  Leftover chips (from integer rounding) go to the
+    largest weights first.  Guarantees payouts reconcile to the pot, avoiding
+    the ±1 "Invalid pot size" errors that per-winner rounding produced."""
+    n = len(weights)
+    if n == 0:
+        return []
+    s = sum(weights)
+    if s <= 0:                       # no weights — split evenly
+        base = total // n
+        out = [base] * n
+        for i in range(total - base * n):
+            out[i % n] += 1
+        return out
+    out = [total * w // s for w in weights]
+    leftover = total - sum(out)
+    order = sorted(range(n), key=lambda i: weights[i], reverse=True)
+    i = 0
+    while leftover > 0:
+        out[order[i % n]] += 1
+        leftover -= 1
+        i += 1
+    return out
 
 
 # ── Single-hand converter ───────────────────────────────────────────────────
@@ -447,31 +551,13 @@ def hand_to_ps_block(record, tz=None, stack_overrides=None, blind_levels=None):
                 _pot_unc += _unc
                 _player_uncalled[_max_sid] = _player_uncalled.get(_max_sid, 0) + _unc
 
-    total_pot = _pot_in - _pot_unc
-
-    # ── Per-player end-stack reconstruction ──────────────────────────────────
-    # Compute each player's stack after this hand based on action data so the
-    # next hand's seat listing can be corrected if PPPoker's hand_chips drifts.
-    _wi_list  = flow.get('winning_info', [])
-    _wi_total = sum(w.get('chips', 0) for w in _wi_list) or 1
-    player_end_stacks = {}
-    for _sid_es, _p_es in seat_map.items():
-        if _sid_es < 0:
-            continue
-        _name_es = (_p_es.get('user_name') or f'Player{_sid_es+1}').strip()
-        # Effective starting chips: override if supplied, else hand_chips.
-        # hand_chips is post-ante/blind, so add back prehand payments.
-        _eff = (stack_overrides.get(_name_es) if stack_overrides else None)
-        if _eff is None:
-            _eff = _rc(_p_es.get('hand_chips', 0) or 0) + _prehand_paid.get(_sid_es, 0)
-        _net_invested = _player_total.get(_sid_es, 0) - _player_uncalled.get(_sid_es, 0)
-        _won = round(
-            sum(w.get('chips', 0) for w in _wi_list if w.get('seatid') == _sid_es)
-            * total_pot / _wi_total
-        )
-        _end = _eff - _net_invested + _won
-        if _end >= 0:
-            player_end_stacks[_name_es] = _end
+    # NOTE: total_pot and the per-player end-stack reconstruction are computed
+    # AFTER all the action lines are emitted (see below), by re-deriving the pot
+    # from those very lines with _pot_from_ps_lines().  That guarantees the
+    # declared "Total pot"/"collected" amounts equal what PokerTracker re-computes
+    # from the hand history, instead of relying on a parallel pre-pass that could
+    # drift.  The pre-pass above is kept only for _start_chips (all-in caps) and
+    # _synth_uncalled (synthetic uncalled-bet lines emitted per street).
 
     # ── Hole cards ───────────────────────────────────────────────────────────
     hero = next((p for p in players if p.get('isSelf')), None)
@@ -632,21 +718,50 @@ def hand_to_ps_block(record, tz=None, stack_overrides=None, blind_levels=None):
 
     sb_sid = next((a.get('seatid') for a in pre_actions if a.get('type') == 8), None)
     bb_sid = next((a.get('seatid') for a in pre_actions if a.get('type') == 9), None)
-    # total_pot was computed in the pre-pass above (before action lines).
+
+    # Derive the pot (and each player's net contribution) from the action lines
+    # we just emitted, so the declared "Total pot"/"collected" amounts equal what
+    # PokerTracker re-computes from this hand history.  This is the single source
+    # of truth for the pot — no parallel pre-pass to drift out of sync.
+    total_pot, _emit_net = _pot_from_ps_lines(lines)
+
+    # Split the pot across winners with integer amounts that sum EXACTLY to
+    # total_pot (largest pools absorb the rounding remainder), so payouts always
+    # reconcile to the pot.
+    _win_amts   = _distribute(total_pot, [w.get('chips', 0) for w in winning_info])
+    _won_by_sid = {}
+    for w, amt in zip(winning_info, _win_amts):
+        _won_by_sid[w.get('seatid')] = _won_by_sid.get(w.get('seatid'), 0) + amt
+
+    # ── Per-player end-stack reconstruction ──────────────────────────────────
+    # Compute each player's stack after this hand so the next hand's seat listing
+    # can be corrected if PPPoker's hand_chips drifts.  Net invested comes from
+    # the same emitted lines (keyed by the emitted name) so stacks stay consistent
+    # with the pot.
+    player_end_stacks = {}
+    for _sid_es, _p_es in seat_map.items():
+        if _sid_es < 0:
+            continue
+        _name_es = (_p_es.get('user_name') or f'Player{_sid_es+1}').strip()
+        # Effective starting chips: override if supplied, else hand_chips.
+        # hand_chips is post-ante/blind, so add back prehand payments.
+        _eff = (stack_overrides.get(_name_es) if stack_overrides else None)
+        if _eff is None:
+            _eff = _rc(_p_es.get('hand_chips', 0) or 0) + _prehand_paid.get(_sid_es, 0)
+        _net_invested = _emit_net.get(_pname(seat_map, _sid_es), 0)
+        _end = _eff - _net_invested + _won_by_sid.get(_sid_es, 0)
+        if _end >= 0:
+            player_end_stacks[_name_es] = _end
 
     # "collected from pot" lines — PT4 uses these to validate pot distribution.
-    # Use total_pot (not winning_info) so the amounts match PT4's own computation.
+    # Amounts come from the exact-sum split so they reconcile to total_pot.
     if len(winning_info) == 1:
         w = winning_info[0]
         lines.append(f"{_pname(seat_map, w.get('seatid', 0))} collected {total_pot} from pot")
     else:
-        # Multiple pools: scale each pool's amount to sum to total_pot
-        wi_total = sum(w.get('chips', 0) for w in winning_info) or 1
-        for i, w in enumerate(winning_info):
+        for i, (w, amt) in enumerate(zip(winning_info, _win_amts)):
             pid   = w.get('poolid', w.get('pool_id', i))
             label = 'main pot' if pid == 0 else f'side pot-{pid}'
-            # Proportionally adjust if winning_info sum differs from computed pot
-            amt   = round(w.get('chips', 0) * total_pot / wi_total)
             lines.append(f"{_pname(seat_map, w.get('seatid', 0))} collected {amt} from {label}")
 
     lines.append("*** SUMMARY ***")
@@ -673,11 +788,9 @@ def hand_to_ps_block(record, tz=None, stack_overrides=None, blind_levels=None):
         fold_st = _fold_street(flow, sid)
 
         if sid in winner_sids:
-            # Use total_pot for the summary amounts so they match Total pot and collected lines.
-            # winning_info.chips can be inflated; scale proportionally to match total_pot.
-            wi_sid_total = sum(w.get('chips', 0) for w in winning_info if w.get('seatid') == sid)
-            wi_grand     = sum(w.get('chips', 0) for w in winning_info) or 1
-            won = round(wi_sid_total * total_pot / wi_grand)
+            # Reuse the exact-sum split computed above so these summary amounts
+            # match the "collected" lines and the "Total pot" total exactly.
+            won = _won_by_sid.get(sid, 0)
             shown_cards = next((sh.get('code', []) for sh in show_hands if sh.get('seatid') == sid), None)
             if shown_cards:
                 lines.append(
