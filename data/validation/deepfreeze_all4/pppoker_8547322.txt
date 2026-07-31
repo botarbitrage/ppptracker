@@ -1,0 +1,3948 @@
+PokerStars Hand #260613033235854732200023218: Tournament #8547322, No Limit Hold'em - Level XXI (8000/16000 ante 2000) - 2026/06/13 22:50:51 ACST [2026/06/13 13:20:51 UTC]
+Table '8547322 8' 9-max Seat #6 is the button
+Seat 1: Bonixer89 (495449 in chips)
+Seat 2: pp12887206 (1586030 in chips)
+Seat 3: tonim67 (532744 in chips)
+Seat 4: christophe6 (320772 in chips)
+Seat 5: livingstone33 (1432095 in chips)
+Seat 6: FatMac (527439 in chips)
+Seat 7: ozrona (300032 in chips)
+Seat 8: fm89 (405976 in chips)
+ozrona: posts the ante 2000
+fm89: posts the ante 2000
+Bonixer89: posts the ante 2000
+pp12887206: posts the ante 2000
+tonim67: posts the ante 2000
+christophe6: posts the ante 2000
+livingstone33: posts the ante 2000
+FatMac: posts the ante 2000
+ozrona: posts small blind 8000
+fm89: posts big blind 16000
+*** HOLE CARDS ***
+Dealt to ozrona [Ad 5s]
+Bonixer89: folds
+pp12887206: raises 16000 to 32000
+tonim67: folds
+christophe6: folds
+livingstone33: folds
+FatMac: folds
+ozrona: calls 24000
+fm89: folds
+*** FLOP *** [4h 8h 2h]
+ozrona: checks
+pp12887206: bets 56000
+ozrona: folds
+Uncalled bet (56000) returned to pp12887206
+pp12887206 collected 96000 from pot
+*** SUMMARY ***
+Total pot 96000 | Rake 0
+Board [4h 8h 2h]
+Seat 1: Bonixer89 folded before Flop (didn't bet)
+Seat 2: pp12887206 collected (96000)
+Seat 3: tonim67 folded before Flop (didn't bet)
+Seat 4: christophe6 folded before Flop (didn't bet)
+Seat 5: livingstone33 folded before Flop (didn't bet)
+Seat 6: FatMac (button) folded before Flop (didn't bet)
+Seat 7: ozrona (small blind) folded on the Flop
+Seat 8: fm89 (big blind) folded before Flop
+
+PokerStars Hand #260613033235854732200023248: Tournament #8547322, No Limit Hold'em - Level XXI (8000/16000 ante 2000) - 2026/06/13 22:51:40 ACST [2026/06/13 13:21:40 UTC]
+Table '8547322 8' 9-max Seat #7 is the button
+Seat 1: Bonixer89 (493449 in chips)
+Seat 2: pp12887206 (1648030 in chips)
+Seat 3: tonim67 (530744 in chips)
+Seat 4: christophe6 (318772 in chips)
+Seat 5: livingstone33 (1430095 in chips)
+Seat 6: FatMac (525439 in chips)
+Seat 7: ozrona (266032 in chips)
+Seat 8: fm89 (387976 in chips)
+fm89: posts the ante 2000
+Bonixer89: posts the ante 2000
+pp12887206: posts the ante 2000
+tonim67: posts the ante 2000
+christophe6: posts the ante 2000
+livingstone33: posts the ante 2000
+FatMac: posts the ante 2000
+ozrona: posts the ante 2000
+fm89: posts small blind 8000
+Bonixer89: posts big blind 16000
+*** HOLE CARDS ***
+Dealt to ozrona [3c 2h]
+pp12887206: folds
+tonim67: calls 16000
+christophe6: folds
+livingstone33: folds
+FatMac: folds
+ozrona: folds
+fm89: folds
+Bonixer89: checks
+*** FLOP *** [As 5d 2c]
+Bonixer89: checks
+tonim67: bets 16000
+Bonixer89: calls 16000
+*** TURN *** [As 5d 2c] [7d]
+Bonixer89: checks
+tonim67: checks
+*** RIVER *** [As 5d 2c 7d] [Ts]
+Bonixer89: bets 44000
+tonim67: calls 44000
+*** SHOW DOWN ***
+tonim67: shows [Ah Td]
+Bonixer89: shows [4d Kd]
+tonim67 collected 176000 from pot
+*** SUMMARY ***
+Total pot 176000 | Rake 0
+Board [As 5d 2c 7d Ts]
+Seat 1: Bonixer89 (big blind) showed [4d Kd] and lost
+Seat 2: pp12887206 folded before Flop (didn't bet)
+Seat 3: tonim67 showed [Ah Td] and won (176000)
+Seat 4: christophe6 folded before Flop (didn't bet)
+Seat 5: livingstone33 folded before Flop (didn't bet)
+Seat 6: FatMac folded before Flop (didn't bet)
+Seat 7: ozrona (button) folded before Flop (didn't bet)
+Seat 8: fm89 (small blind) folded before Flop
+
+PokerStars Hand #260613033235854732200023328: Tournament #8547322, No Limit Hold'em - Level XXI (8000/16000 ante 2000) - 2026/06/13 22:52:54 ACST [2026/06/13 13:22:54 UTC]
+Table '8547322 8' 9-max Seat #8 is the button
+Seat 1: Bonixer89 (415449 in chips)
+Seat 2: pp12887206 (1646030 in chips)
+Seat 3: tonim67 (628744 in chips)
+Seat 4: christophe6 (316772 in chips)
+Seat 5: livingstone33 (1428095 in chips)
+Seat 6: FatMac (523439 in chips)
+Seat 7: ozrona (264032 in chips)
+Seat 8: fm89 (377976 in chips)
+Bonixer89: posts the ante 2000
+pp12887206: posts the ante 2000
+tonim67: posts the ante 2000
+christophe6: posts the ante 2000
+livingstone33: posts the ante 2000
+FatMac: posts the ante 2000
+ozrona: posts the ante 2000
+fm89: posts the ante 2000
+Bonixer89: posts small blind 8000
+pp12887206: posts big blind 16000
+*** HOLE CARDS ***
+Dealt to ozrona [Js 7d]
+tonim67: folds
+christophe6: calls 16000
+livingstone33: folds
+FatMac: folds
+ozrona: folds
+fm89: folds
+Bonixer89: folds
+pp12887206: checks
+*** FLOP *** [Qd Ts 6c]
+pp12887206: checks
+christophe6: bets 16000
+pp12887206: calls 16000
+*** TURN *** [Qd Ts 6c] [Qh]
+pp12887206: checks
+christophe6: bets 22000
+pp12887206: calls 22000
+*** RIVER *** [Qd Ts 6c Qh] [2c]
+pp12887206: checks
+christophe6: bets 66000
+pp12887206: calls 66000
+*** SHOW DOWN ***
+christophe6: shows [Th Td]
+christophe6 collected 264000 from pot
+*** SUMMARY ***
+Total pot 264000 | Rake 0
+Board [Qd Ts 6c Qh 2c]
+Seat 1: Bonixer89 (small blind) folded before Flop
+Seat 2: pp12887206 (big blind) mucked
+Seat 3: tonim67 folded before Flop (didn't bet)
+Seat 4: christophe6 showed [Th Td] and won (264000)
+Seat 5: livingstone33 folded before Flop (didn't bet)
+Seat 6: FatMac folded before Flop (didn't bet)
+Seat 7: ozrona folded before Flop (didn't bet)
+Seat 8: fm89 (button) folded before Flop (didn't bet)
+
+PokerStars Hand #260613033235854732200023408: Tournament #8547322, No Limit Hold'em - Level XXI (8000/16000 ante 2000) - 2026/06/13 22:54:14 ACST [2026/06/13 13:24:14 UTC]
+Table '8547322 8' 9-max Seat #1 is the button
+Seat 1: Bonixer89 (405449 in chips)
+Seat 2: pp12887206 (1524030 in chips)
+Seat 3: tonim67 (626744 in chips)
+Seat 4: christophe6 (458772 in chips)
+Seat 5: livingstone33 (1426095 in chips)
+Seat 6: FatMac (521439 in chips)
+Seat 7: ozrona (262032 in chips)
+Seat 8: fm89 (375976 in chips)
+pp12887206: posts the ante 2000
+tonim67: posts the ante 2000
+christophe6: posts the ante 2000
+livingstone33: posts the ante 2000
+FatMac: posts the ante 2000
+ozrona: posts the ante 2000
+fm89: posts the ante 2000
+Bonixer89: posts the ante 2000
+pp12887206: posts small blind 8000
+tonim67: posts big blind 16000
+*** HOLE CARDS ***
+Dealt to ozrona [2s 8h]
+christophe6: raises 32000 to 48000
+livingstone33: folds
+FatMac: folds
+ozrona: folds
+fm89: folds
+Bonixer89: folds
+pp12887206: folds
+tonim67: folds
+Uncalled bet (32000) returned to christophe6
+christophe6 collected 56000 from pot
+*** SUMMARY ***
+Total pot 56000 | Rake 0
+Seat 1: Bonixer89 (button) folded before Flop (didn't bet)
+Seat 2: pp12887206 (small blind) folded before Flop
+Seat 3: tonim67 (big blind) folded before Flop
+Seat 4: christophe6 collected (56000)
+Seat 5: livingstone33 folded before Flop (didn't bet)
+Seat 6: FatMac folded before Flop (didn't bet)
+Seat 7: ozrona folded before Flop (didn't bet)
+Seat 8: fm89 folded before Flop (didn't bet)
+
+PokerStars Hand #260613033235854732200023458: Tournament #8547322, No Limit Hold'em - Level XXI (8000/16000 ante 2000) - 2026/06/13 22:54:38 ACST [2026/06/13 13:24:38 UTC]
+Table '8547322 8' 9-max Seat #2 is the button
+Seat 1: Bonixer89 (403449 in chips)
+Seat 2: pp12887206 (1514030 in chips)
+Seat 3: tonim67 (608744 in chips)
+Seat 4: christophe6 (496772 in chips)
+Seat 5: livingstone33 (1424095 in chips)
+Seat 6: FatMac (519439 in chips)
+Seat 7: ozrona (260032 in chips)
+Seat 8: fm89 (373976 in chips)
+tonim67: posts the ante 2000
+christophe6: posts the ante 2000
+livingstone33: posts the ante 2000
+FatMac: posts the ante 2000
+ozrona: posts the ante 2000
+fm89: posts the ante 2000
+Bonixer89: posts the ante 2000
+pp12887206: posts the ante 2000
+tonim67: posts small blind 8000
+christophe6: posts big blind 16000
+*** HOLE CARDS ***
+Dealt to ozrona [Ah Jh]
+livingstone33: folds
+FatMac: folds
+ozrona: raises 40000 to 56000
+fm89: folds
+Bonixer89: folds
+pp12887206: folds
+tonim67: folds
+christophe6: raises 422772 to 478772 and is all-in
+ozrona: calls 202032 and is all-in
+Uncalled bet (236740) returned to christophe6
+*** FLOP *** [7d Jc Ts]
+*** TURN *** [7d Jc Ts] [Kd]
+*** RIVER *** [7d Jc Ts Kd] [7h]
+*** SHOW DOWN ***
+ozrona: shows [Ah Jh]
+christophe6: shows [Ac Jd]
+ozrona collected 262032 from main pot
+christophe6 collected 262032 from main pot
+*** SUMMARY ***
+Total pot 524064 | Rake 0
+Board [7d Jc Ts Kd 7h]
+Seat 1: Bonixer89 folded before Flop (didn't bet)
+Seat 2: pp12887206 (button) folded before Flop (didn't bet)
+Seat 3: tonim67 (small blind) folded before Flop
+Seat 4: christophe6 (big blind) showed [Ac Jd] and won (262032)
+Seat 5: livingstone33 folded before Flop (didn't bet)
+Seat 6: FatMac folded before Flop (didn't bet)
+Seat 7: ozrona showed [Ah Jh] and won (262032)
+Seat 8: fm89 folded before Flop (didn't bet)
+
+PokerStars Hand #260613033235854732200023508: Tournament #8547322, No Limit Hold'em - Level XXI (8000/16000 ante 2000) - 2026/06/13 22:55:47 ACST [2026/06/13 13:25:47 UTC]
+Table '8547322 8' 9-max Seat #3 is the button
+Seat 1: Bonixer89 (401449 in chips)
+Seat 2: pp12887206 (1512030 in chips)
+Seat 3: tonim67 (598744 in chips)
+Seat 4: christophe6 (514772 in chips)
+Seat 5: livingstone33 (1422095 in chips)
+Seat 6: FatMac (517439 in chips)
+Seat 7: ozrona (262032 in chips)
+Seat 8: fm89 (371976 in chips)
+Seat 9: TheRealToilet (1135248 in chips)
+christophe6: posts the ante 2000
+livingstone33: posts the ante 2000
+FatMac: posts the ante 2000
+ozrona: posts the ante 2000
+fm89: posts the ante 2000
+TheRealToilet: posts the ante 2000
+Bonixer89: posts the ante 2000
+pp12887206: posts the ante 2000
+tonim67: posts the ante 2000
+christophe6: posts small blind 8000
+livingstone33: posts big blind 16000
+*** HOLE CARDS ***
+Dealt to ozrona [3d 5c]
+FatMac: folds
+ozrona: folds
+fm89: raises 16000 to 32000
+TheRealToilet: folds
+Bonixer89: folds
+pp12887206: folds
+tonim67: folds
+christophe6: calls 24000
+livingstone33: calls 16000
+*** FLOP *** [6c 7h 5d]
+christophe6: checks
+livingstone33: checks
+fm89: checks
+*** TURN *** [6c 7h 5d] [9h]
+christophe6: bets 85500
+livingstone33: calls 85500
+fm89: folds
+*** RIVER *** [6c 7h 5d 9h] [Ts]
+christophe6: checks
+livingstone33: bets 285000
+christophe6: folds
+Uncalled bet (285000) returned to livingstone33
+livingstone33 collected 285000 from pot
+*** SUMMARY ***
+Total pot 285000 | Rake 0
+Board [6c 7h 5d 9h Ts]
+Seat 1: Bonixer89 folded before Flop (didn't bet)
+Seat 2: pp12887206 folded before Flop (didn't bet)
+Seat 3: tonim67 (button) folded before Flop (didn't bet)
+Seat 4: christophe6 (small blind) folded on the River
+Seat 5: livingstone33 (big blind) collected (285000)
+Seat 6: FatMac folded before Flop (didn't bet)
+Seat 7: ozrona folded before Flop (didn't bet)
+Seat 8: fm89 folded on the Turn
+Seat 9: TheRealToilet folded before Flop (didn't bet)
+
+PokerStars Hand #260613033235854732200023568: Tournament #8547322, No Limit Hold'em - Level XXI (8000/16000 ante 2000) - 2026/06/13 22:56:49 ACST [2026/06/13 13:26:49 UTC]
+Table '8547322 8' 9-max Seat #4 is the button
+Seat 1: Bonixer89 (399449 in chips)
+Seat 2: pp12887206 (1510030 in chips)
+Seat 3: tonim67 (596744 in chips)
+Seat 4: christophe6 (395272 in chips)
+Seat 5: livingstone33 (1587595 in chips)
+Seat 6: FatMac (515439 in chips)
+Seat 7: ozrona (260032 in chips)
+Seat 8: fm89 (337976 in chips)
+Seat 9: TheRealToilet (1133248 in chips)
+livingstone33: posts the ante 2000
+FatMac: posts the ante 2000
+ozrona: posts the ante 2000
+fm89: posts the ante 2000
+TheRealToilet: posts the ante 2000
+Bonixer89: posts the ante 2000
+pp12887206: posts the ante 2000
+tonim67: posts the ante 2000
+christophe6: posts the ante 2000
+livingstone33: posts small blind 8000
+FatMac: posts big blind 16000
+*** HOLE CARDS ***
+Dealt to ozrona [6c As]
+ozrona: folds
+fm89: folds
+TheRealToilet: calls 16000
+Bonixer89: calls 16000
+pp12887206: raises 40000 to 56000
+tonim67: folds
+christophe6: folds
+livingstone33: folds
+FatMac: folds
+TheRealToilet: calls 40000
+Bonixer89: calls 40000
+*** FLOP *** [9d 4d 4c]
+TheRealToilet: bets 128000
+Bonixer89: folds
+pp12887206: calls 128000
+*** TURN *** [9d 4d 4c] [Kc]
+TheRealToilet: bets 192000
+pp12887206: calls 192000
+*** RIVER *** [9d 4d 4c Kc] [6h]
+TheRealToilet: bets 566666
+pp12887206: calls 566666 and is all-in
+Uncalled bet (376782) returned to pp12887206
+*** SHOW DOWN ***
+TheRealToilet: shows [9s 8s]
+pp12887206: shows [6s 6d]
+pp12887206 collected 1606550 from pot
+*** SUMMARY ***
+Total pot 1606550 | Rake 0
+Board [9d 4d 4c Kc 6h]
+Seat 1: Bonixer89 folded on the Flop
+Seat 2: pp12887206 showed [6s 6d] and won (1606550)
+Seat 3: tonim67 folded before Flop (didn't bet)
+Seat 4: christophe6 (button) folded before Flop (didn't bet)
+Seat 5: livingstone33 (small blind) folded before Flop
+Seat 6: FatMac (big blind) folded before Flop
+Seat 7: ozrona folded before Flop (didn't bet)
+Seat 8: fm89 folded before Flop (didn't bet)
+Seat 9: TheRealToilet showed [9s 8s] and lost
+
+PokerStars Hand #260613033235854732200023668: Tournament #8547322, No Limit Hold'em - Level XXI (8000/16000 ante 2000) - 2026/06/13 22:58:43 ACST [2026/06/13 13:28:43 UTC]
+Table '8547322 8' 9-max Seat #5 is the button
+Seat 1: Bonixer89 (341449 in chips)
+Seat 2: pp12887206 (2737278 in chips)
+Seat 3: tonim67 (594744 in chips)
+Seat 4: christophe6 (393272 in chips)
+Seat 5: livingstone33 (1577595 in chips)
+Seat 6: FatMac (497439 in chips)
+Seat 7: ozrona (258032 in chips)
+Seat 8: fm89 (335976 in chips)
+FatMac: posts the ante 2000
+ozrona: posts the ante 2000
+fm89: posts the ante 2000
+Bonixer89: posts the ante 2000
+pp12887206: posts the ante 2000
+tonim67: posts the ante 2000
+christophe6: posts the ante 2000
+livingstone33: posts the ante 2000
+FatMac: posts small blind 8000
+ozrona: posts big blind 16000
+*** HOLE CARDS ***
+Dealt to ozrona [Js As]
+fm89: folds
+Bonixer89: folds
+pp12887206: raises 16000 to 32000
+tonim67: folds
+christophe6: folds
+livingstone33: folds
+FatMac: folds
+ozrona: calls 16000
+*** FLOP *** [8h 3c 2d]
+ozrona: checks
+pp12887206: checks
+*** TURN *** [8h 3c 2d] [4c]
+ozrona: bets 224032 and is all-in
+pp12887206: folds
+Uncalled bet (232032) returned to ozrona
+ozrona collected 80000 from pot
+*** SUMMARY ***
+Total pot 80000 | Rake 0
+Board [8h 3c 2d 4c]
+Seat 1: Bonixer89 folded before Flop (didn't bet)
+Seat 2: pp12887206 folded on the Turn
+Seat 3: tonim67 folded before Flop (didn't bet)
+Seat 4: christophe6 folded before Flop (didn't bet)
+Seat 5: livingstone33 (button) folded before Flop (didn't bet)
+Seat 6: FatMac (small blind) folded before Flop
+Seat 7: ozrona (big blind) collected (80000)
+Seat 8: fm89 folded before Flop (didn't bet)
+
+PokerStars Hand #260613033235854732200023708: Tournament #8547322, No Limit Hold'em - Level XXI (8000/16000 ante 2000) - 2026/06/13 22:59:25 ACST [2026/06/13 13:29:25 UTC]
+Table '8547322 8' 9-max Seat #6 is the button
+Seat 1: Bonixer89 (339449 in chips)
+Seat 2: pp12887206 (2703278 in chips)
+Seat 3: tonim67 (592744 in chips)
+Seat 4: christophe6 (391272 in chips)
+Seat 5: livingstone33 (1575595 in chips)
+Seat 6: FatMac (487439 in chips)
+Seat 7: ozrona (312032 in chips)
+Seat 8: fm89 (333976 in chips)
+ozrona: posts the ante 2000
+fm89: posts the ante 2000
+Bonixer89: posts the ante 2000
+pp12887206: posts the ante 2000
+tonim67: posts the ante 2000
+christophe6: posts the ante 2000
+livingstone33: posts the ante 2000
+FatMac: posts the ante 2000
+ozrona: posts small blind 8000
+fm89: posts big blind 16000
+*** HOLE CARDS ***
+Dealt to ozrona [3d 3h]
+Bonixer89: folds
+pp12887206: folds
+tonim67: folds
+christophe6: folds
+livingstone33: raises 32000 to 48000
+FatMac: folds
+ozrona: raises 262032 to 310032 and is all-in
+fm89: folds
+livingstone33: folds
+Uncalled bet (270032) returned to ozrona
+ozrona collected 120000 from pot
+*** SUMMARY ***
+Total pot 120000 | Rake 0
+Seat 1: Bonixer89 folded before Flop (didn't bet)
+Seat 2: pp12887206 folded before Flop (didn't bet)
+Seat 3: tonim67 folded before Flop (didn't bet)
+Seat 4: christophe6 folded before Flop (didn't bet)
+Seat 5: livingstone33 folded before Flop (didn't bet)
+Seat 6: FatMac (button) folded before Flop (didn't bet)
+Seat 7: ozrona (small blind) collected (120000)
+Seat 8: fm89 (big blind) folded before Flop
+
+PokerStars Hand #260613033235854732200023748: Tournament #8547322, No Limit Hold'em - Level XXI (8000/16000 ante 2000) - 2026/06/13 23:00:00 ACST [2026/06/13 13:30:00 UTC]
+Table '8547322 8' 9-max Seat #7 is the button
+Seat 1: Bonixer89 (337449 in chips)
+Seat 2: pp12887206 (2701278 in chips)
+Seat 3: tonim67 (590744 in chips)
+Seat 4: christophe6 (389272 in chips)
+Seat 5: livingstone33 (1525595 in chips)
+Seat 6: FatMac (485439 in chips)
+Seat 7: ozrona (390032 in chips)
+Seat 8: fm89 (315976 in chips)
+fm89: posts the ante 2000
+Bonixer89: posts the ante 2000
+pp12887206: posts the ante 2000
+tonim67: posts the ante 2000
+christophe6: posts the ante 2000
+livingstone33: posts the ante 2000
+FatMac: posts the ante 2000
+ozrona: posts the ante 2000
+fm89: posts small blind 8000
+Bonixer89: posts big blind 16000
+*** HOLE CARDS ***
+Dealt to ozrona [7h 4c]
+pp12887206: folds
+tonim67: folds
+christophe6: folds
+livingstone33: folds
+FatMac: folds
+ozrona: folds
+fm89: raises 289976 to 305976 and is all-in
+Bonixer89: folds
+Uncalled bet (297976) returned to fm89
+fm89 collected 40000 from pot
+*** SUMMARY ***
+Total pot 40000 | Rake 0
+Seat 1: Bonixer89 (big blind) folded before Flop
+Seat 2: pp12887206 folded before Flop (didn't bet)
+Seat 3: tonim67 folded before Flop (didn't bet)
+Seat 4: christophe6 folded before Flop (didn't bet)
+Seat 5: livingstone33 folded before Flop (didn't bet)
+Seat 6: FatMac folded before Flop (didn't bet)
+Seat 7: ozrona (button) folded before Flop (didn't bet)
+Seat 8: fm89 (small blind) collected (40000)
+
+PokerStars Hand #260613033235854732200023788: Tournament #8547322, No Limit Hold'em - Level XXI (8000/16000 ante 2000) - 2026/06/13 23:00:27 ACST [2026/06/13 13:30:27 UTC]
+Table '8547322 8' 9-max Seat #8 is the button
+Seat 1: Bonixer89 (319449 in chips)
+Seat 2: pp12887206 (2699278 in chips)
+Seat 3: tonim67 (588744 in chips)
+Seat 4: christophe6 (387272 in chips)
+Seat 5: livingstone33 (1523595 in chips)
+Seat 6: FatMac (483439 in chips)
+Seat 7: ozrona (388032 in chips)
+Seat 8: fm89 (345976 in chips)
+Bonixer89: posts the ante 2000
+pp12887206: posts the ante 2000
+tonim67: posts the ante 2000
+christophe6: posts the ante 2000
+livingstone33: posts the ante 2000
+FatMac: posts the ante 2000
+ozrona: posts the ante 2000
+fm89: posts the ante 2000
+Bonixer89: posts small blind 8000
+pp12887206: posts big blind 16000
+*** HOLE CARDS ***
+Dealt to ozrona [Ks Js]
+tonim67: folds
+christophe6: folds
+livingstone33: folds
+FatMac: calls 16000
+ozrona: raises 30000 to 46000
+fm89: folds
+Bonixer89: folds
+pp12887206: folds
+FatMac: calls 30000
+*** FLOP *** [Kd Jh 2h]
+FatMac: bets 36000
+ozrona: raises 54000 to 90000
+FatMac: raises 309439 to 399439 and is all-in
+ozrona: calls 250032 and is all-in
+Uncalled bet (87407) returned to FatMac
+*** TURN *** [Kd Jh 2h] [Kc]
+*** RIVER *** [Kd Jh 2h Kc] [Jc]
+*** SHOW DOWN ***
+ozrona: shows [Ks Js]
+FatMac: shows [5h Ah]
+ozrona collected 784064 from pot
+*** SUMMARY ***
+Total pot 784064 | Rake 0
+Board [Kd Jh 2h Kc Jc]
+Seat 1: Bonixer89 (small blind) folded before Flop
+Seat 2: pp12887206 (big blind) folded before Flop
+Seat 3: tonim67 folded before Flop (didn't bet)
+Seat 4: christophe6 folded before Flop (didn't bet)
+Seat 5: livingstone33 folded before Flop (didn't bet)
+Seat 6: FatMac showed [5h Ah] and lost
+Seat 7: ozrona showed [Ks Js] and won (784064)
+Seat 8: fm89 (button) folded before Flop (didn't bet)
+
+PokerStars Hand #260613033235854732200023848: Tournament #8547322, No Limit Hold'em - Level XXI (8000/16000 ante 2000) - 2026/06/13 23:01:48 ACST [2026/06/13 13:31:48 UTC]
+Table '8547322 8' 9-max Seat #1 is the button
+Seat 1: Bonixer89 (309449 in chips)
+Seat 2: pp12887206 (2681278 in chips)
+Seat 3: tonim67 (586744 in chips)
+Seat 4: christophe6 (385272 in chips)
+Seat 5: livingstone33 (1521595 in chips)
+Seat 6: FatMac (87407 in chips)
+Seat 7: ozrona (828064 in chips)
+Seat 8: fm89 (343976 in chips)
+pp12887206: posts the ante 2000
+tonim67: posts the ante 2000
+christophe6: posts the ante 2000
+livingstone33: posts the ante 2000
+FatMac: posts the ante 2000
+ozrona: posts the ante 2000
+fm89: posts the ante 2000
+Bonixer89: posts the ante 2000
+pp12887206: posts small blind 8000
+tonim67: posts big blind 16000
+*** HOLE CARDS ***
+Dealt to ozrona [7s Qh]
+christophe6: folds
+livingstone33: calls 16000
+FatMac: folds
+ozrona: folds
+fm89: calls 16000
+Bonixer89: calls 16000
+pp12887206: calls 8000
+tonim67: checks
+*** FLOP *** [Qd 2d Jh]
+pp12887206: checks
+tonim67: checks
+livingstone33: checks
+fm89: checks
+Bonixer89: checks
+*** TURN *** [Qd 2d Jh] [4d]
+pp12887206: checks
+tonim67: checks
+livingstone33: checks
+fm89: checks
+Bonixer89: checks
+*** RIVER *** [Qd 2d Jh 4d] [3h]
+pp12887206: checks
+tonim67: checks
+livingstone33: checks
+fm89: checks
+Bonixer89: bets 56000
+pp12887206: folds
+tonim67: folds
+livingstone33: folds
+fm89: folds
+Uncalled bet (56000) returned to Bonixer89
+Bonixer89 collected 96000 from pot
+*** SUMMARY ***
+Total pot 96000 | Rake 0
+Board [Qd 2d Jh 4d 3h]
+Seat 1: Bonixer89 (button) collected (96000)
+Seat 2: pp12887206 (small blind) folded on the River
+Seat 3: tonim67 (big blind) folded on the River
+Seat 4: christophe6 folded before Flop (didn't bet)
+Seat 5: livingstone33 folded on the River
+Seat 6: FatMac folded before Flop (didn't bet)
+Seat 7: ozrona folded before Flop (didn't bet)
+Seat 8: fm89 folded on the River
+
+PokerStars Hand #260613033235854732200023978: Tournament #8547322, No Limit Hold'em - Level XXII (10000/20000 ante 3000) - 2026/06/13 23:04:02 ACST [2026/06/13 13:34:02 UTC]
+Table '8547322 8' 9-max Seat #2 is the button
+Seat 1: Bonixer89 (387449 in chips)
+Seat 2: pp12887206 (2663278 in chips)
+Seat 3: tonim67 (568744 in chips)
+Seat 4: christophe6 (383272 in chips)
+Seat 5: livingstone33 (1503595 in chips)
+Seat 6: FatMac (85407 in chips)
+Seat 7: ozrona (826064 in chips)
+Seat 8: fm89 (325976 in chips)
+tonim67: posts the ante 3000
+christophe6: posts the ante 3000
+livingstone33: posts the ante 3000
+FatMac: posts the ante 3000
+ozrona: posts the ante 3000
+fm89: posts the ante 3000
+Bonixer89: posts the ante 3000
+pp12887206: posts the ante 3000
+tonim67: posts small blind 10000
+christophe6: posts big blind 20000
+*** HOLE CARDS ***
+Dealt to ozrona [Jd Ac]
+livingstone33: folds
+FatMac: folds
+ozrona: raises 32000 to 52000
+fm89: folds
+Bonixer89: folds
+pp12887206: raises 88000 to 140000
+tonim67: folds
+christophe6: folds
+ozrona: folds
+Uncalled bet (88000) returned to pp12887206
+pp12887206 collected 158000 from pot
+*** SUMMARY ***
+Total pot 158000 | Rake 0
+Seat 1: Bonixer89 folded before Flop (didn't bet)
+Seat 2: pp12887206 (button) collected (158000)
+Seat 3: tonim67 (small blind) folded before Flop
+Seat 4: christophe6 (big blind) folded before Flop
+Seat 5: livingstone33 folded before Flop (didn't bet)
+Seat 6: FatMac folded before Flop (didn't bet)
+Seat 7: ozrona folded before Flop (didn't bet)
+Seat 8: fm89 folded before Flop (didn't bet)
+
+PokerStars Hand #260613033235854732200024008: Tournament #8547322, No Limit Hold'em - Level XXII (10000/20000 ante 3000) - 2026/06/13 23:04:31 ACST [2026/06/13 13:34:31 UTC]
+Table '8547322 8' 9-max Seat #3 is the button
+Seat 1: Bonixer89 (384449 in chips)
+Seat 2: pp12887206 (2766278 in chips)
+Seat 3: tonim67 (555744 in chips)
+Seat 4: christophe6 (360272 in chips)
+Seat 5: livingstone33 (1500595 in chips)
+Seat 6: FatMac (82407 in chips)
+Seat 7: ozrona (771064 in chips)
+Seat 8: fm89 (322976 in chips)
+christophe6: posts the ante 3000
+livingstone33: posts the ante 3000
+FatMac: posts the ante 3000
+ozrona: posts the ante 3000
+fm89: posts the ante 3000
+Bonixer89: posts the ante 3000
+pp12887206: posts the ante 3000
+tonim67: posts the ante 3000
+christophe6: posts small blind 10000
+livingstone33: posts big blind 20000
+*** HOLE CARDS ***
+Dealt to ozrona [4d 7s]
+FatMac: folds
+ozrona: folds
+fm89: folds
+Bonixer89: folds
+pp12887206: folds
+tonim67: calls 20000
+christophe6: raises 319272 to 339272 and is all-in
+livingstone33: folds
+tonim67: folds
+Uncalled bet (329272) returned to christophe6
+christophe6 collected 74000 from pot
+*** SUMMARY ***
+Total pot 74000 | Rake 0
+Seat 1: Bonixer89 folded before Flop (didn't bet)
+Seat 2: pp12887206 folded before Flop (didn't bet)
+Seat 3: tonim67 (button) folded before Flop (didn't bet)
+Seat 4: christophe6 (small blind) collected (74000)
+Seat 5: livingstone33 (big blind) folded before Flop
+Seat 6: FatMac folded before Flop (didn't bet)
+Seat 7: ozrona folded before Flop (didn't bet)
+Seat 8: fm89 folded before Flop (didn't bet)
+
+PokerStars Hand #260613033235854732200024038: Tournament #8547322, No Limit Hold'em - Level XXII (10000/20000 ante 3000) - 2026/06/13 23:05:07 ACST [2026/06/13 13:35:07 UTC]
+Table '8547322 8' 9-max Seat #4 is the button
+Seat 1: Bonixer89 (381449 in chips)
+Seat 2: pp12887206 (2763278 in chips)
+Seat 3: tonim67 (532744 in chips)
+Seat 4: christophe6 (421272 in chips)
+Seat 5: livingstone33 (1477595 in chips)
+Seat 6: FatMac (79407 in chips)
+Seat 7: ozrona (768064 in chips)
+Seat 8: fm89 (319976 in chips)
+livingstone33: posts the ante 3000
+FatMac: posts the ante 3000
+ozrona: posts the ante 3000
+fm89: posts the ante 3000
+Bonixer89: posts the ante 3000
+pp12887206: posts the ante 3000
+tonim67: posts the ante 3000
+christophe6: posts the ante 3000
+livingstone33: posts small blind 10000
+FatMac: posts big blind 20000
+*** HOLE CARDS ***
+Dealt to ozrona [2h Qs]
+ozrona: folds
+fm89: folds
+Bonixer89: raises 358449 to 378449 and is all-in
+pp12887206: folds
+tonim67: folds
+christophe6: folds
+livingstone33: folds
+FatMac: folds
+Uncalled bet (358449) returned to Bonixer89
+Bonixer89 collected 74000 from pot
+*** SUMMARY ***
+Total pot 74000 | Rake 0
+Seat 1: Bonixer89 collected (74000)
+Seat 2: pp12887206 folded before Flop (didn't bet)
+Seat 3: tonim67 folded before Flop (didn't bet)
+Seat 4: christophe6 (button) folded before Flop (didn't bet)
+Seat 5: livingstone33 (small blind) folded before Flop
+Seat 6: FatMac (big blind) folded before Flop
+Seat 7: ozrona folded before Flop (didn't bet)
+Seat 8: fm89 folded before Flop (didn't bet)
+
+PokerStars Hand #260613033235854732200024058: Tournament #8547322, No Limit Hold'em - Level XXII (10000/20000 ante 3000) - 2026/06/13 23:05:31 ACST [2026/06/13 13:35:31 UTC]
+Table '8547322 8' 9-max Seat #5 is the button
+Seat 1: Bonixer89 (432449 in chips)
+Seat 2: pp12887206 (2760278 in chips)
+Seat 3: tonim67 (529744 in chips)
+Seat 4: christophe6 (418272 in chips)
+Seat 5: livingstone33 (1464595 in chips)
+Seat 6: FatMac (56407 in chips)
+Seat 7: ozrona (765064 in chips)
+Seat 8: fm89 (316976 in chips)
+FatMac: posts the ante 3000
+ozrona: posts the ante 3000
+fm89: posts the ante 3000
+Bonixer89: posts the ante 3000
+pp12887206: posts the ante 3000
+tonim67: posts the ante 3000
+christophe6: posts the ante 3000
+livingstone33: posts the ante 3000
+FatMac: posts small blind 10000
+ozrona: posts big blind 20000
+*** HOLE CARDS ***
+Dealt to ozrona [3s 6d]
+fm89: folds
+Bonixer89: folds
+pp12887206: folds
+tonim67: folds
+christophe6: folds
+livingstone33: raises 40000 to 60000
+FatMac: calls 43407 and is all-in
+ozrona: calls 40000
+*** FLOP *** [6s 3c Kc]
+ozrona: checks
+livingstone33: bets 148055
+ozrona: calls 148055
+*** TURN *** [6s 3c Kc] [7s]
+ozrona: checks
+livingstone33: bets 1253540 and is all-in
+ozrona: calls 554009 and is all-in
+Uncalled bet (699531) returned to livingstone33
+*** RIVER *** [6s 3c Kc 7s] [Qh]
+*** SHOW DOWN ***
+ozrona: shows [3s 6d]
+livingstone33: shows [Js Jc]
+FatMac: shows [Qs Jh]
+ozrona collected 184221 from main pot
+ozrona collected 1417314 from side pot-1
+*** SUMMARY ***
+Total pot 1601535 | Rake 0
+Board [6s 3c Kc 7s Qh]
+Seat 1: Bonixer89 folded before Flop (didn't bet)
+Seat 2: pp12887206 folded before Flop (didn't bet)
+Seat 3: tonim67 folded before Flop (didn't bet)
+Seat 4: christophe6 folded before Flop (didn't bet)
+Seat 5: livingstone33 (button) showed [Js Jc] and lost
+Seat 6: FatMac (small blind) showed [Qs Jh] and lost
+Seat 7: ozrona (big blind) showed [3s 6d] and won (1601535)
+Seat 8: fm89 folded before Flop (didn't bet)
+
+PokerStars Hand #260613033235854732200024118: Tournament #8547322, No Limit Hold'em - Level XXII (10000/20000 ante 3000) - 2026/06/13 23:06:33 ACST [2026/06/13 13:36:33 UTC]
+Table '8547322 8' 9-max Seat #6 is the button
+Seat 1: Bonixer89 (429449 in chips)
+Seat 2: pp12887206 (2757278 in chips)
+Seat 3: tonim67 (526744 in chips)
+Seat 4: christophe6 (415272 in chips)
+Seat 5: livingstone33 (699531 in chips)
+Seat 7: ozrona (1601535 in chips)
+Seat 8: fm89 (313976 in chips)
+ozrona: posts the ante 3000
+fm89: posts the ante 3000
+Bonixer89: posts the ante 3000
+pp12887206: posts the ante 3000
+tonim67: posts the ante 3000
+christophe6: posts the ante 3000
+livingstone33: posts the ante 3000
+ozrona: posts small blind 10000
+fm89: posts big blind 20000
+*** HOLE CARDS ***
+Dealt to ozrona [7s Kc]
+Bonixer89: folds
+pp12887206: folds
+tonim67: folds
+christophe6: folds
+livingstone33: raises 40000 to 60000
+ozrona: folds
+fm89: folds
+Uncalled bet (40000) returned to livingstone33
+livingstone33 collected 71000 from pot
+*** SUMMARY ***
+Total pot 71000 | Rake 0
+Seat 1: Bonixer89 folded before Flop (didn't bet)
+Seat 2: pp12887206 folded before Flop (didn't bet)
+Seat 3: tonim67 folded before Flop (didn't bet)
+Seat 4: christophe6 folded before Flop (didn't bet)
+Seat 5: livingstone33 collected (71000)
+Seat 7: ozrona (small blind) folded before Flop
+Seat 8: fm89 (big blind) folded before Flop
+
+PokerStars Hand #260613033235854732200024148: Tournament #8547322, No Limit Hold'em - Level XXII (10000/20000 ante 3000) - 2026/06/13 23:07:05 ACST [2026/06/13 13:37:05 UTC]
+Table '8547322 8' 9-max Seat #7 is the button
+Seat 1: Bonixer89 (426449 in chips)
+Seat 2: pp12887206 (2754278 in chips)
+Seat 3: tonim67 (523744 in chips)
+Seat 4: christophe6 (412272 in chips)
+Seat 5: livingstone33 (747531 in chips)
+Seat 7: ozrona (1588535 in chips)
+Seat 8: fm89 (290976 in chips)
+fm89: posts the ante 3000
+Bonixer89: posts the ante 3000
+pp12887206: posts the ante 3000
+tonim67: posts the ante 3000
+christophe6: posts the ante 3000
+livingstone33: posts the ante 3000
+ozrona: posts the ante 3000
+fm89: posts small blind 10000
+Bonixer89: posts big blind 20000
+*** HOLE CARDS ***
+Dealt to ozrona [5s Jd]
+pp12887206: folds
+tonim67: folds
+christophe6: folds
+livingstone33: calls 20000
+ozrona: folds
+fm89: folds
+Bonixer89: checks
+*** FLOP *** [3s 8s 7h]
+Bonixer89: checks
+livingstone33: bets 71000
+Bonixer89: calls 71000
+*** TURN *** [3s 8s 7h] [Jh]
+Bonixer89: checks
+livingstone33: bets 159750
+Bonixer89: raises 172699 to 332449 and is all-in
+livingstone33: calls 172699
+*** RIVER *** [3s 8s 7h Jh] [2s]
+*** SHOW DOWN ***
+livingstone33: shows [Ah Ad]
+Bonixer89: shows [Js Ks]
+Bonixer89 collected 877898 from pot
+*** SUMMARY ***
+Total pot 877898 | Rake 0
+Board [3s 8s 7h Jh 2s]
+Seat 1: Bonixer89 (big blind) showed [Js Ks] and won (877898)
+Seat 2: pp12887206 folded before Flop (didn't bet)
+Seat 3: tonim67 folded before Flop (didn't bet)
+Seat 4: christophe6 folded before Flop (didn't bet)
+Seat 5: livingstone33 showed [Ah Ad] and lost
+Seat 7: ozrona (button) folded before Flop (didn't bet)
+Seat 8: fm89 (small blind) folded before Flop
+
+PokerStars Hand #260613033235854732200024208: Tournament #8547322, No Limit Hold'em - Level XXII (10000/20000 ante 3000) - 2026/06/13 23:08:08 ACST [2026/06/13 13:38:08 UTC]
+Table '8547322 8' 9-max Seat #8 is the button
+Seat 1: Bonixer89 (877898 in chips)
+Seat 2: pp12887206 (2751278 in chips)
+Seat 3: tonim67 (520744 in chips)
+Seat 4: christophe6 (409272 in chips)
+Seat 5: livingstone33 (321082 in chips)
+Seat 6: whykickaoinkpig (451856 in chips)
+Seat 7: ozrona (1585535 in chips)
+Seat 8: fm89 (277976 in chips)
+Bonixer89: posts the ante 3000
+pp12887206: posts the ante 3000
+tonim67: posts the ante 3000
+christophe6: posts the ante 3000
+livingstone33: posts the ante 3000
+whykickaoinkpig: posts the ante 3000
+ozrona: posts the ante 3000
+fm89: posts the ante 3000
+Bonixer89: posts small blind 10000
+pp12887206: posts big blind 20000
+*** HOLE CARDS ***
+Dealt to ozrona [3s Jh]
+tonim67: folds
+christophe6: folds
+livingstone33: folds
+whykickaoinkpig: folds
+ozrona: folds
+fm89: folds
+Bonixer89: calls 10000
+pp12887206: raises 30000 to 50000
+Bonixer89: calls 30000
+*** FLOP *** [Qd 4s 4d]
+Bonixer89: checks
+pp12887206: bets 74666
+Bonixer89: folds
+Uncalled bet (74666) returned to pp12887206
+pp12887206 collected 124000 from pot
+*** SUMMARY ***
+Total pot 124000 | Rake 0
+Board [Qd 4s 4d]
+Seat 1: Bonixer89 (small blind) folded on the Flop
+Seat 2: pp12887206 (big blind) collected (124000)
+Seat 3: tonim67 folded before Flop (didn't bet)
+Seat 4: christophe6 folded before Flop (didn't bet)
+Seat 5: livingstone33 folded before Flop (didn't bet)
+Seat 6: whykickaoinkpig folded before Flop (didn't bet)
+Seat 7: ozrona folded before Flop (didn't bet)
+Seat 8: fm89 (button) folded before Flop (didn't bet)
+
+PokerStars Hand #260613033235854732200024238: Tournament #8547322, No Limit Hold'em - Level XXII (10000/20000 ante 3000) - 2026/06/13 23:09:11 ACST [2026/06/13 13:39:11 UTC]
+Table '8547322 8' 9-max Seat #1 is the button
+Seat 1: Bonixer89 (824898 in chips)
+Seat 2: pp12887206 (2822278 in chips)
+Seat 3: tonim67 (517744 in chips)
+Seat 4: christophe6 (406272 in chips)
+Seat 5: livingstone33 (318082 in chips)
+Seat 6: whykickaoinkpig (448856 in chips)
+Seat 7: ozrona (1582535 in chips)
+Seat 8: fm89 (274976 in chips)
+Seat 9: Calvyn05 (912609 in chips)
+pp12887206: posts the ante 3000
+tonim67: posts the ante 3000
+christophe6: posts the ante 3000
+livingstone33: posts the ante 3000
+whykickaoinkpig: posts the ante 3000
+ozrona: posts the ante 3000
+fm89: posts the ante 3000
+Calvyn05: posts the ante 3000
+Bonixer89: posts the ante 3000
+pp12887206: posts small blind 10000
+tonim67: posts big blind 20000
+*** HOLE CARDS ***
+Dealt to ozrona [Jc 5d]
+christophe6: folds
+livingstone33: folds
+whykickaoinkpig: folds
+ozrona: folds
+fm89: folds
+Calvyn05: folds
+Bonixer89: raises 20000 to 40000
+pp12887206: folds
+tonim67: folds
+Uncalled bet (20000) returned to Bonixer89
+Bonixer89 collected 77000 from pot
+*** SUMMARY ***
+Total pot 77000 | Rake 0
+Seat 1: Bonixer89 (button) collected (77000)
+Seat 2: pp12887206 (small blind) folded before Flop
+Seat 3: tonim67 (big blind) folded before Flop
+Seat 4: christophe6 folded before Flop (didn't bet)
+Seat 5: livingstone33 folded before Flop (didn't bet)
+Seat 6: whykickaoinkpig folded before Flop (didn't bet)
+Seat 7: ozrona folded before Flop (didn't bet)
+Seat 8: fm89 folded before Flop (didn't bet)
+Seat 9: Calvyn05 folded before Flop (didn't bet)
+
+PokerStars Hand #260613033235854732200024248: Tournament #8547322, No Limit Hold'em - Level XXII (10000/20000 ante 3000) - 2026/06/13 23:09:39 ACST [2026/06/13 13:39:39 UTC]
+Table '8547322 8' 9-max Seat #2 is the button
+Seat 1: Bonixer89 (878898 in chips)
+Seat 2: pp12887206 (2809278 in chips)
+Seat 3: tonim67 (494744 in chips)
+Seat 4: christophe6 (403272 in chips)
+Seat 5: livingstone33 (315082 in chips)
+Seat 6: whykickaoinkpig (445856 in chips)
+Seat 7: ozrona (1579535 in chips)
+Seat 8: fm89 (271976 in chips)
+Seat 9: Calvyn05 (909609 in chips)
+tonim67: posts the ante 3000
+christophe6: posts the ante 3000
+livingstone33: posts the ante 3000
+whykickaoinkpig: posts the ante 3000
+ozrona: posts the ante 3000
+fm89: posts the ante 3000
+Calvyn05: posts the ante 3000
+Bonixer89: posts the ante 3000
+pp12887206: posts the ante 3000
+tonim67: posts small blind 10000
+christophe6: posts big blind 20000
+*** HOLE CARDS ***
+Dealt to ozrona [Qh Js]
+livingstone33: folds
+whykickaoinkpig: folds
+ozrona: raises 36000 to 56000
+fm89: folds
+Calvyn05: folds
+Bonixer89: folds
+pp12887206: folds
+tonim67: folds
+christophe6: folds
+Uncalled bet (36000) returned to ozrona
+ozrona collected 77000 from pot
+*** SUMMARY ***
+Total pot 77000 | Rake 0
+Seat 1: Bonixer89 folded before Flop (didn't bet)
+Seat 2: pp12887206 (button) folded before Flop (didn't bet)
+Seat 3: tonim67 (small blind) folded before Flop
+Seat 4: christophe6 (big blind) folded before Flop
+Seat 5: livingstone33 folded before Flop (didn't bet)
+Seat 6: whykickaoinkpig folded before Flop (didn't bet)
+Seat 7: ozrona collected (77000)
+Seat 8: fm89 folded before Flop (didn't bet)
+Seat 9: Calvyn05 folded before Flop (didn't bet)
+
+PokerStars Hand #260613033235854732200024278: Tournament #8547322, No Limit Hold'em - Level XXII (10000/20000 ante 3000) - 2026/06/13 23:10:07 ACST [2026/06/13 13:40:07 UTC]
+Table '8547322 8' 9-max Seat #3 is the button
+Seat 1: Bonixer89 (875898 in chips)
+Seat 2: pp12887206 (2806278 in chips)
+Seat 3: tonim67 (481744 in chips)
+Seat 4: christophe6 (380272 in chips)
+Seat 5: livingstone33 (312082 in chips)
+Seat 6: whykickaoinkpig (442856 in chips)
+Seat 7: ozrona (1633535 in chips)
+Seat 8: fm89 (268976 in chips)
+Seat 9: Calvyn05 (906609 in chips)
+christophe6: posts the ante 3000
+livingstone33: posts the ante 3000
+whykickaoinkpig: posts the ante 3000
+ozrona: posts the ante 3000
+fm89: posts the ante 3000
+Calvyn05: posts the ante 3000
+Bonixer89: posts the ante 3000
+pp12887206: posts the ante 3000
+tonim67: posts the ante 3000
+christophe6: posts small blind 10000
+livingstone33: posts big blind 20000
+*** HOLE CARDS ***
+Dealt to ozrona [4s 2c]
+whykickaoinkpig: folds
+ozrona: folds
+fm89: raises 245976 to 265976 and is all-in
+Calvyn05: folds
+Bonixer89: folds
+pp12887206: folds
+tonim67: folds
+christophe6: folds
+livingstone33: calls 245976 and is all-in
+*** FLOP *** [8d Jd 9c]
+*** TURN *** [8d Jd 9c] [8s]
+*** RIVER *** [8d Jd 9c 8s] [9h]
+*** SHOW DOWN ***
+fm89: shows [Qs Qc]
+livingstone33: shows [7c 7s]
+fm89 collected 568952 from pot
+*** SUMMARY ***
+Total pot 568952 | Rake 0
+Board [8d Jd 9c 8s 9h]
+Seat 1: Bonixer89 folded before Flop (didn't bet)
+Seat 2: pp12887206 folded before Flop (didn't bet)
+Seat 3: tonim67 (button) folded before Flop (didn't bet)
+Seat 4: christophe6 (small blind) folded before Flop
+Seat 5: livingstone33 (big blind) showed [7c 7s] and lost
+Seat 6: whykickaoinkpig folded before Flop (didn't bet)
+Seat 7: ozrona folded before Flop (didn't bet)
+Seat 8: fm89 showed [Qs Qc] and won (568952)
+Seat 9: Calvyn05 folded before Flop (didn't bet)
+
+PokerStars Hand #260613033235854732200024308: Tournament #8547322, No Limit Hold'em - Level XXII (10000/20000 ante 3000) - 2026/06/13 23:10:50 ACST [2026/06/13 13:40:50 UTC]
+Table '8547322 8' 9-max Seat #4 is the button
+Seat 1: Bonixer89 (872898 in chips)
+Seat 2: pp12887206 (2803278 in chips)
+Seat 3: tonim67 (478744 in chips)
+Seat 4: christophe6 (367272 in chips)
+Seat 5: livingstone33 (43106 in chips)
+Seat 6: whykickaoinkpig (439856 in chips)
+Seat 7: ozrona (1630535 in chips)
+Seat 8: fm89 (568952 in chips)
+Seat 9: Calvyn05 (903609 in chips)
+livingstone33: posts the ante 3000
+whykickaoinkpig: posts the ante 3000
+ozrona: posts the ante 3000
+fm89: posts the ante 3000
+Calvyn05: posts the ante 3000
+Bonixer89: posts the ante 3000
+pp12887206: posts the ante 3000
+tonim67: posts the ante 3000
+christophe6: posts the ante 3000
+livingstone33: posts small blind 10000
+whykickaoinkpig: posts big blind 20000
+*** HOLE CARDS ***
+Dealt to ozrona [7d 9s]
+ozrona: folds
+fm89: folds
+Calvyn05: calls 20000
+Bonixer89: folds
+pp12887206: folds
+tonim67: folds
+christophe6: raises 60000 to 80000
+livingstone33: calls 30106 and is all-in
+whykickaoinkpig: folds
+Calvyn05: calls 60000
+*** FLOP *** [Ks Kc Tc]
+Calvyn05: checks
+christophe6: checks
+*** TURN *** [Ks Kc Tc] [6h]
+Calvyn05: bets 247106
+christophe6: folds
+Uncalled bet (247106) returned to Calvyn05
+*** RIVER *** [Ks Kc Tc 6h] [2h]
+*** SHOW DOWN ***
+livingstone33: shows [4c 6d]
+Calvyn05: shows [8c 8h]
+Calvyn05 collected 167318 from main pot
+Calvyn05 collected 79788 from side pot-1
+*** SUMMARY ***
+Total pot 247106 | Rake 0
+Board [Ks Kc Tc 6h 2h]
+Seat 1: Bonixer89 folded before Flop (didn't bet)
+Seat 2: pp12887206 folded before Flop (didn't bet)
+Seat 3: tonim67 folded before Flop (didn't bet)
+Seat 4: christophe6 (button) folded on the Turn
+Seat 5: livingstone33 (small blind) showed [4c 6d] and lost
+Seat 6: whykickaoinkpig (big blind) folded before Flop
+Seat 7: ozrona folded before Flop (didn't bet)
+Seat 8: fm89 folded before Flop (didn't bet)
+Seat 9: Calvyn05 showed [8c 8h] and won (247106)
+
+PokerStars Hand #260613033235854732200024338: Tournament #8547322, No Limit Hold'em - Level XXII (10000/20000 ante 3000) - 2026/06/13 23:11:30 ACST [2026/06/13 13:41:30 UTC]
+Table '8547322 8' 9-max Seat #5 is the button
+Seat 1: Bonixer89 (869898 in chips)
+Seat 2: pp12887206 (2800278 in chips)
+Seat 3: tonim67 (475744 in chips)
+Seat 4: christophe6 (284272 in chips)
+Seat 6: whykickaoinkpig (416856 in chips)
+Seat 7: ozrona (1627535 in chips)
+Seat 8: fm89 (565952 in chips)
+Seat 9: Calvyn05 (1067715 in chips)
+whykickaoinkpig: posts the ante 3000
+ozrona: posts the ante 3000
+fm89: posts the ante 3000
+Calvyn05: posts the ante 3000
+Bonixer89: posts the ante 3000
+pp12887206: posts the ante 3000
+tonim67: posts the ante 3000
+christophe6: posts the ante 3000
+whykickaoinkpig: posts small blind 10000
+ozrona: posts big blind 20000
+*** HOLE CARDS ***
+Dealt to ozrona [4h 2h]
+fm89: folds
+Calvyn05: folds
+Bonixer89: folds
+pp12887206: folds
+tonim67: folds
+christophe6: folds
+whykickaoinkpig: calls 10000
+ozrona: raises 20000 to 40000
+whykickaoinkpig: calls 20000
+*** FLOP *** [Th 5s 8s]
+whykickaoinkpig: checks
+ozrona: bets 60000
+whykickaoinkpig: folds
+Uncalled bet (60000) returned to ozrona
+ozrona collected 104000 from pot
+*** SUMMARY ***
+Total pot 104000 | Rake 0
+Board [Th 5s 8s]
+Seat 1: Bonixer89 folded before Flop (didn't bet)
+Seat 2: pp12887206 folded before Flop (didn't bet)
+Seat 3: tonim67 folded before Flop (didn't bet)
+Seat 4: christophe6 folded before Flop (didn't bet)
+Seat 6: whykickaoinkpig (small blind) folded on the Flop
+Seat 7: ozrona (big blind) collected (104000)
+Seat 8: fm89 folded before Flop (didn't bet)
+Seat 9: Calvyn05 folded before Flop (didn't bet)
+
+PokerStars Hand #260613033235854732200024368: Tournament #8547322, No Limit Hold'em - Level XXII (10000/20000 ante 3000) - 2026/06/13 23:12:13 ACST [2026/06/13 13:42:13 UTC]
+Table '8547322 8' 9-max Seat #6 is the button
+Seat 1: Bonixer89 (866898 in chips)
+Seat 2: pp12887206 (2797278 in chips)
+Seat 3: tonim67 (472744 in chips)
+Seat 4: christophe6 (281272 in chips)
+Seat 6: whykickaoinkpig (373856 in chips)
+Seat 7: ozrona (1688535 in chips)
+Seat 8: fm89 (562952 in chips)
+Seat 9: Calvyn05 (1064715 in chips)
+ozrona: posts the ante 3000
+fm89: posts the ante 3000
+Calvyn05: posts the ante 3000
+Bonixer89: posts the ante 3000
+pp12887206: posts the ante 3000
+tonim67: posts the ante 3000
+christophe6: posts the ante 3000
+whykickaoinkpig: posts the ante 3000
+ozrona: posts small blind 10000
+fm89: posts big blind 20000
+*** HOLE CARDS ***
+Dealt to ozrona [8h 2s]
+Calvyn05: calls 20000
+Bonixer89: folds
+pp12887206: raises 50000 to 70000
+tonim67: folds
+christophe6: folds
+whykickaoinkpig: folds
+ozrona: folds
+fm89: calls 50000
+Calvyn05: calls 50000
+*** FLOP *** [4h Td 5s]
+fm89: checks
+Calvyn05: checks
+pp12887206: bets 91333
+fm89: raises 398619 to 489952 and is all-in
+Calvyn05: folds
+pp12887206: calls 398619
+*** TURN *** [4h Td 5s] [5c]
+*** RIVER *** [4h Td 5s 5c] [5d]
+*** SHOW DOWN ***
+fm89: shows [Jc Tc]
+pp12887206: shows [Ks Ts]
+fm89 collected 611952 from main pot
+pp12887206 collected 611952 from main pot
+*** SUMMARY ***
+Total pot 1223904 | Rake 0
+Board [4h Td 5s 5c 5d]
+Seat 1: Bonixer89 folded before Flop (didn't bet)
+Seat 2: pp12887206 showed [Ks Ts] and won (611952)
+Seat 3: tonim67 folded before Flop (didn't bet)
+Seat 4: christophe6 folded before Flop (didn't bet)
+Seat 6: whykickaoinkpig (button) folded before Flop (didn't bet)
+Seat 7: ozrona (small blind) folded before Flop
+Seat 8: fm89 (big blind) showed [Jc Tc] and won (611952)
+Seat 9: Calvyn05 folded on the Flop
+
+PokerStars Hand #260613033235854732200024408: Tournament #8547322, No Limit Hold'em - Level XXII (10000/20000 ante 3000) - 2026/06/13 23:13:17 ACST [2026/06/13 13:43:17 UTC]
+Table '8547322 8' 9-max Seat #7 is the button
+Seat 1: Bonixer89 (863898 in chips)
+Seat 2: pp12887206 (2846278 in chips)
+Seat 3: tonim67 (469744 in chips)
+Seat 4: christophe6 (278272 in chips)
+Seat 6: whykickaoinkpig (370856 in chips)
+Seat 7: ozrona (1675535 in chips)
+Seat 8: fm89 (611952 in chips)
+Seat 9: Calvyn05 (991715 in chips)
+fm89: posts the ante 3000
+Calvyn05: posts the ante 3000
+Bonixer89: posts the ante 3000
+pp12887206: posts the ante 3000
+tonim67: posts the ante 3000
+christophe6: posts the ante 3000
+whykickaoinkpig: posts the ante 3000
+ozrona: posts the ante 3000
+fm89: posts small blind 10000
+Calvyn05: posts big blind 20000
+*** HOLE CARDS ***
+Dealt to ozrona [As 8c]
+Bonixer89: folds
+pp12887206: folds
+tonim67: folds
+christophe6: folds
+whykickaoinkpig: folds
+ozrona: raises 40000 to 60000
+fm89: folds
+Calvyn05: folds
+Uncalled bet (40000) returned to ozrona
+ozrona collected 74000 from pot
+*** SUMMARY ***
+Total pot 74000 | Rake 0
+Seat 1: Bonixer89 folded before Flop (didn't bet)
+Seat 2: pp12887206 folded before Flop (didn't bet)
+Seat 3: tonim67 folded before Flop (didn't bet)
+Seat 4: christophe6 folded before Flop (didn't bet)
+Seat 6: whykickaoinkpig folded before Flop (didn't bet)
+Seat 7: ozrona (button) collected (74000)
+Seat 8: fm89 (small blind) folded before Flop
+Seat 9: Calvyn05 (big blind) folded before Flop
+
+PokerStars Hand #260613033235854732200024438: Tournament #8547322, No Limit Hold'em - Level XXII (10000/20000 ante 3000) - 2026/06/13 23:14:00 ACST [2026/06/13 13:44:00 UTC]
+Table '8547322 8' 9-max Seat #8 is the button
+Seat 1: Bonixer89 (860898 in chips)
+Seat 2: pp12887206 (2843278 in chips)
+Seat 3: tonim67 (466744 in chips)
+Seat 4: christophe6 (275272 in chips)
+Seat 6: whykickaoinkpig (367856 in chips)
+Seat 7: ozrona (1726535 in chips)
+Seat 8: fm89 (598952 in chips)
+Seat 9: Calvyn05 (968715 in chips)
+Calvyn05: posts the ante 3000
+Bonixer89: posts the ante 3000
+pp12887206: posts the ante 3000
+tonim67: posts the ante 3000
+christophe6: posts the ante 3000
+whykickaoinkpig: posts the ante 3000
+ozrona: posts the ante 3000
+fm89: posts the ante 3000
+Calvyn05: posts small blind 10000
+Bonixer89: posts big blind 20000
+*** HOLE CARDS ***
+Dealt to ozrona [2h 3c]
+pp12887206: folds
+tonim67: calls 20000
+christophe6: folds
+whykickaoinkpig: folds
+ozrona: folds
+fm89: folds
+Calvyn05: calls 10000
+Bonixer89: checks
+*** FLOP *** [3h 8c 6h]
+Calvyn05: checks
+Bonixer89: checks
+tonim67: checks
+*** TURN *** [3h 8c 6h] [Jc]
+Calvyn05: checks
+Bonixer89: checks
+tonim67: bets 84000
+Calvyn05: folds
+Bonixer89: folds
+Uncalled bet (84000) returned to tonim67
+tonim67 collected 84000 from pot
+*** SUMMARY ***
+Total pot 84000 | Rake 0
+Board [3h 8c 6h Jc]
+Seat 1: Bonixer89 (big blind) folded on the Turn
+Seat 2: pp12887206 folded before Flop (didn't bet)
+Seat 3: tonim67 collected (84000)
+Seat 4: christophe6 folded before Flop (didn't bet)
+Seat 6: whykickaoinkpig folded before Flop (didn't bet)
+Seat 7: ozrona folded before Flop (didn't bet)
+Seat 8: fm89 (button) folded before Flop (didn't bet)
+Seat 9: Calvyn05 (small blind) folded on the Turn
+
+PokerStars Hand #260613033235854732200024468: Tournament #8547322, No Limit Hold'em - Level XXIII (12000/24000 ante 3000) - 2026/06/13 23:15:02 ACST [2026/06/13 13:45:02 UTC]
+Table '8547322 8' 9-max Seat #9 is the button
+Seat 1: Bonixer89 (837898 in chips)
+Seat 2: pp12887206 (2840278 in chips)
+Seat 3: tonim67 (527744 in chips)
+Seat 4: christophe6 (272272 in chips)
+Seat 6: whykickaoinkpig (364856 in chips)
+Seat 7: ozrona (1723535 in chips)
+Seat 8: fm89 (595952 in chips)
+Seat 9: Calvyn05 (945715 in chips)
+Bonixer89: posts the ante 3000
+pp12887206: posts the ante 3000
+tonim67: posts the ante 3000
+christophe6: posts the ante 3000
+whykickaoinkpig: posts the ante 3000
+ozrona: posts the ante 3000
+fm89: posts the ante 3000
+Calvyn05: posts the ante 3000
+Bonixer89: posts small blind 12000
+pp12887206: posts big blind 24000
+*** HOLE CARDS ***
+Dealt to ozrona [6s Jc]
+tonim67: folds
+christophe6: raises 237272 to 261272 and is all-in
+whykickaoinkpig: folds
+ozrona: folds
+fm89: folds
+Calvyn05: folds
+Bonixer89: folds
+pp12887206: folds
+Uncalled bet (237272) returned to christophe6
+christophe6 collected 84000 from pot
+*** SUMMARY ***
+Total pot 84000 | Rake 0
+Seat 1: Bonixer89 (small blind) folded before Flop
+Seat 2: pp12887206 (big blind) folded before Flop
+Seat 3: tonim67 folded before Flop (didn't bet)
+Seat 4: christophe6 collected (84000)
+Seat 6: whykickaoinkpig folded before Flop (didn't bet)
+Seat 7: ozrona folded before Flop (didn't bet)
+Seat 8: fm89 folded before Flop (didn't bet)
+Seat 9: Calvyn05 (button) folded before Flop (didn't bet)
+
+PokerStars Hand #260613033235854732200024498: Tournament #8547322, No Limit Hold'em - Level XXIII (12000/24000 ante 3000) - 2026/06/13 23:15:28 ACST [2026/06/13 13:45:28 UTC]
+Table '8547322 8' 9-max Seat #1 is the button
+Seat 1: Bonixer89 (822898 in chips)
+Seat 2: pp12887206 (2813278 in chips)
+Seat 3: tonim67 (524744 in chips)
+Seat 4: christophe6 (329272 in chips)
+Seat 6: whykickaoinkpig (361856 in chips)
+Seat 7: ozrona (1720535 in chips)
+Seat 8: fm89 (592952 in chips)
+Seat 9: Calvyn05 (942715 in chips)
+pp12887206: posts the ante 3000
+tonim67: posts the ante 3000
+christophe6: posts the ante 3000
+whykickaoinkpig: posts the ante 3000
+ozrona: posts the ante 3000
+fm89: posts the ante 3000
+Calvyn05: posts the ante 3000
+Bonixer89: posts the ante 3000
+pp12887206: posts small blind 12000
+tonim67: posts big blind 24000
+*** HOLE CARDS ***
+Dealt to ozrona [8h 4c]
+christophe6: folds
+whykickaoinkpig: folds
+ozrona: folds
+fm89: folds
+Calvyn05: raises 36000 to 60000
+Bonixer89: folds
+pp12887206: folds
+tonim67: calls 36000
+*** FLOP *** [9d Jd As]
+tonim67: checks
+Calvyn05: checks
+*** TURN *** [9d Jd As] [6c]
+tonim67: bets 156000
+Calvyn05: calls 156000
+*** RIVER *** [9d Jd As 6c] [3d]
+tonim67: checks
+Calvyn05: bets 156000
+tonim67: calls 156000
+*** SHOW DOWN ***
+Calvyn05: shows [Ad Td]
+Calvyn05 collected 780000 from pot
+*** SUMMARY ***
+Total pot 780000 | Rake 0
+Board [9d Jd As 6c 3d]
+Seat 1: Bonixer89 (button) folded before Flop (didn't bet)
+Seat 2: pp12887206 (small blind) folded before Flop
+Seat 3: tonim67 (big blind) mucked
+Seat 4: christophe6 folded before Flop (didn't bet)
+Seat 6: whykickaoinkpig folded before Flop (didn't bet)
+Seat 7: ozrona folded before Flop (didn't bet)
+Seat 8: fm89 folded before Flop (didn't bet)
+Seat 9: Calvyn05 showed [Ad Td] and won (780000)
+
+PokerStars Hand #260613033235854732200024538: Tournament #8547322, No Limit Hold'em - Level XXIII (12000/24000 ante 3000) - 2026/06/13 23:16:23 ACST [2026/06/13 13:46:23 UTC]
+Table '8547322 8' 9-max Seat #2 is the button
+Seat 1: Bonixer89 (819898 in chips)
+Seat 2: pp12887206 (2798278 in chips)
+Seat 3: tonim67 (149744 in chips)
+Seat 4: christophe6 (326272 in chips)
+Seat 6: whykickaoinkpig (358856 in chips)
+Seat 7: ozrona (1717535 in chips)
+Seat 8: fm89 (589952 in chips)
+Seat 9: Calvyn05 (1347715 in chips)
+tonim67: posts the ante 3000
+christophe6: posts the ante 3000
+whykickaoinkpig: posts the ante 3000
+ozrona: posts the ante 3000
+fm89: posts the ante 3000
+Calvyn05: posts the ante 3000
+Bonixer89: posts the ante 3000
+pp12887206: posts the ante 3000
+tonim67: posts small blind 12000
+christophe6: posts big blind 24000
+*** HOLE CARDS ***
+Dealt to ozrona [3c Jd]
+whykickaoinkpig: folds
+ozrona: folds
+fm89: folds
+Calvyn05: calls 24000
+Bonixer89: folds
+pp12887206: folds
+tonim67: calls 12000
+christophe6: raises 267272 to 291272 and is all-in
+Calvyn05: folds
+tonim67: calls 122744 and is all-in
+Uncalled bet (168528) returned to christophe6
+*** FLOP *** [Ad 6c Ks]
+*** TURN *** [Ad 6c Ks] [7c]
+*** RIVER *** [Ad 6c Ks 7c] [Kh]
+*** SHOW DOWN ***
+tonim67: shows [2s Ac]
+christophe6: shows [9h 8d]
+tonim67 collected 317488 from pot
+*** SUMMARY ***
+Total pot 317488 | Rake 0
+Board [Ad 6c Ks 7c Kh]
+Seat 1: Bonixer89 folded before Flop (didn't bet)
+Seat 2: pp12887206 (button) folded before Flop (didn't bet)
+Seat 3: tonim67 (small blind) showed [2s Ac] and won (317488)
+Seat 4: christophe6 (big blind) showed [9h 8d] and lost
+Seat 6: whykickaoinkpig folded before Flop (didn't bet)
+Seat 7: ozrona folded before Flop (didn't bet)
+Seat 8: fm89 folded before Flop (didn't bet)
+Seat 9: Calvyn05 folded before Flop (didn't bet)
+
+PokerStars Hand #260613033235854732200024588: Tournament #8547322, No Limit Hold'em - Level XXIII (12000/24000 ante 3000) - 2026/06/13 23:17:12 ACST [2026/06/13 13:47:12 UTC]
+Table '8547322 8' 9-max Seat #3 is the button
+Seat 1: Bonixer89 (816898 in chips)
+Seat 2: pp12887206 (2795278 in chips)
+Seat 3: tonim67 (317488 in chips)
+Seat 4: christophe6 (200528 in chips)
+Seat 7: ozrona (1714535 in chips)
+Seat 8: fm89 (586952 in chips)
+Seat 9: Calvyn05 (1320715 in chips)
+christophe6: posts the ante 3000
+ozrona: posts the ante 3000
+fm89: posts the ante 3000
+Calvyn05: posts the ante 3000
+Bonixer89: posts the ante 3000
+pp12887206: posts the ante 3000
+tonim67: posts the ante 3000
+christophe6: posts small blind 12000
+ozrona: posts big blind 24000
+*** HOLE CARDS ***
+Dealt to ozrona [Kh Qs]
+fm89: folds
+Calvyn05: raises 24000 to 48000
+Bonixer89: folds
+pp12887206: folds
+tonim67: folds
+christophe6: folds
+ozrona: calls 24000
+*** FLOP *** [8d Tc 3s]
+ozrona: bets 55000
+Calvyn05: calls 55000
+*** TURN *** [8d Tc 3s] [4h]
+ozrona: bets 159333
+Calvyn05: calls 159333
+*** RIVER *** [8d Tc 3s 4h] [4d]
+ozrona: checks
+Calvyn05: bets 557666
+ozrona: folds
+Uncalled bet (557666) returned to Calvyn05
+Calvyn05 collected 557666 from pot
+*** SUMMARY ***
+Total pot 557666 | Rake 0
+Board [8d Tc 3s 4h 4d]
+Seat 1: Bonixer89 folded before Flop (didn't bet)
+Seat 2: pp12887206 folded before Flop (didn't bet)
+Seat 3: tonim67 (button) folded before Flop (didn't bet)
+Seat 4: christophe6 (small blind) folded before Flop
+Seat 7: ozrona (big blind) folded on the River
+Seat 8: fm89 folded before Flop (didn't bet)
+Seat 9: Calvyn05 collected (557666)
+
+PokerStars Hand #260613033235854732200024628: Tournament #8547322, No Limit Hold'em - Level XXIII (12000/24000 ante 3000) - 2026/06/13 23:18:05 ACST [2026/06/13 13:48:05 UTC]
+Table '8547322 8' 9-max Seat #4 is the button
+Seat 1: Bonixer89 (813898 in chips)
+Seat 2: pp12887206 (2792278 in chips)
+Seat 3: tonim67 (314488 in chips)
+Seat 4: christophe6 (185528 in chips)
+Seat 7: ozrona (1449202 in chips)
+Seat 8: fm89 (583952 in chips)
+Seat 9: Calvyn05 (1613048 in chips)
+ozrona: posts the ante 3000
+fm89: posts the ante 3000
+Calvyn05: posts the ante 3000
+Bonixer89: posts the ante 3000
+pp12887206: posts the ante 3000
+tonim67: posts the ante 3000
+christophe6: posts the ante 3000
+ozrona: posts small blind 12000
+fm89: posts big blind 24000
+*** HOLE CARDS ***
+Dealt to ozrona [8d 3c]
+Calvyn05: raises 24000 to 48000
+Bonixer89: folds
+pp12887206: folds
+tonim67: folds
+christophe6: folds
+ozrona: folds
+fm89: calls 24000
+*** FLOP *** [8c 9s 3d]
+fm89: checks
+Calvyn05: checks
+*** TURN *** [8c 9s 3d] [Td]
+fm89: checks
+Calvyn05: bets 24000
+fm89: calls 24000
+*** RIVER *** [8c 9s 3d Td] [4s]
+fm89: checks
+Calvyn05: checks
+*** SHOW DOWN ***
+fm89: shows [6c Ac]
+fm89 collected 177000 from pot
+*** SUMMARY ***
+Total pot 177000 | Rake 0
+Board [8c 9s 3d Td 4s]
+Seat 1: Bonixer89 folded before Flop (didn't bet)
+Seat 2: pp12887206 folded before Flop (didn't bet)
+Seat 3: tonim67 folded before Flop (didn't bet)
+Seat 4: christophe6 (button) folded before Flop (didn't bet)
+Seat 7: ozrona (small blind) folded before Flop
+Seat 8: fm89 (big blind) showed [6c Ac] and won (177000)
+Seat 9: Calvyn05 mucked
+
+PokerStars Hand #260613033235854732200024658: Tournament #8547322, No Limit Hold'em - Level XXIII (12000/24000 ante 3000) - 2026/06/13 23:18:42 ACST [2026/06/13 13:48:42 UTC]
+Table '8547322 8' 9-max Seat #7 is the button
+Seat 1: Bonixer89 (810898 in chips)
+Seat 2: pp12887206 (2789278 in chips)
+Seat 3: tonim67 (311488 in chips)
+Seat 4: christophe6 (182528 in chips)
+Seat 7: ozrona (1434202 in chips)
+Seat 8: fm89 (685952 in chips)
+fm89: posts the ante 3000
+Bonixer89: posts the ante 3000
+pp12887206: posts the ante 3000
+tonim67: posts the ante 3000
+christophe6: posts the ante 3000
+ozrona: posts the ante 3000
+fm89: posts small blind 12000
+Bonixer89: posts big blind 24000
+*** HOLE CARDS ***
+Dealt to ozrona [Td Th]
+pp12887206: folds
+tonim67: folds
+christophe6: raises 123528 to 147528 and is all-in
+ozrona: raises 221292 to 368820
+fm89: folds
+Bonixer89: folds
+Uncalled bet (221292) returned to ozrona
+*** FLOP *** [Kc 9d 4h]
+*** TURN *** [Kc 9d 4h] [Ks]
+*** RIVER *** [Kc 9d 4h Ks] [2h]
+*** SHOW DOWN ***
+ozrona: shows [Td Th]
+christophe6: shows [9c 7h]
+ozrona collected 349056 from pot
+*** SUMMARY ***
+Total pot 349056 | Rake 0
+Board [Kc 9d 4h Ks 2h]
+Seat 1: Bonixer89 (big blind) folded before Flop
+Seat 2: pp12887206 folded before Flop (didn't bet)
+Seat 3: tonim67 folded before Flop (didn't bet)
+Seat 4: christophe6 showed [9c 7h] and lost
+Seat 7: ozrona (button) showed [Td Th] and won (349056)
+Seat 8: fm89 (small blind) folded before Flop
+
+PokerStars Hand #2606130332358547322000246810: Tournament #8547322, No Limit Hold'em - Level XXIII (12000/24000 ante 3000) - 2026/06/13 23:19:20 ACST [2026/06/13 13:49:20 UTC]
+Table '8547322 10' 9-max Seat #4 is the button
+Seat 1: _R0880_ (633264 in chips)
+Seat 2: Calvyn05 (1538048 in chips)
+Seat 3: ozrona (1632730 in chips)
+Seat 4: RUBREE (1272325 in chips)
+Seat 7: LONGVSOFT (1851133 in chips)
+Seat 8: Zov26rus (318822 in chips)
+Seat 9: RebelsMC (3308823 in chips)
+LONGVSOFT: posts the ante 3000
+Zov26rus: posts the ante 3000
+RebelsMC: posts the ante 3000
+_R0880_: posts the ante 3000
+Calvyn05: posts the ante 3000
+ozrona: posts the ante 3000
+RUBREE: posts the ante 3000
+LONGVSOFT: posts small blind 12000
+Zov26rus: posts big blind 24000
+*** HOLE CARDS ***
+Dealt to ozrona [4c 9d]
+RebelsMC: raises 24000 to 48000
+_R0880_: folds
+Calvyn05: calls 48000
+ozrona: folds
+RUBREE: folds
+LONGVSOFT: folds
+Zov26rus: calls 24000
+*** FLOP *** [Qc Ah 7h]
+Zov26rus: checks
+RebelsMC: checks
+Calvyn05: checks
+*** TURN *** [Qc Ah 7h] [8h]
+Zov26rus: checks
+RebelsMC: checks
+Calvyn05: bets 59000
+Zov26rus: folds
+RebelsMC: folds
+Uncalled bet (59000) returned to Calvyn05
+Calvyn05 collected 177000 from pot
+*** SUMMARY ***
+Total pot 177000 | Rake 0
+Board [Qc Ah 7h 8h]
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 2: Calvyn05 collected (177000)
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE (button) folded before Flop (didn't bet)
+Seat 7: LONGVSOFT (small blind) folded before Flop
+Seat 8: Zov26rus (big blind) folded on the Turn
+Seat 9: RebelsMC folded on the Turn
+
+PokerStars Hand #2606130332358547322000247010: Tournament #8547322, No Limit Hold'em - Level XXIII (12000/24000 ante 3000) - 2026/06/13 23:20:28 ACST [2026/06/13 13:50:28 UTC]
+Table '8547322 10' 9-max Seat #7 is the button
+Seat 1: _R0880_ (630264 in chips)
+Seat 2: Calvyn05 (1664048 in chips)
+Seat 3: ozrona (1629730 in chips)
+Seat 4: RUBREE (1269325 in chips)
+Seat 5: fm89 (670952 in chips)
+Seat 6: Bonixer89 (783898 in chips)
+Seat 7: LONGVSOFT (1836133 in chips)
+Seat 8: Zov26rus (267822 in chips)
+Seat 9: RebelsMC (3257823 in chips)
+Zov26rus: posts the ante 3000
+RebelsMC: posts the ante 3000
+_R0880_: posts the ante 3000
+Calvyn05: posts the ante 3000
+ozrona: posts the ante 3000
+RUBREE: posts the ante 3000
+fm89: posts the ante 3000
+Bonixer89: posts the ante 3000
+LONGVSOFT: posts the ante 3000
+Zov26rus: posts small blind 12000
+RebelsMC: posts big blind 24000
+*** HOLE CARDS ***
+Dealt to ozrona [5h 2d]
+_R0880_: folds
+Calvyn05: calls 24000
+ozrona: folds
+RUBREE: calls 24000
+fm89: folds
+Bonixer89: folds
+LONGVSOFT: calls 24000
+Zov26rus: calls 12000
+RebelsMC: checks
+*** FLOP *** [2s Tc Kh]
+Zov26rus: checks
+RebelsMC: checks
+Calvyn05: checks
+RUBREE: checks
+LONGVSOFT: bets 110250
+Zov26rus: folds
+RebelsMC: raises 183750 to 294000
+Calvyn05: folds
+RUBREE: folds
+LONGVSOFT: folds
+Uncalled bet (183750) returned to RebelsMC
+RebelsMC collected 367500 from pot
+*** SUMMARY ***
+Total pot 367500 | Rake 0
+Board [2s Tc Kh]
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 2: Calvyn05 folded on the Flop
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE folded on the Flop
+Seat 5: fm89 folded before Flop (didn't bet)
+Seat 6: Bonixer89 folded before Flop (didn't bet)
+Seat 7: LONGVSOFT (button) folded on the Flop
+Seat 8: Zov26rus (small blind) folded on the Flop
+Seat 9: RebelsMC (big blind) collected (367500)
+
+PokerStars Hand #2606130332358547322000247310: Tournament #8547322, No Limit Hold'em - Level XXIII (12000/24000 ante 3000) - 2026/06/13 23:21:53 ACST [2026/06/13 13:51:53 UTC]
+Table '8547322 10' 9-max Seat #8 is the button
+Seat 1: _R0880_ (627264 in chips)
+Seat 2: Calvyn05 (1637048 in chips)
+Seat 3: ozrona (1626730 in chips)
+Seat 4: RUBREE (1242325 in chips)
+Seat 5: fm89 (667952 in chips)
+Seat 6: Bonixer89 (780898 in chips)
+Seat 7: LONGVSOFT (1698883 in chips)
+Seat 8: Zov26rus (240822 in chips)
+Seat 9: RebelsMC (3488073 in chips)
+RebelsMC: posts the ante 3000
+_R0880_: posts the ante 3000
+Calvyn05: posts the ante 3000
+ozrona: posts the ante 3000
+RUBREE: posts the ante 3000
+fm89: posts the ante 3000
+Bonixer89: posts the ante 3000
+LONGVSOFT: posts the ante 3000
+Zov26rus: posts the ante 3000
+RebelsMC: posts small blind 12000
+_R0880_: posts big blind 24000
+*** HOLE CARDS ***
+Dealt to ozrona [6s 3d]
+Calvyn05: calls 24000
+ozrona: folds
+RUBREE: folds
+fm89: folds
+Bonixer89: raises 48000 to 72000
+LONGVSOFT: folds
+Zov26rus: folds
+RebelsMC: folds
+_R0880_: folds
+Calvyn05: calls 48000
+*** FLOP *** [8c Td 7h]
+Calvyn05: checks
+Bonixer89: bets 72000
+Calvyn05: calls 72000
+*** TURN *** [8c Td 7h] [8s]
+Calvyn05: bets 175500
+Bonixer89: folds
+Uncalled bet (175500) returned to Calvyn05
+Calvyn05 collected 351000 from pot
+*** SUMMARY ***
+Total pot 351000 | Rake 0
+Board [8c Td 7h 8s]
+Seat 1: _R0880_ (big blind) folded before Flop
+Seat 2: Calvyn05 collected (351000)
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE folded before Flop (didn't bet)
+Seat 5: fm89 folded before Flop (didn't bet)
+Seat 6: Bonixer89 folded on the Turn
+Seat 7: LONGVSOFT folded before Flop (didn't bet)
+Seat 8: Zov26rus (button) folded before Flop (didn't bet)
+Seat 9: RebelsMC (small blind) folded before Flop
+
+PokerStars Hand #2606130332358547322000247510: Tournament #8547322, No Limit Hold'em - Level XXIII (12000/24000 ante 3000) - 2026/06/13 23:23:03 ACST [2026/06/13 13:53:03 UTC]
+Table '8547322 10' 9-max Seat #9 is the button
+Seat 1: _R0880_ (600264 in chips)
+Seat 2: Calvyn05 (1841048 in chips)
+Seat 3: ozrona (1623730 in chips)
+Seat 4: RUBREE (1239325 in chips)
+Seat 5: fm89 (664952 in chips)
+Seat 6: Bonixer89 (633898 in chips)
+Seat 7: LONGVSOFT (1695883 in chips)
+Seat 8: Zov26rus (237822 in chips)
+Seat 9: RebelsMC (3473073 in chips)
+_R0880_: posts the ante 3000
+Calvyn05: posts the ante 3000
+ozrona: posts the ante 3000
+RUBREE: posts the ante 3000
+fm89: posts the ante 3000
+Bonixer89: posts the ante 3000
+LONGVSOFT: posts the ante 3000
+Zov26rus: posts the ante 3000
+RebelsMC: posts the ante 3000
+_R0880_: posts small blind 12000
+Calvyn05: posts big blind 24000
+*** HOLE CARDS ***
+Dealt to ozrona [8s Kd]
+ozrona: folds
+RUBREE: raises 24000 to 48000
+fm89: raises 613952 to 661952 and is all-in
+Bonixer89: folds
+LONGVSOFT: folds
+Zov26rus: folds
+RebelsMC: folds
+_R0880_: folds
+Calvyn05: folds
+RUBREE: calls 613952
+*** FLOP *** [Jh 2d 8h]
+*** TURN *** [Jh 2d 8h] [8c]
+*** RIVER *** [Jh 2d 8h 8c] [Ah]
+*** SHOW DOWN ***
+RUBREE: shows [Jd Jc]
+fm89: shows [Th Td]
+RUBREE collected 1386904 from pot
+*** SUMMARY ***
+Total pot 1386904 | Rake 0
+Board [Jh 2d 8h 8c Ah]
+Seat 1: _R0880_ (small blind) folded before Flop
+Seat 2: Calvyn05 (big blind) folded before Flop
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE showed [Jd Jc] and won (1386904)
+Seat 5: fm89 showed [Th Td] and lost
+Seat 6: Bonixer89 folded before Flop (didn't bet)
+Seat 7: LONGVSOFT folded before Flop (didn't bet)
+Seat 8: Zov26rus folded before Flop (didn't bet)
+Seat 9: RebelsMC (button) folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000247710: Tournament #8547322, No Limit Hold'em - Level XXIII (12000/24000 ante 3000) - 2026/06/13 23:24:06 ACST [2026/06/13 13:54:06 UTC]
+Table '8547322 10' 9-max Seat #1 is the button
+Seat 1: _R0880_ (585264 in chips)
+Seat 2: Calvyn05 (1814048 in chips)
+Seat 3: ozrona (1620730 in chips)
+Seat 4: RUBREE (1961277 in chips)
+Seat 6: Bonixer89 (630898 in chips)
+Seat 7: LONGVSOFT (1692883 in chips)
+Seat 8: Zov26rus (234822 in chips)
+Seat 9: RebelsMC (3470073 in chips)
+Calvyn05: posts the ante 3000
+ozrona: posts the ante 3000
+RUBREE: posts the ante 3000
+Bonixer89: posts the ante 3000
+LONGVSOFT: posts the ante 3000
+Zov26rus: posts the ante 3000
+RebelsMC: posts the ante 3000
+_R0880_: posts the ante 3000
+Calvyn05: posts small blind 12000
+ozrona: posts big blind 24000
+*** HOLE CARDS ***
+Dealt to ozrona [Td 6c]
+RUBREE: folds
+Bonixer89: folds
+LONGVSOFT: folds
+Zov26rus: folds
+RebelsMC: folds
+_R0880_: folds
+Calvyn05: folds
+Uncalled bet (12000) returned to ozrona
+ozrona collected 48000 from pot
+*** SUMMARY ***
+Total pot 48000 | Rake 0
+Seat 1: _R0880_ (button) folded before Flop (didn't bet)
+Seat 2: Calvyn05 (small blind) folded before Flop
+Seat 3: ozrona (big blind) collected (48000)
+Seat 4: RUBREE folded before Flop (didn't bet)
+Seat 6: Bonixer89 folded before Flop (didn't bet)
+Seat 7: LONGVSOFT folded before Flop (didn't bet)
+Seat 8: Zov26rus folded before Flop (didn't bet)
+Seat 9: RebelsMC folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000247910: Tournament #8547322, No Limit Hold'em - Level XXIII (12000/24000 ante 3000) - 2026/06/13 23:24:42 ACST [2026/06/13 13:54:42 UTC]
+Table '8547322 10' 9-max Seat #2 is the button
+Seat 1: _R0880_ (582264 in chips)
+Seat 2: Calvyn05 (1799048 in chips)
+Seat 3: ozrona (1653730 in chips)
+Seat 4: RUBREE (1958277 in chips)
+Seat 6: Bonixer89 (627898 in chips)
+Seat 7: LONGVSOFT (1689883 in chips)
+Seat 8: Zov26rus (231822 in chips)
+Seat 9: RebelsMC (3467073 in chips)
+ozrona: posts the ante 3000
+RUBREE: posts the ante 3000
+Bonixer89: posts the ante 3000
+LONGVSOFT: posts the ante 3000
+Zov26rus: posts the ante 3000
+RebelsMC: posts the ante 3000
+_R0880_: posts the ante 3000
+Calvyn05: posts the ante 3000
+ozrona: posts small blind 12000
+RUBREE: posts big blind 24000
+*** HOLE CARDS ***
+Dealt to ozrona [9c 8s]
+Bonixer89: folds
+LONGVSOFT: folds
+Zov26rus: raises 204822 to 228822 and is all-in
+RebelsMC: folds
+_R0880_: raises 350442 to 579264 and is all-in
+Calvyn05: folds
+ozrona: folds
+RUBREE: folds
+Uncalled bet (350442) returned to _R0880_
+*** FLOP *** [5s 8d 3s]
+*** TURN *** [5s 8d 3s] [3h]
+*** RIVER *** [5s 8d 3s 3h] [4d]
+*** SHOW DOWN ***
+_R0880_: shows [Kd Ac]
+Zov26rus: shows [Th Ah]
+_R0880_ collected 517644 from pot
+*** SUMMARY ***
+Total pot 517644 | Rake 0
+Board [5s 8d 3s 3h 4d]
+Seat 1: _R0880_ showed [Kd Ac] and won (517644)
+Seat 2: Calvyn05 (button) folded before Flop (didn't bet)
+Seat 3: ozrona (small blind) folded before Flop
+Seat 4: RUBREE (big blind) folded before Flop
+Seat 6: Bonixer89 folded before Flop (didn't bet)
+Seat 7: LONGVSOFT folded before Flop (didn't bet)
+Seat 8: Zov26rus showed [Th Ah] and lost
+Seat 9: RebelsMC folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000248210: Tournament #8547322, No Limit Hold'em - Level XXIII (12000/24000 ante 3000) - 2026/06/13 23:30:01 ACST [2026/06/13 14:00:01 UTC]
+Table '8547322 10' 9-max Seat #3 is the button
+Seat 1: _R0880_ (868086 in chips)
+Seat 2: Calvyn05 (1796048 in chips)
+Seat 3: ozrona (1638730 in chips)
+Seat 4: RUBREE (1931277 in chips)
+Seat 6: Bonixer89 (624898 in chips)
+Seat 7: LONGVSOFT (1686883 in chips)
+Seat 9: RebelsMC (3464073 in chips)
+RUBREE: posts the ante 3000
+Bonixer89: posts the ante 3000
+LONGVSOFT: posts the ante 3000
+RebelsMC: posts the ante 3000
+_R0880_: posts the ante 3000
+Calvyn05: posts the ante 3000
+ozrona: posts the ante 3000
+RUBREE: posts small blind 12000
+Bonixer89: posts big blind 24000
+*** HOLE CARDS ***
+Dealt to ozrona [Ks 2c]
+LONGVSOFT: raises 24000 to 48000
+RebelsMC: folds
+_R0880_: folds
+Calvyn05: folds
+ozrona: folds
+RUBREE: folds
+Bonixer89: folds
+Uncalled bet (24000) returned to LONGVSOFT
+LONGVSOFT collected 81000 from pot
+*** SUMMARY ***
+Total pot 81000 | Rake 0
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 2: Calvyn05 folded before Flop (didn't bet)
+Seat 3: ozrona (button) folded before Flop (didn't bet)
+Seat 4: RUBREE (small blind) folded before Flop
+Seat 6: Bonixer89 (big blind) folded before Flop
+Seat 7: LONGVSOFT collected (81000)
+Seat 9: RebelsMC folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000248410: Tournament #8547322, No Limit Hold'em - Level XXIII (12000/24000 ante 3000) - 2026/06/13 23:30:40 ACST [2026/06/13 14:00:40 UTC]
+Table '8547322 10' 9-max Seat #4 is the button
+Seat 1: _R0880_ (865086 in chips)
+Seat 2: Calvyn05 (1793048 in chips)
+Seat 3: ozrona (1635730 in chips)
+Seat 4: RUBREE (1916277 in chips)
+Seat 6: Bonixer89 (597898 in chips)
+Seat 7: LONGVSOFT (1740883 in chips)
+Seat 9: RebelsMC (3461073 in chips)
+Bonixer89: posts the ante 3000
+LONGVSOFT: posts the ante 3000
+RebelsMC: posts the ante 3000
+_R0880_: posts the ante 3000
+Calvyn05: posts the ante 3000
+ozrona: posts the ante 3000
+RUBREE: posts the ante 3000
+Bonixer89: posts small blind 12000
+LONGVSOFT: posts big blind 24000
+*** HOLE CARDS ***
+Dealt to ozrona [7s 5h]
+RebelsMC: folds
+_R0880_: folds
+Calvyn05: folds
+ozrona: raises 48000 to 72000
+RUBREE: calls 72000
+Bonixer89: folds
+LONGVSOFT: calls 48000
+*** FLOP *** [Td 3c 7c]
+LONGVSOFT: checks
+ozrona: checks
+RUBREE: checks
+*** TURN *** [Td 3c 7c] [Ks]
+LONGVSOFT: bets 62250
+ozrona: folds
+RUBREE: folds
+Uncalled bet (62250) returned to LONGVSOFT
+LONGVSOFT collected 249000 from pot
+*** SUMMARY ***
+Total pot 249000 | Rake 0
+Board [Td 3c 7c Ks]
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 2: Calvyn05 folded before Flop (didn't bet)
+Seat 3: ozrona folded on the Turn
+Seat 4: RUBREE (button) folded on the Turn
+Seat 6: Bonixer89 (small blind) folded before Flop
+Seat 7: LONGVSOFT (big blind) collected (249000)
+Seat 9: RebelsMC folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000248710: Tournament #8547322, No Limit Hold'em - Level XXIV (15000/30000 ante 4000) - 2026/06/13 23:32:04 ACST [2026/06/13 14:02:04 UTC]
+Table '8547322 10' 9-max Seat #6 is the button
+Seat 1: _R0880_ (862086 in chips)
+Seat 2: Calvyn05 (1790048 in chips)
+Seat 3: ozrona (1560730 in chips)
+Seat 4: RUBREE (1841277 in chips)
+Seat 6: Bonixer89 (582898 in chips)
+Seat 7: LONGVSOFT (1914883 in chips)
+Seat 9: RebelsMC (3458073 in chips)
+LONGVSOFT: posts the ante 4000
+RebelsMC: posts the ante 4000
+_R0880_: posts the ante 4000
+Calvyn05: posts the ante 4000
+ozrona: posts the ante 4000
+RUBREE: posts the ante 4000
+Bonixer89: posts the ante 4000
+LONGVSOFT: posts small blind 15000
+RebelsMC: posts big blind 30000
+*** HOLE CARDS ***
+Dealt to ozrona [Kd Qd]
+_R0880_: raises 30000 to 60000
+Calvyn05: folds
+ozrona: raises 80000 to 140000
+RUBREE: folds
+Bonixer89: folds
+LONGVSOFT: folds
+RebelsMC: folds
+_R0880_: calls 80000
+*** FLOP *** [Ad 3h 6d]
+_R0880_: checks
+ozrona: bets 105000
+_R0880_: folds
+Uncalled bet (105000) returned to ozrona
+ozrona collected 353000 from pot
+*** SUMMARY ***
+Total pot 353000 | Rake 0
+Board [Ad 3h 6d]
+Seat 1: _R0880_ folded on the Flop
+Seat 2: Calvyn05 folded before Flop (didn't bet)
+Seat 3: ozrona collected (353000)
+Seat 4: RUBREE folded before Flop (didn't bet)
+Seat 6: Bonixer89 (button) folded before Flop (didn't bet)
+Seat 7: LONGVSOFT (small blind) folded before Flop
+Seat 9: RebelsMC (big blind) folded before Flop
+
+PokerStars Hand #2606130332358547322000249010: Tournament #8547322, No Limit Hold'em - Level XXIV (15000/30000 ante 4000) - 2026/06/13 23:33:19 ACST [2026/06/13 14:03:19 UTC]
+Table '8547322 10' 9-max Seat #7 is the button
+Seat 1: _R0880_ (718086 in chips)
+Seat 2: Calvyn05 (1786048 in chips)
+Seat 3: ozrona (1769730 in chips)
+Seat 4: RUBREE (1837277 in chips)
+Seat 6: Bonixer89 (578898 in chips)
+Seat 7: LONGVSOFT (1895883 in chips)
+Seat 9: RebelsMC (3424073 in chips)
+RebelsMC: posts the ante 4000
+_R0880_: posts the ante 4000
+Calvyn05: posts the ante 4000
+ozrona: posts the ante 4000
+RUBREE: posts the ante 4000
+Bonixer89: posts the ante 4000
+LONGVSOFT: posts the ante 4000
+RebelsMC: posts small blind 15000
+_R0880_: posts big blind 30000
+*** HOLE CARDS ***
+Dealt to ozrona [3s 2c]
+Calvyn05: folds
+ozrona: folds
+RUBREE: folds
+Bonixer89: folds
+LONGVSOFT: folds
+RebelsMC: raises 30000 to 60000
+_R0880_: calls 30000
+*** FLOP *** [Tc Ks 6c]
+RebelsMC: bets 74000
+_R0880_: calls 74000
+*** TURN *** [Tc Ks 6c] [Th]
+RebelsMC: bets 222000
+_R0880_: folds
+Uncalled bet (222000) returned to RebelsMC
+RebelsMC collected 296000 from pot
+*** SUMMARY ***
+Total pot 296000 | Rake 0
+Board [Tc Ks 6c Th]
+Seat 1: _R0880_ (big blind) folded on the Turn
+Seat 2: Calvyn05 folded before Flop (didn't bet)
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE folded before Flop (didn't bet)
+Seat 6: Bonixer89 folded before Flop (didn't bet)
+Seat 7: LONGVSOFT (button) folded before Flop (didn't bet)
+Seat 9: RebelsMC (small blind) collected (296000)
+
+PokerStars Hand #2606130332358547322000249210: Tournament #8547322, No Limit Hold'em - Level XXIV (15000/30000 ante 4000) - 2026/06/13 23:34:07 ACST [2026/06/13 14:04:07 UTC]
+Table '8547322 10' 9-max Seat #9 is the button
+Seat 1: _R0880_ (580086 in chips)
+Seat 2: Calvyn05 (1782048 in chips)
+Seat 3: ozrona (1765730 in chips)
+Seat 4: RUBREE (1833277 in chips)
+Seat 6: Bonixer89 (574898 in chips)
+Seat 7: LONGVSOFT (1891883 in chips)
+Seat 9: RebelsMC (3582073 in chips)
+_R0880_: posts the ante 4000
+Calvyn05: posts the ante 4000
+ozrona: posts the ante 4000
+RUBREE: posts the ante 4000
+Bonixer89: posts the ante 4000
+LONGVSOFT: posts the ante 4000
+RebelsMC: posts the ante 4000
+_R0880_: posts small blind 15000
+Calvyn05: posts big blind 30000
+*** HOLE CARDS ***
+Dealt to ozrona [3d As]
+ozrona: folds
+RUBREE: folds
+Bonixer89: folds
+LONGVSOFT: folds
+RebelsMC: folds
+_R0880_: calls 15000
+Calvyn05: raises 60000 to 90000
+_R0880_: folds
+Uncalled bet (90000) returned to Calvyn05
+Calvyn05 collected 58000 from pot
+*** SUMMARY ***
+Total pot 58000 | Rake 0
+Seat 1: _R0880_ (small blind) folded before Flop
+Seat 2: Calvyn05 (big blind) collected (58000)
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE folded before Flop (didn't bet)
+Seat 6: Bonixer89 folded before Flop (didn't bet)
+Seat 7: LONGVSOFT folded before Flop (didn't bet)
+Seat 9: RebelsMC (button) folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000249410: Tournament #8547322, No Limit Hold'em - Level XXIV (15000/30000 ante 4000) - 2026/06/13 23:34:38 ACST [2026/06/13 14:04:38 UTC]
+Table '8547322 10' 9-max Seat #1 is the button
+Seat 1: _R0880_ (546086 in chips)
+Seat 2: Calvyn05 (1836048 in chips)
+Seat 3: ozrona (1761730 in chips)
+Seat 4: RUBREE (1829277 in chips)
+Seat 6: Bonixer89 (570898 in chips)
+Seat 7: LONGVSOFT (1887883 in chips)
+Seat 9: RebelsMC (3578073 in chips)
+Calvyn05: posts the ante 4000
+ozrona: posts the ante 4000
+RUBREE: posts the ante 4000
+Bonixer89: posts the ante 4000
+LONGVSOFT: posts the ante 4000
+RebelsMC: posts the ante 4000
+_R0880_: posts the ante 4000
+Calvyn05: posts small blind 15000
+ozrona: posts big blind 30000
+*** HOLE CARDS ***
+Dealt to ozrona [Ad 3c]
+RUBREE: folds
+Bonixer89: raises 30000 to 60000
+LONGVSOFT: folds
+RebelsMC: folds
+_R0880_: folds
+Calvyn05: calls 45000
+ozrona: calls 30000
+*** FLOP *** [2d Td 7d]
+Calvyn05: checks
+ozrona: checks
+Bonixer89: checks
+*** TURN *** [2d Td 7d] [Qd]
+Calvyn05: bets 30000
+ozrona: calls 30000
+Bonixer89: folds
+*** RIVER *** [2d Td 7d Qd] [Tc]
+Calvyn05: bets 30000
+ozrona: raises 190000 to 220000
+Calvyn05: folds
+Uncalled bet (190000) returned to ozrona
+ozrona collected 328000 from pot
+*** SUMMARY ***
+Total pot 328000 | Rake 0
+Board [2d Td 7d Qd Tc]
+Seat 1: _R0880_ (button) folded before Flop (didn't bet)
+Seat 2: Calvyn05 (small blind) folded on the River
+Seat 3: ozrona (big blind) collected (328000)
+Seat 4: RUBREE folded before Flop (didn't bet)
+Seat 6: Bonixer89 folded on the Turn
+Seat 7: LONGVSOFT folded before Flop (didn't bet)
+Seat 9: RebelsMC folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000249710: Tournament #8547322, No Limit Hold'em - Level XXIV (15000/30000 ante 4000) - 2026/06/13 23:36:17 ACST [2026/06/13 14:06:17 UTC]
+Table '8547322 10' 9-max Seat #2 is the button
+Seat 1: _R0880_ (542086 in chips)
+Seat 2: Calvyn05 (1712048 in chips)
+Seat 3: ozrona (1965730 in chips)
+Seat 4: RUBREE (1825277 in chips)
+Seat 6: Bonixer89 (506898 in chips)
+Seat 7: LONGVSOFT (1883883 in chips)
+Seat 9: RebelsMC (3574073 in chips)
+ozrona: posts the ante 4000
+RUBREE: posts the ante 4000
+Bonixer89: posts the ante 4000
+LONGVSOFT: posts the ante 4000
+RebelsMC: posts the ante 4000
+_R0880_: posts the ante 4000
+Calvyn05: posts the ante 4000
+ozrona: posts small blind 15000
+RUBREE: posts big blind 30000
+*** HOLE CARDS ***
+Dealt to ozrona [Tc Js]
+Bonixer89: folds
+LONGVSOFT: folds
+RebelsMC: folds
+_R0880_: folds
+Calvyn05: folds
+ozrona: calls 15000
+RUBREE: checks
+*** FLOP *** [Kh Jd Ad]
+ozrona: checks
+RUBREE: bets 30000
+ozrona: calls 30000
+*** TURN *** [Kh Jd Ad] [9d]
+ozrona: checks
+RUBREE: bets 30000
+ozrona: calls 30000
+*** RIVER *** [Kh Jd Ad 9d] [9h]
+ozrona: bets 104000
+RUBREE: calls 104000
+*** SHOW DOWN ***
+ozrona: shows [Tc Js]
+RUBREE: shows [Ts Qd]
+RUBREE collected 416000 from pot
+*** SUMMARY ***
+Total pot 416000 | Rake 0
+Board [Kh Jd Ad 9d 9h]
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 2: Calvyn05 (button) folded before Flop (didn't bet)
+Seat 3: ozrona (small blind) showed [Tc Js] and lost
+Seat 4: RUBREE (big blind) showed [Ts Qd] and won (416000)
+Seat 6: Bonixer89 folded before Flop (didn't bet)
+Seat 7: LONGVSOFT folded before Flop (didn't bet)
+Seat 9: RebelsMC folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000250110: Tournament #8547322, No Limit Hold'em - Level XXIV (15000/30000 ante 4000) - 2026/06/13 23:37:24 ACST [2026/06/13 14:07:24 UTC]
+Table '8547322 10' 9-max Seat #3 is the button
+Seat 1: _R0880_ (538086 in chips)
+Seat 2: Calvyn05 (1708048 in chips)
+Seat 3: ozrona (1767730 in chips)
+Seat 4: RUBREE (2043277 in chips)
+Seat 6: Bonixer89 (502898 in chips)
+Seat 7: LONGVSOFT (1879883 in chips)
+Seat 9: RebelsMC (3570073 in chips)
+RUBREE: posts the ante 4000
+Bonixer89: posts the ante 4000
+LONGVSOFT: posts the ante 4000
+RebelsMC: posts the ante 4000
+_R0880_: posts the ante 4000
+Calvyn05: posts the ante 4000
+ozrona: posts the ante 4000
+RUBREE: posts small blind 15000
+Bonixer89: posts big blind 30000
+*** HOLE CARDS ***
+Dealt to ozrona [6h 9d]
+LONGVSOFT: raises 30000 to 60000
+RebelsMC: folds
+_R0880_: folds
+Calvyn05: folds
+ozrona: calls 60000
+RUBREE: folds
+Bonixer89: calls 30000
+*** FLOP *** [9c 2c 2s]
+Bonixer89: checks
+LONGVSOFT: checks
+ozrona: bets 89333
+Bonixer89: raises 329565 to 418898 and is all-in
+LONGVSOFT: calls 418898
+ozrona: folds
+*** TURN *** [9c 2c 2s] [4s]
+*** RIVER *** [9c 2c 2s 4s] [5h]
+*** SHOW DOWN ***
+LONGVSOFT: shows [Js Jc]
+Bonixer89: shows [Ac 8c]
+LONGVSOFT collected 1150129 from pot
+*** SUMMARY ***
+Total pot 1150129 | Rake 0
+Board [9c 2c 2s 4s 5h]
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 2: Calvyn05 folded before Flop (didn't bet)
+Seat 3: ozrona (button) folded on the Flop
+Seat 4: RUBREE (small blind) folded before Flop
+Seat 6: Bonixer89 (big blind) showed [Ac 8c] and lost
+Seat 7: LONGVSOFT showed [Js Jc] and won (1150129)
+Seat 9: RebelsMC folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000250310: Tournament #8547322, No Limit Hold'em - Level XXIV (15000/30000 ante 4000) - 2026/06/13 23:38:49 ACST [2026/06/13 14:08:49 UTC]
+Table '8547322 10' 9-max Seat #4 is the button
+Seat 1: _R0880_ (534086 in chips)
+Seat 2: Calvyn05 (1704048 in chips)
+Seat 3: ozrona (1614397 in chips)
+Seat 4: RUBREE (2024277 in chips)
+Seat 7: LONGVSOFT (2547114 in chips)
+Seat 9: RebelsMC (3566073 in chips)
+LONGVSOFT: posts the ante 4000
+RebelsMC: posts the ante 4000
+_R0880_: posts the ante 4000
+Calvyn05: posts the ante 4000
+ozrona: posts the ante 4000
+RUBREE: posts the ante 4000
+LONGVSOFT: posts big blind 30000
+*** HOLE CARDS ***
+Dealt to ozrona [6c 8s]
+RebelsMC: folds
+_R0880_: folds
+Calvyn05: calls 30000
+ozrona: folds
+RUBREE: folds
+LONGVSOFT: checks
+*** FLOP *** [Jd 2s 5h]
+LONGVSOFT: checks
+Calvyn05: checks
+*** TURN *** [Jd 2s 5h] [4d]
+LONGVSOFT: bets 30000
+Calvyn05: calls 30000
+*** RIVER *** [Jd 2s 5h 4d] [9s]
+LONGVSOFT: checks
+Calvyn05: checks
+*** SHOW DOWN ***
+LONGVSOFT: shows [9c As]
+LONGVSOFT collected 144000 from pot
+*** SUMMARY ***
+Total pot 144000 | Rake 0
+Board [Jd 2s 5h 4d 9s]
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 2: Calvyn05 mucked
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE (button) folded before Flop (didn't bet)
+Seat 7: LONGVSOFT (big blind) showed [9c As] and won (144000)
+Seat 9: RebelsMC folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000250610: Tournament #8547322, No Limit Hold'em - Level XXIV (15000/30000 ante 4000) - 2026/06/13 23:39:37 ACST [2026/06/13 14:09:37 UTC]
+Table '8547322 10' 9-max Seat #6 is the button
+Seat 1: _R0880_ (530086 in chips)
+Seat 2: Calvyn05 (1640048 in chips)
+Seat 3: ozrona (1610397 in chips)
+Seat 4: RUBREE (2020277 in chips)
+Seat 7: LONGVSOFT (2627114 in chips)
+Seat 9: RebelsMC (3562073 in chips)
+LONGVSOFT: posts the ante 4000
+RebelsMC: posts the ante 4000
+_R0880_: posts the ante 4000
+Calvyn05: posts the ante 4000
+ozrona: posts the ante 4000
+RUBREE: posts the ante 4000
+LONGVSOFT: posts small blind 15000
+RebelsMC: posts big blind 30000
+*** HOLE CARDS ***
+Dealt to ozrona [3d Js]
+_R0880_: folds
+Calvyn05: folds
+ozrona: folds
+RUBREE: folds
+LONGVSOFT: raises 30000 to 60000
+RebelsMC: raises 90000 to 150000
+LONGVSOFT: calls 90000
+*** FLOP *** [3c Ac 4d]
+LONGVSOFT: checks
+RebelsMC: bets 384000
+LONGVSOFT: folds
+Uncalled bet (384000) returned to RebelsMC
+RebelsMC collected 324000 from pot
+*** SUMMARY ***
+Total pot 324000 | Rake 0
+Board [3c Ac 4d]
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 2: Calvyn05 folded before Flop (didn't bet)
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE folded before Flop (didn't bet)
+Seat 7: LONGVSOFT (small blind) folded on the Flop
+Seat 9: RebelsMC (big blind) collected (324000)
+
+PokerStars Hand #2606130332358547322000250810: Tournament #8547322, No Limit Hold'em - Level XXIV (15000/30000 ante 4000) - 2026/06/13 23:40:26 ACST [2026/06/13 14:10:26 UTC]
+Table '8547322 10' 9-max Seat #7 is the button
+Seat 1: _R0880_ (526086 in chips)
+Seat 2: Calvyn05 (1636048 in chips)
+Seat 3: ozrona (1606397 in chips)
+Seat 4: RUBREE (2016277 in chips)
+Seat 7: LONGVSOFT (2473114 in chips)
+Seat 9: RebelsMC (3732073 in chips)
+RebelsMC: posts the ante 4000
+_R0880_: posts the ante 4000
+Calvyn05: posts the ante 4000
+ozrona: posts the ante 4000
+RUBREE: posts the ante 4000
+LONGVSOFT: posts the ante 4000
+RebelsMC: posts small blind 15000
+_R0880_: posts big blind 30000
+*** HOLE CARDS ***
+Dealt to ozrona [Jd 6s]
+Calvyn05: calls 30000
+ozrona: folds
+RUBREE: calls 30000
+LONGVSOFT: folds
+RebelsMC: calls 15000
+_R0880_: checks
+*** FLOP *** [4s 8c 5s]
+RebelsMC: checks
+_R0880_: checks
+Calvyn05: bets 72000
+RUBREE: calls 72000
+RebelsMC: folds
+_R0880_: folds
+*** TURN *** [4s 8c 5s] [6d]
+Calvyn05: checks
+RUBREE: bets 288000
+Calvyn05: folds
+Uncalled bet (288000) returned to RUBREE
+RUBREE collected 288000 from pot
+*** SUMMARY ***
+Total pot 288000 | Rake 0
+Board [4s 8c 5s 6d]
+Seat 1: _R0880_ (big blind) folded on the Flop
+Seat 2: Calvyn05 folded on the Turn
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE collected (288000)
+Seat 7: LONGVSOFT (button) folded before Flop (didn't bet)
+Seat 9: RebelsMC (small blind) folded on the Flop
+
+PokerStars Hand #2606130332358547322000251110: Tournament #8547322, No Limit Hold'em - Level XXIV (15000/30000 ante 4000) - 2026/06/13 23:41:32 ACST [2026/06/13 14:11:32 UTC]
+Table '8547322 10' 9-max Seat #9 is the button
+Seat 1: _R0880_ (492086 in chips)
+Seat 2: Calvyn05 (1530048 in chips)
+Seat 3: ozrona (1602397 in chips)
+Seat 4: RUBREE (2198277 in chips)
+Seat 7: LONGVSOFT (2469114 in chips)
+Seat 9: RebelsMC (3698073 in chips)
+_R0880_: posts the ante 4000
+Calvyn05: posts the ante 4000
+ozrona: posts the ante 4000
+RUBREE: posts the ante 4000
+LONGVSOFT: posts the ante 4000
+RebelsMC: posts the ante 4000
+_R0880_: posts small blind 15000
+Calvyn05: posts big blind 30000
+*** HOLE CARDS ***
+Dealt to ozrona [8c 4s]
+ozrona: folds
+RUBREE: folds
+LONGVSOFT: folds
+RebelsMC: raises 30000 to 60000
+_R0880_: raises 30000 to 90000
+Calvyn05: folds
+RebelsMC: calls 30000
+*** FLOP *** [Kd 9c 8s]
+_R0880_: bets 398086 and is all-in
+RebelsMC: folds
+Uncalled bet (398086) returned to _R0880_
+_R0880_ collected 234000 from pot
+*** SUMMARY ***
+Total pot 234000 | Rake 0
+Board [Kd 9c 8s]
+Seat 1: _R0880_ (small blind) collected (234000)
+Seat 2: Calvyn05 (big blind) folded before Flop
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE folded before Flop (didn't bet)
+Seat 7: LONGVSOFT folded before Flop (didn't bet)
+Seat 9: RebelsMC (button) folded on the Flop
+
+PokerStars Hand #2606130332358547322000251210: Tournament #8547322, No Limit Hold'em - Level XXIV (15000/30000 ante 4000) - 2026/06/13 23:42:08 ACST [2026/06/13 14:12:08 UTC]
+Table '8547322 10' 9-max Seat #1 is the button
+Seat 1: _R0880_ (632086 in chips)
+Seat 2: Calvyn05 (1496048 in chips)
+Seat 3: ozrona (1598397 in chips)
+Seat 4: RUBREE (2194277 in chips)
+Seat 7: LONGVSOFT (2465114 in chips)
+Seat 9: RebelsMC (3604073 in chips)
+Calvyn05: posts the ante 4000
+ozrona: posts the ante 4000
+RUBREE: posts the ante 4000
+LONGVSOFT: posts the ante 4000
+RebelsMC: posts the ante 4000
+_R0880_: posts the ante 4000
+Calvyn05: posts small blind 15000
+ozrona: posts big blind 30000
+*** HOLE CARDS ***
+Dealt to ozrona [Ks 7c]
+RUBREE: folds
+LONGVSOFT: folds
+RebelsMC: raises 30000 to 60000
+_R0880_: folds
+Calvyn05: calls 45000
+ozrona: calls 30000
+*** FLOP *** [5c 6c 2d]
+Calvyn05: checks
+ozrona: checks
+RebelsMC: bets 153000
+Calvyn05: folds
+ozrona: folds
+Uncalled bet (153000) returned to RebelsMC
+RebelsMC collected 204000 from pot
+*** SUMMARY ***
+Total pot 204000 | Rake 0
+Board [5c 6c 2d]
+Seat 1: _R0880_ (button) folded before Flop (didn't bet)
+Seat 2: Calvyn05 (small blind) folded on the Flop
+Seat 3: ozrona (big blind) folded on the Flop
+Seat 4: RUBREE folded before Flop (didn't bet)
+Seat 7: LONGVSOFT folded before Flop (didn't bet)
+Seat 9: RebelsMC collected (204000)
+
+PokerStars Hand #2606130332358547322000251510: Tournament #8547322, No Limit Hold'em - Level XXV (20000/40000 ante 5000) - 2026/06/13 23:43:17 ACST [2026/06/13 14:13:17 UTC]
+Table '8547322 10' 9-max Seat #2 is the button
+Seat 1: _R0880_ (628086 in chips)
+Seat 2: Calvyn05 (1432048 in chips)
+Seat 3: ozrona (1534397 in chips)
+Seat 4: RUBREE (2190277 in chips)
+Seat 7: LONGVSOFT (2461114 in chips)
+Seat 9: RebelsMC (3744073 in chips)
+ozrona: posts the ante 5000
+RUBREE: posts the ante 5000
+LONGVSOFT: posts the ante 5000
+RebelsMC: posts the ante 5000
+_R0880_: posts the ante 5000
+Calvyn05: posts the ante 5000
+ozrona: posts small blind 20000
+RUBREE: posts big blind 40000
+*** HOLE CARDS ***
+Dealt to ozrona [4h 3h]
+LONGVSOFT: folds
+RebelsMC: folds
+_R0880_: folds
+Calvyn05: calls 40000
+ozrona: calls 20000
+RUBREE: checks
+*** FLOP *** [6h Qc 3s]
+ozrona: checks
+RUBREE: checks
+Calvyn05: checks
+*** TURN *** [6h Qc 3s] [Ac]
+ozrona: checks
+RUBREE: checks
+Calvyn05: checks
+*** RIVER *** [6h Qc 3s Ac] [4c]
+ozrona: checks
+RUBREE: checks
+Calvyn05: checks
+*** SHOW DOWN ***
+ozrona: shows [4h 3h]
+ozrona collected 150000 from pot
+*** SUMMARY ***
+Total pot 150000 | Rake 0
+Board [6h Qc 3s Ac 4c]
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 2: Calvyn05 (button) mucked
+Seat 3: ozrona (small blind) showed [4h 3h] and won (150000)
+Seat 4: RUBREE (big blind) mucked
+Seat 7: LONGVSOFT folded before Flop (didn't bet)
+Seat 9: RebelsMC folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000251810: Tournament #8547322, No Limit Hold'em - Level XXV (20000/40000 ante 5000) - 2026/06/13 23:44:22 ACST [2026/06/13 14:14:22 UTC]
+Table '8547322 10' 9-max Seat #3 is the button
+Seat 1: _R0880_ (623086 in chips)
+Seat 2: Calvyn05 (1387048 in chips)
+Seat 3: ozrona (1639397 in chips)
+Seat 4: RUBREE (2145277 in chips)
+Seat 7: LONGVSOFT (2456114 in chips)
+Seat 9: RebelsMC (3739073 in chips)
+RUBREE: posts the ante 5000
+LONGVSOFT: posts the ante 5000
+RebelsMC: posts the ante 5000
+_R0880_: posts the ante 5000
+Calvyn05: posts the ante 5000
+ozrona: posts the ante 5000
+RUBREE: posts small blind 20000
+LONGVSOFT: posts big blind 40000
+*** HOLE CARDS ***
+Dealt to ozrona [Qs 8d]
+RebelsMC: folds
+_R0880_: folds
+Calvyn05: calls 40000
+ozrona: calls 40000
+RUBREE: folds
+LONGVSOFT: checks
+*** FLOP *** [6d 4d 2h]
+LONGVSOFT: checks
+Calvyn05: checks
+ozrona: bets 76666
+LONGVSOFT: raises 161666 to 238332
+Calvyn05: folds
+ozrona: folds
+Uncalled bet (161666) returned to LONGVSOFT
+LONGVSOFT collected 323332 from pot
+*** SUMMARY ***
+Total pot 323332 | Rake 0
+Board [6d 4d 2h]
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 2: Calvyn05 folded on the Flop
+Seat 3: ozrona (button) folded on the Flop
+Seat 4: RUBREE (small blind) folded before Flop
+Seat 7: LONGVSOFT (big blind) collected (323332)
+Seat 9: RebelsMC folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000251910: Tournament #8547322, No Limit Hold'em - Level XXV (20000/40000 ante 5000) - 2026/06/13 23:45:23 ACST [2026/06/13 14:15:23 UTC]
+Table '8547322 10' 9-max Seat #4 is the button
+Seat 1: _R0880_ (618086 in chips)
+Seat 2: Calvyn05 (1342048 in chips)
+Seat 3: ozrona (1517731 in chips)
+Seat 4: RUBREE (2120277 in chips)
+Seat 7: LONGVSOFT (2657780 in chips)
+Seat 9: RebelsMC (3734073 in chips)
+LONGVSOFT: posts the ante 5000
+RebelsMC: posts the ante 5000
+_R0880_: posts the ante 5000
+Calvyn05: posts the ante 5000
+ozrona: posts the ante 5000
+RUBREE: posts the ante 5000
+LONGVSOFT: posts small blind 20000
+RebelsMC: posts big blind 40000
+*** HOLE CARDS ***
+Dealt to ozrona [Qd Ks]
+_R0880_: folds
+Calvyn05: calls 40000
+ozrona: raises 80000 to 120000
+RUBREE: folds
+LONGVSOFT: raises 220000 to 340000
+RebelsMC: folds
+Calvyn05: folds
+ozrona: calls 220000
+*** FLOP *** [7d 8s 6s]
+LONGVSOFT: checks
+ozrona: checks
+*** TURN *** [7d 8s 6s] [2d]
+LONGVSOFT: bets 415000
+ozrona: folds
+Uncalled bet (415000) returned to LONGVSOFT
+LONGVSOFT collected 790000 from pot
+*** SUMMARY ***
+Total pot 790000 | Rake 0
+Board [7d 8s 6s 2d]
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 2: Calvyn05 folded before Flop (didn't bet)
+Seat 3: ozrona folded on the Turn
+Seat 4: RUBREE (button) folded before Flop (didn't bet)
+Seat 7: LONGVSOFT (small blind) collected (790000)
+Seat 9: RebelsMC (big blind) folded before Flop
+
+PokerStars Hand #2606130332358547322000252310: Tournament #8547322, No Limit Hold'em - Level XXV (20000/40000 ante 5000) - 2026/06/13 23:46:38 ACST [2026/06/13 14:16:38 UTC]
+Table '8547322 10' 9-max Seat #7 is the button
+Seat 1: _R0880_ (613086 in chips)
+Seat 2: Calvyn05 (1297048 in chips)
+Seat 3: ozrona (1172731 in chips)
+Seat 4: RUBREE (2115277 in chips)
+Seat 7: LONGVSOFT (3102780 in chips)
+Seat 9: RebelsMC (3689073 in chips)
+RebelsMC: posts the ante 5000
+_R0880_: posts the ante 5000
+Calvyn05: posts the ante 5000
+ozrona: posts the ante 5000
+RUBREE: posts the ante 5000
+LONGVSOFT: posts the ante 5000
+RebelsMC: posts small blind 20000
+_R0880_: posts big blind 40000
+*** HOLE CARDS ***
+Dealt to ozrona [Kc 4c]
+Calvyn05: folds
+ozrona: folds
+RUBREE: folds
+LONGVSOFT: raises 40000 to 80000
+RebelsMC: folds
+_R0880_: folds
+Uncalled bet (40000) returned to LONGVSOFT
+LONGVSOFT collected 130000 from pot
+*** SUMMARY ***
+Total pot 130000 | Rake 0
+Seat 1: _R0880_ (big blind) folded before Flop
+Seat 2: Calvyn05 folded before Flop (didn't bet)
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE folded before Flop (didn't bet)
+Seat 7: LONGVSOFT (button) collected (130000)
+Seat 9: RebelsMC (small blind) folded before Flop
+
+PokerStars Hand #2606130332358547322000252510: Tournament #8547322, No Limit Hold'em - Level XXV (20000/40000 ante 5000) - 2026/06/13 23:47:07 ACST [2026/06/13 14:17:07 UTC]
+Table '8547322 10' 9-max Seat #9 is the button
+Seat 1: _R0880_ (568086 in chips)
+Seat 3: ozrona (1167731 in chips)
+Seat 4: RUBREE (2110277 in chips)
+Seat 7: LONGVSOFT (3187780 in chips)
+Seat 9: RebelsMC (3664073 in chips)
+_R0880_: posts the ante 5000
+ozrona: posts the ante 5000
+RUBREE: posts the ante 5000
+LONGVSOFT: posts the ante 5000
+RebelsMC: posts the ante 5000
+_R0880_: posts small blind 20000
+ozrona: posts big blind 40000
+*** HOLE CARDS ***
+Dealt to ozrona [4s 9d]
+RUBREE: folds
+LONGVSOFT: folds
+RebelsMC: folds
+_R0880_: calls 20000
+ozrona: checks
+*** FLOP *** [Ts 5s 6h]
+_R0880_: bets 70000
+ozrona: folds
+Uncalled bet (70000) returned to _R0880_
+_R0880_ collected 105000 from pot
+*** SUMMARY ***
+Total pot 105000 | Rake 0
+Board [Ts 5s 6h]
+Seat 1: _R0880_ (small blind) collected (105000)
+Seat 3: ozrona (big blind) folded on the Flop
+Seat 4: RUBREE folded before Flop (didn't bet)
+Seat 7: LONGVSOFT folded before Flop (didn't bet)
+Seat 9: RebelsMC (button) folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000252710: Tournament #8547322, No Limit Hold'em - Level XXV (20000/40000 ante 5000) - 2026/06/13 23:47:38 ACST [2026/06/13 14:17:38 UTC]
+Table '8547322 10' 9-max Seat #1 is the button
+Seat 1: _R0880_ (628086 in chips)
+Seat 3: ozrona (1122731 in chips)
+Seat 4: RUBREE (2105277 in chips)
+Seat 7: LONGVSOFT (3182780 in chips)
+Seat 9: RebelsMC (3659073 in chips)
+ozrona: posts the ante 5000
+RUBREE: posts the ante 5000
+LONGVSOFT: posts the ante 5000
+RebelsMC: posts the ante 5000
+_R0880_: posts the ante 5000
+ozrona: posts small blind 20000
+RUBREE: posts big blind 40000
+*** HOLE CARDS ***
+Dealt to ozrona [4s As]
+LONGVSOFT: raises 40000 to 80000
+RebelsMC: folds
+_R0880_: folds
+ozrona: calls 60000
+RUBREE: folds
+*** FLOP *** [7s 2d 5s]
+ozrona: checks
+LONGVSOFT: bets 168750
+ozrona: calls 168750
+*** TURN *** [7s 2d 5s] [5c]
+ozrona: bets 868981 and is all-in
+LONGVSOFT: folds
+Uncalled bet (868981) returned to ozrona
+ozrona collected 562500 from pot
+*** SUMMARY ***
+Total pot 562500 | Rake 0
+Board [7s 2d 5s 5c]
+Seat 1: _R0880_ (button) folded before Flop (didn't bet)
+Seat 3: ozrona (small blind) collected (562500)
+Seat 4: RUBREE (big blind) folded before Flop
+Seat 7: LONGVSOFT folded on the Turn
+Seat 9: RebelsMC folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000252910: Tournament #8547322, No Limit Hold'em - Level XXV (20000/40000 ante 5000) - 2026/06/13 23:48:22 ACST [2026/06/13 14:18:22 UTC]
+Table '8547322 10' 9-max Seat #3 is the button
+Seat 1: _R0880_ (623086 in chips)
+Seat 3: ozrona (1431481 in chips)
+Seat 4: RUBREE (2060277 in chips)
+Seat 7: LONGVSOFT (2929030 in chips)
+Seat 9: RebelsMC (3654073 in chips)
+RUBREE: posts the ante 5000
+LONGVSOFT: posts the ante 5000
+RebelsMC: posts the ante 5000
+_R0880_: posts the ante 5000
+ozrona: posts the ante 5000
+RUBREE: posts small blind 20000
+LONGVSOFT: posts big blind 40000
+*** HOLE CARDS ***
+Dealt to ozrona [Qs 9d]
+RebelsMC: folds
+_R0880_: raises 60000 to 100000
+ozrona: folds
+RUBREE: folds
+LONGVSOFT: folds
+Uncalled bet (60000) returned to _R0880_
+_R0880_ collected 125000 from pot
+*** SUMMARY ***
+Total pot 125000 | Rake 0
+Seat 1: _R0880_ collected (125000)
+Seat 3: ozrona (button) folded before Flop (didn't bet)
+Seat 4: RUBREE (small blind) folded before Flop
+Seat 7: LONGVSOFT (big blind) folded before Flop
+Seat 9: RebelsMC folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000253010: Tournament #8547322, No Limit Hold'em - Level XXV (20000/40000 ante 5000) - 2026/06/13 23:49:08 ACST [2026/06/13 14:19:08 UTC]
+Table '8547322 10' 9-max Seat #4 is the button
+Seat 1: _R0880_ (703086 in chips)
+Seat 3: ozrona (1426481 in chips)
+Seat 4: RUBREE (2035277 in chips)
+Seat 7: LONGVSOFT (2884030 in chips)
+Seat 9: RebelsMC (3649073 in chips)
+LONGVSOFT: posts the ante 5000
+RebelsMC: posts the ante 5000
+_R0880_: posts the ante 5000
+ozrona: posts the ante 5000
+RUBREE: posts the ante 5000
+LONGVSOFT: posts small blind 20000
+RebelsMC: posts big blind 40000
+*** HOLE CARDS ***
+Dealt to ozrona [Ah Qs]
+_R0880_: folds
+ozrona: raises 58000 to 98000
+RUBREE: calls 98000
+LONGVSOFT: raises 274000 to 372000
+RebelsMC: folds
+ozrona: folds
+RUBREE: folds
+Uncalled bet (294000) returned to LONGVSOFT
+LONGVSOFT collected 339000 from pot
+*** SUMMARY ***
+Total pot 339000 | Rake 0
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE (button) folded before Flop (didn't bet)
+Seat 7: LONGVSOFT (small blind) collected (339000)
+Seat 9: RebelsMC (big blind) folded before Flop
+
+PokerStars Hand #2606130332358547322000253310: Tournament #8547322, No Limit Hold'em - Level XXV (20000/40000 ante 5000) - 2026/06/13 23:49:51 ACST [2026/06/13 14:19:51 UTC]
+Table '8547322 10' 9-max Seat #7 is the button
+Seat 1: _R0880_ (698086 in chips)
+Seat 3: ozrona (1323481 in chips)
+Seat 4: RUBREE (1932277 in chips)
+Seat 7: LONGVSOFT (3140030 in chips)
+Seat 9: RebelsMC (3604073 in chips)
+RebelsMC: posts the ante 5000
+_R0880_: posts the ante 5000
+ozrona: posts the ante 5000
+RUBREE: posts the ante 5000
+LONGVSOFT: posts the ante 5000
+RebelsMC: posts small blind 20000
+_R0880_: posts big blind 40000
+*** HOLE CARDS ***
+Dealt to ozrona [4s Ad]
+ozrona: folds
+RUBREE: folds
+LONGVSOFT: folds
+RebelsMC: raises 40000 to 80000
+_R0880_: folds
+Uncalled bet (40000) returned to RebelsMC
+RebelsMC collected 105000 from pot
+*** SUMMARY ***
+Total pot 105000 | Rake 0
+Seat 1: _R0880_ (big blind) folded before Flop
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE folded before Flop (didn't bet)
+Seat 7: LONGVSOFT (button) folded before Flop (didn't bet)
+Seat 9: RebelsMC (small blind) collected (105000)
+
+PokerStars Hand #2606130332358547322000253410: Tournament #8547322, No Limit Hold'em - Level XXV (20000/40000 ante 5000) - 2026/06/13 23:50:39 ACST [2026/06/13 14:20:39 UTC]
+Table '8547322 10' 9-max Seat #9 is the button
+Seat 1: _R0880_ (653086 in chips)
+Seat 3: ozrona (1318481 in chips)
+Seat 4: RUBREE (1927277 in chips)
+Seat 7: LONGVSOFT (3135030 in chips)
+Seat 9: RebelsMC (3664073 in chips)
+_R0880_: posts the ante 5000
+ozrona: posts the ante 5000
+RUBREE: posts the ante 5000
+LONGVSOFT: posts the ante 5000
+RebelsMC: posts the ante 5000
+_R0880_: posts small blind 20000
+ozrona: posts big blind 40000
+*** HOLE CARDS ***
+Dealt to ozrona [8h 3s]
+RUBREE: folds
+LONGVSOFT: folds
+RebelsMC: folds
+_R0880_: raises 40000 to 80000
+ozrona: folds
+Uncalled bet (60000) returned to _R0880_
+_R0880_ collected 85000 from pot
+*** SUMMARY ***
+Total pot 85000 | Rake 0
+Seat 1: _R0880_ (small blind) collected (85000)
+Seat 3: ozrona (big blind) folded before Flop
+Seat 4: RUBREE folded before Flop (didn't bet)
+Seat 7: LONGVSOFT folded before Flop (didn't bet)
+Seat 9: RebelsMC (button) folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000253610: Tournament #8547322, No Limit Hold'em - Level XXV (20000/40000 ante 5000) - 2026/06/13 23:52:00 ACST [2026/06/13 14:22:00 UTC]
+Table '8547322 10' 9-max Seat #1 is the button
+Seat 1: _R0880_ (713086 in chips)
+Seat 3: ozrona (1273481 in chips)
+Seat 4: RUBREE (1922277 in chips)
+Seat 7: LONGVSOFT (3130030 in chips)
+Seat 9: RebelsMC (3659073 in chips)
+ozrona: posts the ante 5000
+RUBREE: posts the ante 5000
+LONGVSOFT: posts the ante 5000
+RebelsMC: posts the ante 5000
+_R0880_: posts the ante 5000
+ozrona: posts small blind 20000
+RUBREE: posts big blind 40000
+*** HOLE CARDS ***
+Dealt to ozrona [Qh 8d]
+LONGVSOFT: folds
+RebelsMC: folds
+_R0880_: raises 60000 to 100000
+ozrona: folds
+RUBREE: calls 60000
+*** FLOP *** [9h 5s Kh]
+RUBREE: checks
+_R0880_: bets 163333
+RUBREE: calls 163333
+*** TURN *** [9h 5s Kh] [8h]
+RUBREE: checks
+_R0880_: checks
+*** RIVER *** [9h 5s Kh 8h] [Jd]
+RUBREE: bets 285833
+_R0880_: calls 285833
+*** SHOW DOWN ***
+RUBREE: shows [Jh 6h]
+RUBREE collected 1143332 from pot
+*** SUMMARY ***
+Total pot 1143332 | Rake 0
+Board [9h 5s Kh 8h Jd]
+Seat 1: _R0880_ (button) mucked
+Seat 3: ozrona (small blind) folded before Flop
+Seat 4: RUBREE (big blind) showed [Jh 6h] and won (1143332)
+Seat 7: LONGVSOFT folded before Flop (didn't bet)
+Seat 9: RebelsMC folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000253910: Tournament #8547322, No Limit Hold'em - Level XXV (20000/40000 ante 5000) - 2026/06/13 23:52:39 ACST [2026/06/13 14:22:39 UTC]
+Table '8547322 10' 9-max Seat #3 is the button
+Seat 1: _R0880_ (158920 in chips)
+Seat 2: Calvyn05 (1467048 in chips)
+Seat 3: ozrona (1248481 in chips)
+Seat 4: RUBREE (2511443 in chips)
+Seat 5: whykickaoinkpig (1992657 in chips)
+Seat 6: pp12887206 (3963864 in chips)
+Seat 7: LONGVSOFT (3125030 in chips)
+Seat 8: Eren Yeaga (3658484 in chips)
+Seat 9: RebelsMC (3654073 in chips)
+RUBREE: posts the ante 5000
+whykickaoinkpig: posts the ante 5000
+pp12887206: posts the ante 5000
+LONGVSOFT: posts the ante 5000
+Eren Yeaga: posts the ante 5000
+RebelsMC: posts the ante 5000
+_R0880_: posts the ante 5000
+Calvyn05: posts the ante 5000
+ozrona: posts the ante 5000
+RUBREE: posts small blind 20000
+whykickaoinkpig: posts big blind 40000
+*** HOLE CARDS ***
+Dealt to ozrona [Qd Ac]
+pp12887206: folds
+LONGVSOFT: raises 80000 to 120000
+Eren Yeaga: folds
+RebelsMC: folds
+_R0880_: folds
+Calvyn05: folds
+ozrona: raises 1123481 to 1243481 and is all-in
+RUBREE: folds
+whykickaoinkpig: folds
+LONGVSOFT: folds
+Uncalled bet (1123481) returned to ozrona
+ozrona collected 345000 from pot
+*** SUMMARY ***
+Total pot 345000 | Rake 0
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 2: Calvyn05 folded before Flop (didn't bet)
+Seat 3: ozrona (button) collected (345000)
+Seat 4: RUBREE (small blind) folded before Flop
+Seat 5: whykickaoinkpig (big blind) folded before Flop
+Seat 6: pp12887206 folded before Flop (didn't bet)
+Seat 7: LONGVSOFT folded before Flop (didn't bet)
+Seat 8: Eren Yeaga folded before Flop (didn't bet)
+Seat 9: RebelsMC folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000254010: Tournament #8547322, No Limit Hold'em - Level XXV (20000/40000 ante 5000) - 2026/06/13 23:53:10 ACST [2026/06/13 14:23:10 UTC]
+Table '8547322 10' 9-max Seat #4 is the button
+Seat 1: _R0880_ (153920 in chips)
+Seat 2: Calvyn05 (1462048 in chips)
+Seat 3: ozrona (1468481 in chips)
+Seat 4: RUBREE (2486443 in chips)
+Seat 5: whykickaoinkpig (1947657 in chips)
+Seat 6: pp12887206 (3958864 in chips)
+Seat 7: LONGVSOFT (3000030 in chips)
+Seat 8: Eren Yeaga (3653484 in chips)
+Seat 9: RebelsMC (3649073 in chips)
+whykickaoinkpig: posts the ante 5000
+pp12887206: posts the ante 5000
+LONGVSOFT: posts the ante 5000
+Eren Yeaga: posts the ante 5000
+RebelsMC: posts the ante 5000
+_R0880_: posts the ante 5000
+Calvyn05: posts the ante 5000
+ozrona: posts the ante 5000
+RUBREE: posts the ante 5000
+whykickaoinkpig: posts small blind 20000
+pp12887206: posts big blind 40000
+*** HOLE CARDS ***
+Dealt to ozrona [8s 3s]
+LONGVSOFT: folds
+Eren Yeaga: folds
+RebelsMC: raises 80000 to 120000
+_R0880_: folds
+Calvyn05: calls 120000
+ozrona: folds
+RUBREE: folds
+whykickaoinkpig: folds
+pp12887206: folds
+*** FLOP *** [Jc 6d Jd]
+RebelsMC: checks
+Calvyn05: bets 172500
+RebelsMC: calls 172500
+*** TURN *** [Jc 6d Jd] [8h]
+RebelsMC: checks
+Calvyn05: checks
+*** RIVER *** [Jc 6d Jd 8h] [Tc]
+RebelsMC: checks
+Calvyn05: checks
+*** SHOW DOWN ***
+RebelsMC: shows [9h 9c]
+Calvyn05: shows [Ad Td]
+Calvyn05 collected 690000 from pot
+*** SUMMARY ***
+Total pot 690000 | Rake 0
+Board [Jc 6d Jd 8h Tc]
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 2: Calvyn05 showed [Ad Td] and won (690000)
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE (button) folded before Flop (didn't bet)
+Seat 5: whykickaoinkpig (small blind) folded before Flop
+Seat 6: pp12887206 (big blind) folded before Flop
+Seat 7: LONGVSOFT folded before Flop (didn't bet)
+Seat 8: Eren Yeaga folded before Flop (didn't bet)
+Seat 9: RebelsMC showed [9h 9c] and lost
+
+PokerStars Hand #2606130332358547322000254110: Tournament #8547322, No Limit Hold'em - Level XXV (20000/40000 ante 5000) - 2026/06/13 23:53:47 ACST [2026/06/13 14:23:47 UTC]
+Table '8547322 10' 9-max Seat #5 is the button
+Seat 1: _R0880_ (148920 in chips)
+Seat 2: Calvyn05 (1854548 in chips)
+Seat 3: ozrona (1463481 in chips)
+Seat 4: RUBREE (2481443 in chips)
+Seat 5: whykickaoinkpig (1922657 in chips)
+Seat 6: pp12887206 (3913864 in chips)
+Seat 7: LONGVSOFT (2995030 in chips)
+Seat 8: Eren Yeaga (3648484 in chips)
+Seat 9: RebelsMC (3351573 in chips)
+pp12887206: posts the ante 5000
+LONGVSOFT: posts the ante 5000
+Eren Yeaga: posts the ante 5000
+RebelsMC: posts the ante 5000
+_R0880_: posts the ante 5000
+Calvyn05: posts the ante 5000
+ozrona: posts the ante 5000
+RUBREE: posts the ante 5000
+whykickaoinkpig: posts the ante 5000
+pp12887206: posts small blind 20000
+LONGVSOFT: posts big blind 40000
+*** HOLE CARDS ***
+Dealt to ozrona [2s Qh]
+Eren Yeaga: folds
+RebelsMC: folds
+_R0880_: folds
+Calvyn05: folds
+ozrona: folds
+RUBREE: folds
+whykickaoinkpig: folds
+pp12887206: calls 20000
+LONGVSOFT: raises 80000 to 120000
+pp12887206: folds
+Uncalled bet (120000) returned to LONGVSOFT
+LONGVSOFT collected 85000 from pot
+*** SUMMARY ***
+Total pot 85000 | Rake 0
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 2: Calvyn05 folded before Flop (didn't bet)
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE folded before Flop (didn't bet)
+Seat 5: whykickaoinkpig (button) folded before Flop (didn't bet)
+Seat 6: pp12887206 (small blind) folded before Flop
+Seat 7: LONGVSOFT (big blind) collected (85000)
+Seat 8: Eren Yeaga folded before Flop (didn't bet)
+Seat 9: RebelsMC folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000254210: Tournament #8547322, No Limit Hold'em - Level XXV (20000/40000 ante 5000) - 2026/06/13 23:54:09 ACST [2026/06/13 14:24:09 UTC]
+Table '8547322 10' 9-max Seat #6 is the button
+Seat 1: _R0880_ (143920 in chips)
+Seat 2: Calvyn05 (1849548 in chips)
+Seat 3: ozrona (1458481 in chips)
+Seat 4: RUBREE (2476443 in chips)
+Seat 5: whykickaoinkpig (1917657 in chips)
+Seat 6: pp12887206 (3868864 in chips)
+Seat 7: LONGVSOFT (3075030 in chips)
+Seat 8: Eren Yeaga (3643484 in chips)
+Seat 9: RebelsMC (3346573 in chips)
+LONGVSOFT: posts the ante 5000
+Eren Yeaga: posts the ante 5000
+RebelsMC: posts the ante 5000
+_R0880_: posts the ante 5000
+Calvyn05: posts the ante 5000
+ozrona: posts the ante 5000
+RUBREE: posts the ante 5000
+whykickaoinkpig: posts the ante 5000
+pp12887206: posts the ante 5000
+LONGVSOFT: posts small blind 20000
+Eren Yeaga: posts big blind 40000
+*** HOLE CARDS ***
+Dealt to ozrona [9s Jd]
+RebelsMC: raises 80000 to 120000
+_R0880_: folds
+Calvyn05: folds
+ozrona: folds
+RUBREE: folds
+whykickaoinkpig: folds
+pp12887206: folds
+LONGVSOFT: folds
+Eren Yeaga: calls 80000
+*** FLOP *** [Jh Kc 5c]
+Eren Yeaga: checks
+RebelsMC: bets 305000
+Eren Yeaga: folds
+Uncalled bet (305000) returned to RebelsMC
+RebelsMC collected 305000 from pot
+*** SUMMARY ***
+Total pot 305000 | Rake 0
+Board [Jh Kc 5c]
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 2: Calvyn05 folded before Flop (didn't bet)
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE folded before Flop (didn't bet)
+Seat 5: whykickaoinkpig folded before Flop (didn't bet)
+Seat 6: pp12887206 (button) folded before Flop (didn't bet)
+Seat 7: LONGVSOFT (small blind) folded before Flop
+Seat 8: Eren Yeaga (big blind) folded on the Flop
+Seat 9: RebelsMC collected (305000)
+
+PokerStars Hand #2606130332358547322000254310: Tournament #8547322, No Limit Hold'em - Level XXV (20000/40000 ante 5000) - 2026/06/13 23:54:44 ACST [2026/06/13 14:24:44 UTC]
+Table '8547322 10' 9-max Seat #7 is the button
+Seat 1: _R0880_ (138920 in chips)
+Seat 2: Calvyn05 (1844548 in chips)
+Seat 3: ozrona (1453481 in chips)
+Seat 4: RUBREE (2471443 in chips)
+Seat 5: whykickaoinkpig (1912657 in chips)
+Seat 6: pp12887206 (3863864 in chips)
+Seat 7: LONGVSOFT (3050030 in chips)
+Seat 8: Eren Yeaga (3518484 in chips)
+Seat 9: RebelsMC (3526573 in chips)
+Eren Yeaga: posts the ante 5000
+RebelsMC: posts the ante 5000
+_R0880_: posts the ante 5000
+Calvyn05: posts the ante 5000
+ozrona: posts the ante 5000
+RUBREE: posts the ante 5000
+whykickaoinkpig: posts the ante 5000
+pp12887206: posts the ante 5000
+LONGVSOFT: posts the ante 5000
+Eren Yeaga: posts small blind 20000
+RebelsMC: posts big blind 40000
+*** HOLE CARDS ***
+Dealt to ozrona [9c 3d]
+_R0880_: folds
+Calvyn05: folds
+ozrona: folds
+RUBREE: folds
+whykickaoinkpig: raises 40000 to 80000
+pp12887206: folds
+LONGVSOFT: folds
+Eren Yeaga: calls 60000
+RebelsMC: calls 40000
+*** FLOP *** [2h 8c 8h]
+Eren Yeaga: checks
+RebelsMC: checks
+whykickaoinkpig: bets 80000
+Eren Yeaga: folds
+RebelsMC: calls 80000
+*** TURN *** [2h 8c 8h] [2c]
+RebelsMC: bets 445000
+whykickaoinkpig: folds
+Uncalled bet (445000) returned to RebelsMC
+RebelsMC collected 445000 from pot
+*** SUMMARY ***
+Total pot 445000 | Rake 0
+Board [2h 8c 8h 2c]
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 2: Calvyn05 folded before Flop (didn't bet)
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE folded before Flop (didn't bet)
+Seat 5: whykickaoinkpig folded on the Turn
+Seat 6: pp12887206 folded before Flop (didn't bet)
+Seat 7: LONGVSOFT (button) folded before Flop (didn't bet)
+Seat 8: Eren Yeaga (small blind) folded on the Flop
+Seat 9: RebelsMC (big blind) collected (445000)
+
+PokerStars Hand #2606130332358547322000254410: Tournament #8547322, No Limit Hold'em - Level XXVI (25000/50000 ante 6000) - 2026/06/13 23:55:47 ACST [2026/06/13 14:25:47 UTC]
+Table '8547322 10' 9-max Seat #8 is the button
+Seat 1: _R0880_ (133920 in chips)
+Seat 2: Calvyn05 (1839548 in chips)
+Seat 3: ozrona (1448481 in chips)
+Seat 4: RUBREE (2466443 in chips)
+Seat 5: whykickaoinkpig (1747657 in chips)
+Seat 6: pp12887206 (3858864 in chips)
+Seat 7: LONGVSOFT (3045030 in chips)
+Seat 8: Eren Yeaga (3433484 in chips)
+Seat 9: RebelsMC (3806573 in chips)
+RebelsMC: posts the ante 6000
+_R0880_: posts the ante 6000
+Calvyn05: posts the ante 6000
+ozrona: posts the ante 6000
+RUBREE: posts the ante 6000
+whykickaoinkpig: posts the ante 6000
+pp12887206: posts the ante 6000
+LONGVSOFT: posts the ante 6000
+Eren Yeaga: posts the ante 6000
+RebelsMC: posts small blind 25000
+_R0880_: posts big blind 50000
+*** HOLE CARDS ***
+Dealt to ozrona [4c 9h]
+Calvyn05: folds
+ozrona: folds
+RUBREE: folds
+whykickaoinkpig: folds
+pp12887206: folds
+LONGVSOFT: raises 100000 to 150000
+Eren Yeaga: raises 300000 to 450000
+RebelsMC: folds
+_R0880_: folds
+LONGVSOFT: raises 2429030 to 2879030 and is all-in
+Eren Yeaga: folds
+Uncalled bet (2579030) returned to LONGVSOFT
+LONGVSOFT collected 879000 from pot
+*** SUMMARY ***
+Total pot 879000 | Rake 0
+Seat 1: _R0880_ (big blind) folded before Flop
+Seat 2: Calvyn05 folded before Flop (didn't bet)
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE folded before Flop (didn't bet)
+Seat 5: whykickaoinkpig folded before Flop (didn't bet)
+Seat 6: pp12887206 folded before Flop (didn't bet)
+Seat 7: LONGVSOFT collected (879000)
+Seat 8: Eren Yeaga (button) folded before Flop (didn't bet)
+Seat 9: RebelsMC (small blind) folded before Flop
+
+PokerStars Hand #2606130332358547322000254510: Tournament #8547322, No Limit Hold'em - Level XXVI (25000/50000 ante 6000) - 2026/06/13 23:56:16 ACST [2026/06/13 14:26:16 UTC]
+Table '8547322 10' 9-max Seat #9 is the button
+Seat 1: _R0880_ (77920 in chips)
+Seat 2: Calvyn05 (1833548 in chips)
+Seat 3: ozrona (1442481 in chips)
+Seat 4: RUBREE (2460443 in chips)
+Seat 5: whykickaoinkpig (1741657 in chips)
+Seat 6: pp12887206 (3852864 in chips)
+Seat 7: LONGVSOFT (3618030 in chips)
+Seat 8: Eren Yeaga (2977484 in chips)
+Seat 9: RebelsMC (3775573 in chips)
+_R0880_: posts the ante 6000
+Calvyn05: posts the ante 6000
+ozrona: posts the ante 6000
+RUBREE: posts the ante 6000
+whykickaoinkpig: posts the ante 6000
+pp12887206: posts the ante 6000
+LONGVSOFT: posts the ante 6000
+Eren Yeaga: posts the ante 6000
+RebelsMC: posts the ante 6000
+_R0880_: posts small blind 25000
+Calvyn05: posts big blind 50000
+*** HOLE CARDS ***
+Dealt to ozrona [4c Kd]
+ozrona: folds
+RUBREE: folds
+whykickaoinkpig: folds
+pp12887206: folds
+LONGVSOFT: folds
+Eren Yeaga: raises 100000 to 150000
+RebelsMC: folds
+_R0880_: folds
+Calvyn05: folds
+Uncalled bet (100000) returned to Eren Yeaga
+Eren Yeaga collected 179000 from pot
+*** SUMMARY ***
+Total pot 179000 | Rake 0
+Seat 1: _R0880_ (small blind) folded before Flop
+Seat 2: Calvyn05 (big blind) folded before Flop
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE folded before Flop (didn't bet)
+Seat 5: whykickaoinkpig folded before Flop (didn't bet)
+Seat 6: pp12887206 folded before Flop (didn't bet)
+Seat 7: LONGVSOFT folded before Flop (didn't bet)
+Seat 8: Eren Yeaga collected (179000)
+Seat 9: RebelsMC (button) folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000254610: Tournament #8547322, No Limit Hold'em - Level XXVI (25000/50000 ante 6000) - 2026/06/13 23:56:37 ACST [2026/06/13 14:26:37 UTC]
+Table '8547322 10' 9-max Seat #1 is the button
+Seat 1: _R0880_ (46920 in chips)
+Seat 2: Calvyn05 (1777548 in chips)
+Seat 3: ozrona (1436481 in chips)
+Seat 4: RUBREE (2454443 in chips)
+Seat 5: whykickaoinkpig (1735657 in chips)
+Seat 6: pp12887206 (3846864 in chips)
+Seat 7: LONGVSOFT (3612030 in chips)
+Seat 8: Eren Yeaga (3100484 in chips)
+Seat 9: RebelsMC (3769573 in chips)
+Calvyn05: posts the ante 6000
+ozrona: posts the ante 6000
+RUBREE: posts the ante 6000
+whykickaoinkpig: posts the ante 6000
+pp12887206: posts the ante 6000
+LONGVSOFT: posts the ante 6000
+Eren Yeaga: posts the ante 6000
+RebelsMC: posts the ante 6000
+_R0880_: posts the ante 6000
+Calvyn05: posts small blind 25000
+ozrona: posts big blind 50000
+*** HOLE CARDS ***
+Dealt to ozrona [7c 8s]
+RUBREE: calls 50000
+whykickaoinkpig: folds
+pp12887206: folds
+LONGVSOFT: calls 50000
+Eren Yeaga: folds
+RebelsMC: folds
+_R0880_: folds
+Calvyn05: raises 75000 to 125000
+ozrona: calls 75000
+RUBREE: calls 75000
+LONGVSOFT: calls 75000
+*** FLOP *** [Tc 2d Qd]
+Calvyn05: bets 327000
+ozrona: folds
+RUBREE: raises 981000 to 1308000
+LONGVSOFT: folds
+Calvyn05: folds
+Uncalled bet (981000) returned to RUBREE
+RUBREE collected 1208000 from pot
+*** SUMMARY ***
+Total pot 1208000 | Rake 0
+Board [Tc 2d Qd]
+Seat 1: _R0880_ (button) folded before Flop (didn't bet)
+Seat 2: Calvyn05 (small blind) folded on the Flop
+Seat 3: ozrona (big blind) folded on the Flop
+Seat 4: RUBREE collected (1208000)
+Seat 5: whykickaoinkpig folded before Flop (didn't bet)
+Seat 6: pp12887206 folded before Flop (didn't bet)
+Seat 7: LONGVSOFT folded on the Flop
+Seat 8: Eren Yeaga folded before Flop (didn't bet)
+Seat 9: RebelsMC folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000254710: Tournament #8547322, No Limit Hold'em - Level XXVI (25000/50000 ante 6000) - 2026/06/13 23:57:25 ACST [2026/06/13 14:27:25 UTC]
+Table '8547322 10' 9-max Seat #2 is the button
+Seat 1: _R0880_ (40920 in chips)
+Seat 2: Calvyn05 (1319548 in chips)
+Seat 3: ozrona (1305481 in chips)
+Seat 4: RUBREE (3204443 in chips)
+Seat 5: whykickaoinkpig (1729657 in chips)
+Seat 6: pp12887206 (3840864 in chips)
+Seat 7: LONGVSOFT (3481030 in chips)
+Seat 8: Eren Yeaga (3094484 in chips)
+Seat 9: RebelsMC (3763573 in chips)
+ozrona: posts the ante 6000
+RUBREE: posts the ante 6000
+whykickaoinkpig: posts the ante 6000
+pp12887206: posts the ante 6000
+LONGVSOFT: posts the ante 6000
+Eren Yeaga: posts the ante 6000
+RebelsMC: posts the ante 6000
+_R0880_: posts the ante 6000
+Calvyn05: posts the ante 6000
+ozrona: posts small blind 25000
+RUBREE: posts big blind 50000
+*** HOLE CARDS ***
+Dealt to ozrona [Qd 4d]
+whykickaoinkpig: folds
+pp12887206: folds
+LONGVSOFT: folds
+Eren Yeaga: folds
+RebelsMC: raises 100000 to 150000
+_R0880_: calls 34920 and is all-in
+Calvyn05: folds
+ozrona: folds
+RUBREE: folds
+Uncalled bet (100000) returned to RebelsMC
+*** FLOP *** [4s Js 8h]
+*** TURN *** [4s Js 8h] [9s]
+*** RIVER *** [4s Js 8h 9s] [Td]
+*** SHOW DOWN ***
+_R0880_: shows [7h Qh]
+RebelsMC: shows [5h 5d]
+_R0880_ collected 183760 from main pot
+RebelsMC collected 30160 from side pot-1
+*** SUMMARY ***
+Total pot 213920 | Rake 0
+Board [4s Js 8h 9s Td]
+Seat 1: _R0880_ showed [7h Qh] and won (183760)
+Seat 2: Calvyn05 (button) folded before Flop (didn't bet)
+Seat 3: ozrona (small blind) folded before Flop
+Seat 4: RUBREE (big blind) folded before Flop
+Seat 5: whykickaoinkpig folded before Flop (didn't bet)
+Seat 6: pp12887206 folded before Flop (didn't bet)
+Seat 7: LONGVSOFT folded before Flop (didn't bet)
+Seat 8: Eren Yeaga folded before Flop (didn't bet)
+Seat 9: RebelsMC showed [5h 5d] and won (30160)
+
+PokerStars Hand #2606130332358547322000254810: Tournament #8547322, No Limit Hold'em - Level XXVI (25000/50000 ante 6000) - 2026/06/13 23:58:00 ACST [2026/06/13 14:28:00 UTC]
+Table '8547322 10' 9-max Seat #3 is the button
+Seat 1: _R0880_ (183760 in chips)
+Seat 2: Calvyn05 (1313548 in chips)
+Seat 3: ozrona (1274481 in chips)
+Seat 4: RUBREE (3148443 in chips)
+Seat 5: whykickaoinkpig (1723657 in chips)
+Seat 6: pp12887206 (3834864 in chips)
+Seat 7: LONGVSOFT (3475030 in chips)
+Seat 8: Eren Yeaga (3088484 in chips)
+Seat 9: RebelsMC (3737733 in chips)
+RUBREE: posts the ante 6000
+whykickaoinkpig: posts the ante 6000
+pp12887206: posts the ante 6000
+LONGVSOFT: posts the ante 6000
+Eren Yeaga: posts the ante 6000
+RebelsMC: posts the ante 6000
+_R0880_: posts the ante 6000
+Calvyn05: posts the ante 6000
+ozrona: posts the ante 6000
+RUBREE: posts small blind 25000
+whykickaoinkpig: posts big blind 50000
+*** HOLE CARDS ***
+Dealt to ozrona [5d 9d]
+pp12887206: raises 50000 to 100000
+LONGVSOFT: folds
+Eren Yeaga: folds
+RebelsMC: folds
+_R0880_: folds
+Calvyn05: folds
+ozrona: calls 100000
+RUBREE: folds
+whykickaoinkpig: calls 50000
+*** FLOP *** [5h 6c Ad]
+whykickaoinkpig: checks
+pp12887206: bets 151333
+ozrona: folds
+whykickaoinkpig: raises 1466324 to 1617657 and is all-in
+pp12887206: calls 1466324
+*** TURN *** [5h 6c Ad] [Kc]
+*** RIVER *** [5h 6c Ad Kc] [7h]
+*** SHOW DOWN ***
+whykickaoinkpig: shows [5c Ac]
+pp12887206: shows [As 6s]
+pp12887206 collected 3614314 from pot
+*** SUMMARY ***
+Total pot 3614314 | Rake 0
+Board [5h 6c Ad Kc 7h]
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 2: Calvyn05 folded before Flop (didn't bet)
+Seat 3: ozrona (button) folded on the Flop
+Seat 4: RUBREE (small blind) folded before Flop
+Seat 5: whykickaoinkpig (big blind) showed [5c Ac] and lost
+Seat 6: pp12887206 showed [As 6s] and won (3614314)
+Seat 7: LONGVSOFT folded before Flop (didn't bet)
+Seat 8: Eren Yeaga folded before Flop (didn't bet)
+Seat 9: RebelsMC folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000254910: Tournament #8547322, No Limit Hold'em - Level XXVI (25000/50000 ante 6000) - 2026/06/13 23:58:46 ACST [2026/06/13 14:28:46 UTC]
+Table '8547322 10' 9-max Seat #4 is the button
+Seat 1: _R0880_ (177760 in chips)
+Seat 2: Calvyn05 (1307548 in chips)
+Seat 3: ozrona (1168481 in chips)
+Seat 4: RUBREE (3117443 in chips)
+Seat 6: pp12887206 (5725521 in chips)
+Seat 7: LONGVSOFT (3469030 in chips)
+Seat 8: Eren Yeaga (3082484 in chips)
+Seat 9: RebelsMC (3731733 in chips)
+pp12887206: posts the ante 6000
+LONGVSOFT: posts the ante 6000
+Eren Yeaga: posts the ante 6000
+RebelsMC: posts the ante 6000
+_R0880_: posts the ante 6000
+Calvyn05: posts the ante 6000
+ozrona: posts the ante 6000
+RUBREE: posts the ante 6000
+pp12887206: posts big blind 50000
+*** HOLE CARDS ***
+Dealt to ozrona [3s 6d]
+LONGVSOFT: folds
+Eren Yeaga: folds
+RebelsMC: calls 50000
+_R0880_: folds
+Calvyn05: calls 50000
+ozrona: folds
+RUBREE: folds
+pp12887206: checks
+*** FLOP *** [2c 5s 7c]
+pp12887206: checks
+RebelsMC: checks
+Calvyn05: checks
+*** TURN *** [2c 5s 7c] [Kd]
+pp12887206: checks
+RebelsMC: checks
+Calvyn05: checks
+*** RIVER *** [2c 5s 7c Kd] [Jd]
+pp12887206: checks
+RebelsMC: bets 198000
+Calvyn05: folds
+pp12887206: folds
+Uncalled bet (198000) returned to RebelsMC
+RebelsMC collected 198000 from pot
+*** SUMMARY ***
+Total pot 198000 | Rake 0
+Board [2c 5s 7c Kd Jd]
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 2: Calvyn05 folded on the River
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE (button) folded before Flop (didn't bet)
+Seat 6: pp12887206 (big blind) folded on the River
+Seat 7: LONGVSOFT folded before Flop (didn't bet)
+Seat 8: Eren Yeaga folded before Flop (didn't bet)
+Seat 9: RebelsMC collected (198000)
+
+PokerStars Hand #2606130332358547322000255010: Tournament #8547322, No Limit Hold'em - Level XXVI (25000/50000 ante 6000) - 2026/06/14 00:00:01 ACST [2026/06/13 14:30:01 UTC]
+Table '8547322 10' 9-max Seat #5 is the button
+Seat 1: _R0880_ (171760 in chips)
+Seat 2: Calvyn05 (1251548 in chips)
+Seat 3: ozrona (1162481 in chips)
+Seat 4: RUBREE (3111443 in chips)
+Seat 6: pp12887206 (5669521 in chips)
+Seat 7: LONGVSOFT (3463030 in chips)
+Seat 8: Eren Yeaga (3076484 in chips)
+Seat 9: RebelsMC (3873733 in chips)
+pp12887206: posts the ante 6000
+LONGVSOFT: posts the ante 6000
+Eren Yeaga: posts the ante 6000
+RebelsMC: posts the ante 6000
+_R0880_: posts the ante 6000
+Calvyn05: posts the ante 6000
+ozrona: posts the ante 6000
+RUBREE: posts the ante 6000
+pp12887206: posts small blind 25000
+LONGVSOFT: posts big blind 50000
+*** HOLE CARDS ***
+Dealt to ozrona [2h As]
+Eren Yeaga: folds
+RebelsMC: folds
+_R0880_: folds
+Calvyn05: folds
+ozrona: folds
+RUBREE: calls 50000
+pp12887206: folds
+LONGVSOFT: checks
+*** FLOP *** [6c Tc 8s]
+LONGVSOFT: checks
+RUBREE: bets 86500
+LONGVSOFT: folds
+Uncalled bet (86500) returned to RUBREE
+RUBREE collected 173000 from pot
+*** SUMMARY ***
+Total pot 173000 | Rake 0
+Board [6c Tc 8s]
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 2: Calvyn05 folded before Flop (didn't bet)
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE collected (173000)
+Seat 6: pp12887206 (small blind) folded before Flop
+Seat 7: LONGVSOFT (big blind) folded on the Flop
+Seat 8: Eren Yeaga folded before Flop (didn't bet)
+Seat 9: RebelsMC folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000255110: Tournament #8547322, No Limit Hold'em - Level XXVI (25000/50000 ante 6000) - 2026/06/14 00:00:39 ACST [2026/06/13 14:30:39 UTC]
+Table '8547322 10' 9-max Seat #6 is the button
+Seat 1: _R0880_ (165760 in chips)
+Seat 2: Calvyn05 (1245548 in chips)
+Seat 3: ozrona (1156481 in chips)
+Seat 4: RUBREE (3228443 in chips)
+Seat 6: pp12887206 (5638521 in chips)
+Seat 7: LONGVSOFT (3407030 in chips)
+Seat 8: Eren Yeaga (3070484 in chips)
+Seat 9: RebelsMC (3867733 in chips)
+LONGVSOFT: posts the ante 6000
+Eren Yeaga: posts the ante 6000
+RebelsMC: posts the ante 6000
+_R0880_: posts the ante 6000
+Calvyn05: posts the ante 6000
+ozrona: posts the ante 6000
+RUBREE: posts the ante 6000
+pp12887206: posts the ante 6000
+LONGVSOFT: posts small blind 25000
+Eren Yeaga: posts big blind 50000
+*** HOLE CARDS ***
+Dealt to ozrona [Tc Kd]
+RebelsMC: folds
+_R0880_: folds
+Calvyn05: raises 1164548 to 1214548 and is all-in
+ozrona: folds
+RUBREE: folds
+pp12887206: folds
+LONGVSOFT: folds
+Eren Yeaga: folds
+Uncalled bet (1164548) returned to Calvyn05
+Calvyn05 collected 173000 from pot
+*** SUMMARY ***
+Total pot 173000 | Rake 0
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 2: Calvyn05 collected (173000)
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE folded before Flop (didn't bet)
+Seat 6: pp12887206 (button) folded before Flop (didn't bet)
+Seat 7: LONGVSOFT (small blind) folded before Flop
+Seat 8: Eren Yeaga (big blind) folded before Flop
+Seat 9: RebelsMC folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000255210: Tournament #8547322, No Limit Hold'em - Level XXVI (25000/50000 ante 6000) - 2026/06/14 00:01:06 ACST [2026/06/13 14:31:06 UTC]
+Table '8547322 10' 9-max Seat #7 is the button
+Seat 1: _R0880_ (159760 in chips)
+Seat 2: Calvyn05 (1362548 in chips)
+Seat 3: ozrona (1150481 in chips)
+Seat 4: RUBREE (3222443 in chips)
+Seat 6: pp12887206 (5632521 in chips)
+Seat 7: LONGVSOFT (3376030 in chips)
+Seat 8: Eren Yeaga (3014484 in chips)
+Seat 9: RebelsMC (3861733 in chips)
+Eren Yeaga: posts the ante 6000
+RebelsMC: posts the ante 6000
+_R0880_: posts the ante 6000
+Calvyn05: posts the ante 6000
+ozrona: posts the ante 6000
+RUBREE: posts the ante 6000
+pp12887206: posts the ante 6000
+LONGVSOFT: posts the ante 6000
+Eren Yeaga: posts small blind 25000
+RebelsMC: posts big blind 50000
+*** HOLE CARDS ***
+Dealt to ozrona [Ah 4s]
+_R0880_: folds
+Calvyn05: folds
+ozrona: folds
+RUBREE: folds
+pp12887206: raises 50000 to 100000
+LONGVSOFT: folds
+Eren Yeaga: folds
+RebelsMC: calls 50000
+*** FLOP *** [Jd 5h 9h]
+RebelsMC: checks
+pp12887206: checks
+*** TURN *** [Jd 5h 9h] [2s]
+RebelsMC: checks
+pp12887206: checks
+*** RIVER *** [Jd 5h 9h 2s] [5d]
+RebelsMC: checks
+pp12887206: checks
+*** SHOW DOWN ***
+RebelsMC: shows [2h Qs]
+pp12887206: shows [6s 6d]
+pp12887206 collected 273000 from pot
+*** SUMMARY ***
+Total pot 273000 | Rake 0
+Board [Jd 5h 9h 2s 5d]
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 2: Calvyn05 folded before Flop (didn't bet)
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE folded before Flop (didn't bet)
+Seat 6: pp12887206 showed [6s 6d] and won (273000)
+Seat 7: LONGVSOFT (button) folded before Flop (didn't bet)
+Seat 8: Eren Yeaga (small blind) folded before Flop
+Seat 9: RebelsMC (big blind) showed [2h Qs] and lost
+
+PokerStars Hand #2606130332358547322000255310: Tournament #8547322, No Limit Hold'em - Level XXVI (25000/50000 ante 6000) - 2026/06/14 00:02:08 ACST [2026/06/13 14:32:08 UTC]
+Table '8547322 10' 9-max Seat #8 is the button
+Seat 1: _R0880_ (153760 in chips)
+Seat 2: Calvyn05 (1356548 in chips)
+Seat 3: ozrona (1144481 in chips)
+Seat 4: RUBREE (3216443 in chips)
+Seat 6: pp12887206 (5799521 in chips)
+Seat 7: LONGVSOFT (3370030 in chips)
+Seat 8: Eren Yeaga (2983484 in chips)
+Seat 9: RebelsMC (3755733 in chips)
+RebelsMC: posts the ante 6000
+_R0880_: posts the ante 6000
+Calvyn05: posts the ante 6000
+ozrona: posts the ante 6000
+RUBREE: posts the ante 6000
+pp12887206: posts the ante 6000
+LONGVSOFT: posts the ante 6000
+Eren Yeaga: posts the ante 6000
+RebelsMC: posts small blind 25000
+_R0880_: posts big blind 50000
+*** HOLE CARDS ***
+Dealt to ozrona [Th 7d]
+Calvyn05: folds
+ozrona: folds
+RUBREE: folds
+pp12887206: folds
+LONGVSOFT: raises 50000 to 100000
+Eren Yeaga: folds
+RebelsMC: raises 425000 to 525000
+_R0880_: folds
+LONGVSOFT: raises 2704030 to 3229030 and is all-in
+RebelsMC: folds
+Uncalled bet (2779030) returned to LONGVSOFT
+LONGVSOFT collected 1073000 from pot
+*** SUMMARY ***
+Total pot 1073000 | Rake 0
+Seat 1: _R0880_ (big blind) folded before Flop
+Seat 2: Calvyn05 folded before Flop (didn't bet)
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE folded before Flop (didn't bet)
+Seat 6: pp12887206 folded before Flop (didn't bet)
+Seat 7: LONGVSOFT collected (1073000)
+Seat 8: Eren Yeaga (button) folded before Flop (didn't bet)
+Seat 9: RebelsMC (small blind) folded before Flop
+
+PokerStars Hand #2606130332358547322000255410: Tournament #8547322, No Limit Hold'em - Level XXVI (25000/50000 ante 6000) - 2026/06/14 00:02:41 ACST [2026/06/13 14:32:41 UTC]
+Table '8547322 10' 9-max Seat #9 is the button
+Seat 1: _R0880_ (97760 in chips)
+Seat 2: Calvyn05 (1350548 in chips)
+Seat 3: ozrona (1138481 in chips)
+Seat 4: RUBREE (3210443 in chips)
+Seat 6: pp12887206 (5793521 in chips)
+Seat 7: LONGVSOFT (3987030 in chips)
+Seat 8: Eren Yeaga (2977484 in chips)
+Seat 9: RebelsMC (3224733 in chips)
+_R0880_: posts the ante 6000
+Calvyn05: posts the ante 6000
+ozrona: posts the ante 6000
+RUBREE: posts the ante 6000
+pp12887206: posts the ante 6000
+LONGVSOFT: posts the ante 6000
+Eren Yeaga: posts the ante 6000
+RebelsMC: posts the ante 6000
+_R0880_: posts small blind 25000
+Calvyn05: posts big blind 50000
+*** HOLE CARDS ***
+Dealt to ozrona [Jh Kh]
+ozrona: calls 50000
+RUBREE: folds
+pp12887206: raises 125000 to 175000
+LONGVSOFT: folds
+Eren Yeaga: folds
+RebelsMC: folds
+_R0880_: folds
+Calvyn05: folds
+ozrona: folds
+Uncalled bet (125000) returned to pp12887206
+pp12887206 collected 223000 from pot
+*** SUMMARY ***
+Total pot 223000 | Rake 0
+Seat 1: _R0880_ (small blind) folded before Flop
+Seat 2: Calvyn05 (big blind) folded before Flop
+Seat 3: ozrona folded before Flop (didn't bet)
+Seat 4: RUBREE folded before Flop (didn't bet)
+Seat 6: pp12887206 collected (223000)
+Seat 7: LONGVSOFT folded before Flop (didn't bet)
+Seat 8: Eren Yeaga folded before Flop (didn't bet)
+Seat 9: RebelsMC (button) folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000255510: Tournament #8547322, No Limit Hold'em - Level XXVI (25000/50000 ante 6000) - 2026/06/14 00:03:33 ACST [2026/06/13 14:33:33 UTC]
+Table '8547322 10' 9-max Seat #1 is the button
+Seat 1: _R0880_ (66760 in chips)
+Seat 2: Calvyn05 (1294548 in chips)
+Seat 3: ozrona (1082481 in chips)
+Seat 4: RUBREE (3204443 in chips)
+Seat 6: pp12887206 (5960521 in chips)
+Seat 7: LONGVSOFT (3981030 in chips)
+Seat 8: Eren Yeaga (2971484 in chips)
+Seat 9: RebelsMC (3218733 in chips)
+Calvyn05: posts the ante 6000
+ozrona: posts the ante 6000
+RUBREE: posts the ante 6000
+pp12887206: posts the ante 6000
+LONGVSOFT: posts the ante 6000
+Eren Yeaga: posts the ante 6000
+RebelsMC: posts the ante 6000
+_R0880_: posts the ante 6000
+Calvyn05: posts small blind 25000
+ozrona: posts big blind 50000
+*** HOLE CARDS ***
+Dealt to ozrona [Td Ad]
+RUBREE: folds
+pp12887206: folds
+LONGVSOFT: raises 50000 to 100000
+Eren Yeaga: folds
+RebelsMC: folds
+_R0880_: folds
+Calvyn05: folds
+ozrona: raises 901481 to 1001481 and is all-in
+LONGVSOFT: folds
+Uncalled bet (951481) returned to ozrona
+ozrona collected 223000 from pot
+*** SUMMARY ***
+Total pot 223000 | Rake 0
+Seat 1: _R0880_ (button) folded before Flop (didn't bet)
+Seat 2: Calvyn05 (small blind) folded before Flop
+Seat 3: ozrona (big blind) collected (223000)
+Seat 4: RUBREE folded before Flop (didn't bet)
+Seat 6: pp12887206 folded before Flop (didn't bet)
+Seat 7: LONGVSOFT folded before Flop (didn't bet)
+Seat 8: Eren Yeaga folded before Flop (didn't bet)
+Seat 9: RebelsMC folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000255610: Tournament #8547322, No Limit Hold'em - Level XXVI (25000/50000 ante 6000) - 2026/06/14 00:04:09 ACST [2026/06/13 14:34:09 UTC]
+Table '8547322 10' 9-max Seat #2 is the button
+Seat 1: _R0880_ (60760 in chips)
+Seat 2: Calvyn05 (1263548 in chips)
+Seat 3: ozrona (1249481 in chips)
+Seat 4: RUBREE (3198443 in chips)
+Seat 6: pp12887206 (5954521 in chips)
+Seat 7: LONGVSOFT (3875030 in chips)
+Seat 8: Eren Yeaga (2965484 in chips)
+Seat 9: RebelsMC (3212733 in chips)
+ozrona: posts the ante 6000
+RUBREE: posts the ante 6000
+pp12887206: posts the ante 6000
+LONGVSOFT: posts the ante 6000
+Eren Yeaga: posts the ante 6000
+RebelsMC: posts the ante 6000
+_R0880_: posts the ante 6000
+Calvyn05: posts the ante 6000
+ozrona: posts small blind 25000
+RUBREE: posts big blind 50000
+*** HOLE CARDS ***
+Dealt to ozrona [2h Jh]
+pp12887206: folds
+LONGVSOFT: folds
+Eren Yeaga: folds
+RebelsMC: folds
+_R0880_: folds
+Calvyn05: calls 50000
+ozrona: calls 25000
+RUBREE: checks
+*** FLOP *** [8d Ts Ks]
+ozrona: checks
+RUBREE: checks
+Calvyn05: bets 198000
+ozrona: folds
+RUBREE: folds
+Uncalled bet (198000) returned to Calvyn05
+Calvyn05 collected 198000 from pot
+*** SUMMARY ***
+Total pot 198000 | Rake 0
+Board [8d Ts Ks]
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 2: Calvyn05 (button) collected (198000)
+Seat 3: ozrona (small blind) folded on the Flop
+Seat 4: RUBREE (big blind) folded on the Flop
+Seat 6: pp12887206 folded before Flop (didn't bet)
+Seat 7: LONGVSOFT folded before Flop (didn't bet)
+Seat 8: Eren Yeaga folded before Flop (didn't bet)
+Seat 9: RebelsMC folded before Flop (didn't bet)
+
+PokerStars Hand #2606130332358547322000255710: Tournament #8547322, No Limit Hold'em - Level XXVI (25000/50000 ante 6000) - 2026/06/14 00:04:37 ACST [2026/06/13 14:34:37 UTC]
+Table '8547322 10' 9-max Seat #3 is the button
+Seat 1: _R0880_ (54760 in chips)
+Seat 2: Calvyn05 (1405548 in chips)
+Seat 3: ozrona (1193481 in chips)
+Seat 4: RUBREE (3142443 in chips)
+Seat 6: pp12887206 (5948521 in chips)
+Seat 7: LONGVSOFT (3869030 in chips)
+Seat 8: Eren Yeaga (2959484 in chips)
+Seat 9: RebelsMC (3206733 in chips)
+RUBREE: posts the ante 6000
+pp12887206: posts the ante 6000
+LONGVSOFT: posts the ante 6000
+Eren Yeaga: posts the ante 6000
+RebelsMC: posts the ante 6000
+_R0880_: posts the ante 6000
+Calvyn05: posts the ante 6000
+ozrona: posts the ante 6000
+RUBREE: posts small blind 25000
+pp12887206: posts big blind 50000
+*** HOLE CARDS ***
+Dealt to ozrona [Ac Kh]
+LONGVSOFT: raises 50000 to 100000
+Eren Yeaga: folds
+RebelsMC: folds
+_R0880_: folds
+Calvyn05: folds
+ozrona: raises 200000 to 300000
+RUBREE: folds
+pp12887206: folds
+LONGVSOFT: raises 377180 to 677180
+ozrona: calls 377180 and is all-in
+*** FLOP *** [6s 2c 8c]
+*** TURN *** [6s 2c 8c] [Qs]
+*** RIVER *** [6s 2c 8c Qs] [9c]
+*** SHOW DOWN ***
+ozrona: shows [Ac Kh]
+LONGVSOFT: shows [As Ah]
+LONGVSOFT collected 1477360 from pot
+*** SUMMARY ***
+Total pot 1477360 | Rake 0
+Board [6s 2c 8c Qs 9c]
+Seat 1: _R0880_ folded before Flop (didn't bet)
+Seat 2: Calvyn05 folded before Flop (didn't bet)
+Seat 3: ozrona (button) showed [Ac Kh] and lost
+Seat 4: RUBREE (small blind) folded before Flop
+Seat 6: pp12887206 (big blind) folded before Flop
+Seat 7: LONGVSOFT showed [As Ah] and won (1477360)
+Seat 8: Eren Yeaga folded before Flop (didn't bet)
+Seat 9: RebelsMC folded before Flop (didn't bet)

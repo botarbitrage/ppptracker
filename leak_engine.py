@@ -39,10 +39,10 @@ import re
 # are EP, everything between them and the CO is MP. With N active players the
 # non-blind positions run 0..N-3, so EP = positions ≥ N-4:
 #     9-handed → EP {5,6} · 8-handed → EP {4,5} · 7-handed → EP {3,4}
-# Validated cell-exact against the PT4 per-tournament CSV for 7–9 players
-# (tournament #10002806). Tables of ≤6 players have no EP under this rule
-# (guard: EP requires numeric ≥ 2, so CO/BTN never shift) — pending a
-# final-table ground-truth pair to confirm PT4's short-handed behaviour.
+# Tables of 6 or fewer players have NO EP bucket at all — PT4 folds those
+# seats into MP instead (short tables don't get a distinct "early" position).
+# Validated cell-exact against PT4 report CSVs across 349 hands spanning 5-9
+# player tables (four DeepFreeze tournaments, 2026-07-31).
 POSITION_BUCKETS = ('BTN', 'CO', 'MP', 'EP', 'BB', 'SB')
 
 
@@ -58,7 +58,10 @@ def position_bucket(numeric_pos, n_players=9):
         return 'BTN'
     if numeric_pos == 1:
         return 'CO'
-    if numeric_pos >= max(2, (n_players or 9) - 4):
+    n = n_players or 9
+    if n <= 6:
+        return 'MP'
+    if numeric_pos >= max(2, n - 4):
         return 'EP'
     return 'MP'
 

@@ -1,8 +1,9 @@
 # Leak Finder — Design & Delivery Plan
 
-_Status: **Phase 0 complete — gate PASSED** (per-position hand counts cell-exact vs the PT4
-per-tournament CSV; validation harness live at `/leaks/validate`). Next: Phase 1 (preflop
-stats)._
+_Status: **Phase 0 complete — gate PASSED at scale** (349 hands / 4 tournaments / 5–9 player
+tables, cell-exact vs PT4 on every position, after also finding and fixing PT4's own "phantom
+missing hands" import bug — see §10. Validation harness live at `/leaks/validate`). Next: Phase 1
+(preflop stats)._
 _Owner: Caio · Consulting engineer: Claude_
 
 ## 1. Goal
@@ -243,6 +244,45 @@ What the harvest established:
 Estimate: **~2 weeks to a solid v1** (Phases 0–4) that matches PT4 numbers on the validation set;
 Phase 5 + exact-parity edge cases follow.
 
+## 10. Case study: the "phantom missing hands" investigation (2026-07-30/31)
+
+After the Phase 0 gate first passed (§5, single tournament), deploying to prod surfaced a second,
+much stranger problem while re-validating on more tournaments: PT4 would report **"128 hands
+imported, 0 errors, 0 duplicates"** and then show only **72** in the position-based report — for
+data our own `validate_pot()` accepted as 100% internally consistent. Worth recording the
+investigation because the eventual cause was not in our code at all, and the false leads are
+useful context for future debugging:
+
+1. **DeepFreeze #10002806, single-hand fix.** A real bug: a capped all-in call was recorded as
+   matching the full bet, suppressing the "Uncalled bet returned" line → unbalanced hand → PT4's
+   own explicit rejection ("Invalid pot size"). Fixed in `hand_exporter.py` (§Phase 0 above).
+   Confirmed correct — but re-importing surfaced a **new**, much larger discrepancy (128 accepted,
+   only 72 in the report) that this fix could not explain.
+2. **False lead: table-transition / stack-continuity theories.** Byte-diffing old vs new exports
+   showed only the one corrected hand differed; every downstream hand's stack reconciled exactly.
+   Investigated whether PT4's session/sitting bookkeeping was confused by a table redraw
+   immediately after the corrected hand — plausible-sounding, never confirmed.
+3. **Texas tournaments (305 hands, 4 tournaments): same symptom, zero data explanation.** All 305
+   new-export hands passed `validate_pot()` with zero rejections, yet PT4's report totalled 240 —
+   a 65-hand gap with no textual difference to blame. Ruled out our exporter as the cause a second
+   time.
+4. **CRAZY2 (36 hands): the decisive test.** Old and new export files proved **byte-for-byte
+   identical** — same hands, same bytes — yet one import reported 36 and another reported 27 for
+   the *same file*. This is conclusive: with identical input producing different output, the
+   cause cannot be in the data or our code. It has to be PT4-side (stale report cache, a database
+   that wasn't actually clean, a report filter carried over between runs).
+5. **Resolution.** Caio found and fixed a PT4-side import/report setting (not an app change).
+   Re-exporting DeepFreeze (4 tournaments, 349 hands, 5–9 player tables) and re-importing gave
+   **100% import, and PT4's report total (349) now matches our own parse count exactly** — see
+   the `deepfreeze_all4` validation suite (§5). The "phantom missing hands" saga is closed.
+6. **Bonus finding from the same dataset.** With a bigger, more varied validation set (down to
+   5-handed tables), a real EP/MP position-bucketing gap appeared (EP off by +4, MP by −4,
+   symmetric) and was fixed in the same sitting — see Appendix B.
+
+Takeaway for future debugging of "PT4 shows fewer hands than we exported": check for a
+byte-identical-input, different-output case *first* — it's the cheapest way to rule our code in
+or out before chasing structural theories in the data.
+
 ## Appendix A — Stat → formula map (from the `.pt4rpt`)
 
 All stats are `numerator / denominator × 100`. Grouped by street. Label alignments previously
@@ -313,12 +353,19 @@ rec-actions match the fold-frequency interpretation).
 ## Appendix B — PT4 position scheme
 
 `lookup_positions` collapses seats into six buckets: **SB, BB, EP, MP, CO, BTN**. Numeric
-scheme (validated cell-exact in Phase 0): position 0 = BTN counting away from the button
-through non-blind seats (CO = 1, …), BB = 8, SB = 9. Bucketing is **table-size dependent**:
-EP = the two earliest-to-act non-blind seats (positions ≥ N−4 for N active players), MP =
-everything between EP and the CO. So: 9-handed EP {5,6}, 8-handed EP {4,5}, 7-handed EP {3,4}.
-Confirmed for 7–9 players against the #10002806 per-tournament CSV; ≤6-player behaviour is
-guarded (EP requires position ≥ 2) but awaits a final-table ground-truth pair.
+scheme (validated cell-exact): position 0 = BTN counting away from the button through non-blind
+seats (CO = 1, …), BB = 8, SB = 9. Bucketing is **table-size dependent**:
+
+- **7–9 players:** EP = the two earliest-to-act non-blind seats (positions ≥ N−4). MP = everything
+  between EP and CO. So 9-handed EP {5,6}, 8-handed EP {4,5}, 7-handed EP {3,4}.
+- **≤6 players: no EP bucket at all** — those seats fold into MP instead. Short tables don't get a
+  distinct "early" position in PT4's scheme.
+
+Confirmed cell-exact against PT4 report CSVs across **349 hands spanning 5–9 player tables**
+(four DeepFreeze tournaments, `data/validation/deepfreeze_all4/`, 2026-07-31) — every one of the
+six position totals matches exactly (BTN 44, CO 43, MP 97, EP 78, BB 43, SB 44). The ≤6-player
+rule was found by testing the hypothesis "PT4 has no EP bucket below 7-handed" against this
+mixed-table-size dataset — it closed a symmetric ±4-hand EP/MP gap exactly.
 
 ## Appendix C — Open items before/at build
 
@@ -330,6 +377,6 @@ guarded (EP requires position ≥ 2) but awaits a final-table ground-truth pair.
 - [x] Canonical action model documented — `docs/pppoker-action-model.md` (exporter semantics adopted; `hand_parser` 12/13 flagged as probable bug).
 - [ ] Empirically confirm 12/13 via `python leak_validation.py --audit-actions <records.json>` on a raw JSON export (§8, action-model doc).
 - [x] Phase-0 gate — **PASSED** with the #10002806 per-tournament pair (127/127, all positions cell-exact).
-- [ ] Optional: add a final-table suite (short-handed hands + PT4 CSV) to pin ≤6-player EP/MP bucketing.
-- [ ] After deploying the exporter fix: regenerate one tournament export, re-import to PT4, confirm the previously-rejected hand now imports.
+- [x] ≤6-player EP/MP bucketing — **PASSED**, confirmed via the 349-hand `deepfreeze_all4` suite (§10, Appendix B).
+- [x] "Phantom missing hands" (PT4 reporting far fewer hands than imported) — **RESOLVED**, root cause was PT4-side, not our data; see §10 case study.
 - [ ] Pick equity library (`eval7` vs `treys` vs `pokerkit`) — Phase 3.
