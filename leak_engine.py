@@ -31,21 +31,36 @@ The IR is a plain dict per hand:
 import re
 
 # ── PT4 position scheme ─────────────────────────────────────────────────────
-# PokerTracker's lookup_positions is keyed on a numeric position: 0 = BTN,
-# counting away from the button through the non-blind seats (CO = 1, HJ = 2 …),
-# with the blinds fixed at BB = 8 and SB = 9 (the 8/9 encoding is visible in
-# the BBZ .pt4rpt formulas). The bucket grouping below (CO=1, MP=2–4, EP=5–7)
-# is PT4's stock lookup table; the Phase-0 validation gate (per-position hand
-# counts vs the PT4 CSV) is what proves it.
+# PokerTracker's numeric position: 0 = BTN, counting away from the button
+# through the non-blind seats (CO = 1, HJ = 2 …), with the blinds fixed at
+# BB = 8 and SB = 9 (the 8/9 encoding is visible in the BBZ .pt4rpt formulas).
+#
+# Bucketing is TABLE-SIZE DEPENDENT: the two earliest-to-act non-blind seats
+# are EP, everything between them and the CO is MP. With N active players the
+# non-blind positions run 0..N-3, so EP = positions ≥ N-4:
+#     9-handed → EP {5,6} · 8-handed → EP {4,5} · 7-handed → EP {3,4}
+# Validated cell-exact against the PT4 per-tournament CSV for 7–9 players
+# (tournament #10002806). Tables of ≤6 players have no EP under this rule
+# (guard: EP requires numeric ≥ 2, so CO/BTN never shift) — pending a
+# final-table ground-truth pair to confirm PT4's short-handed behaviour.
 POSITION_BUCKETS = ('BTN', 'CO', 'MP', 'EP', 'BB', 'SB')
 
-_NUM_TO_BUCKET = {0: 'BTN', 1: 'CO', 2: 'MP', 3: 'MP', 4: 'MP',
-                  5: 'EP', 6: 'EP', 7: 'EP', 8: 'BB', 9: 'SB'}
 
-
-def position_bucket(numeric_pos):
-    """PT4 numeric position → SB|BB|EP|MP|CO|BTN (None if unknown)."""
-    return _NUM_TO_BUCKET.get(numeric_pos)
+def position_bucket(numeric_pos, n_players=9):
+    """PT4 numeric position + table size → SB|BB|EP|MP|CO|BTN (None if unknown)."""
+    if numeric_pos is None:
+        return None
+    if numeric_pos == 9:
+        return 'SB'
+    if numeric_pos == 8:
+        return 'BB'
+    if numeric_pos == 0:
+        return 'BTN'
+    if numeric_pos == 1:
+        return 'CO'
+    if numeric_pos >= max(2, (n_players or 9) - 4):
+        return 'EP'
+    return 'MP'
 
 
 def pt4_positions(hand):
@@ -96,7 +111,7 @@ def hero_position(hand):
     hero = hand.get('hero')
     if not hero:
         return None
-    return position_bucket(pt4_positions(hand).get(hero))
+    return position_bucket(pt4_positions(hand).get(hero), len(hand['seats']))
 
 
 # ── PokerStars-dialect parser ───────────────────────────────────────────────
@@ -159,8 +174,11 @@ def _new_hand():
         'seats': {}, 'stacks': {},
         'hero': None, 'hero_cards': '',
         'sb_seat': None, 'bb_seat': None,
+        'posts': [],       # [{name, kind: ante|sb|bb, amount}]
         'streets': {'preflop': [], 'flop': [], 'turn': [], 'river': []},
         'board': [], 'shows': {}, 'collected': [],
+        'uncalled': [],    # [{name, amount}]
+        'total_pot': None,  # stated "Total pot N" from the summary
     }
 
 
@@ -233,6 +251,9 @@ def parse_ps_text(text):
                 in_summary = True
                 continue
             if in_summary:
+                m = re.match(r'^Total pot (\d+)', line)
+                if m:
+                    hand['total_pot'] = int(m.group(1))
                 continue
 
             m = _RE_DEALT.match(line)
@@ -240,7 +261,10 @@ def parse_ps_text(text):
                 hand['hero'] = m.group('name').strip()
                 hand['hero_cards'] = m.group('cards')
                 continue
-            if _RE_UNCALLED.match(line):
+            m = _RE_UNCALLED.match(line)
+            if m:
+                hand['uncalled'].append({'name': m.group('name').strip(),
+                                         'amount': int(m.group('amt'))})
                 continue
             m = _RE_COLLECT.match(line)
             if m and ': ' not in m.group('name'):
@@ -255,13 +279,22 @@ def parse_ps_text(text):
             if actor is None:
                 continue
 
-            if rest.startswith('posts the ante '):
+            m = re.match(r'^posts the ante (\d+)$', rest)
+            if m:
+                hand['posts'].append({'name': actor, 'kind': 'ante',
+                                      'amount': int(m.group(1))})
                 continue
-            if rest.startswith('posts small blind '):
+            m = re.match(r'^posts small blind (\d+)$', rest)
+            if m:
                 hand['sb_seat'] = name_to_seat.get(actor)
+                hand['posts'].append({'name': actor, 'kind': 'sb',
+                                      'amount': int(m.group(1))})
                 continue
-            if rest.startswith('posts big blind '):
+            m = re.match(r'^posts big blind (\d+)$', rest)
+            if m:
                 hand['bb_seat'] = name_to_seat.get(actor)
+                hand['posts'].append({'name': actor, 'kind': 'bb',
+                                      'amount': int(m.group(1))})
                 continue
             m = re.match(r'^shows \[([^\]]*)\]$', rest)
             if m:
@@ -279,6 +312,55 @@ def parse_ps_text(text):
     if hand is not None:
         hands.append(hand)
     return hands
+
+
+# ── PT4-style pot validation ────────────────────────────────────────────────
+
+def validate_pot(hand):
+    """
+    Re-derive the pot from an IR hand's posts/actions and check it against the
+    stated total pot, the collected amounts, and each player's stack — the
+    same arithmetic PT4 validates on import (it silently drops hands that
+    fail). Returns a list of problem strings (empty = importable).
+    """
+    problems = []
+    pot = sum(p['amount'] for p in hand['posts'] if p['kind'] == 'ante')
+    total_commit = {p['name']: p['amount'] for p in hand['posts']
+                    if p['kind'] == 'ante'}
+
+    for street in ('preflop', 'flop', 'turn', 'river'):
+        commit = {}
+        if street == 'preflop':
+            for p in hand['posts']:
+                if p['kind'] in ('sb', 'bb'):
+                    commit[p['name']] = commit.get(p['name'], 0) + p['amount']
+                    pot += p['amount']
+                    total_commit[p['name']] = total_commit.get(p['name'], 0) + p['amount']
+        for a in hand['streets'][street]:
+            n, v = a['name'], a['amount']
+            if a['verb'] in ('call', 'bet'):
+                commit[n] = commit.get(n, 0) + v
+                pot += v
+                total_commit[n] = total_commit.get(n, 0) + v
+            elif a['verb'] == 'raise':
+                delta = v - commit.get(n, 0)
+                commit[n] = v
+                pot += delta
+                total_commit[n] = total_commit.get(n, 0) + delta
+
+    net = pot - sum(u['amount'] for u in hand['uncalled'])
+    stated = hand.get('total_pot')
+    if stated is not None and net != stated:
+        problems.append(f'pot from actions {net} != stated total pot {stated}')
+    if hand['collected'] and stated is not None and \
+            sum(c['amount'] for c in hand['collected']) != stated:
+        problems.append(f"collected {sum(c['amount'] for c in hand['collected'])}"
+                        f' != stated total pot {stated}')
+    for n, c in total_commit.items():
+        stack = hand['stacks'].get(n, 0)
+        if c > stack:
+            problems.append(f'{n} committed {c} > stack {stack}')
+    return problems
 
 
 # ── Aggregation (Phase 0: hands per position) ───────────────────────────────

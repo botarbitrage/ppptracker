@@ -1,0 +1,4492 @@
+PokerStars Hand #260715044642973532600002254: Tournament #9735326, No Limit Hold'em - Level V (200/400 ante 50) - 2026/07/15 19:19:24 ACST [2026/07/15 09:49:24 UTC]
+Table '9735326 4' 9-max Seat #1 is the button
+Seat 1: biggiebeats (101197 in chips)
+Seat 2: blakeannir (118033 in chips)
+Seat 3: frankwalt (109898 in chips)
+Seat 4: JackAntonyyy (191457 in chips)
+Seat 5: 2sly4u2sly (99427 in chips)
+Seat 6: DontBeSoft (91475 in chips)
+Seat 7: Djonatan22 (93088 in chips)
+Seat 8: AbramiyRago (126758 in chips)
+Seat 9: ozrona (100000 in chips)
+blakeannir: posts the ante 50
+frankwalt: posts the ante 50
+JackAntonyyy: posts the ante 50
+2sly4u2sly: posts the ante 50
+DontBeSoft: posts the ante 50
+Djonatan22: posts the ante 50
+AbramiyRago: posts the ante 50
+ozrona: posts the ante 50
+biggiebeats: posts the ante 50
+blakeannir: posts small blind 200
+frankwalt: posts big blind 400
+*** HOLE CARDS ***
+Dealt to ozrona [Ad 6c]
+JackAntonyyy: raises 1200 to 1600
+2sly4u2sly: folds
+DontBeSoft: calls 1600
+Djonatan22: folds
+AbramiyRago: folds
+ozrona: calls 1600
+biggiebeats: folds
+blakeannir: raises 10200 to 11800
+frankwalt: folds
+JackAntonyyy: calls 10200
+DontBeSoft: raises 78025 to 89825 and is all-in
+ozrona: folds
+blakeannir: folds
+JackAntonyyy: calls 78025
+*** FLOP *** [Qs 7h 9h]
+*** TURN *** [Qs 7h 9h] [9c]
+*** RIVER *** [Qs 7h 9h 9c] [8c]
+*** SHOW DOWN ***
+JackAntonyyy: shows [Js Jh]
+DontBeSoft: shows [Ks Kd]
+DontBeSoft collected 193900 from pot
+*** SUMMARY ***
+Total pot 193900 | Rake 0
+Board [Qs 7h 9h 9c 8c]
+Seat 1: biggiebeats (button) folded before Flop (didn't bet)
+Seat 2: blakeannir (small blind) folded before Flop
+Seat 3: frankwalt (big blind) folded before Flop
+Seat 4: JackAntonyyy showed [Js Jh] and lost
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: DontBeSoft showed [Ks Kd] and won (193900)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: AbramiyRago folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600002314: Tournament #9735326, No Limit Hold'em - Level V (200/400 ante 50) - 2026/07/15 19:20:24 ACST [2026/07/15 09:50:24 UTC]
+Table '9735326 4' 9-max Seat #2 is the button
+Seat 1: biggiebeats (101147 in chips)
+Seat 2: blakeannir (106183 in chips)
+Seat 3: frankwalt (109448 in chips)
+Seat 4: JackAntonyyy (99982 in chips)
+Seat 5: 2sly4u2sly (99377 in chips)
+Seat 6: DontBeSoft (197300 in chips)
+Seat 7: Djonatan22 (93038 in chips)
+Seat 8: AbramiyRago (126708 in chips)
+Seat 9: ozrona (98350 in chips)
+frankwalt: posts the ante 50
+JackAntonyyy: posts the ante 50
+2sly4u2sly: posts the ante 50
+DontBeSoft: posts the ante 50
+Djonatan22: posts the ante 50
+AbramiyRago: posts the ante 50
+ozrona: posts the ante 50
+biggiebeats: posts the ante 50
+blakeannir: posts the ante 50
+frankwalt: posts small blind 200
+JackAntonyyy: posts big blind 400
+*** HOLE CARDS ***
+Dealt to ozrona [Kd 4d]
+2sly4u2sly: folds
+DontBeSoft: folds
+Djonatan22: raises 600 to 1000
+AbramiyRago: folds
+ozrona: folds
+biggiebeats: folds
+blakeannir: folds
+frankwalt: folds
+JackAntonyyy: folds
+Uncalled bet (600) returned to Djonatan22
+Djonatan22 collected 1450 from pot
+*** SUMMARY ***
+Total pot 1450 | Rake 0
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir (button) folded before Flop (didn't bet)
+Seat 3: frankwalt (small blind) folded before Flop
+Seat 4: JackAntonyyy (big blind) folded before Flop
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: DontBeSoft folded before Flop (didn't bet)
+Seat 7: Djonatan22 collected (1450)
+Seat 8: AbramiyRago folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600002344: Tournament #9735326, No Limit Hold'em - Level V (200/400 ante 50) - 2026/07/15 19:20:59 ACST [2026/07/15 09:50:59 UTC]
+Table '9735326 4' 9-max Seat #3 is the button
+Seat 1: biggiebeats (101097 in chips)
+Seat 2: blakeannir (106133 in chips)
+Seat 3: frankwalt (109198 in chips)
+Seat 4: JackAntonyyy (99532 in chips)
+Seat 5: 2sly4u2sly (99327 in chips)
+Seat 6: DontBeSoft (197250 in chips)
+Seat 7: Djonatan22 (94038 in chips)
+Seat 8: AbramiyRago (126658 in chips)
+Seat 9: ozrona (98300 in chips)
+JackAntonyyy: posts the ante 50
+2sly4u2sly: posts the ante 50
+DontBeSoft: posts the ante 50
+Djonatan22: posts the ante 50
+AbramiyRago: posts the ante 50
+ozrona: posts the ante 50
+biggiebeats: posts the ante 50
+blakeannir: posts the ante 50
+frankwalt: posts the ante 50
+JackAntonyyy: posts small blind 200
+2sly4u2sly: posts big blind 400
+*** HOLE CARDS ***
+Dealt to ozrona [7d 4c]
+DontBeSoft: calls 400
+Djonatan22: folds
+AbramiyRago: folds
+ozrona: folds
+biggiebeats: folds
+blakeannir: calls 400
+frankwalt: raises 1600 to 2000
+JackAntonyyy: folds
+2sly4u2sly: folds
+DontBeSoft: calls 1600
+blakeannir: calls 1600
+*** FLOP *** [9h Qc 3c]
+DontBeSoft: checks
+blakeannir: checks
+frankwalt: checks
+*** TURN *** [9h Qc 3c] [Ac]
+DontBeSoft: checks
+blakeannir: checks
+frankwalt: checks
+*** RIVER *** [9h Qc 3c Ac] [Ad]
+DontBeSoft: bets 400
+blakeannir: folds
+frankwalt: calls 400
+*** SHOW DOWN ***
+DontBeSoft: shows [Ah 5d]
+DontBeSoft collected 7850 from pot
+*** SUMMARY ***
+Total pot 7850 | Rake 0
+Board [9h Qc 3c Ac Ad]
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir folded on the River
+Seat 3: frankwalt (button) mucked
+Seat 4: JackAntonyyy (small blind) folded before Flop
+Seat 5: 2sly4u2sly (big blind) folded before Flop
+Seat 6: DontBeSoft showed [Ah 5d] and won (7850)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: AbramiyRago folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600002404: Tournament #9735326, No Limit Hold'em - Level V (200/400 ante 50) - 2026/07/15 19:22:11 ACST [2026/07/15 09:52:11 UTC]
+Table '9735326 4' 9-max Seat #4 is the button
+Seat 1: biggiebeats (101047 in chips)
+Seat 2: blakeannir (104083 in chips)
+Seat 3: frankwalt (106748 in chips)
+Seat 4: JackAntonyyy (99282 in chips)
+Seat 5: 2sly4u2sly (98877 in chips)
+Seat 6: DontBeSoft (202650 in chips)
+Seat 7: Djonatan22 (93988 in chips)
+Seat 8: AbramiyRago (126608 in chips)
+Seat 9: ozrona (98250 in chips)
+2sly4u2sly: posts the ante 50
+DontBeSoft: posts the ante 50
+Djonatan22: posts the ante 50
+AbramiyRago: posts the ante 50
+ozrona: posts the ante 50
+biggiebeats: posts the ante 50
+blakeannir: posts the ante 50
+frankwalt: posts the ante 50
+JackAntonyyy: posts the ante 50
+2sly4u2sly: posts small blind 200
+DontBeSoft: posts big blind 400
+*** HOLE CARDS ***
+Dealt to ozrona [7d Qh]
+Djonatan22: folds
+AbramiyRago: folds
+ozrona: folds
+biggiebeats: calls 400
+blakeannir: raises 1200 to 1600
+frankwalt: folds
+JackAntonyyy: folds
+2sly4u2sly: calls 1400
+DontBeSoft: folds
+biggiebeats: calls 1200
+*** FLOP *** [Ac Ah 3h]
+2sly4u2sly: checks
+biggiebeats: checks
+blakeannir: bets 2825
+2sly4u2sly: folds
+biggiebeats: calls 2825
+*** TURN *** [Ac Ah 3h] [5c]
+biggiebeats: checks
+blakeannir: bets 11300
+biggiebeats: folds
+Uncalled bet (11300) returned to blakeannir
+blakeannir collected 11300 from pot
+*** SUMMARY ***
+Total pot 11300 | Rake 0
+Board [Ac Ah 3h 5c]
+Seat 1: biggiebeats folded on the Turn
+Seat 2: blakeannir collected (11300)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: JackAntonyyy (button) folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly (small blind) folded on the Flop
+Seat 6: DontBeSoft (big blind) folded before Flop
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: AbramiyRago folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600002464: Tournament #9735326, No Limit Hold'em - Level V (200/400 ante 50) - 2026/07/15 19:23:12 ACST [2026/07/15 09:53:12 UTC]
+Table '9735326 4' 9-max Seat #5 is the button
+Seat 1: biggiebeats (96572 in chips)
+Seat 2: blakeannir (110908 in chips)
+Seat 3: frankwalt (106698 in chips)
+Seat 4: JackAntonyyy (99232 in chips)
+Seat 5: 2sly4u2sly (97227 in chips)
+Seat 6: DontBeSoft (202200 in chips)
+Seat 7: Djonatan22 (93938 in chips)
+Seat 8: AbramiyRago (126558 in chips)
+Seat 9: ozrona (98200 in chips)
+DontBeSoft: posts the ante 50
+Djonatan22: posts the ante 50
+AbramiyRago: posts the ante 50
+ozrona: posts the ante 50
+biggiebeats: posts the ante 50
+blakeannir: posts the ante 50
+frankwalt: posts the ante 50
+JackAntonyyy: posts the ante 50
+2sly4u2sly: posts the ante 50
+DontBeSoft: posts small blind 200
+Djonatan22: posts big blind 400
+*** HOLE CARDS ***
+Dealt to ozrona [9c 7h]
+AbramiyRago: folds
+ozrona: folds
+biggiebeats: raises 800 to 1200
+blakeannir: folds
+frankwalt: folds
+JackAntonyyy: folds
+2sly4u2sly: calls 1200
+DontBeSoft: calls 1000
+Djonatan22: calls 800
+*** FLOP *** [9d 7c 3d]
+DontBeSoft: checks
+Djonatan22: bets 3937
+biggiebeats: calls 3937
+2sly4u2sly: folds
+DontBeSoft: calls 3937
+*** TURN *** [9d 7c 3d] [Th]
+DontBeSoft: checks
+Djonatan22: bets 17061
+biggiebeats: folds
+DontBeSoft: calls 17061
+*** RIVER *** [9d 7c 3d Th] [Kc]
+DontBeSoft: checks
+Djonatan22: bets 17061
+DontBeSoft: raises 162891 to 179952 and is all-in
+Djonatan22: calls 54629 and is all-in
+Uncalled bet (108262) returned to DontBeSoft
+*** SHOW DOWN ***
+Djonatan22: shows [Tc 9s]
+DontBeSoft: shows [9h 8s]
+Djonatan22 collected 194563 from pot
+*** SUMMARY ***
+Total pot 194563 | Rake 0
+Board [9d 7c 3d Th Kc]
+Seat 1: biggiebeats folded on the Turn
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: JackAntonyyy folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly (button) folded on the Flop
+Seat 6: DontBeSoft (small blind) showed [9h 8s] and lost
+Seat 7: Djonatan22 (big blind) showed [Tc 9s] and won (194563)
+Seat 8: AbramiyRago folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600002534: Tournament #9735326, No Limit Hold'em - Level V (200/400 ante 50) - 2026/07/15 19:24:33 ACST [2026/07/15 09:54:33 UTC]
+Table '9735326 4' 9-max Seat #6 is the button
+Seat 1: biggiebeats (91385 in chips)
+Seat 2: blakeannir (110858 in chips)
+Seat 3: frankwalt (106648 in chips)
+Seat 4: JackAntonyyy (99182 in chips)
+Seat 5: 2sly4u2sly (95977 in chips)
+Seat 6: DontBeSoft (108262 in chips)
+Seat 7: Djonatan22 (194563 in chips)
+Seat 9: ozrona (98150 in chips)
+Djonatan22: posts the ante 50
+ozrona: posts the ante 50
+biggiebeats: posts the ante 50
+blakeannir: posts the ante 50
+frankwalt: posts the ante 50
+JackAntonyyy: posts the ante 50
+2sly4u2sly: posts the ante 50
+DontBeSoft: posts the ante 50
+Djonatan22: posts small blind 200
+ozrona: posts big blind 400
+*** HOLE CARDS ***
+Dealt to ozrona [6c 8d]
+biggiebeats: calls 400
+blakeannir: folds
+frankwalt: folds
+JackAntonyyy: folds
+2sly4u2sly: folds
+DontBeSoft: folds
+Djonatan22: raises 400 to 800
+ozrona: calls 400
+biggiebeats: calls 400
+*** FLOP *** [3c Kh 9h]
+Djonatan22: bets 2800
+ozrona: folds
+biggiebeats: calls 2800
+*** TURN *** [3c Kh 9h] [3d]
+Djonatan22: bets 8400
+biggiebeats: calls 8400
+*** RIVER *** [3c Kh 9h 3d] [3s]
+Djonatan22: checks
+biggiebeats: checks
+*** SHOW DOWN ***
+Djonatan22: shows [9d Qd]
+Djonatan22 collected 25200 from pot
+*** SUMMARY ***
+Total pot 25200 | Rake 0
+Board [3c Kh 9h 3d 3s]
+Seat 1: biggiebeats mucked
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: JackAntonyyy folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: DontBeSoft (button) folded before Flop (didn't bet)
+Seat 7: Djonatan22 (small blind) showed [9d Qd] and won (25200)
+Seat 9: ozrona (big blind) folded on the Flop
+
+PokerStars Hand #260715044642973532600002574: Tournament #9735326, No Limit Hold'em - Level V (200/400 ante 50) - 2026/07/15 19:30:01 ACST [2026/07/15 10:00:01 UTC]
+Table '9735326 4' 9-max Seat #7 is the button
+Seat 1: biggiebeats (79335 in chips)
+Seat 2: blakeannir (110808 in chips)
+Seat 3: frankwalt (106598 in chips)
+Seat 4: JackAntonyyy (99132 in chips)
+Seat 5: 2sly4u2sly (95927 in chips)
+Seat 6: DontBeSoft (108212 in chips)
+Seat 7: Djonatan22 (207713 in chips)
+Seat 9: ozrona (97300 in chips)
+ozrona: posts the ante 50
+biggiebeats: posts the ante 50
+blakeannir: posts the ante 50
+frankwalt: posts the ante 50
+JackAntonyyy: posts the ante 50
+2sly4u2sly: posts the ante 50
+DontBeSoft: posts the ante 50
+Djonatan22: posts the ante 50
+ozrona: posts small blind 200
+biggiebeats: posts big blind 400
+*** HOLE CARDS ***
+Dealt to ozrona [8s Tc]
+blakeannir: raises 800 to 1200
+frankwalt: folds
+JackAntonyyy: folds
+2sly4u2sly: folds
+DontBeSoft: calls 1200
+Djonatan22: raises 1760 to 2960
+ozrona: folds
+biggiebeats: folds
+blakeannir: folds
+DontBeSoft: raises 104002 to 106962 and is all-in
+Djonatan22: folds
+Uncalled bet (105202) returned to DontBeSoft
+DontBeSoft collected 6920 from pot
+*** SUMMARY ***
+Total pot 6920 | Rake 0
+Seat 1: biggiebeats (big blind) folded before Flop
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: JackAntonyyy folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: DontBeSoft collected (6920)
+Seat 7: Djonatan22 (button) folded before Flop (didn't bet)
+Seat 9: ozrona (small blind) folded before Flop
+
+PokerStars Hand #260715044642973532600002624: Tournament #9735326, No Limit Hold'em - Level V (200/400 ante 50) - 2026/07/15 19:30:46 ACST [2026/07/15 10:00:46 UTC]
+Table '9735326 4' 9-max Seat #9 is the button
+Seat 1: biggiebeats (78885 in chips)
+Seat 2: blakeannir (109558 in chips)
+Seat 3: frankwalt (106548 in chips)
+Seat 4: JackAntonyyy (99082 in chips)
+Seat 5: 2sly4u2sly (95877 in chips)
+Seat 6: DontBeSoft (113322 in chips)
+Seat 7: Djonatan22 (204703 in chips)
+Seat 9: ozrona (97050 in chips)
+biggiebeats: posts the ante 50
+blakeannir: posts the ante 50
+frankwalt: posts the ante 50
+JackAntonyyy: posts the ante 50
+2sly4u2sly: posts the ante 50
+DontBeSoft: posts the ante 50
+Djonatan22: posts the ante 50
+ozrona: posts the ante 50
+biggiebeats: posts small blind 200
+blakeannir: posts big blind 400
+*** HOLE CARDS ***
+Dealt to ozrona [Qh 2s]
+frankwalt: folds
+JackAntonyyy: folds
+2sly4u2sly: folds
+DontBeSoft: folds
+Djonatan22: raises 600 to 1000
+ozrona: calls 1000
+biggiebeats: folds
+blakeannir: calls 600
+*** FLOP *** [Td Th 7s]
+blakeannir: checks
+Djonatan22: bets 1800
+ozrona: folds
+blakeannir: folds
+Uncalled bet (1800) returned to Djonatan22
+Djonatan22 collected 3600 from pot
+*** SUMMARY ***
+Total pot 3600 | Rake 0
+Board [Td Th 7s]
+Seat 1: biggiebeats (small blind) folded before Flop
+Seat 2: blakeannir (big blind) folded on the Flop
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: JackAntonyyy folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: DontBeSoft folded before Flop (didn't bet)
+Seat 7: Djonatan22 collected (3600)
+Seat 9: ozrona (button) folded on the Flop
+
+PokerStars Hand #260715044642973532600002714: Tournament #9735326, No Limit Hold'em - Level V (200/400 ante 50) - 2026/07/15 19:31:57 ACST [2026/07/15 10:01:57 UTC]
+Table '9735326 4' 9-max Seat #1 is the button
+Seat 1: biggiebeats (78635 in chips)
+Seat 2: blakeannir (108508 in chips)
+Seat 3: frankwalt (106498 in chips)
+Seat 4: JackAntonyyy (99032 in chips)
+Seat 5: 2sly4u2sly (95827 in chips)
+Seat 6: DontBeSoft (113272 in chips)
+Seat 7: Djonatan22 (207253 in chips)
+Seat 8: Bazuna (100000 in chips)
+Seat 9: ozrona (96000 in chips)
+blakeannir: posts the ante 50
+frankwalt: posts the ante 50
+JackAntonyyy: posts the ante 50
+2sly4u2sly: posts the ante 50
+DontBeSoft: posts the ante 50
+Djonatan22: posts the ante 50
+Bazuna: posts the ante 50
+ozrona: posts the ante 50
+biggiebeats: posts the ante 50
+blakeannir: posts small blind 200
+frankwalt: posts big blind 400
+*** HOLE CARDS ***
+Dealt to ozrona [Qd 7h]
+JackAntonyyy: raises 800 to 1200
+2sly4u2sly: folds
+DontBeSoft: folds
+Djonatan22: folds
+Bazuna: folds
+ozrona: calls 1200
+biggiebeats: folds
+blakeannir: folds
+frankwalt: calls 800
+*** FLOP *** [Th 9d 9c]
+frankwalt: checks
+JackAntonyyy: checks
+ozrona: bets 3233
+frankwalt: folds
+JackAntonyyy: folds
+Uncalled bet (3233) returned to ozrona
+ozrona collected 4250 from pot
+*** SUMMARY ***
+Total pot 4250 | Rake 0
+Board [Th 9d 9c]
+Seat 1: biggiebeats (button) folded before Flop (didn't bet)
+Seat 2: blakeannir (small blind) folded before Flop
+Seat 3: frankwalt (big blind) folded on the Flop
+Seat 4: JackAntonyyy folded on the Flop
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: DontBeSoft folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona collected (4250)
+
+PokerStars Hand #260715044642973532600002774: Tournament #9735326, No Limit Hold'em - Level V (200/400 ante 50) - 2026/07/15 19:33:13 ACST [2026/07/15 10:03:13 UTC]
+Table '9735326 4' 9-max Seat #2 is the button
+Seat 1: biggiebeats (78585 in chips)
+Seat 2: blakeannir (108258 in chips)
+Seat 3: frankwalt (105248 in chips)
+Seat 4: JackAntonyyy (97782 in chips)
+Seat 5: 2sly4u2sly (95777 in chips)
+Seat 6: DontBeSoft (113222 in chips)
+Seat 7: Djonatan22 (207203 in chips)
+Seat 8: Bazuna (99950 in chips)
+Seat 9: ozrona (99000 in chips)
+frankwalt: posts the ante 50
+JackAntonyyy: posts the ante 50
+2sly4u2sly: posts the ante 50
+DontBeSoft: posts the ante 50
+Djonatan22: posts the ante 50
+Bazuna: posts the ante 50
+ozrona: posts the ante 50
+biggiebeats: posts the ante 50
+blakeannir: posts the ante 50
+frankwalt: posts small blind 200
+JackAntonyyy: posts big blind 400
+*** HOLE CARDS ***
+Dealt to ozrona [6s Kc]
+2sly4u2sly: folds
+DontBeSoft: folds
+Djonatan22: raises 600 to 1000
+Bazuna: folds
+ozrona: folds
+biggiebeats: folds
+blakeannir: folds
+frankwalt: calls 800
+JackAntonyyy: folds
+*** FLOP *** [Tc Jd Ts]
+frankwalt: checks
+Djonatan22: bets 1425
+frankwalt: calls 1425
+*** TURN *** [Tc Jd Ts] [Kh]
+frankwalt: checks
+Djonatan22: checks
+*** RIVER *** [Tc Jd Ts Kh] [Ac]
+frankwalt: checks
+Djonatan22: checks
+*** SHOW DOWN ***
+Djonatan22: shows [Jh Kd]
+frankwalt: shows [8c 8s]
+Djonatan22 collected 5700 from pot
+*** SUMMARY ***
+Total pot 5700 | Rake 0
+Board [Tc Jd Ts Kh Ac]
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir (button) folded before Flop (didn't bet)
+Seat 3: frankwalt (small blind) showed [8c 8s] and lost
+Seat 4: JackAntonyyy (big blind) folded before Flop
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: DontBeSoft folded before Flop (didn't bet)
+Seat 7: Djonatan22 showed [Jh Kd] and won (5700)
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600002844: Tournament #9735326, No Limit Hold'em - Level V (200/400 ante 50) - 2026/07/15 19:34:28 ACST [2026/07/15 10:04:28 UTC]
+Table '9735326 4' 9-max Seat #3 is the button
+Seat 1: biggiebeats (78535 in chips)
+Seat 2: blakeannir (108208 in chips)
+Seat 3: frankwalt (102773 in chips)
+Seat 4: JackAntonyyy (97332 in chips)
+Seat 5: 2sly4u2sly (95727 in chips)
+Seat 6: DontBeSoft (113172 in chips)
+Seat 7: Djonatan22 (210428 in chips)
+Seat 8: Bazuna (99900 in chips)
+Seat 9: ozrona (98950 in chips)
+JackAntonyyy: posts the ante 50
+2sly4u2sly: posts the ante 50
+DontBeSoft: posts the ante 50
+Djonatan22: posts the ante 50
+Bazuna: posts the ante 50
+ozrona: posts the ante 50
+biggiebeats: posts the ante 50
+blakeannir: posts the ante 50
+frankwalt: posts the ante 50
+JackAntonyyy: posts small blind 200
+2sly4u2sly: posts big blind 400
+*** HOLE CARDS ***
+Dealt to ozrona [Ts Jh]
+DontBeSoft: folds
+Djonatan22: raises 600 to 1000
+Bazuna: calls 1000
+ozrona: calls 1000
+biggiebeats: folds
+blakeannir: folds
+frankwalt: calls 1000
+JackAntonyyy: calls 800
+2sly4u2sly: folds
+*** FLOP *** [Kc Ah Ks]
+JackAntonyyy: checks
+Djonatan22: bets 3125
+Bazuna: folds
+ozrona: calls 3125
+frankwalt: folds
+JackAntonyyy: calls 3125
+*** TURN *** [Kc Ah Ks] [7d]
+JackAntonyyy: checks
+Djonatan22: bets 10818
+ozrona: folds
+JackAntonyyy: calls 10818
+*** RIVER *** [Kc Ah Ks 7d] [5s]
+JackAntonyyy: checks
+Djonatan22: bets 15830
+JackAntonyyy: raises 31660 to 47490
+Djonatan22: calls 31660
+*** SHOW DOWN ***
+Djonatan22: shows [Kd Qh]
+JackAntonyyy: shows [5c Ac]
+Djonatan22 collected 131841 from pot
+*** SUMMARY ***
+Total pot 131841 | Rake 0
+Board [Kc Ah Ks 7d 5s]
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt (button) folded on the Flop
+Seat 4: JackAntonyyy (small blind) showed [5c Ac] and lost
+Seat 5: 2sly4u2sly (big blind) folded before Flop
+Seat 6: DontBeSoft folded before Flop (didn't bet)
+Seat 7: Djonatan22 showed [Kd Qh] and won (131841)
+Seat 8: Bazuna folded on the Flop
+Seat 9: ozrona folded on the Turn
+
+PokerStars Hand #260715044642973532600002984: Tournament #9735326, No Limit Hold'em - Level VI (250/500 ante 75) - 2026/07/15 19:36:39 ACST [2026/07/15 10:06:39 UTC]
+Table '9735326 4' 9-max Seat #4 is the button
+Seat 1: biggiebeats (78485 in chips)
+Seat 2: blakeannir (108158 in chips)
+Seat 3: frankwalt (101723 in chips)
+Seat 4: JackAntonyyy (34849 in chips)
+Seat 5: 2sly4u2sly (95277 in chips)
+Seat 6: DontBeSoft (113122 in chips)
+Seat 7: Djonatan22 (279786 in chips)
+Seat 8: Bazuna (98850 in chips)
+Seat 9: ozrona (94775 in chips)
+2sly4u2sly: posts the ante 75
+DontBeSoft: posts the ante 75
+Djonatan22: posts the ante 75
+Bazuna: posts the ante 75
+ozrona: posts the ante 75
+biggiebeats: posts the ante 75
+blakeannir: posts the ante 75
+frankwalt: posts the ante 75
+JackAntonyyy: posts the ante 75
+2sly4u2sly: posts small blind 250
+DontBeSoft: posts big blind 500
+*** HOLE CARDS ***
+Dealt to ozrona [7h 4c]
+Djonatan22: raises 750 to 1250
+Bazuna: calls 1250
+ozrona: folds
+biggiebeats: folds
+blakeannir: folds
+frankwalt: calls 1250
+JackAntonyyy: raises 33524 to 34774 and is all-in
+2sly4u2sly: folds
+DontBeSoft: folds
+Djonatan22: calls 33524
+Bazuna: folds
+frankwalt: folds
+*** FLOP *** [4d 7s 5c]
+*** TURN *** [4d 7s 5c] [Qc]
+*** RIVER *** [4d 7s 5c Qc] [8c]
+*** SHOW DOWN ***
+Djonatan22: shows [9c 9d]
+JackAntonyyy: shows [Ad Kh]
+Djonatan22 collected 73473 from pot
+*** SUMMARY ***
+Total pot 73473 | Rake 0
+Board [4d 7s 5c Qc 8c]
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: JackAntonyyy (button) showed [Ad Kh] and lost
+Seat 5: 2sly4u2sly (small blind) folded before Flop
+Seat 6: DontBeSoft (big blind) folded before Flop
+Seat 7: Djonatan22 showed [9c 9d] and won (73473)
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600003034: Tournament #9735326, No Limit Hold'em - Level VI (250/500 ante 75) - 2026/07/15 19:37:36 ACST [2026/07/15 10:07:36 UTC]
+Table '9735326 4' 9-max Seat #5 is the button
+Seat 1: biggiebeats (78410 in chips)
+Seat 2: blakeannir (108083 in chips)
+Seat 3: frankwalt (100398 in chips)
+Seat 5: 2sly4u2sly (94952 in chips)
+Seat 6: DontBeSoft (112547 in chips)
+Seat 7: Djonatan22 (318410 in chips)
+Seat 8: Bazuna (97525 in chips)
+Seat 9: ozrona (94700 in chips)
+DontBeSoft: posts the ante 75
+Djonatan22: posts the ante 75
+Bazuna: posts the ante 75
+ozrona: posts the ante 75
+biggiebeats: posts the ante 75
+blakeannir: posts the ante 75
+frankwalt: posts the ante 75
+2sly4u2sly: posts the ante 75
+DontBeSoft: posts small blind 250
+Djonatan22: posts big blind 500
+*** HOLE CARDS ***
+Dealt to ozrona [4h Jh]
+Bazuna: folds
+ozrona: folds
+biggiebeats: raises 750 to 1250
+blakeannir: folds
+frankwalt: calls 1250
+2sly4u2sly: calls 1250
+DontBeSoft: calls 1000
+Djonatan22: calls 750
+*** FLOP *** [5h 4d 3d]
+DontBeSoft: checks
+Djonatan22: bets 5137
+biggiebeats: calls 5137
+frankwalt: folds
+2sly4u2sly: calls 5137
+DontBeSoft: calls 5137
+*** TURN *** [5h 4d 3d] [4s]
+DontBeSoft: checks
+Djonatan22: checks
+biggiebeats: checks
+2sly4u2sly: checks
+*** RIVER *** [5h 4d 3d 4s] [Kc]
+DontBeSoft: checks
+Djonatan22: checks
+biggiebeats: checks
+2sly4u2sly: checks
+*** SHOW DOWN ***
+DontBeSoft: shows [Qs 7h]
+2sly4u2sly: shows [Qc Ad]
+biggiebeats: shows [Th Ac]
+2sly4u2sly collected 27398 from pot
+*** SUMMARY ***
+Total pot 27398 | Rake 0
+Board [5h 4d 3d 4s Kc]
+Seat 1: biggiebeats showed [Th Ac] and lost
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded on the Flop
+Seat 5: 2sly4u2sly (button) showed [Qc Ad] and won (27398)
+Seat 6: DontBeSoft (small blind) showed [Qs 7h] and lost
+Seat 7: Djonatan22 (big blind) mucked
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600003134: Tournament #9735326, No Limit Hold'em - Level VI (250/500 ante 75) - 2026/07/15 19:38:58 ACST [2026/07/15 10:08:58 UTC]
+Table '9735326 4' 9-max Seat #6 is the button
+Seat 1: biggiebeats (71948 in chips)
+Seat 2: blakeannir (108008 in chips)
+Seat 3: frankwalt (99073 in chips)
+Seat 5: 2sly4u2sly (115888 in chips)
+Seat 6: DontBeSoft (106085 in chips)
+Seat 7: Djonatan22 (311948 in chips)
+Seat 8: Bazuna (97450 in chips)
+Seat 9: ozrona (94625 in chips)
+Djonatan22: posts the ante 75
+Bazuna: posts the ante 75
+ozrona: posts the ante 75
+biggiebeats: posts the ante 75
+blakeannir: posts the ante 75
+frankwalt: posts the ante 75
+2sly4u2sly: posts the ante 75
+DontBeSoft: posts the ante 75
+Djonatan22: posts small blind 250
+Bazuna: posts big blind 500
+*** HOLE CARDS ***
+Dealt to ozrona [5d 2d]
+ozrona: folds
+biggiebeats: folds
+blakeannir: folds
+frankwalt: folds
+2sly4u2sly: raises 1700 to 2200
+DontBeSoft: calls 2200
+Djonatan22: folds
+Bazuna: folds
+*** FLOP *** [Kc 2s 3s]
+2sly4u2sly: checks
+DontBeSoft: bets 5750
+2sly4u2sly: calls 5750
+*** TURN *** [Kc 2s 3s] [Ts]
+2sly4u2sly: checks
+DontBeSoft: checks
+*** RIVER *** [Kc 2s 3s Ts] [2h]
+2sly4u2sly: bets 32000
+DontBeSoft: calls 32000
+*** SHOW DOWN ***
+2sly4u2sly: shows [Js 4s]
+2sly4u2sly collected 81250 from pot
+*** SUMMARY ***
+Total pot 81250 | Rake 0
+Board [Kc 2s 3s Ts 2h]
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly showed [Js 4s] and won (81250)
+Seat 6: DontBeSoft (button) mucked
+Seat 7: Djonatan22 (small blind) folded before Flop
+Seat 8: Bazuna (big blind) folded before Flop
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600003234: Tournament #9735326, No Limit Hold'em - Level VI (250/500 ante 75) - 2026/07/15 19:40:39 ACST [2026/07/15 10:10:39 UTC]
+Table '9735326 4' 9-max Seat #7 is the button
+Seat 1: biggiebeats (71873 in chips)
+Seat 2: blakeannir (107933 in chips)
+Seat 3: frankwalt (98998 in chips)
+Seat 5: 2sly4u2sly (157113 in chips)
+Seat 6: DontBeSoft (66060 in chips)
+Seat 7: Djonatan22 (311623 in chips)
+Seat 8: Bazuna (96875 in chips)
+Seat 9: ozrona (94550 in chips)
+Bazuna: posts the ante 75
+ozrona: posts the ante 75
+biggiebeats: posts the ante 75
+blakeannir: posts the ante 75
+frankwalt: posts the ante 75
+2sly4u2sly: posts the ante 75
+DontBeSoft: posts the ante 75
+Djonatan22: posts the ante 75
+Bazuna: posts small blind 250
+ozrona: posts big blind 500
+*** HOLE CARDS ***
+Dealt to ozrona [6s 6d]
+biggiebeats: folds
+blakeannir: folds
+frankwalt: folds
+2sly4u2sly: folds
+DontBeSoft: calls 500
+Djonatan22: folds
+Bazuna: calls 250
+ozrona: raises 1500 to 2000
+DontBeSoft: calls 1500
+Bazuna: calls 1500
+*** FLOP *** [Ah Jh 9d]
+Bazuna: checks
+ozrona: checks
+DontBeSoft: checks
+*** TURN *** [Ah Jh 9d] [2h]
+Bazuna: checks
+ozrona: bets 5400
+DontBeSoft: folds
+Bazuna: folds
+Uncalled bet (5400) returned to ozrona
+ozrona collected 6600 from pot
+*** SUMMARY ***
+Total pot 6600 | Rake 0
+Board [Ah Jh 9d 2h]
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: DontBeSoft folded on the Turn
+Seat 7: Djonatan22 (button) folded before Flop (didn't bet)
+Seat 8: Bazuna (small blind) folded on the Turn
+Seat 9: ozrona (big blind) collected (6600)
+
+PokerStars Hand #260715044642973532600003334: Tournament #9735326, No Limit Hold'em - Level VI (250/500 ante 75) - 2026/07/15 19:41:55 ACST [2026/07/15 10:11:55 UTC]
+Table '9735326 4' 9-max Seat #8 is the button
+Seat 1: biggiebeats (71798 in chips)
+Seat 2: blakeannir (107858 in chips)
+Seat 3: frankwalt (98923 in chips)
+Seat 5: 2sly4u2sly (157038 in chips)
+Seat 6: DontBeSoft (63985 in chips)
+Seat 7: Djonatan22 (311548 in chips)
+Seat 8: Bazuna (94800 in chips)
+Seat 9: ozrona (99075 in chips)
+ozrona: posts the ante 75
+biggiebeats: posts the ante 75
+blakeannir: posts the ante 75
+frankwalt: posts the ante 75
+2sly4u2sly: posts the ante 75
+DontBeSoft: posts the ante 75
+Djonatan22: posts the ante 75
+Bazuna: posts the ante 75
+ozrona: posts small blind 250
+biggiebeats: posts big blind 500
+*** HOLE CARDS ***
+Dealt to ozrona [8h 5d]
+blakeannir: folds
+frankwalt: folds
+2sly4u2sly: folds
+DontBeSoft: folds
+Djonatan22: raises 750 to 1250
+Bazuna: calls 1250
+ozrona: calls 1000
+biggiebeats: calls 750
+*** FLOP *** [9h 3d 7s]
+ozrona: checks
+biggiebeats: checks
+Djonatan22: bets 4200
+Bazuna: folds
+ozrona: folds
+biggiebeats: folds
+Uncalled bet (4200) returned to Djonatan22
+Djonatan22 collected 5600 from pot
+*** SUMMARY ***
+Total pot 5600 | Rake 0
+Board [9h 3d 7s]
+Seat 1: biggiebeats (big blind) folded on the Flop
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: DontBeSoft folded before Flop (didn't bet)
+Seat 7: Djonatan22 collected (5600)
+Seat 8: Bazuna (button) folded on the Flop
+Seat 9: ozrona (small blind) folded on the Flop
+
+PokerStars Hand #260715044642973532600003384: Tournament #9735326, No Limit Hold'em - Level VI (250/500 ante 75) - 2026/07/15 19:42:53 ACST [2026/07/15 10:12:53 UTC]
+Table '9735326 4' 9-max Seat #9 is the button
+Seat 1: biggiebeats (70473 in chips)
+Seat 2: blakeannir (107783 in chips)
+Seat 3: frankwalt (98848 in chips)
+Seat 5: 2sly4u2sly (156963 in chips)
+Seat 6: DontBeSoft (63910 in chips)
+Seat 7: Djonatan22 (315823 in chips)
+Seat 8: Bazuna (93475 in chips)
+Seat 9: ozrona (97750 in chips)
+biggiebeats: posts the ante 75
+blakeannir: posts the ante 75
+frankwalt: posts the ante 75
+2sly4u2sly: posts the ante 75
+DontBeSoft: posts the ante 75
+Djonatan22: posts the ante 75
+Bazuna: posts the ante 75
+ozrona: posts the ante 75
+biggiebeats: posts small blind 250
+blakeannir: posts big blind 500
+*** HOLE CARDS ***
+Dealt to ozrona [Qh Qc]
+frankwalt: raises 1000 to 1500
+2sly4u2sly: folds
+DontBeSoft: folds
+Djonatan22: folds
+Bazuna: folds
+ozrona: raises 3500 to 5000
+biggiebeats: calls 4750
+blakeannir: folds
+frankwalt: folds
+*** FLOP *** [5s Ks 9s]
+biggiebeats: checks
+ozrona: bets 5550
+biggiebeats: calls 5550
+*** TURN *** [5s Ks 9s] [5d]
+biggiebeats: checks
+ozrona: checks
+*** RIVER *** [5s Ks 9s 5d] [8h]
+biggiebeats: bets 23700
+ozrona: calls 23700
+*** SHOW DOWN ***
+biggiebeats: shows [8s 8c]
+biggiebeats collected 71100 from pot
+*** SUMMARY ***
+Total pot 71100 | Rake 0
+Board [5s Ks 9s 5d 8h]
+Seat 1: biggiebeats (small blind) showed [8s 8c] and won (71100)
+Seat 2: blakeannir (big blind) folded before Flop
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: DontBeSoft folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona (button) mucked
+
+PokerStars Hand #260715044642973532600003504: Tournament #9735326, No Limit Hold'em - Level VI (250/500 ante 75) - 2026/07/15 19:44:42 ACST [2026/07/15 10:14:42 UTC]
+Table '9735326 4' 9-max Seat #1 is the button
+Seat 1: biggiebeats (107248 in chips)
+Seat 2: blakeannir (107208 in chips)
+Seat 3: frankwalt (97273 in chips)
+Seat 5: 2sly4u2sly (156888 in chips)
+Seat 6: DontBeSoft (63835 in chips)
+Seat 7: Djonatan22 (315748 in chips)
+Seat 8: Bazuna (93400 in chips)
+Seat 9: ozrona (63425 in chips)
+blakeannir: posts the ante 75
+frankwalt: posts the ante 75
+2sly4u2sly: posts the ante 75
+DontBeSoft: posts the ante 75
+Djonatan22: posts the ante 75
+Bazuna: posts the ante 75
+ozrona: posts the ante 75
+biggiebeats: posts the ante 75
+blakeannir: posts small blind 250
+frankwalt: posts big blind 500
+*** HOLE CARDS ***
+Dealt to ozrona [2d 5d]
+2sly4u2sly: raises 900 to 1400
+DontBeSoft: folds
+Djonatan22: calls 1400
+Bazuna: folds
+ozrona: folds
+biggiebeats: calls 1400
+blakeannir: folds
+frankwalt: calls 900
+*** FLOP *** [Ac Kh 8d]
+frankwalt: checks
+2sly4u2sly: checks
+Djonatan22: checks
+biggiebeats: checks
+*** TURN *** [Ac Kh 8d] [Th]
+frankwalt: checks
+2sly4u2sly: checks
+Djonatan22: bets 4837
+biggiebeats: calls 4837
+frankwalt: folds
+2sly4u2sly: folds
+*** RIVER *** [Ac Kh 8d Th] [Kd]
+Djonatan22: checks
+biggiebeats: bets 8062
+Djonatan22: calls 8062
+*** SHOW DOWN ***
+Djonatan22: shows [Qc Kc]
+biggiebeats: shows [5h Jh]
+Djonatan22 collected 32248 from pot
+*** SUMMARY ***
+Total pot 32248 | Rake 0
+Board [Ac Kh 8d Th Kd]
+Seat 1: biggiebeats (button) showed [5h Jh] and lost
+Seat 2: blakeannir (small blind) folded before Flop
+Seat 3: frankwalt (big blind) folded on the Turn
+Seat 5: 2sly4u2sly folded on the Turn
+Seat 6: DontBeSoft folded before Flop (didn't bet)
+Seat 7: Djonatan22 showed [Qc Kc] and won (32248)
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600003604: Tournament #9735326, No Limit Hold'em - Level VI (250/500 ante 75) - 2026/07/15 19:46:07 ACST [2026/07/15 10:16:07 UTC]
+Table '9735326 4' 9-max Seat #2 is the button
+Seat 1: biggiebeats (92874 in chips)
+Seat 2: blakeannir (106883 in chips)
+Seat 3: frankwalt (95798 in chips)
+Seat 5: 2sly4u2sly (155413 in chips)
+Seat 6: DontBeSoft (63760 in chips)
+Seat 7: Djonatan22 (333622 in chips)
+Seat 8: Bazuna (93325 in chips)
+Seat 9: ozrona (63350 in chips)
+frankwalt: posts the ante 75
+2sly4u2sly: posts the ante 75
+DontBeSoft: posts the ante 75
+Djonatan22: posts the ante 75
+Bazuna: posts the ante 75
+ozrona: posts the ante 75
+biggiebeats: posts the ante 75
+blakeannir: posts the ante 75
+frankwalt: posts small blind 250
+2sly4u2sly: posts big blind 500
+*** HOLE CARDS ***
+Dealt to ozrona [4s 2d]
+DontBeSoft: calls 500
+Djonatan22: folds
+Bazuna: folds
+ozrona: folds
+biggiebeats: folds
+blakeannir: raises 1500 to 2000
+frankwalt: calls 1750
+2sly4u2sly: folds
+DontBeSoft: calls 1500
+*** FLOP *** [5d 8c Kc]
+frankwalt: checks
+DontBeSoft: checks
+blakeannir: checks
+*** TURN *** [5d 8c Kc] [5c]
+frankwalt: checks
+DontBeSoft: checks
+blakeannir: checks
+*** RIVER *** [5d 8c Kc 5c] [Kh]
+frankwalt: bets 7100
+DontBeSoft: folds
+blakeannir: folds
+Uncalled bet (7100) returned to frankwalt
+frankwalt collected 7100 from pot
+*** SUMMARY ***
+Total pot 7100 | Rake 0
+Board [5d 8c Kc 5c Kh]
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir (button) folded on the River
+Seat 3: frankwalt (small blind) collected (7100)
+Seat 5: 2sly4u2sly (big blind) folded before Flop
+Seat 6: DontBeSoft folded on the River
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600003694: Tournament #9735326, No Limit Hold'em - Level VII (300/600 ante 75) - 2026/07/15 19:47:34 ACST [2026/07/15 10:17:34 UTC]
+Table '9735326 4' 9-max Seat #3 is the button
+Seat 1: biggiebeats (92799 in chips)
+Seat 2: blakeannir (104808 in chips)
+Seat 3: frankwalt (100823 in chips)
+Seat 5: 2sly4u2sly (154838 in chips)
+Seat 6: DontBeSoft (61685 in chips)
+Seat 7: Djonatan22 (333547 in chips)
+Seat 8: Bazuna (93250 in chips)
+Seat 9: ozrona (63275 in chips)
+2sly4u2sly: posts the ante 75
+DontBeSoft: posts the ante 75
+Djonatan22: posts the ante 75
+Bazuna: posts the ante 75
+ozrona: posts the ante 75
+biggiebeats: posts the ante 75
+blakeannir: posts the ante 75
+frankwalt: posts the ante 75
+2sly4u2sly: posts small blind 300
+DontBeSoft: posts big blind 600
+*** HOLE CARDS ***
+Dealt to ozrona [Ac Qd]
+Djonatan22: folds
+Bazuna: folds
+ozrona: raises 1500 to 2100
+biggiebeats: folds
+blakeannir: folds
+frankwalt: raises 4200 to 6300
+2sly4u2sly: folds
+DontBeSoft: folds
+ozrona: calls 4200
+*** FLOP *** [4c Jh 7h]
+ozrona: checks
+frankwalt: bets 3525
+ozrona: calls 3525
+*** TURN *** [4c Jh 7h] [Ah]
+ozrona: checks
+frankwalt: bets 15863
+ozrona: folds
+Uncalled bet (15863) returned to frankwalt
+frankwalt collected 21150 from pot
+*** SUMMARY ***
+Total pot 21150 | Rake 0
+Board [4c Jh 7h Ah]
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt (button) collected (21150)
+Seat 5: 2sly4u2sly (small blind) folded before Flop
+Seat 6: DontBeSoft (big blind) folded before Flop
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona folded on the Turn
+
+PokerStars Hand #260715044642973532600003784: Tournament #9735326, No Limit Hold'em - Level VII (300/600 ante 75) - 2026/07/15 19:48:49 ACST [2026/07/15 10:18:49 UTC]
+Table '9735326 4' 9-max Seat #5 is the button
+Seat 1: biggiebeats (92724 in chips)
+Seat 2: blakeannir (104733 in chips)
+Seat 3: frankwalt (112073 in chips)
+Seat 5: 2sly4u2sly (154463 in chips)
+Seat 6: DontBeSoft (61010 in chips)
+Seat 7: Djonatan22 (333472 in chips)
+Seat 8: Bazuna (93175 in chips)
+Seat 9: ozrona (53375 in chips)
+DontBeSoft: posts the ante 75
+Djonatan22: posts the ante 75
+Bazuna: posts the ante 75
+ozrona: posts the ante 75
+biggiebeats: posts the ante 75
+blakeannir: posts the ante 75
+frankwalt: posts the ante 75
+2sly4u2sly: posts the ante 75
+DontBeSoft: posts small blind 300
+Djonatan22: posts big blind 600
+*** HOLE CARDS ***
+Dealt to ozrona [Kc 7s]
+Bazuna: folds
+ozrona: folds
+biggiebeats: folds
+blakeannir: raises 1200 to 1800
+frankwalt: folds
+2sly4u2sly: folds
+DontBeSoft: folds
+Djonatan22: folds
+Uncalled bet (1200) returned to blakeannir
+blakeannir collected 2100 from pot
+*** SUMMARY ***
+Total pot 2100 | Rake 0
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir collected (2100)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly (button) folded before Flop (didn't bet)
+Seat 6: DontBeSoft (small blind) folded before Flop
+Seat 7: Djonatan22 (big blind) folded before Flop
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600003834: Tournament #9735326, No Limit Hold'em - Level VII (300/600 ante 75) - 2026/07/15 19:49:28 ACST [2026/07/15 10:19:28 UTC]
+Table '9735326 4' 9-max Seat #6 is the button
+Seat 1: biggiebeats (92649 in chips)
+Seat 2: blakeannir (106158 in chips)
+Seat 3: frankwalt (111998 in chips)
+Seat 5: 2sly4u2sly (154388 in chips)
+Seat 6: DontBeSoft (60635 in chips)
+Seat 7: Djonatan22 (332797 in chips)
+Seat 8: Bazuna (93100 in chips)
+Seat 9: ozrona (53300 in chips)
+Djonatan22: posts the ante 75
+Bazuna: posts the ante 75
+ozrona: posts the ante 75
+biggiebeats: posts the ante 75
+blakeannir: posts the ante 75
+frankwalt: posts the ante 75
+2sly4u2sly: posts the ante 75
+DontBeSoft: posts the ante 75
+Djonatan22: posts small blind 300
+Bazuna: posts big blind 600
+*** HOLE CARDS ***
+Dealt to ozrona [6d 3d]
+ozrona: folds
+biggiebeats: folds
+blakeannir: raises 1200 to 1800
+frankwalt: folds
+2sly4u2sly: folds
+DontBeSoft: folds
+Djonatan22: calls 1500
+Bazuna: calls 1200
+*** FLOP *** [4s Qd 3s]
+Djonatan22: checks
+Bazuna: checks
+blakeannir: bets 3000
+Djonatan22: calls 3000
+Bazuna: folds
+*** TURN *** [4s Qd 3s] [7h]
+Djonatan22: checks
+blakeannir: checks
+*** RIVER *** [4s Qd 3s 7h] [5c]
+Djonatan22: bets 10200
+blakeannir: folds
+Uncalled bet (10200) returned to Djonatan22
+Djonatan22 collected 12000 from pot
+*** SUMMARY ***
+Total pot 12000 | Rake 0
+Board [4s Qd 3s 7h 5c]
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir folded on the River
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: DontBeSoft (button) folded before Flop (didn't bet)
+Seat 7: Djonatan22 (small blind) collected (12000)
+Seat 8: Bazuna (big blind) folded on the Flop
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600003944: Tournament #9735326, No Limit Hold'em - Level VII (300/600 ante 75) - 2026/07/15 19:50:49 ACST [2026/07/15 10:20:49 UTC]
+Table '9735326 4' 9-max Seat #7 is the button
+Seat 1: biggiebeats (92574 in chips)
+Seat 2: blakeannir (101283 in chips)
+Seat 3: frankwalt (111923 in chips)
+Seat 5: 2sly4u2sly (154313 in chips)
+Seat 6: DontBeSoft (60560 in chips)
+Seat 7: Djonatan22 (339922 in chips)
+Seat 8: Bazuna (91225 in chips)
+Seat 9: ozrona (53225 in chips)
+Bazuna: posts the ante 75
+ozrona: posts the ante 75
+biggiebeats: posts the ante 75
+blakeannir: posts the ante 75
+frankwalt: posts the ante 75
+2sly4u2sly: posts the ante 75
+DontBeSoft: posts the ante 75
+Djonatan22: posts the ante 75
+Bazuna: posts small blind 300
+ozrona: posts big blind 600
+*** HOLE CARDS ***
+Dealt to ozrona [3d 7h]
+biggiebeats: folds
+blakeannir: folds
+frankwalt: folds
+2sly4u2sly: calls 600
+DontBeSoft: calls 600
+Djonatan22: folds
+Bazuna: calls 300
+ozrona: checks
+*** FLOP *** [Ks Qd 6h]
+Bazuna: checks
+ozrona: checks
+2sly4u2sly: checks
+DontBeSoft: bets 1500
+Bazuna: folds
+ozrona: folds
+2sly4u2sly: folds
+Uncalled bet (1500) returned to DontBeSoft
+DontBeSoft collected 3000 from pot
+*** SUMMARY ***
+Total pot 3000 | Rake 0
+Board [Ks Qd 6h]
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded on the Flop
+Seat 6: DontBeSoft collected (3000)
+Seat 7: Djonatan22 (button) folded before Flop (didn't bet)
+Seat 8: Bazuna (small blind) folded on the Flop
+Seat 9: ozrona (big blind) folded on the Flop
+
+PokerStars Hand #260715044642973532600004014: Tournament #9735326, No Limit Hold'em - Level VII (300/600 ante 75) - 2026/07/15 19:51:46 ACST [2026/07/15 10:21:46 UTC]
+Table '9735326 4' 9-max Seat #8 is the button
+Seat 1: biggiebeats (92499 in chips)
+Seat 2: blakeannir (101208 in chips)
+Seat 3: frankwalt (111848 in chips)
+Seat 5: 2sly4u2sly (153638 in chips)
+Seat 6: DontBeSoft (62885 in chips)
+Seat 7: Djonatan22 (339847 in chips)
+Seat 8: Bazuna (90550 in chips)
+Seat 9: ozrona (52550 in chips)
+ozrona: posts the ante 75
+biggiebeats: posts the ante 75
+blakeannir: posts the ante 75
+frankwalt: posts the ante 75
+2sly4u2sly: posts the ante 75
+DontBeSoft: posts the ante 75
+Djonatan22: posts the ante 75
+Bazuna: posts the ante 75
+ozrona: posts small blind 300
+biggiebeats: posts big blind 600
+*** HOLE CARDS ***
+Dealt to ozrona [8c 4s]
+blakeannir: folds
+frankwalt: raises 1200 to 1800
+2sly4u2sly: folds
+DontBeSoft: folds
+Djonatan22: folds
+Bazuna: folds
+ozrona: calls 1500
+biggiebeats: folds
+*** FLOP *** [5d Tc 3d]
+ozrona: checks
+frankwalt: bets 3600
+ozrona: folds
+Uncalled bet (3600) returned to frankwalt
+frankwalt collected 4800 from pot
+*** SUMMARY ***
+Total pot 4800 | Rake 0
+Board [5d Tc 3d]
+Seat 1: biggiebeats (big blind) folded before Flop
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt collected (4800)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: DontBeSoft folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: Bazuna (button) folded before Flop (didn't bet)
+Seat 9: ozrona (small blind) folded on the Flop
+
+PokerStars Hand #260715044642973532600004054: Tournament #9735326, No Limit Hold'em - Level VII (300/600 ante 75) - 2026/07/15 19:52:31 ACST [2026/07/15 10:22:31 UTC]
+Table '9735326 4' 9-max Seat #9 is the button
+Seat 1: biggiebeats (91824 in chips)
+Seat 2: blakeannir (101133 in chips)
+Seat 3: frankwalt (114773 in chips)
+Seat 5: 2sly4u2sly (153563 in chips)
+Seat 6: DontBeSoft (62810 in chips)
+Seat 7: Djonatan22 (339772 in chips)
+Seat 8: Bazuna (90475 in chips)
+Seat 9: ozrona (50675 in chips)
+biggiebeats: posts the ante 75
+blakeannir: posts the ante 75
+frankwalt: posts the ante 75
+2sly4u2sly: posts the ante 75
+DontBeSoft: posts the ante 75
+Djonatan22: posts the ante 75
+Bazuna: posts the ante 75
+ozrona: posts the ante 75
+biggiebeats: posts small blind 300
+blakeannir: posts big blind 600
+*** HOLE CARDS ***
+Dealt to ozrona [As Ah]
+frankwalt: folds
+2sly4u2sly: folds
+DontBeSoft: folds
+Djonatan22: raises 900 to 1500
+Bazuna: folds
+ozrona: raises 49100 to 50600 and is all-in
+biggiebeats: folds
+blakeannir: folds
+Djonatan22: folds
+Uncalled bet (50100) returned to ozrona
+ozrona collected 3500 from pot
+*** SUMMARY ***
+Total pot 3500 | Rake 0
+Seat 1: biggiebeats (small blind) folded before Flop
+Seat 2: blakeannir (big blind) folded before Flop
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: DontBeSoft folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona (button) collected (3500)
+
+PokerStars Hand #260715044642973532600004104: Tournament #9735326, No Limit Hold'em - Level VII (300/600 ante 75) - 2026/07/15 19:53:23 ACST [2026/07/15 10:23:23 UTC]
+Table '9735326 4' 9-max Seat #1 is the button
+Seat 1: biggiebeats (91449 in chips)
+Seat 2: blakeannir (100458 in chips)
+Seat 3: frankwalt (114698 in chips)
+Seat 5: 2sly4u2sly (153488 in chips)
+Seat 6: DontBeSoft (62735 in chips)
+Seat 7: Djonatan22 (338197 in chips)
+Seat 8: Bazuna (90400 in chips)
+Seat 9: ozrona (53600 in chips)
+blakeannir: posts the ante 75
+frankwalt: posts the ante 75
+2sly4u2sly: posts the ante 75
+DontBeSoft: posts the ante 75
+Djonatan22: posts the ante 75
+Bazuna: posts the ante 75
+ozrona: posts the ante 75
+biggiebeats: posts the ante 75
+blakeannir: posts small blind 300
+frankwalt: posts big blind 600
+*** HOLE CARDS ***
+Dealt to ozrona [Td 9h]
+2sly4u2sly: folds
+DontBeSoft: calls 600
+Djonatan22: calls 600
+Bazuna: raises 900 to 1500
+ozrona: folds
+biggiebeats: calls 1500
+blakeannir: calls 1200
+frankwalt: folds
+DontBeSoft: calls 900
+Djonatan22: calls 900
+*** FLOP *** [Kc 5d Ac]
+blakeannir: checks
+DontBeSoft: checks
+Djonatan22: checks
+Bazuna: bets 5800
+biggiebeats: calls 5800
+blakeannir: folds
+DontBeSoft: calls 5800
+Djonatan22: folds
+*** TURN *** [Kc 5d Ac] [9c]
+DontBeSoft: checks
+Bazuna: checks
+biggiebeats: bets 8700
+DontBeSoft: calls 8700
+Bazuna: folds
+*** RIVER *** [Kc 5d Ac 9c] [8h]
+DontBeSoft: bets 46160 and is all-in
+biggiebeats: folds
+Uncalled bet (46160) returned to DontBeSoft
+DontBeSoft collected 43500 from pot
+*** SUMMARY ***
+Total pot 43500 | Rake 0
+Board [Kc 5d Ac 9c 8h]
+Seat 1: biggiebeats (button) folded on the River
+Seat 2: blakeannir (small blind) folded on the Flop
+Seat 3: frankwalt (big blind) folded before Flop
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: DontBeSoft collected (43500)
+Seat 7: Djonatan22 folded on the Flop
+Seat 8: Bazuna folded on the Turn
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600004254: Tournament #9735326, No Limit Hold'em - Level VII (300/600 ante 75) - 2026/07/15 19:55:18 ACST [2026/07/15 10:25:18 UTC]
+Table '9735326 4' 9-max Seat #2 is the button
+Seat 1: biggiebeats (75374 in chips)
+Seat 2: blakeannir (98883 in chips)
+Seat 3: frankwalt (114023 in chips)
+Seat 5: 2sly4u2sly (153413 in chips)
+Seat 6: DontBeSoft (90160 in chips)
+Seat 7: Djonatan22 (336622 in chips)
+Seat 8: Bazuna (83025 in chips)
+Seat 9: ozrona (53525 in chips)
+frankwalt: posts the ante 75
+2sly4u2sly: posts the ante 75
+DontBeSoft: posts the ante 75
+Djonatan22: posts the ante 75
+Bazuna: posts the ante 75
+ozrona: posts the ante 75
+biggiebeats: posts the ante 75
+blakeannir: posts the ante 75
+frankwalt: posts small blind 300
+2sly4u2sly: posts big blind 600
+*** HOLE CARDS ***
+Dealt to ozrona [7s 7h]
+DontBeSoft: folds
+Djonatan22: folds
+Bazuna: folds
+ozrona: folds
+biggiebeats: folds
+blakeannir: folds
+frankwalt: raises 900 to 1500
+2sly4u2sly: raises 3900 to 5400
+frankwalt: folds
+Uncalled bet (3900) returned to 2sly4u2sly
+2sly4u2sly collected 3600 from pot
+*** SUMMARY ***
+Total pot 3600 | Rake 0
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir (button) folded before Flop (didn't bet)
+Seat 3: frankwalt (small blind) folded before Flop
+Seat 5: 2sly4u2sly (big blind) collected (3600)
+Seat 6: DontBeSoft folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600004304: Tournament #9735326, No Limit Hold'em - Level VII (300/600 ante 75) - 2026/07/15 19:56:07 ACST [2026/07/15 10:26:07 UTC]
+Table '9735326 4' 9-max Seat #3 is the button
+Seat 1: biggiebeats (75299 in chips)
+Seat 2: blakeannir (98808 in chips)
+Seat 3: frankwalt (112448 in chips)
+Seat 5: 2sly4u2sly (155438 in chips)
+Seat 6: DontBeSoft (90085 in chips)
+Seat 7: Djonatan22 (336547 in chips)
+Seat 8: Bazuna (82950 in chips)
+Seat 9: ozrona (53450 in chips)
+2sly4u2sly: posts the ante 75
+DontBeSoft: posts the ante 75
+Djonatan22: posts the ante 75
+Bazuna: posts the ante 75
+ozrona: posts the ante 75
+biggiebeats: posts the ante 75
+blakeannir: posts the ante 75
+frankwalt: posts the ante 75
+2sly4u2sly: posts small blind 300
+DontBeSoft: posts big blind 600
+*** HOLE CARDS ***
+Dealt to ozrona [9d 2s]
+Djonatan22: folds
+Bazuna: folds
+ozrona: folds
+biggiebeats: folds
+blakeannir: folds
+frankwalt: raises 1200 to 1800
+2sly4u2sly: calls 1500
+DontBeSoft: folds
+*** FLOP *** [5s 9s 5h]
+2sly4u2sly: checks
+frankwalt: bets 3600
+2sly4u2sly: folds
+Uncalled bet (3600) returned to frankwalt
+frankwalt collected 4800 from pot
+*** SUMMARY ***
+Total pot 4800 | Rake 0
+Board [5s 9s 5h]
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt (button) collected (4800)
+Seat 5: 2sly4u2sly (small blind) folded on the Flop
+Seat 6: DontBeSoft (big blind) folded before Flop
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600004394: Tournament #9735326, No Limit Hold'em - Level VII (300/600 ante 75) - 2026/07/15 19:56:57 ACST [2026/07/15 10:26:57 UTC]
+Table '9735326 4' 9-max Seat #5 is the button
+Seat 1: biggiebeats (75224 in chips)
+Seat 2: blakeannir (98733 in chips)
+Seat 3: frankwalt (115373 in chips)
+Seat 5: 2sly4u2sly (153563 in chips)
+Seat 6: DontBeSoft (89410 in chips)
+Seat 7: Djonatan22 (336472 in chips)
+Seat 8: Bazuna (82875 in chips)
+Seat 9: ozrona (53375 in chips)
+DontBeSoft: posts the ante 75
+Djonatan22: posts the ante 75
+Bazuna: posts the ante 75
+ozrona: posts the ante 75
+biggiebeats: posts the ante 75
+blakeannir: posts the ante 75
+frankwalt: posts the ante 75
+2sly4u2sly: posts the ante 75
+DontBeSoft: posts small blind 300
+Djonatan22: posts big blind 600
+*** HOLE CARDS ***
+Dealt to ozrona [4c 8d]
+Bazuna: calls 600
+ozrona: folds
+biggiebeats: folds
+blakeannir: folds
+frankwalt: folds
+2sly4u2sly: folds
+DontBeSoft: calls 300
+Djonatan22: raises 900 to 1500
+Bazuna: raises 6300 to 7800
+DontBeSoft: folds
+Djonatan22: folds
+Uncalled bet (6300) returned to Bazuna
+Bazuna collected 4200 from pot
+*** SUMMARY ***
+Total pot 4200 | Rake 0
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly (button) folded before Flop (didn't bet)
+Seat 6: DontBeSoft (small blind) folded before Flop
+Seat 7: Djonatan22 (big blind) folded before Flop
+Seat 8: Bazuna collected (4200)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600004434: Tournament #9735326, No Limit Hold'em - Level VII (300/600 ante 75) - 2026/07/15 19:57:42 ACST [2026/07/15 10:27:42 UTC]
+Table '9735326 4' 9-max Seat #6 is the button
+Seat 1: biggiebeats (75149 in chips)
+Seat 2: blakeannir (98658 in chips)
+Seat 3: frankwalt (115298 in chips)
+Seat 5: 2sly4u2sly (153488 in chips)
+Seat 6: DontBeSoft (88735 in chips)
+Seat 7: Djonatan22 (334897 in chips)
+Seat 8: Bazuna (85500 in chips)
+Seat 9: ozrona (53300 in chips)
+Djonatan22: posts the ante 75
+Bazuna: posts the ante 75
+ozrona: posts the ante 75
+biggiebeats: posts the ante 75
+blakeannir: posts the ante 75
+frankwalt: posts the ante 75
+2sly4u2sly: posts the ante 75
+DontBeSoft: posts the ante 75
+Djonatan22: posts small blind 300
+Bazuna: posts big blind 600
+*** HOLE CARDS ***
+Dealt to ozrona [5h Kc]
+ozrona: folds
+biggiebeats: folds
+blakeannir: raises 1200 to 1800
+frankwalt: folds
+2sly4u2sly: folds
+DontBeSoft: folds
+Djonatan22: folds
+Bazuna: calls 1200
+*** FLOP *** [Qd 9d Td]
+Bazuna: checks
+blakeannir: bets 2250
+Bazuna: calls 2250
+*** TURN *** [Qd 9d Td] [Qs]
+Bazuna: checks
+blakeannir: checks
+*** RIVER *** [Qd 9d Td Qs] [5d]
+Bazuna: bets 14000
+blakeannir: folds
+Uncalled bet (14000) returned to Bazuna
+Bazuna collected 9000 from pot
+*** SUMMARY ***
+Total pot 9000 | Rake 0
+Board [Qd 9d Td Qs 5d]
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir folded on the River
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: DontBeSoft (button) folded before Flop (didn't bet)
+Seat 7: Djonatan22 (small blind) folded before Flop
+Seat 8: Bazuna (big blind) collected (9000)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600004494: Tournament #9735326, No Limit Hold'em - Level VII (300/600 ante 75) - 2026/07/15 19:58:50 ACST [2026/07/15 10:28:50 UTC]
+Table '9735326 4' 9-max Seat #7 is the button
+Seat 1: biggiebeats (75074 in chips)
+Seat 2: blakeannir (94533 in chips)
+Seat 3: frankwalt (115223 in chips)
+Seat 4: Vinsin (100000 in chips)
+Seat 5: 2sly4u2sly (153413 in chips)
+Seat 6: DontBeSoft (88660 in chips)
+Seat 7: Djonatan22 (334522 in chips)
+Seat 8: Bazuna (90375 in chips)
+Seat 9: ozrona (53225 in chips)
+Bazuna: posts the ante 75
+ozrona: posts the ante 75
+biggiebeats: posts the ante 75
+blakeannir: posts the ante 75
+frankwalt: posts the ante 75
+Vinsin: posts the ante 75
+2sly4u2sly: posts the ante 75
+DontBeSoft: posts the ante 75
+Djonatan22: posts the ante 75
+Bazuna: posts small blind 300
+ozrona: posts big blind 600
+*** HOLE CARDS ***
+Dealt to ozrona [Js 3d]
+biggiebeats: folds
+blakeannir: folds
+frankwalt: raises 1200 to 1800
+Vinsin: folds
+2sly4u2sly: folds
+DontBeSoft: folds
+Djonatan22: folds
+Bazuna: calls 1500
+ozrona: calls 1200
+*** FLOP *** [6s Qh 4h]
+Bazuna: checks
+ozrona: checks
+frankwalt: checks
+*** TURN *** [6s Qh 4h] [7h]
+Bazuna: checks
+ozrona: checks
+frankwalt: bets 6075
+Bazuna: calls 6075
+ozrona: folds
+*** RIVER *** [6s Qh 4h 7h] [Jd]
+Bazuna: checks
+frankwalt: checks
+*** SHOW DOWN ***
+Bazuna: shows [Qs Kd]
+Bazuna collected 18225 from pot
+*** SUMMARY ***
+Total pot 18225 | Rake 0
+Board [6s Qh 4h 7h Jd]
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt mucked
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: DontBeSoft folded before Flop (didn't bet)
+Seat 7: Djonatan22 (button) folded before Flop (didn't bet)
+Seat 8: Bazuna (small blind) showed [Qs Kd] and won (18225)
+Seat 9: ozrona (big blind) folded on the Turn
+
+PokerStars Hand #260715044642973532600004604: Tournament #9735326, No Limit Hold'em - Level VIII (400/800 ante 100) - 2026/07/15 20:00:15 ACST [2026/07/15 10:30:15 UTC]
+Table '9735326 4' 9-max Seat #8 is the button
+Seat 1: biggiebeats (74999 in chips)
+Seat 2: blakeannir (94458 in chips)
+Seat 3: frankwalt (107273 in chips)
+Seat 4: Vinsin (99925 in chips)
+Seat 5: 2sly4u2sly (153338 in chips)
+Seat 6: DontBeSoft (88585 in chips)
+Seat 7: Djonatan22 (334447 in chips)
+Seat 8: Bazuna (100650 in chips)
+Seat 9: ozrona (51350 in chips)
+ozrona: posts the ante 100
+biggiebeats: posts the ante 100
+blakeannir: posts the ante 100
+frankwalt: posts the ante 100
+Vinsin: posts the ante 100
+2sly4u2sly: posts the ante 100
+DontBeSoft: posts the ante 100
+Djonatan22: posts the ante 100
+Bazuna: posts the ante 100
+ozrona: posts small blind 400
+biggiebeats: posts big blind 800
+*** HOLE CARDS ***
+Dealt to ozrona [5d Qc]
+blakeannir: folds
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: raises 1800 to 2600
+DontBeSoft: calls 2600
+Djonatan22: calls 2600
+Bazuna: calls 2600
+ozrona: folds
+biggiebeats: calls 1800
+*** FLOP *** [7d 3c 5s]
+biggiebeats: checks
+2sly4u2sly: bets 6000
+DontBeSoft: folds
+Djonatan22: calls 6000
+Bazuna: folds
+biggiebeats: calls 6000
+*** TURN *** [7d 3c 5s] [5h]
+biggiebeats: checks
+2sly4u2sly: bets 7200
+Djonatan22: calls 7200
+biggiebeats: folds
+*** RIVER *** [7d 3c 5s 5h] [Kd]
+2sly4u2sly: checks
+Djonatan22: checks
+*** SHOW DOWN ***
+2sly4u2sly: shows [9c 7c]
+2sly4u2sly collected 46700 from pot
+*** SUMMARY ***
+Total pot 46700 | Rake 0
+Board [7d 3c 5s 5h Kd]
+Seat 1: biggiebeats (big blind) folded on the Turn
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly showed [9c 7c] and won (46700)
+Seat 6: DontBeSoft folded on the Flop
+Seat 7: Djonatan22 mucked
+Seat 8: Bazuna (button) folded on the Flop
+Seat 9: ozrona (small blind) folded before Flop
+
+PokerStars Hand #260715044642973532600004694: Tournament #9735326, No Limit Hold'em - Level VIII (400/800 ante 100) - 2026/07/15 20:01:25 ACST [2026/07/15 10:31:25 UTC]
+Table '9735326 4' 9-max Seat #9 is the button
+Seat 1: biggiebeats (66299 in chips)
+Seat 2: blakeannir (94358 in chips)
+Seat 3: frankwalt (107173 in chips)
+Seat 4: Vinsin (99825 in chips)
+Seat 5: 2sly4u2sly (184138 in chips)
+Seat 6: DontBeSoft (85885 in chips)
+Seat 7: Djonatan22 (318547 in chips)
+Seat 8: Bazuna (97950 in chips)
+Seat 9: ozrona (50850 in chips)
+biggiebeats: posts the ante 100
+blakeannir: posts the ante 100
+frankwalt: posts the ante 100
+Vinsin: posts the ante 100
+2sly4u2sly: posts the ante 100
+DontBeSoft: posts the ante 100
+Djonatan22: posts the ante 100
+Bazuna: posts the ante 100
+ozrona: posts the ante 100
+biggiebeats: posts small blind 400
+blakeannir: posts big blind 800
+*** HOLE CARDS ***
+Dealt to ozrona [9h 2s]
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: calls 800
+DontBeSoft: calls 800
+Djonatan22: raises 2400 to 3200
+Bazuna: folds
+ozrona: folds
+biggiebeats: folds
+blakeannir: calls 2400
+2sly4u2sly: raises 6000 to 9200
+DontBeSoft: raises 75285 to 84485 and is all-in
+Djonatan22: folds
+blakeannir: folds
+2sly4u2sly: calls 75285
+*** FLOP *** [Th Jc Td]
+*** TURN *** [Th Jc Td] [8d]
+*** RIVER *** [Th Jc Td 8d] [Kc]
+*** SHOW DOWN ***
+DontBeSoft: shows [Ah Ad]
+2sly4u2sly: shows [Js Jd]
+2sly4u2sly collected 176670 from pot
+*** SUMMARY ***
+Total pot 176670 | Rake 0
+Board [Th Jc Td 8d Kc]
+Seat 1: biggiebeats (small blind) folded before Flop
+Seat 2: blakeannir (big blind) folded before Flop
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly showed [Js Jd] and won (176670)
+Seat 6: DontBeSoft showed [Ah Ad] and lost
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona (button) folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600004784: Tournament #9735326, No Limit Hold'em - Level VIII (400/800 ante 100) - 2026/07/15 20:02:40 ACST [2026/07/15 10:32:40 UTC]
+Table '9735326 4' 9-max Seat #1 is the button
+Seat 1: biggiebeats (65799 in chips)
+Seat 2: blakeannir (91058 in chips)
+Seat 3: frankwalt (107073 in chips)
+Seat 4: Vinsin (99725 in chips)
+Seat 5: 2sly4u2sly (276223 in chips)
+Seat 7: Djonatan22 (315247 in chips)
+Seat 8: Bazuna (97850 in chips)
+Seat 9: ozrona (50750 in chips)
+blakeannir: posts the ante 100
+frankwalt: posts the ante 100
+Vinsin: posts the ante 100
+2sly4u2sly: posts the ante 100
+Djonatan22: posts the ante 100
+Bazuna: posts the ante 100
+ozrona: posts the ante 100
+biggiebeats: posts the ante 100
+blakeannir: posts small blind 400
+frankwalt: posts big blind 800
+*** HOLE CARDS ***
+Dealt to ozrona [2s Tc]
+Vinsin: folds
+2sly4u2sly: folds
+Djonatan22: folds
+Bazuna: raises 1200 to 2000
+ozrona: folds
+biggiebeats: folds
+blakeannir: folds
+frankwalt: calls 1200
+*** FLOP *** [Qs Th 6s]
+frankwalt: checks
+Bazuna: bets 3466
+frankwalt: calls 3466
+*** TURN *** [Qs Th 6s] [7s]
+frankwalt: checks
+Bazuna: checks
+*** RIVER *** [Qs Th 6s 7s] [3h]
+frankwalt: bets 6066
+Bazuna: folds
+Uncalled bet (6066) returned to frankwalt
+frankwalt collected 12132 from pot
+*** SUMMARY ***
+Total pot 12132 | Rake 0
+Board [Qs Th 6s 7s 3h]
+Seat 1: biggiebeats (button) folded before Flop (didn't bet)
+Seat 2: blakeannir (small blind) folded before Flop
+Seat 3: frankwalt (big blind) collected (12132)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: Bazuna folded on the River
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600004834: Tournament #9735326, No Limit Hold'em - Level VIII (400/800 ante 100) - 2026/07/15 20:03:34 ACST [2026/07/15 10:33:34 UTC]
+Table '9735326 4' 9-max Seat #2 is the button
+Seat 1: biggiebeats (65699 in chips)
+Seat 2: blakeannir (90558 in chips)
+Seat 3: frankwalt (113639 in chips)
+Seat 4: Vinsin (99625 in chips)
+Seat 5: 2sly4u2sly (276123 in chips)
+Seat 7: Djonatan22 (315147 in chips)
+Seat 8: Bazuna (92284 in chips)
+Seat 9: ozrona (50650 in chips)
+frankwalt: posts the ante 100
+Vinsin: posts the ante 100
+2sly4u2sly: posts the ante 100
+Djonatan22: posts the ante 100
+Bazuna: posts the ante 100
+ozrona: posts the ante 100
+biggiebeats: posts the ante 100
+blakeannir: posts the ante 100
+frankwalt: posts small blind 400
+Vinsin: posts big blind 800
+*** HOLE CARDS ***
+Dealt to ozrona [Qh 3h]
+2sly4u2sly: raises 800 to 1600
+Djonatan22: folds
+Bazuna: folds
+ozrona: calls 1600
+biggiebeats: calls 1600
+blakeannir: folds
+frankwalt: folds
+Vinsin: folds
+*** FLOP *** [Ks As 8h]
+2sly4u2sly: checks
+ozrona: checks
+biggiebeats: bets 6800
+2sly4u2sly: calls 6800
+ozrona: folds
+*** TURN *** [Ks As 8h] [Qc]
+2sly4u2sly: checks
+biggiebeats: bets 10200
+2sly4u2sly: raises 10200 to 20400
+biggiebeats: calls 10200
+*** RIVER *** [Ks As 8h Qc] [Ac]
+2sly4u2sly: checks
+biggiebeats: checks
+*** SHOW DOWN ***
+biggiebeats: shows [Ad Jc]
+2sly4u2sly: shows [Kc Qs]
+biggiebeats collected 61200 from pot
+*** SUMMARY ***
+Total pot 61200 | Rake 0
+Board [Ks As 8h Qc Ac]
+Seat 1: biggiebeats showed [Ad Jc] and won (61200)
+Seat 2: blakeannir (button) folded before Flop (didn't bet)
+Seat 3: frankwalt (small blind) folded before Flop
+Seat 4: Vinsin (big blind) folded before Flop
+Seat 5: 2sly4u2sly showed [Kc Qs] and lost
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona folded on the Flop
+
+PokerStars Hand #260715044642973532600004944: Tournament #9735326, No Limit Hold'em - Level VIII (400/800 ante 100) - 2026/07/15 20:04:54 ACST [2026/07/15 10:34:54 UTC]
+Table '9735326 4' 9-max Seat #3 is the button
+Seat 1: biggiebeats (97999 in chips)
+Seat 2: blakeannir (90458 in chips)
+Seat 3: frankwalt (113139 in chips)
+Seat 4: Vinsin (98725 in chips)
+Seat 5: 2sly4u2sly (247223 in chips)
+Seat 7: Djonatan22 (315047 in chips)
+Seat 8: Bazuna (92184 in chips)
+Seat 9: ozrona (48950 in chips)
+Vinsin: posts the ante 100
+2sly4u2sly: posts the ante 100
+Djonatan22: posts the ante 100
+Bazuna: posts the ante 100
+ozrona: posts the ante 100
+biggiebeats: posts the ante 100
+blakeannir: posts the ante 100
+frankwalt: posts the ante 100
+Vinsin: posts small blind 400
+2sly4u2sly: posts big blind 800
+*** HOLE CARDS ***
+Dealt to ozrona [Qd 3c]
+Djonatan22: raises 1200 to 2000
+Bazuna: calls 2000
+ozrona: folds
+biggiebeats: folds
+blakeannir: folds
+frankwalt: calls 2000
+Vinsin: folds
+2sly4u2sly: calls 1200
+*** FLOP *** [9c As 4d]
+2sly4u2sly: checks
+Djonatan22: bets 5800
+Bazuna: folds
+frankwalt: folds
+2sly4u2sly: folds
+Uncalled bet (5800) returned to Djonatan22
+Djonatan22 collected 9200 from pot
+*** SUMMARY ***
+Total pot 9200 | Rake 0
+Board [9c As 4d]
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt (button) folded on the Flop
+Seat 4: Vinsin (small blind) folded before Flop
+Seat 5: 2sly4u2sly (big blind) folded on the Flop
+Seat 7: Djonatan22 collected (9200)
+Seat 8: Bazuna folded on the Flop
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600005044: Tournament #9735326, No Limit Hold'em - Level VIII (400/800 ante 100) - 2026/07/15 20:06:32 ACST [2026/07/15 10:36:32 UTC]
+Table '9735326 4' 9-max Seat #4 is the button
+Seat 1: biggiebeats (97899 in chips)
+Seat 2: blakeannir (90358 in chips)
+Seat 3: frankwalt (111039 in chips)
+Seat 4: Vinsin (98225 in chips)
+Seat 5: 2sly4u2sly (245123 in chips)
+Seat 7: Djonatan22 (322147 in chips)
+Seat 8: Bazuna (90084 in chips)
+Seat 9: ozrona (48850 in chips)
+2sly4u2sly: posts the ante 100
+Djonatan22: posts the ante 100
+Bazuna: posts the ante 100
+ozrona: posts the ante 100
+biggiebeats: posts the ante 100
+blakeannir: posts the ante 100
+frankwalt: posts the ante 100
+Vinsin: posts the ante 100
+2sly4u2sly: posts small blind 400
+Djonatan22: posts big blind 800
+*** HOLE CARDS ***
+Dealt to ozrona [8d Ah]
+Bazuna: folds
+ozrona: folds
+biggiebeats: folds
+blakeannir: raises 1600 to 2400
+frankwalt: raises 4800 to 7200
+Vinsin: folds
+2sly4u2sly: folds
+Djonatan22: folds
+blakeannir: folds
+Uncalled bet (4800) returned to frankwalt
+frankwalt collected 6800 from pot
+*** SUMMARY ***
+Total pot 6800 | Rake 0
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt collected (6800)
+Seat 4: Vinsin (button) folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly (small blind) folded before Flop
+Seat 7: Djonatan22 (big blind) folded before Flop
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600005094: Tournament #9735326, No Limit Hold'em - Level VIII (400/800 ante 100) - 2026/07/15 20:07:28 ACST [2026/07/15 10:37:28 UTC]
+Table '9735326 4' 9-max Seat #5 is the button
+Seat 1: biggiebeats (97799 in chips)
+Seat 2: blakeannir (87858 in chips)
+Seat 3: frankwalt (115339 in chips)
+Seat 4: Vinsin (98125 in chips)
+Seat 5: 2sly4u2sly (244623 in chips)
+Seat 7: Djonatan22 (321247 in chips)
+Seat 8: Bazuna (89984 in chips)
+Seat 9: ozrona (48750 in chips)
+Djonatan22: posts the ante 100
+Bazuna: posts the ante 100
+ozrona: posts the ante 100
+biggiebeats: posts the ante 100
+blakeannir: posts the ante 100
+frankwalt: posts the ante 100
+Vinsin: posts the ante 100
+2sly4u2sly: posts the ante 100
+Djonatan22: posts small blind 400
+Bazuna: posts big blind 800
+*** HOLE CARDS ***
+Dealt to ozrona [5h As]
+ozrona: folds
+biggiebeats: raises 2400 to 3200
+blakeannir: folds
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: folds
+Djonatan22: calls 2800
+Bazuna: folds
+*** FLOP *** [7c 8c Td]
+Djonatan22: checks
+biggiebeats: checks
+*** TURN *** [7c 8c Td] [2s]
+Djonatan22: bets 6000
+biggiebeats: calls 6000
+*** RIVER *** [7c 8c Td 2s] [9h]
+Djonatan22: checks
+biggiebeats: checks
+*** SHOW DOWN ***
+Djonatan22: shows [Ts 6s]
+Djonatan22 collected 20000 from pot
+*** SUMMARY ***
+Total pot 20000 | Rake 0
+Board [7c 8c Td 2s 9h]
+Seat 1: biggiebeats mucked
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly (button) folded before Flop (didn't bet)
+Seat 7: Djonatan22 (small blind) showed [Ts 6s] and won (20000)
+Seat 8: Bazuna (big blind) folded before Flop
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600005174: Tournament #9735326, No Limit Hold'em - Level VIII (400/800 ante 100) - 2026/07/15 20:08:25 ACST [2026/07/15 10:38:25 UTC]
+Table '9735326 4' 9-max Seat #7 is the button
+Seat 1: biggiebeats (88499 in chips)
+Seat 2: blakeannir (87758 in chips)
+Seat 3: frankwalt (115239 in chips)
+Seat 4: Vinsin (98025 in chips)
+Seat 5: 2sly4u2sly (244523 in chips)
+Seat 7: Djonatan22 (331947 in chips)
+Seat 8: Bazuna (89084 in chips)
+Seat 9: ozrona (48650 in chips)
+Bazuna: posts the ante 100
+ozrona: posts the ante 100
+biggiebeats: posts the ante 100
+blakeannir: posts the ante 100
+frankwalt: posts the ante 100
+Vinsin: posts the ante 100
+2sly4u2sly: posts the ante 100
+Djonatan22: posts the ante 100
+Bazuna: posts small blind 400
+ozrona: posts big blind 800
+*** HOLE CARDS ***
+Dealt to ozrona [9s 3s]
+biggiebeats: calls 800
+blakeannir: folds
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: folds
+Djonatan22: folds
+Bazuna: calls 400
+ozrona: checks
+*** FLOP *** [5h 2s 5c]
+Bazuna: checks
+ozrona: checks
+biggiebeats: checks
+*** TURN *** [5h 2s 5c] [Ad]
+Bazuna: checks
+ozrona: bets 3200
+biggiebeats: folds
+Bazuna: folds
+Uncalled bet (3200) returned to ozrona
+ozrona collected 3200 from pot
+*** SUMMARY ***
+Total pot 3200 | Rake 0
+Board [5h 2s 5c Ad]
+Seat 1: biggiebeats folded on the Turn
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 7: Djonatan22 (button) folded before Flop (didn't bet)
+Seat 8: Bazuna (small blind) folded on the Turn
+Seat 9: ozrona (big blind) collected (3200)
+
+PokerStars Hand #260715044642973532600005274: Tournament #9735326, No Limit Hold'em - Level VIII (400/800 ante 100) - 2026/07/15 20:09:52 ACST [2026/07/15 10:39:52 UTC]
+Table '9735326 4' 9-max Seat #8 is the button
+Seat 1: biggiebeats (87599 in chips)
+Seat 2: blakeannir (87658 in chips)
+Seat 3: frankwalt (115139 in chips)
+Seat 4: Vinsin (97925 in chips)
+Seat 5: 2sly4u2sly (244423 in chips)
+Seat 7: Djonatan22 (331847 in chips)
+Seat 8: Bazuna (88184 in chips)
+Seat 9: ozrona (50950 in chips)
+ozrona: posts the ante 100
+biggiebeats: posts the ante 100
+blakeannir: posts the ante 100
+frankwalt: posts the ante 100
+Vinsin: posts the ante 100
+2sly4u2sly: posts the ante 100
+Djonatan22: posts the ante 100
+Bazuna: posts the ante 100
+ozrona: posts small blind 400
+biggiebeats: posts big blind 800
+*** HOLE CARDS ***
+Dealt to ozrona [Kc 4s]
+blakeannir: folds
+frankwalt: calls 800
+Vinsin: folds
+2sly4u2sly: folds
+Djonatan22: folds
+Bazuna: calls 800
+ozrona: calls 400
+biggiebeats: checks
+*** FLOP *** [5d 9d 8d]
+ozrona: checks
+biggiebeats: bets 2666
+frankwalt: folds
+Bazuna: folds
+ozrona: folds
+Uncalled bet (2666) returned to biggiebeats
+biggiebeats collected 4000 from pot
+*** SUMMARY ***
+Total pot 4000 | Rake 0
+Board [5d 9d 8d]
+Seat 1: biggiebeats (big blind) collected (4000)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded on the Flop
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: Bazuna (button) folded on the Flop
+Seat 9: ozrona (small blind) folded on the Flop
+
+PokerStars Hand #260715044642973532600005364: Tournament #9735326, No Limit Hold'em - Level IX (500/1000 ante 150) - 2026/07/15 20:11:13 ACST [2026/07/15 10:41:13 UTC]
+Table '9735326 4' 9-max Seat #9 is the button
+Seat 1: biggiebeats (90699 in chips)
+Seat 2: blakeannir (87558 in chips)
+Seat 3: frankwalt (114239 in chips)
+Seat 4: Vinsin (97825 in chips)
+Seat 5: 2sly4u2sly (244323 in chips)
+Seat 7: Djonatan22 (331747 in chips)
+Seat 8: Bazuna (87284 in chips)
+Seat 9: ozrona (50050 in chips)
+biggiebeats: posts the ante 150
+blakeannir: posts the ante 150
+frankwalt: posts the ante 150
+Vinsin: posts the ante 150
+2sly4u2sly: posts the ante 150
+Djonatan22: posts the ante 150
+Bazuna: posts the ante 150
+ozrona: posts the ante 150
+biggiebeats: posts small blind 500
+blakeannir: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to ozrona [Ks Ac]
+frankwalt: raises 2000 to 3000
+Vinsin: folds
+2sly4u2sly: folds
+Djonatan22: folds
+Bazuna: folds
+ozrona: raises 6000 to 9000
+biggiebeats: folds
+blakeannir: folds
+frankwalt: folds
+Uncalled bet (6000) returned to ozrona
+ozrona collected 8700 from pot
+*** SUMMARY ***
+Total pot 8700 | Rake 0
+Seat 1: biggiebeats (small blind) folded before Flop
+Seat 2: blakeannir (big blind) folded before Flop
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona (button) collected (8700)
+
+PokerStars Hand #260715044642973532600005414: Tournament #9735326, No Limit Hold'em - Level IX (500/1000 ante 150) - 2026/07/15 20:11:57 ACST [2026/07/15 10:41:57 UTC]
+Table '9735326 4' 9-max Seat #1 is the button
+Seat 1: biggiebeats (90049 in chips)
+Seat 2: blakeannir (86408 in chips)
+Seat 3: frankwalt (111089 in chips)
+Seat 4: Vinsin (97675 in chips)
+Seat 5: 2sly4u2sly (244173 in chips)
+Seat 7: Djonatan22 (331597 in chips)
+Seat 8: Bazuna (87134 in chips)
+Seat 9: ozrona (55600 in chips)
+blakeannir: posts the ante 150
+frankwalt: posts the ante 150
+Vinsin: posts the ante 150
+2sly4u2sly: posts the ante 150
+Djonatan22: posts the ante 150
+Bazuna: posts the ante 150
+ozrona: posts the ante 150
+biggiebeats: posts the ante 150
+blakeannir: posts small blind 500
+frankwalt: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to ozrona [Kh 8c]
+Vinsin: folds
+2sly4u2sly: folds
+Djonatan22: folds
+Bazuna: folds
+ozrona: folds
+biggiebeats: raises 1500 to 2500
+blakeannir: raises 10750 to 13250
+frankwalt: folds
+biggiebeats: calls 10750
+*** FLOP *** [Jd Js 4c]
+blakeannir: bets 7425
+biggiebeats: folds
+Uncalled bet (7425) returned to blakeannir
+blakeannir collected 28700 from pot
+*** SUMMARY ***
+Total pot 28700 | Rake 0
+Board [Jd Js 4c]
+Seat 1: biggiebeats (button) folded on the Flop
+Seat 2: blakeannir (small blind) collected (28700)
+Seat 3: frankwalt (big blind) folded before Flop
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600005474: Tournament #9735326, No Limit Hold'em - Level IX (500/1000 ante 150) - 2026/07/15 20:12:41 ACST [2026/07/15 10:42:41 UTC]
+Table '9735326 4' 9-max Seat #2 is the button
+Seat 1: biggiebeats (76649 in chips)
+Seat 2: blakeannir (101708 in chips)
+Seat 3: frankwalt (109939 in chips)
+Seat 4: Vinsin (97525 in chips)
+Seat 5: 2sly4u2sly (244023 in chips)
+Seat 6: Mistabombastic (100000 in chips)
+Seat 7: Djonatan22 (331447 in chips)
+Seat 8: Bazuna (86984 in chips)
+Seat 9: ozrona (55450 in chips)
+frankwalt: posts the ante 150
+Vinsin: posts the ante 150
+2sly4u2sly: posts the ante 150
+Mistabombastic: posts the ante 150
+Djonatan22: posts the ante 150
+Bazuna: posts the ante 150
+ozrona: posts the ante 150
+biggiebeats: posts the ante 150
+blakeannir: posts the ante 150
+frankwalt: posts small blind 500
+Vinsin: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to ozrona [5s 7s]
+2sly4u2sly: folds
+Mistabombastic: folds
+Djonatan22: raises 1500 to 2500
+Bazuna: folds
+ozrona: calls 2500
+biggiebeats: folds
+blakeannir: folds
+frankwalt: calls 2000
+Vinsin: folds
+*** FLOP *** [Qc 9d 3c]
+frankwalt: checks
+Djonatan22: bets 7887
+ozrona: folds
+frankwalt: calls 7887
+*** TURN *** [Qc 9d 3c] [8d]
+frankwalt: checks
+Djonatan22: checks
+*** RIVER *** [Qc 9d 3c 8d] [6s]
+frankwalt: bets 6406
+Djonatan22: folds
+Uncalled bet (6406) returned to frankwalt
+frankwalt collected 25624 from pot
+*** SUMMARY ***
+Total pot 25624 | Rake 0
+Board [Qc 9d 3c 8d 6s]
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir (button) folded before Flop (didn't bet)
+Seat 3: frankwalt (small blind) collected (25624)
+Seat 4: Vinsin (big blind) folded before Flop
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: Mistabombastic folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded on the River
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona folded on the Flop
+
+PokerStars Hand #260715044642973532600005584: Tournament #9735326, No Limit Hold'em - Level IX (500/1000 ante 150) - 2026/07/15 20:14:08 ACST [2026/07/15 10:44:08 UTC]
+Table '9735326 4' 9-max Seat #3 is the button
+Seat 1: biggiebeats (76499 in chips)
+Seat 2: blakeannir (101558 in chips)
+Seat 3: frankwalt (125026 in chips)
+Seat 4: Vinsin (96375 in chips)
+Seat 5: 2sly4u2sly (243873 in chips)
+Seat 6: Mistabombastic (99850 in chips)
+Seat 7: Djonatan22 (320910 in chips)
+Seat 8: Bazuna (86834 in chips)
+Seat 9: ozrona (52800 in chips)
+Vinsin: posts the ante 150
+2sly4u2sly: posts the ante 150
+Mistabombastic: posts the ante 150
+Djonatan22: posts the ante 150
+Bazuna: posts the ante 150
+ozrona: posts the ante 150
+biggiebeats: posts the ante 150
+blakeannir: posts the ante 150
+frankwalt: posts the ante 150
+Vinsin: posts small blind 500
+2sly4u2sly: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to ozrona [Ts 7s]
+Mistabombastic: folds
+Djonatan22: folds
+Bazuna: folds
+ozrona: folds
+biggiebeats: folds
+blakeannir: raises 2000 to 3000
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: folds
+Uncalled bet (2000) returned to blakeannir
+blakeannir collected 3850 from pot
+*** SUMMARY ***
+Total pot 3850 | Rake 0
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir collected (3850)
+Seat 3: frankwalt (button) folded before Flop (didn't bet)
+Seat 4: Vinsin (small blind) folded before Flop
+Seat 5: 2sly4u2sly (big blind) folded before Flop
+Seat 6: Mistabombastic folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600005644: Tournament #9735326, No Limit Hold'em - Level IX (500/1000 ante 150) - 2026/07/15 20:14:58 ACST [2026/07/15 10:44:58 UTC]
+Table '9735326 4' 9-max Seat #4 is the button
+Seat 1: biggiebeats (76349 in chips)
+Seat 2: blakeannir (104258 in chips)
+Seat 3: frankwalt (124876 in chips)
+Seat 4: Vinsin (95725 in chips)
+Seat 5: 2sly4u2sly (242723 in chips)
+Seat 6: Mistabombastic (99700 in chips)
+Seat 7: Djonatan22 (320760 in chips)
+Seat 8: Bazuna (86684 in chips)
+Seat 9: ozrona (52650 in chips)
+2sly4u2sly: posts the ante 150
+Mistabombastic: posts the ante 150
+Djonatan22: posts the ante 150
+Bazuna: posts the ante 150
+ozrona: posts the ante 150
+biggiebeats: posts the ante 150
+blakeannir: posts the ante 150
+frankwalt: posts the ante 150
+Vinsin: posts the ante 150
+2sly4u2sly: posts small blind 500
+Mistabombastic: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to ozrona [As Kc]
+Djonatan22: folds
+Bazuna: folds
+ozrona: raises 2500 to 3500
+biggiebeats: folds
+blakeannir: folds
+frankwalt: raises 10500 to 14000
+Vinsin: folds
+2sly4u2sly: calls 13500
+Mistabombastic: folds
+ozrona: calls 10500
+*** FLOP *** [Qd Td 2s]
+2sly4u2sly: checks
+ozrona: bets 38500 and is all-in
+frankwalt: folds
+2sly4u2sly: folds
+Uncalled bet (39500) returned to ozrona
+ozrona collected 44350 from pot
+*** SUMMARY ***
+Total pot 44350 | Rake 0
+Board [Qd Td 2s]
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded on the Flop
+Seat 4: Vinsin (button) folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly (small blind) folded on the Flop
+Seat 6: Mistabombastic (big blind) folded before Flop
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona collected (44350)
+
+PokerStars Hand #260715044642973532600005724: Tournament #9735326, No Limit Hold'em - Level IX (500/1000 ante 150) - 2026/07/15 20:16:24 ACST [2026/07/15 10:46:24 UTC]
+Table '9735326 4' 9-max Seat #5 is the button
+Seat 1: biggiebeats (76199 in chips)
+Seat 2: blakeannir (104108 in chips)
+Seat 3: frankwalt (110726 in chips)
+Seat 4: Vinsin (95575 in chips)
+Seat 5: 2sly4u2sly (228573 in chips)
+Seat 6: Mistabombastic (98550 in chips)
+Seat 7: Djonatan22 (320610 in chips)
+Seat 8: Bazuna (86534 in chips)
+Seat 9: ozrona (82850 in chips)
+Mistabombastic: posts the ante 150
+Djonatan22: posts the ante 150
+Bazuna: posts the ante 150
+ozrona: posts the ante 150
+biggiebeats: posts the ante 150
+blakeannir: posts the ante 150
+frankwalt: posts the ante 150
+Vinsin: posts the ante 150
+2sly4u2sly: posts the ante 150
+Mistabombastic: posts small blind 500
+Djonatan22: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to ozrona [4d 9d]
+Bazuna: folds
+ozrona: folds
+biggiebeats: folds
+blakeannir: folds
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: folds
+Mistabombastic: raises 1000 to 2000
+Djonatan22: raises 3750 to 5750
+Mistabombastic: calls 3750
+*** FLOP *** [Jd 2h Js]
+Mistabombastic: checks
+Djonatan22: bets 7925
+Mistabombastic: folds
+Uncalled bet (7925) returned to Djonatan22
+Djonatan22 collected 12850 from pot
+*** SUMMARY ***
+Total pot 12850 | Rake 0
+Board [Jd 2h Js]
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly (button) folded before Flop (didn't bet)
+Seat 6: Mistabombastic (small blind) folded on the Flop
+Seat 7: Djonatan22 (big blind) collected (12850)
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600005804: Tournament #9735326, No Limit Hold'em - Level IX (500/1000 ante 150) - 2026/07/15 20:17:25 ACST [2026/07/15 10:47:25 UTC]
+Table '9735326 4' 9-max Seat #6 is the button
+Seat 1: biggiebeats (76049 in chips)
+Seat 2: blakeannir (103958 in chips)
+Seat 3: frankwalt (110576 in chips)
+Seat 4: Vinsin (95425 in chips)
+Seat 5: 2sly4u2sly (228423 in chips)
+Seat 6: Mistabombastic (92650 in chips)
+Seat 7: Djonatan22 (327560 in chips)
+Seat 8: Bazuna (86384 in chips)
+Seat 9: ozrona (82700 in chips)
+Djonatan22: posts the ante 150
+Bazuna: posts the ante 150
+ozrona: posts the ante 150
+biggiebeats: posts the ante 150
+blakeannir: posts the ante 150
+frankwalt: posts the ante 150
+Vinsin: posts the ante 150
+2sly4u2sly: posts the ante 150
+Mistabombastic: posts the ante 150
+Djonatan22: posts small blind 500
+Bazuna: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to ozrona [2h 6c]
+ozrona: folds
+biggiebeats: calls 1000
+blakeannir: folds
+frankwalt: folds
+Vinsin: calls 1000
+2sly4u2sly: calls 1000
+Mistabombastic: folds
+Djonatan22: calls 500
+Bazuna: checks
+*** FLOP *** [Jh 7s Qd]
+Djonatan22: checks
+Bazuna: checks
+biggiebeats: bets 2116
+Vinsin: calls 2116
+2sly4u2sly: folds
+Djonatan22: calls 2116
+Bazuna: folds
+*** TURN *** [Jh 7s Qd] [4h]
+Djonatan22: checks
+biggiebeats: bets 4232
+Vinsin: calls 4232
+Djonatan22: folds
+*** RIVER *** [Jh 7s Qd 4h] [4c]
+biggiebeats: bets 7054
+Vinsin: folds
+Uncalled bet (7054) returned to biggiebeats
+biggiebeats collected 21162 from pot
+*** SUMMARY ***
+Total pot 21162 | Rake 0
+Board [Jh 7s Qd 4h 4c]
+Seat 1: biggiebeats collected (21162)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded on the River
+Seat 5: 2sly4u2sly folded on the Flop
+Seat 6: Mistabombastic (button) folded before Flop (didn't bet)
+Seat 7: Djonatan22 (small blind) folded on the Turn
+Seat 8: Bazuna (big blind) folded on the Flop
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600005934: Tournament #9735326, No Limit Hold'em - Level IX (500/1000 ante 150) - 2026/07/15 20:18:58 ACST [2026/07/15 10:48:58 UTC]
+Table '9735326 4' 9-max Seat #7 is the button
+Seat 1: biggiebeats (89713 in chips)
+Seat 2: blakeannir (103808 in chips)
+Seat 3: frankwalt (110426 in chips)
+Seat 4: Vinsin (87927 in chips)
+Seat 5: 2sly4u2sly (227273 in chips)
+Seat 6: Mistabombastic (92500 in chips)
+Seat 7: Djonatan22 (324294 in chips)
+Seat 8: Bazuna (85234 in chips)
+Seat 9: ozrona (82550 in chips)
+Bazuna: posts the ante 150
+ozrona: posts the ante 150
+biggiebeats: posts the ante 150
+blakeannir: posts the ante 150
+frankwalt: posts the ante 150
+Vinsin: posts the ante 150
+2sly4u2sly: posts the ante 150
+Mistabombastic: posts the ante 150
+Djonatan22: posts the ante 150
+Bazuna: posts small blind 500
+ozrona: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to ozrona [6s 5d]
+biggiebeats: folds
+blakeannir: folds
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: raises 1000 to 2000
+Mistabombastic: raises 4500 to 6500
+Djonatan22: folds
+Bazuna: folds
+ozrona: folds
+2sly4u2sly: folds
+Uncalled bet (4500) returned to Mistabombastic
+Mistabombastic collected 6850 from pot
+*** SUMMARY ***
+Total pot 6850 | Rake 0
+Seat 1: biggiebeats folded before Flop (didn't bet)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: Mistabombastic collected (6850)
+Seat 7: Djonatan22 (button) folded before Flop (didn't bet)
+Seat 8: Bazuna (small blind) folded before Flop
+Seat 9: ozrona (big blind) folded before Flop
+
+PokerStars Hand #260715044642973532600006004: Tournament #9735326, No Limit Hold'em - Level IX (500/1000 ante 150) - 2026/07/15 20:19:40 ACST [2026/07/15 10:49:40 UTC]
+Table '9735326 4' 9-max Seat #8 is the button
+Seat 1: biggiebeats (89563 in chips)
+Seat 2: blakeannir (103658 in chips)
+Seat 3: frankwalt (110276 in chips)
+Seat 4: Vinsin (87777 in chips)
+Seat 5: 2sly4u2sly (225123 in chips)
+Seat 6: Mistabombastic (97200 in chips)
+Seat 7: Djonatan22 (324144 in chips)
+Seat 8: Bazuna (84584 in chips)
+Seat 9: ozrona (81400 in chips)
+ozrona: posts the ante 150
+biggiebeats: posts the ante 150
+blakeannir: posts the ante 150
+frankwalt: posts the ante 150
+Vinsin: posts the ante 150
+2sly4u2sly: posts the ante 150
+Mistabombastic: posts the ante 150
+Djonatan22: posts the ante 150
+Bazuna: posts the ante 150
+ozrona: posts small blind 500
+biggiebeats: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to ozrona [8s 9c]
+blakeannir: folds
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: folds
+Mistabombastic: folds
+Djonatan22: raises 1500 to 2500
+Bazuna: calls 2500
+ozrona: calls 2000
+biggiebeats: calls 1500
+*** FLOP *** [9s Ac As]
+ozrona: checks
+biggiebeats: checks
+Djonatan22: bets 8512
+Bazuna: calls 8512
+ozrona: folds
+biggiebeats: folds
+*** TURN *** [9s Ac As] [9h]
+Djonatan22: checks
+Bazuna: checks
+*** RIVER *** [9s Ac As 9h] [2h]
+Djonatan22: checks
+Bazuna: bets 28374
+Djonatan22: folds
+Uncalled bet (28374) returned to Bazuna
+Bazuna collected 28374 from pot
+*** SUMMARY ***
+Total pot 28374 | Rake 0
+Board [9s Ac As 9h 2h]
+Seat 1: biggiebeats (big blind) folded on the Flop
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: Mistabombastic folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded on the River
+Seat 8: Bazuna (button) collected (28374)
+Seat 9: ozrona (small blind) folded on the Flop
+
+PokerStars Hand #260715044642973532600006064: Tournament #9735326, No Limit Hold'em - Level IX (500/1000 ante 150) - 2026/07/15 20:20:55 ACST [2026/07/15 10:50:55 UTC]
+Table '9735326 4' 9-max Seat #9 is the button
+Seat 1: biggiebeats (86913 in chips)
+Seat 2: blakeannir (103508 in chips)
+Seat 3: frankwalt (110126 in chips)
+Seat 4: Vinsin (87627 in chips)
+Seat 5: 2sly4u2sly (224973 in chips)
+Seat 6: Mistabombastic (97050 in chips)
+Seat 7: Djonatan22 (312982 in chips)
+Seat 8: Bazuna (101796 in chips)
+Seat 9: ozrona (78750 in chips)
+biggiebeats: posts the ante 150
+blakeannir: posts the ante 150
+frankwalt: posts the ante 150
+Vinsin: posts the ante 150
+2sly4u2sly: posts the ante 150
+Mistabombastic: posts the ante 150
+Djonatan22: posts the ante 150
+Bazuna: posts the ante 150
+ozrona: posts the ante 150
+biggiebeats: posts small blind 500
+blakeannir: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to ozrona [4h Qd]
+frankwalt: folds
+Vinsin: raises 1500 to 2500
+2sly4u2sly: folds
+Mistabombastic: folds
+Djonatan22: folds
+Bazuna: folds
+ozrona: folds
+biggiebeats: calls 2000
+blakeannir: raises 9000 to 11500
+Vinsin: folds
+biggiebeats: calls 9000
+*** FLOP *** [Qc 9s Ks]
+biggiebeats: checks
+blakeannir: bets 14425
+biggiebeats: raises 59338 to 73763 and is all-in
+blakeannir: calls 59338
+*** TURN *** [Qc 9s Ks] [Qh]
+*** RIVER *** [Qc 9s Ks Qh] [2d]
+*** SHOW DOWN ***
+blakeannir: shows [Jc Th]
+biggiebeats: shows [Ah Kd]
+blakeannir collected 174376 from pot
+*** SUMMARY ***
+Total pot 174376 | Rake 0
+Board [Qc 9s Ks Qh 2d]
+Seat 1: biggiebeats (small blind) showed [Ah Kd] and lost
+Seat 2: blakeannir (big blind) showed [Jc Th] and won (174376)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: Mistabombastic folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona (button) folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600006154: Tournament #9735326, No Limit Hold'em - Level IX (500/1000 ante 150) - 2026/07/15 20:22:10 ACST [2026/07/15 10:52:10 UTC]
+Table '9735326 4' 9-max Seat #1 is the button
+Seat 2: blakeannir (192471 in chips)
+Seat 3: frankwalt (109976 in chips)
+Seat 4: Vinsin (84977 in chips)
+Seat 5: 2sly4u2sly (224823 in chips)
+Seat 6: Mistabombastic (96900 in chips)
+Seat 7: Djonatan22 (312832 in chips)
+Seat 8: Bazuna (101646 in chips)
+Seat 9: ozrona (78600 in chips)
+blakeannir: posts the ante 150
+frankwalt: posts the ante 150
+Vinsin: posts the ante 150
+2sly4u2sly: posts the ante 150
+Mistabombastic: posts the ante 150
+Djonatan22: posts the ante 150
+Bazuna: posts the ante 150
+ozrona: posts the ante 150
+blakeannir: posts small blind 500
+frankwalt: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to ozrona [2s Tc]
+Vinsin: raises 1500 to 2500
+2sly4u2sly: folds
+Mistabombastic: folds
+Djonatan22: folds
+Bazuna: folds
+ozrona: folds
+blakeannir: folds
+frankwalt: calls 1500
+*** FLOP *** [5c 7d 4s]
+frankwalt: checks
+Vinsin: checks
+*** TURN *** [5c 7d 4s] [Ts]
+frankwalt: checks
+Vinsin: checks
+*** RIVER *** [5c 7d 4s Ts] [Ah]
+frankwalt: checks
+Vinsin: bets 2233
+frankwalt: folds
+Uncalled bet (2233) returned to Vinsin
+Vinsin collected 6700 from pot
+*** SUMMARY ***
+Total pot 6700 | Rake 0
+Board [5c 7d 4s Ts Ah]
+Seat 2: blakeannir (small blind) folded before Flop
+Seat 3: frankwalt (big blind) folded on the River
+Seat 4: Vinsin collected (6700)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: Mistabombastic folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600006224: Tournament #9735326, No Limit Hold'em - Level X (600/1200 ante 200) - 2026/07/15 20:23:15 ACST [2026/07/15 10:53:15 UTC]
+Table '9735326 4' 9-max Seat #2 is the button
+Seat 1: Mishka36 (100000 in chips)
+Seat 2: blakeannir (191821 in chips)
+Seat 3: frankwalt (107326 in chips)
+Seat 4: Vinsin (89027 in chips)
+Seat 5: 2sly4u2sly (224673 in chips)
+Seat 6: Mistabombastic (96750 in chips)
+Seat 7: Djonatan22 (312682 in chips)
+Seat 8: Bazuna (101496 in chips)
+Seat 9: ozrona (78450 in chips)
+frankwalt: posts the ante 200
+Vinsin: posts the ante 200
+2sly4u2sly: posts the ante 200
+Mistabombastic: posts the ante 200
+Djonatan22: posts the ante 200
+Bazuna: posts the ante 200
+ozrona: posts the ante 200
+Mishka36: posts the ante 200
+blakeannir: posts the ante 200
+frankwalt: posts small blind 600
+Vinsin: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to ozrona [9d 6c]
+2sly4u2sly: raises 1800 to 3000
+Mistabombastic: calls 3000
+Djonatan22: folds
+Bazuna: folds
+ozrona: folds
+Mishka36: folds
+blakeannir: folds
+frankwalt: folds
+Vinsin: folds
+*** FLOP *** [2d Kh 6h]
+2sly4u2sly: checks
+Mistabombastic: checks
+*** TURN *** [2d Kh 6h] [Kd]
+2sly4u2sly: checks
+Mistabombastic: checks
+*** RIVER *** [2d Kh 6h Kd] [3h]
+2sly4u2sly: checks
+Mistabombastic: checks
+*** SHOW DOWN ***
+2sly4u2sly: shows [Ah Ts]
+Mistabombastic: shows [Ad Jc]
+Mistabombastic collected 9600 from pot
+*** SUMMARY ***
+Total pot 9600 | Rake 0
+Board [2d Kh 6h Kd 3h]
+Seat 1: Mishka36 folded before Flop (didn't bet)
+Seat 2: blakeannir (button) folded before Flop (didn't bet)
+Seat 3: frankwalt (small blind) folded before Flop
+Seat 4: Vinsin (big blind) folded before Flop
+Seat 5: 2sly4u2sly showed [Ah Ts] and lost
+Seat 6: Mistabombastic showed [Ad Jc] and won (9600)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600006284: Tournament #9735326, No Limit Hold'em - Level X (600/1200 ante 200) - 2026/07/15 20:24:09 ACST [2026/07/15 10:54:09 UTC]
+Table '9735326 4' 9-max Seat #3 is the button
+Seat 1: Mishka36 (99800 in chips)
+Seat 2: blakeannir (191621 in chips)
+Seat 3: frankwalt (106526 in chips)
+Seat 4: Vinsin (87627 in chips)
+Seat 5: 2sly4u2sly (221473 in chips)
+Seat 6: Mistabombastic (103150 in chips)
+Seat 7: Djonatan22 (312482 in chips)
+Seat 8: Bazuna (101296 in chips)
+Seat 9: ozrona (78250 in chips)
+Vinsin: posts the ante 200
+2sly4u2sly: posts the ante 200
+Mistabombastic: posts the ante 200
+Djonatan22: posts the ante 200
+Bazuna: posts the ante 200
+ozrona: posts the ante 200
+Mishka36: posts the ante 200
+blakeannir: posts the ante 200
+frankwalt: posts the ante 200
+Vinsin: posts small blind 600
+2sly4u2sly: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to ozrona [Qh 5h]
+Mistabombastic: calls 1200
+Djonatan22: raises 3000 to 4200
+Bazuna: folds
+ozrona: folds
+Mishka36: folds
+blakeannir: folds
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: folds
+Mistabombastic: raises 11400 to 15600
+Djonatan22: calls 11400
+*** FLOP *** [Jd 3d Kc]
+Mistabombastic: checks
+Djonatan22: checks
+*** TURN *** [Jd 3d Kc] [6h]
+Mistabombastic: bets 12400
+Djonatan22: calls 12400
+*** RIVER *** [Jd 3d Kc 6h] [Th]
+Mistabombastic: bets 72750 and is all-in
+Djonatan22: folds
+Uncalled bet (72750) returned to Mistabombastic
+Mistabombastic collected 59600 from pot
+*** SUMMARY ***
+Total pot 59600 | Rake 0
+Board [Jd 3d Kc 6h Th]
+Seat 1: Mishka36 folded before Flop (didn't bet)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt (button) folded before Flop (didn't bet)
+Seat 4: Vinsin (small blind) folded before Flop
+Seat 5: 2sly4u2sly (big blind) folded before Flop
+Seat 6: Mistabombastic collected (59600)
+Seat 7: Djonatan22 folded on the River
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600006364: Tournament #9735326, No Limit Hold'em - Level X (600/1200 ante 200) - 2026/07/15 20:30:01 ACST [2026/07/15 11:00:01 UTC]
+Table '9735326 4' 9-max Seat #4 is the button
+Seat 1: Mishka36 (99600 in chips)
+Seat 2: blakeannir (191421 in chips)
+Seat 3: frankwalt (106326 in chips)
+Seat 4: Vinsin (86827 in chips)
+Seat 5: 2sly4u2sly (220073 in chips)
+Seat 6: Mistabombastic (134550 in chips)
+Seat 7: Djonatan22 (284282 in chips)
+Seat 8: Bazuna (101096 in chips)
+Seat 9: ozrona (78050 in chips)
+2sly4u2sly: posts the ante 200
+Mistabombastic: posts the ante 200
+Djonatan22: posts the ante 200
+Bazuna: posts the ante 200
+ozrona: posts the ante 200
+Mishka36: posts the ante 200
+blakeannir: posts the ante 200
+frankwalt: posts the ante 200
+Vinsin: posts the ante 200
+2sly4u2sly: posts small blind 600
+Mistabombastic: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to ozrona [Ah 7d]
+Djonatan22: folds
+Bazuna: calls 1200
+ozrona: folds
+Mishka36: folds
+blakeannir: raises 3600 to 4800
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: folds
+Mistabombastic: folds
+Bazuna: calls 3600
+*** FLOP *** [6s 9s 2h]
+Bazuna: checks
+blakeannir: bets 9900
+Bazuna: folds
+Uncalled bet (9900) returned to blakeannir
+blakeannir collected 13200 from pot
+*** SUMMARY ***
+Total pot 13200 | Rake 0
+Board [6s 9s 2h]
+Seat 1: Mishka36 folded before Flop (didn't bet)
+Seat 2: blakeannir collected (13200)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin (button) folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly (small blind) folded before Flop
+Seat 6: Mistabombastic (big blind) folded before Flop
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: Bazuna folded on the Flop
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600006484: Tournament #9735326, No Limit Hold'em - Level X (600/1200 ante 200) - 2026/07/15 20:31:23 ACST [2026/07/15 11:01:23 UTC]
+Table '9735326 4' 9-max Seat #5 is the button
+Seat 1: Mishka36 (99400 in chips)
+Seat 2: blakeannir (199621 in chips)
+Seat 3: frankwalt (106126 in chips)
+Seat 4: Vinsin (86627 in chips)
+Seat 5: 2sly4u2sly (219273 in chips)
+Seat 6: Mistabombastic (133150 in chips)
+Seat 7: Djonatan22 (284082 in chips)
+Seat 8: Bazuna (96096 in chips)
+Seat 9: ozrona (77850 in chips)
+Mistabombastic: posts the ante 200
+Djonatan22: posts the ante 200
+Bazuna: posts the ante 200
+ozrona: posts the ante 200
+Mishka36: posts the ante 200
+blakeannir: posts the ante 200
+frankwalt: posts the ante 200
+Vinsin: posts the ante 200
+2sly4u2sly: posts the ante 200
+Mistabombastic: posts small blind 600
+Djonatan22: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to ozrona [Ts Kd]
+Bazuna: folds
+ozrona: folds
+Mishka36: folds
+blakeannir: raises 2400 to 3600
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: folds
+Mistabombastic: folds
+Djonatan22: folds
+Uncalled bet (2400) returned to blakeannir
+blakeannir collected 4800 from pot
+*** SUMMARY ***
+Total pot 4800 | Rake 0
+Seat 1: Mishka36 folded before Flop (didn't bet)
+Seat 2: blakeannir collected (4800)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly (button) folded before Flop (didn't bet)
+Seat 6: Mistabombastic (small blind) folded before Flop
+Seat 7: Djonatan22 (big blind) folded before Flop
+Seat 8: Bazuna folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600006534: Tournament #9735326, No Limit Hold'em - Level X (600/1200 ante 200) - 2026/07/15 20:32:09 ACST [2026/07/15 11:02:09 UTC]
+Table '9735326 4' 9-max Seat #6 is the button
+Seat 1: Mishka36 (99200 in chips)
+Seat 2: blakeannir (203021 in chips)
+Seat 3: frankwalt (105926 in chips)
+Seat 4: Vinsin (86427 in chips)
+Seat 5: 2sly4u2sly (219073 in chips)
+Seat 6: Mistabombastic (132350 in chips)
+Seat 7: Djonatan22 (282682 in chips)
+Seat 9: ozrona (77650 in chips)
+Djonatan22: posts the ante 200
+ozrona: posts the ante 200
+Mishka36: posts the ante 200
+blakeannir: posts the ante 200
+frankwalt: posts the ante 200
+Vinsin: posts the ante 200
+2sly4u2sly: posts the ante 200
+Mistabombastic: posts the ante 200
+Djonatan22: posts small blind 600
+ozrona: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to ozrona [Qh 2s]
+Mishka36: folds
+blakeannir: folds
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: folds
+Mistabombastic: folds
+Djonatan22: raises 2400 to 3600
+ozrona: folds
+Uncalled bet (2400) returned to Djonatan22
+Djonatan22 collected 4000 from pot
+*** SUMMARY ***
+Total pot 4000 | Rake 0
+Seat 1: Mishka36 folded before Flop (didn't bet)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: Mistabombastic (button) folded before Flop (didn't bet)
+Seat 7: Djonatan22 (small blind) collected (4000)
+Seat 9: ozrona (big blind) folded before Flop
+
+PokerStars Hand #260715044642973532600006624: Tournament #9735326, No Limit Hold'em - Level X (600/1200 ante 200) - 2026/07/15 20:33:02 ACST [2026/07/15 11:03:02 UTC]
+Table '9735326 4' 9-max Seat #7 is the button
+Seat 1: Mishka36 (99000 in chips)
+Seat 2: blakeannir (202821 in chips)
+Seat 3: frankwalt (105726 in chips)
+Seat 4: Vinsin (86227 in chips)
+Seat 5: 2sly4u2sly (218873 in chips)
+Seat 6: Mistabombastic (132150 in chips)
+Seat 7: Djonatan22 (285282 in chips)
+Seat 9: ozrona (76250 in chips)
+ozrona: posts the ante 200
+Mishka36: posts the ante 200
+blakeannir: posts the ante 200
+frankwalt: posts the ante 200
+Vinsin: posts the ante 200
+2sly4u2sly: posts the ante 200
+Mistabombastic: posts the ante 200
+Djonatan22: posts the ante 200
+ozrona: posts small blind 600
+Mishka36: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to ozrona [2c Ks]
+blakeannir: folds
+frankwalt: folds
+Vinsin: raises 1800 to 3000
+2sly4u2sly: folds
+Mistabombastic: folds
+Djonatan22: folds
+ozrona: folds
+Mishka36: calls 1800
+*** FLOP *** [Ah 3h Tc]
+Mishka36: checks
+Vinsin: checks
+*** TURN *** [Ah 3h Tc] [8c]
+Mishka36: bets 2400
+Vinsin: folds
+Uncalled bet (2400) returned to Mishka36
+Mishka36 collected 8200 from pot
+*** SUMMARY ***
+Total pot 8200 | Rake 0
+Board [Ah 3h Tc 8c]
+Seat 1: Mishka36 (big blind) collected (8200)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded on the Turn
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: Mistabombastic folded before Flop (didn't bet)
+Seat 7: Djonatan22 (button) folded before Flop (didn't bet)
+Seat 9: ozrona (small blind) folded before Flop
+
+PokerStars Hand #260715044642973532600006694: Tournament #9735326, No Limit Hold'em - Level X (600/1200 ante 200) - 2026/07/15 20:33:52 ACST [2026/07/15 11:03:52 UTC]
+Table '9735326 4' 9-max Seat #9 is the button
+Seat 1: Mishka36 (104000 in chips)
+Seat 2: blakeannir (202621 in chips)
+Seat 3: frankwalt (105526 in chips)
+Seat 4: Vinsin (83027 in chips)
+Seat 5: 2sly4u2sly (218673 in chips)
+Seat 6: Mistabombastic (131950 in chips)
+Seat 7: Djonatan22 (285082 in chips)
+Seat 9: ozrona (75450 in chips)
+Mishka36: posts the ante 200
+blakeannir: posts the ante 200
+frankwalt: posts the ante 200
+Vinsin: posts the ante 200
+2sly4u2sly: posts the ante 200
+Mistabombastic: posts the ante 200
+Djonatan22: posts the ante 200
+ozrona: posts the ante 200
+Mishka36: posts small blind 600
+blakeannir: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to ozrona [5c Td]
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: folds
+Mistabombastic: folds
+Djonatan22: folds
+ozrona: folds
+Mishka36: calls 600
+blakeannir: raises 2400 to 3600
+Mishka36: folds
+Uncalled bet (2400) returned to blakeannir
+blakeannir collected 4000 from pot
+*** SUMMARY ***
+Total pot 4000 | Rake 0
+Seat 1: Mishka36 (small blind) folded before Flop
+Seat 2: blakeannir (big blind) collected (4000)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: Mistabombastic folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 9: ozrona (button) folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600006824: Tournament #9735326, No Limit Hold'em - Level X (600/1200 ante 200) - 2026/07/15 20:35:18 ACST [2026/07/15 11:05:18 UTC]
+Table '9735326 4' 9-max Seat #1 is the button
+Seat 1: Mishka36 (102600 in chips)
+Seat 2: blakeannir (205221 in chips)
+Seat 3: frankwalt (105326 in chips)
+Seat 4: Vinsin (82827 in chips)
+Seat 5: 2sly4u2sly (218473 in chips)
+Seat 6: Mistabombastic (131750 in chips)
+Seat 7: Djonatan22 (284882 in chips)
+Seat 8: ProfessorBinkman (100000 in chips)
+Seat 9: ozrona (75250 in chips)
+blakeannir: posts the ante 200
+frankwalt: posts the ante 200
+Vinsin: posts the ante 200
+2sly4u2sly: posts the ante 200
+Mistabombastic: posts the ante 200
+Djonatan22: posts the ante 200
+ProfessorBinkman: posts the ante 200
+ozrona: posts the ante 200
+Mishka36: posts the ante 200
+blakeannir: posts small blind 600
+frankwalt: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to ozrona [5d 9s]
+Vinsin: folds
+2sly4u2sly: folds
+Mistabombastic: folds
+Djonatan22: folds
+ProfessorBinkman: folds
+ozrona: folds
+Mishka36: folds
+blakeannir: raises 1800 to 3000
+frankwalt: raises 10200 to 13200
+blakeannir: folds
+Uncalled bet (10200) returned to frankwalt
+frankwalt collected 7800 from pot
+*** SUMMARY ***
+Total pot 7800 | Rake 0
+Seat 1: Mishka36 (button) folded before Flop (didn't bet)
+Seat 2: blakeannir (small blind) folded before Flop
+Seat 3: frankwalt (big blind) collected (7800)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: Mistabombastic folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: ProfessorBinkman folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600006954: Tournament #9735326, No Limit Hold'em - Level X (600/1200 ante 200) - 2026/07/15 20:36:57 ACST [2026/07/15 11:06:57 UTC]
+Table '9735326 4' 9-max Seat #2 is the button
+Seat 1: Mishka36 (102400 in chips)
+Seat 2: blakeannir (202021 in chips)
+Seat 3: frankwalt (109926 in chips)
+Seat 4: Vinsin (82627 in chips)
+Seat 5: 2sly4u2sly (218273 in chips)
+Seat 6: Mistabombastic (131550 in chips)
+Seat 7: Djonatan22 (284682 in chips)
+Seat 8: ProfessorBinkman (99800 in chips)
+Seat 9: ozrona (75050 in chips)
+frankwalt: posts the ante 200
+Vinsin: posts the ante 200
+2sly4u2sly: posts the ante 200
+Mistabombastic: posts the ante 200
+Djonatan22: posts the ante 200
+ProfessorBinkman: posts the ante 200
+ozrona: posts the ante 200
+Mishka36: posts the ante 200
+blakeannir: posts the ante 200
+frankwalt: posts small blind 600
+Vinsin: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to ozrona [6d 8c]
+2sly4u2sly: folds
+Mistabombastic: folds
+Djonatan22: folds
+ProfessorBinkman: folds
+ozrona: folds
+Mishka36: folds
+blakeannir: raises 2400 to 3600
+frankwalt: folds
+Vinsin: folds
+Uncalled bet (2400) returned to blakeannir
+blakeannir collected 4800 from pot
+*** SUMMARY ***
+Total pot 4800 | Rake 0
+Seat 1: Mishka36 folded before Flop (didn't bet)
+Seat 2: blakeannir (button) collected (4800)
+Seat 3: frankwalt (small blind) folded before Flop
+Seat 4: Vinsin (big blind) folded before Flop
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: Mistabombastic folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: ProfessorBinkman folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600006984: Tournament #9735326, No Limit Hold'em - Level X (600/1200 ante 200) - 2026/07/15 20:37:33 ACST [2026/07/15 11:07:33 UTC]
+Table '9735326 4' 9-max Seat #3 is the button
+Seat 1: Mishka36 (102200 in chips)
+Seat 2: blakeannir (205421 in chips)
+Seat 3: frankwalt (109126 in chips)
+Seat 4: Vinsin (81227 in chips)
+Seat 5: 2sly4u2sly (218073 in chips)
+Seat 6: Mistabombastic (131350 in chips)
+Seat 7: Djonatan22 (284482 in chips)
+Seat 8: ProfessorBinkman (99600 in chips)
+Seat 9: ozrona (74850 in chips)
+Vinsin: posts the ante 200
+2sly4u2sly: posts the ante 200
+Mistabombastic: posts the ante 200
+Djonatan22: posts the ante 200
+ProfessorBinkman: posts the ante 200
+ozrona: posts the ante 200
+Mishka36: posts the ante 200
+blakeannir: posts the ante 200
+frankwalt: posts the ante 200
+Vinsin: posts small blind 600
+2sly4u2sly: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to ozrona [Kd 6s]
+Mistabombastic: folds
+Djonatan22: raises 1200 to 2400
+ProfessorBinkman: folds
+ozrona: folds
+Mishka36: folds
+blakeannir: raises 7200 to 9600
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: folds
+Djonatan22: raises 16800 to 26400
+blakeannir: folds
+Uncalled bet (16800) returned to Djonatan22
+Djonatan22 collected 22800 from pot
+*** SUMMARY ***
+Total pot 22800 | Rake 0
+Seat 1: Mishka36 folded before Flop (didn't bet)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt (button) folded before Flop (didn't bet)
+Seat 4: Vinsin (small blind) folded before Flop
+Seat 5: 2sly4u2sly (big blind) folded before Flop
+Seat 6: Mistabombastic folded before Flop (didn't bet)
+Seat 7: Djonatan22 collected (22800)
+Seat 8: ProfessorBinkman folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600007114: Tournament #9735326, No Limit Hold'em - Level X (600/1200 ante 200) - 2026/07/15 20:38:43 ACST [2026/07/15 11:08:43 UTC]
+Table '9735326 4' 9-max Seat #4 is the button
+Seat 1: Mishka36 (102000 in chips)
+Seat 2: blakeannir (195621 in chips)
+Seat 3: frankwalt (108926 in chips)
+Seat 4: Vinsin (80427 in chips)
+Seat 5: 2sly4u2sly (216673 in chips)
+Seat 6: Mistabombastic (131150 in chips)
+Seat 7: Djonatan22 (297482 in chips)
+Seat 8: ProfessorBinkman (99400 in chips)
+Seat 9: ozrona (74650 in chips)
+2sly4u2sly: posts the ante 200
+Mistabombastic: posts the ante 200
+Djonatan22: posts the ante 200
+ProfessorBinkman: posts the ante 200
+ozrona: posts the ante 200
+Mishka36: posts the ante 200
+blakeannir: posts the ante 200
+frankwalt: posts the ante 200
+Vinsin: posts the ante 200
+2sly4u2sly: posts small blind 600
+Mistabombastic: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to ozrona [5s 2c]
+Djonatan22: folds
+ProfessorBinkman: folds
+ozrona: folds
+Mishka36: folds
+blakeannir: raises 2400 to 3600
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: folds
+Mistabombastic: folds
+Uncalled bet (2400) returned to blakeannir
+blakeannir collected 4800 from pot
+*** SUMMARY ***
+Total pot 4800 | Rake 0
+Seat 1: Mishka36 folded before Flop (didn't bet)
+Seat 2: blakeannir collected (4800)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin (button) folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly (small blind) folded before Flop
+Seat 6: Mistabombastic (big blind) folded before Flop
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: ProfessorBinkman folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600007154: Tournament #9735326, No Limit Hold'em - Level X (600/1200 ante 200) - 2026/07/15 20:39:29 ACST [2026/07/15 11:09:29 UTC]
+Table '9735326 4' 9-max Seat #5 is the button
+Seat 1: Mishka36 (101800 in chips)
+Seat 2: blakeannir (199021 in chips)
+Seat 3: frankwalt (108726 in chips)
+Seat 4: Vinsin (80227 in chips)
+Seat 5: 2sly4u2sly (215873 in chips)
+Seat 6: Mistabombastic (129750 in chips)
+Seat 7: Djonatan22 (297282 in chips)
+Seat 8: ProfessorBinkman (99200 in chips)
+Seat 9: ozrona (74450 in chips)
+Mistabombastic: posts the ante 200
+Djonatan22: posts the ante 200
+ProfessorBinkman: posts the ante 200
+ozrona: posts the ante 200
+Mishka36: posts the ante 200
+blakeannir: posts the ante 200
+frankwalt: posts the ante 200
+Vinsin: posts the ante 200
+2sly4u2sly: posts the ante 200
+Mistabombastic: posts small blind 600
+Djonatan22: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to ozrona [8h Ac]
+ProfessorBinkman: raises 1200 to 2400
+ozrona: folds
+Mishka36: folds
+blakeannir: folds
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: calls 2400
+Mistabombastic: calls 1800
+Djonatan22: calls 1200
+*** FLOP *** [5s Ks 4s]
+Mistabombastic: checks
+Djonatan22: checks
+ProfessorBinkman: bets 5700
+2sly4u2sly: folds
+Mistabombastic: folds
+Djonatan22: folds
+Uncalled bet (5700) returned to ProfessorBinkman
+ProfessorBinkman collected 11400 from pot
+*** SUMMARY ***
+Total pot 11400 | Rake 0
+Board [5s Ks 4s]
+Seat 1: Mishka36 folded before Flop (didn't bet)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly (button) folded on the Flop
+Seat 6: Mistabombastic (small blind) folded on the Flop
+Seat 7: Djonatan22 (big blind) folded on the Flop
+Seat 8: ProfessorBinkman collected (11400)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600007274: Tournament #9735326, No Limit Hold'em - Level XI (800/1600 ante 200) - 2026/07/15 20:40:42 ACST [2026/07/15 11:10:42 UTC]
+Table '9735326 4' 9-max Seat #6 is the button
+Seat 1: Mishka36 (101600 in chips)
+Seat 2: blakeannir (198821 in chips)
+Seat 3: frankwalt (108526 in chips)
+Seat 4: Vinsin (80027 in chips)
+Seat 5: 2sly4u2sly (213273 in chips)
+Seat 6: Mistabombastic (127150 in chips)
+Seat 7: Djonatan22 (294682 in chips)
+Seat 8: ProfessorBinkman (108000 in chips)
+Seat 9: ozrona (74250 in chips)
+Djonatan22: posts the ante 200
+ProfessorBinkman: posts the ante 200
+ozrona: posts the ante 200
+Mishka36: posts the ante 200
+blakeannir: posts the ante 200
+frankwalt: posts the ante 200
+Vinsin: posts the ante 200
+2sly4u2sly: posts the ante 200
+Mistabombastic: posts the ante 200
+Djonatan22: posts small blind 800
+ProfessorBinkman: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to ozrona [9d Th]
+ozrona: folds
+Mishka36: folds
+blakeannir: folds
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: folds
+Mistabombastic: raises 1600 to 3200
+Djonatan22: raises 5600 to 8800
+ProfessorBinkman: calls 7200
+Mistabombastic: raises 115150 to 123950 and is all-in
+Djonatan22: folds
+ProfessorBinkman: calls 98200 and is all-in
+Uncalled bet (16950) returned to Mistabombastic
+*** FLOP *** [7h 6s 3c]
+*** TURN *** [7h 6s 3c] [9c]
+*** RIVER *** [7h 6s 3c 9c] [4d]
+*** SHOW DOWN ***
+Mistabombastic: shows [Kd 9h]
+ProfessorBinkman: shows [7d 7c]
+ProfessorBinkman collected 224600 from pot
+*** SUMMARY ***
+Total pot 224600 | Rake 0
+Board [7h 6s 3c 9c 4d]
+Seat 1: Mishka36 folded before Flop (didn't bet)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: Mistabombastic (button) showed [Kd 9h] and lost
+Seat 7: Djonatan22 (small blind) folded before Flop
+Seat 8: ProfessorBinkman (big blind) showed [7d 7c] and won (224600)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600007364: Tournament #9735326, No Limit Hold'em - Level XI (800/1600 ante 200) - 2026/07/15 20:41:51 ACST [2026/07/15 11:11:51 UTC]
+Table '9735326 4' 9-max Seat #7 is the button
+Seat 1: Mishka36 (101400 in chips)
+Seat 2: blakeannir (198621 in chips)
+Seat 3: frankwalt (108326 in chips)
+Seat 4: Vinsin (79827 in chips)
+Seat 5: 2sly4u2sly (213073 in chips)
+Seat 6: Mistabombastic (19950 in chips)
+Seat 7: Djonatan22 (285682 in chips)
+Seat 8: ProfessorBinkman (225400 in chips)
+Seat 9: ozrona (74050 in chips)
+ProfessorBinkman: posts the ante 200
+ozrona: posts the ante 200
+Mishka36: posts the ante 200
+blakeannir: posts the ante 200
+frankwalt: posts the ante 200
+Vinsin: posts the ante 200
+2sly4u2sly: posts the ante 200
+Mistabombastic: posts the ante 200
+Djonatan22: posts the ante 200
+ProfessorBinkman: posts small blind 800
+ozrona: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to ozrona [3s 9s]
+Mishka36: calls 1600
+blakeannir: raises 4800 to 6400
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: folds
+Mistabombastic: folds
+Djonatan22: folds
+ProfessorBinkman: calls 5600
+ozrona: folds
+Mishka36: calls 4800
+*** FLOP *** [4s 6c 4d]
+ProfessorBinkman: checks
+Mishka36: checks
+blakeannir: bets 16950
+ProfessorBinkman: folds
+Mishka36: folds
+Uncalled bet (16950) returned to blakeannir
+blakeannir collected 22600 from pot
+*** SUMMARY ***
+Total pot 22600 | Rake 0
+Board [4s 6c 4d]
+Seat 1: Mishka36 folded on the Flop
+Seat 2: blakeannir collected (22600)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: Mistabombastic folded before Flop (didn't bet)
+Seat 7: Djonatan22 (button) folded before Flop (didn't bet)
+Seat 8: ProfessorBinkman (small blind) folded on the Flop
+Seat 9: ozrona (big blind) folded before Flop
+
+PokerStars Hand #260715044642973532600007454: Tournament #9735326, No Limit Hold'em - Level XI (800/1600 ante 200) - 2026/07/15 20:42:44 ACST [2026/07/15 11:12:44 UTC]
+Table '9735326 4' 9-max Seat #8 is the button
+Seat 1: Mishka36 (94800 in chips)
+Seat 2: blakeannir (214621 in chips)
+Seat 3: frankwalt (108126 in chips)
+Seat 4: Vinsin (79627 in chips)
+Seat 5: 2sly4u2sly (212873 in chips)
+Seat 6: Mistabombastic (19750 in chips)
+Seat 7: Djonatan22 (285482 in chips)
+Seat 8: ProfessorBinkman (218800 in chips)
+Seat 9: ozrona (72250 in chips)
+ozrona: posts the ante 200
+Mishka36: posts the ante 200
+blakeannir: posts the ante 200
+frankwalt: posts the ante 200
+Vinsin: posts the ante 200
+2sly4u2sly: posts the ante 200
+Mistabombastic: posts the ante 200
+Djonatan22: posts the ante 200
+ProfessorBinkman: posts the ante 200
+ozrona: posts small blind 800
+Mishka36: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to ozrona [Ad As]
+blakeannir: folds
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: folds
+Mistabombastic: folds
+Djonatan22: raises 2400 to 4000
+ProfessorBinkman: folds
+ozrona: raises 11200 to 15200
+Mishka36: calls 13600
+Djonatan22: calls 11200
+*** FLOP *** [7s Jh 8s]
+ozrona: bets 25700
+Mishka36: folds
+Djonatan22: folds
+Uncalled bet (25700) returned to ozrona
+ozrona collected 47400 from pot
+*** SUMMARY ***
+Total pot 47400 | Rake 0
+Board [7s Jh 8s]
+Seat 1: Mishka36 (big blind) folded on the Flop
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: Mistabombastic folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded on the Flop
+Seat 8: ProfessorBinkman (button) folded before Flop (didn't bet)
+Seat 9: ozrona (small blind) collected (47400)
+
+PokerStars Hand #260715044642973532600007534: Tournament #9735326, No Limit Hold'em - Level XI (800/1600 ante 200) - 2026/07/15 20:43:32 ACST [2026/07/15 11:13:32 UTC]
+Table '9735326 4' 9-max Seat #9 is the button
+Seat 1: Mishka36 (79400 in chips)
+Seat 2: blakeannir (214421 in chips)
+Seat 3: frankwalt (107926 in chips)
+Seat 4: Vinsin (79427 in chips)
+Seat 5: 2sly4u2sly (212673 in chips)
+Seat 6: Mistabombastic (19550 in chips)
+Seat 7: Djonatan22 (270082 in chips)
+Seat 8: ProfessorBinkman (218600 in chips)
+Seat 9: ozrona (104250 in chips)
+Mishka36: posts the ante 200
+blakeannir: posts the ante 200
+frankwalt: posts the ante 200
+Vinsin: posts the ante 200
+2sly4u2sly: posts the ante 200
+Mistabombastic: posts the ante 200
+Djonatan22: posts the ante 200
+ProfessorBinkman: posts the ante 200
+ozrona: posts the ante 200
+Mishka36: posts small blind 800
+blakeannir: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to ozrona [9c Kh]
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: folds
+Mistabombastic: raises 17150 to 18750 and is all-in
+Djonatan22: folds
+ProfessorBinkman: calls 18750
+ozrona: folds
+Mishka36: calls 17950
+blakeannir: folds
+*** FLOP *** [5c Kc 4s]
+Mishka36: checks
+ProfessorBinkman: checks
+*** TURN *** [5c Kc 4s] [3h]
+Mishka36: checks
+ProfessorBinkman: checks
+*** RIVER *** [5c Kc 4s 3h] [Qs]
+Mishka36: checks
+ProfessorBinkman: checks
+*** SHOW DOWN ***
+Mistabombastic: shows [9d 7h]
+Mishka36: shows [Jc Js]
+ProfessorBinkman: shows [9s Ah]
+Mishka36 collected 59650 from pot
+*** SUMMARY ***
+Total pot 59650 | Rake 0
+Board [5c Kc 4s 3h Qs]
+Seat 1: Mishka36 (small blind) showed [Jc Js] and won (59650)
+Seat 2: blakeannir (big blind) folded before Flop
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: Mistabombastic showed [9d 7h] and lost
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: ProfessorBinkman showed [9s Ah] and lost
+Seat 9: ozrona (button) folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600007624: Tournament #9735326, No Limit Hold'em - Level XI (800/1600 ante 200) - 2026/07/15 20:44:31 ACST [2026/07/15 11:14:31 UTC]
+Table '9735326 4' 9-max Seat #1 is the button
+Seat 1: Mishka36 (120100 in chips)
+Seat 2: blakeannir (212621 in chips)
+Seat 3: frankwalt (107726 in chips)
+Seat 4: Vinsin (79227 in chips)
+Seat 5: 2sly4u2sly (212473 in chips)
+Seat 7: Djonatan22 (269882 in chips)
+Seat 8: ProfessorBinkman (199650 in chips)
+Seat 9: ozrona (104050 in chips)
+blakeannir: posts the ante 200
+frankwalt: posts the ante 200
+Vinsin: posts the ante 200
+2sly4u2sly: posts the ante 200
+Djonatan22: posts the ante 200
+ProfessorBinkman: posts the ante 200
+ozrona: posts the ante 200
+Mishka36: posts the ante 200
+blakeannir: posts small blind 800
+frankwalt: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to ozrona [Jd 7h]
+Vinsin: folds
+2sly4u2sly: folds
+Djonatan22: folds
+ProfessorBinkman: calls 1600
+ozrona: folds
+Mishka36: folds
+blakeannir: calls 800
+frankwalt: checks
+*** FLOP *** [5d Jh 5c]
+blakeannir: bets 1600
+frankwalt: folds
+ProfessorBinkman: folds
+Uncalled bet (1600) returned to blakeannir
+blakeannir collected 6400 from pot
+*** SUMMARY ***
+Total pot 6400 | Rake 0
+Board [5d Jh 5c]
+Seat 1: Mishka36 (button) folded before Flop (didn't bet)
+Seat 2: blakeannir (small blind) collected (6400)
+Seat 3: frankwalt (big blind) folded on the Flop
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: ProfessorBinkman folded on the Flop
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600007684: Tournament #9735326, No Limit Hold'em - Level XI (800/1600 ante 200) - 2026/07/15 20:45:09 ACST [2026/07/15 11:15:09 UTC]
+Table '9735326 4' 9-max Seat #2 is the button
+Seat 1: Mishka36 (119900 in chips)
+Seat 2: blakeannir (217221 in chips)
+Seat 3: frankwalt (105926 in chips)
+Seat 4: Vinsin (79027 in chips)
+Seat 5: 2sly4u2sly (212273 in chips)
+Seat 7: Djonatan22 (269682 in chips)
+Seat 8: ProfessorBinkman (197850 in chips)
+Seat 9: ozrona (103850 in chips)
+frankwalt: posts the ante 200
+Vinsin: posts the ante 200
+2sly4u2sly: posts the ante 200
+Djonatan22: posts the ante 200
+ProfessorBinkman: posts the ante 200
+ozrona: posts the ante 200
+Mishka36: posts the ante 200
+blakeannir: posts the ante 200
+frankwalt: posts small blind 800
+Vinsin: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to ozrona [3h Ks]
+2sly4u2sly: calls 1600
+Djonatan22: folds
+ProfessorBinkman: raises 1600 to 3200
+ozrona: folds
+Mishka36: folds
+blakeannir: folds
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: calls 1600
+*** FLOP *** [2d Ad Th]
+2sly4u2sly: checks
+ProfessorBinkman: checks
+*** TURN *** [2d Ad Th] [7c]
+2sly4u2sly: checks
+ProfessorBinkman: bets 5200
+2sly4u2sly: calls 5200
+*** RIVER *** [2d Ad Th 7c] [6c]
+2sly4u2sly: bets 9600
+ProfessorBinkman: calls 9600
+*** SHOW DOWN ***
+2sly4u2sly: shows [6d 7d]
+2sly4u2sly collected 40000 from pot
+*** SUMMARY ***
+Total pot 40000 | Rake 0
+Board [2d Ad Th 7c 6c]
+Seat 1: Mishka36 folded before Flop (didn't bet)
+Seat 2: blakeannir (button) folded before Flop (didn't bet)
+Seat 3: frankwalt (small blind) folded before Flop
+Seat 4: Vinsin (big blind) folded before Flop
+Seat 5: 2sly4u2sly showed [6d 7d] and won (40000)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: ProfessorBinkman mucked
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600007774: Tournament #9735326, No Limit Hold'em - Level XI (800/1600 ante 200) - 2026/07/15 20:46:18 ACST [2026/07/15 11:16:18 UTC]
+Table '9735326 4' 9-max Seat #3 is the button
+Seat 1: Mishka36 (119700 in chips)
+Seat 2: blakeannir (217021 in chips)
+Seat 3: frankwalt (104926 in chips)
+Seat 4: Vinsin (77227 in chips)
+Seat 5: 2sly4u2sly (234073 in chips)
+Seat 7: Djonatan22 (269482 in chips)
+Seat 8: ProfessorBinkman (179650 in chips)
+Seat 9: ozrona (103650 in chips)
+Vinsin: posts the ante 200
+2sly4u2sly: posts the ante 200
+Djonatan22: posts the ante 200
+ProfessorBinkman: posts the ante 200
+ozrona: posts the ante 200
+Mishka36: posts the ante 200
+blakeannir: posts the ante 200
+frankwalt: posts the ante 200
+Vinsin: posts small blind 800
+2sly4u2sly: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to ozrona [8d Ts]
+Djonatan22: folds
+ProfessorBinkman: raises 1600 to 3200
+ozrona: raises 2400 to 5600
+Mishka36: folds
+blakeannir: folds
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: folds
+ProfessorBinkman: calls 2400
+*** FLOP *** [As 3s 6c]
+ProfessorBinkman: checks
+ozrona: bets 1600
+ProfessorBinkman: calls 1600
+*** TURN *** [As 3s 6c] [5c]
+ProfessorBinkman: checks
+ozrona: bets 9200
+ProfessorBinkman: folds
+Uncalled bet (9200) returned to ozrona
+ozrona collected 18400 from pot
+*** SUMMARY ***
+Total pot 18400 | Rake 0
+Board [As 3s 6c 5c]
+Seat 1: Mishka36 folded before Flop (didn't bet)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt (button) folded before Flop (didn't bet)
+Seat 4: Vinsin (small blind) folded before Flop
+Seat 5: 2sly4u2sly (big blind) folded before Flop
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: ProfessorBinkman folded on the Turn
+Seat 9: ozrona collected (18400)
+
+PokerStars Hand #260715044642973532600007874: Tournament #9735326, No Limit Hold'em - Level XI (800/1600 ante 200) - 2026/07/15 20:47:35 ACST [2026/07/15 11:17:35 UTC]
+Table '9735326 4' 9-max Seat #4 is the button
+Seat 1: Mishka36 (119500 in chips)
+Seat 2: blakeannir (216821 in chips)
+Seat 3: frankwalt (104726 in chips)
+Seat 4: Vinsin (76227 in chips)
+Seat 5: 2sly4u2sly (232273 in chips)
+Seat 7: Djonatan22 (269282 in chips)
+Seat 8: ProfessorBinkman (172250 in chips)
+Seat 9: ozrona (114650 in chips)
+2sly4u2sly: posts the ante 200
+Djonatan22: posts the ante 200
+ProfessorBinkman: posts the ante 200
+ozrona: posts the ante 200
+Mishka36: posts the ante 200
+blakeannir: posts the ante 200
+frankwalt: posts the ante 200
+Vinsin: posts the ante 200
+2sly4u2sly: posts small blind 800
+Djonatan22: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to ozrona [5h 5d]
+ProfessorBinkman: folds
+ozrona: calls 1600
+Mishka36: raises 2400 to 4000
+blakeannir: calls 4000
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: folds
+Djonatan22: folds
+ozrona: calls 2400
+*** FLOP *** [Ks 5c 2h]
+ozrona: checks
+Mishka36: checks
+blakeannir: bets 12000
+ozrona: calls 12000
+Mishka36: raises 12000 to 24000
+blakeannir: folds
+ozrona: calls 12000
+*** TURN *** [Ks 5c 2h] [As]
+ozrona: checks
+Mishka36: bets 10400
+ozrona: raises 20800 to 31200
+Mishka36: calls 20800
+*** RIVER *** [Ks 5c 2h As] [6s]
+ozrona: bets 46133
+Mishka36: calls 46133
+*** SHOW DOWN ***
+ozrona: shows [5h 5d]
+Mishka36: shows [Kc Kh]
+Mishka36 collected 230666 from pot
+*** SUMMARY ***
+Total pot 230666 | Rake 0
+Board [Ks 5c 2h As 6s]
+Seat 1: Mishka36 showed [Kc Kh] and won (230666)
+Seat 2: blakeannir folded on the Flop
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin (button) folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly (small blind) folded before Flop
+Seat 7: Djonatan22 (big blind) folded before Flop
+Seat 8: ProfessorBinkman folded before Flop (didn't bet)
+Seat 9: ozrona showed [5h 5d] and lost
+
+PokerStars Hand #260715044642973532600008104: Tournament #9735326, No Limit Hold'em - Level XI (800/1600 ante 200) - 2026/07/15 20:50:07 ACST [2026/07/15 11:20:07 UTC]
+Table '9735326 4' 9-max Seat #5 is the button
+Seat 1: Mishka36 (244633 in chips)
+Seat 2: blakeannir (200621 in chips)
+Seat 3: frankwalt (104526 in chips)
+Seat 4: Vinsin (76027 in chips)
+Seat 5: 2sly4u2sly (231273 in chips)
+Seat 7: Djonatan22 (267482 in chips)
+Seat 8: ProfessorBinkman (172050 in chips)
+Seat 9: ozrona (9117 in chips)
+Djonatan22: posts the ante 200
+ProfessorBinkman: posts the ante 200
+ozrona: posts the ante 200
+Mishka36: posts the ante 200
+blakeannir: posts the ante 200
+frankwalt: posts the ante 200
+Vinsin: posts the ante 200
+2sly4u2sly: posts the ante 200
+Djonatan22: posts small blind 800
+ProfessorBinkman: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to ozrona [6c 9c]
+ozrona: folds
+Mishka36: raises 1600 to 3200
+blakeannir: folds
+frankwalt: calls 3200
+Vinsin: folds
+2sly4u2sly: folds
+Djonatan22: folds
+ProfessorBinkman: calls 1600
+*** FLOP *** [4h 7s 2h]
+ProfessorBinkman: checks
+Mishka36: checks
+frankwalt: checks
+*** TURN *** [4h 7s 2h] [Jc]
+ProfessorBinkman: checks
+Mishka36: checks
+frankwalt: checks
+*** RIVER *** [4h 7s 2h Jc] [Kd]
+ProfessorBinkman: checks
+Mishka36: bets 3200
+frankwalt: folds
+ProfessorBinkman: folds
+Uncalled bet (3200) returned to Mishka36
+Mishka36 collected 12000 from pot
+*** SUMMARY ***
+Total pot 12000 | Rake 0
+Board [4h 7s 2h Jc Kd]
+Seat 1: Mishka36 collected (12000)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded on the River
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly (button) folded before Flop (didn't bet)
+Seat 7: Djonatan22 (small blind) folded before Flop
+Seat 8: ProfessorBinkman (big blind) folded on the River
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600008324: Tournament #9735326, No Limit Hold'em - Level XI (800/1600 ante 200) - 2026/07/15 20:51:55 ACST [2026/07/15 11:21:55 UTC]
+Table '9735326 4' 9-max Seat #7 is the button
+Seat 1: Mishka36 (253233 in chips)
+Seat 2: blakeannir (200421 in chips)
+Seat 3: frankwalt (101126 in chips)
+Seat 4: Vinsin (75827 in chips)
+Seat 5: 2sly4u2sly (231073 in chips)
+Seat 6: VAASCO (100000 in chips)
+Seat 7: Djonatan22 (266482 in chips)
+Seat 8: ProfessorBinkman (168650 in chips)
+Seat 9: ozrona (8917 in chips)
+ProfessorBinkman: posts the ante 200
+ozrona: posts the ante 200
+Mishka36: posts the ante 200
+blakeannir: posts the ante 200
+frankwalt: posts the ante 200
+Vinsin: posts the ante 200
+2sly4u2sly: posts the ante 200
+VAASCO: posts the ante 200
+Djonatan22: posts the ante 200
+ProfessorBinkman: posts small blind 800
+ozrona: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to ozrona [9h Kd]
+Mishka36: folds
+blakeannir: folds
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: folds
+VAASCO: raises 2000 to 3600
+Djonatan22: calls 3600
+ProfessorBinkman: folds
+ozrona: calls 2000
+*** FLOP *** [Ks 2h 5s]
+ozrona: bets 5117 and is all-in
+VAASCO: folds
+Djonatan22: calls 5117
+*** TURN *** [Ks 2h 5s] [7h]
+*** RIVER *** [Ks 2h 5s 7h] [4d]
+*** SHOW DOWN ***
+ozrona: shows [9h Kd]
+Djonatan22: shows [Js Qc]
+ozrona collected 28834 from pot
+*** SUMMARY ***
+Total pot 28834 | Rake 0
+Board [Ks 2h 5s 7h 4d]
+Seat 1: Mishka36 folded before Flop (didn't bet)
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: VAASCO folded on the Flop
+Seat 7: Djonatan22 (button) showed [Js Qc] and lost
+Seat 8: ProfessorBinkman (small blind) folded before Flop
+Seat 9: ozrona (big blind) showed [9h Kd] and won (28834)
+
+PokerStars Hand #260715044642973532600008414: Tournament #9735326, No Limit Hold'em - Level XII (1000/2000 ante 300) - 2026/07/15 20:53:12 ACST [2026/07/15 11:23:12 UTC]
+Table '9735326 4' 9-max Seat #8 is the button
+Seat 1: Mishka36 (253033 in chips)
+Seat 2: blakeannir (200221 in chips)
+Seat 3: frankwalt (100926 in chips)
+Seat 4: Vinsin (75627 in chips)
+Seat 5: 2sly4u2sly (230873 in chips)
+Seat 6: VAASCO (96200 in chips)
+Seat 7: Djonatan22 (254965 in chips)
+Seat 8: ProfessorBinkman (167650 in chips)
+Seat 9: ozrona (26234 in chips)
+ozrona: posts the ante 300
+Mishka36: posts the ante 300
+blakeannir: posts the ante 300
+frankwalt: posts the ante 300
+Vinsin: posts the ante 300
+2sly4u2sly: posts the ante 300
+VAASCO: posts the ante 300
+Djonatan22: posts the ante 300
+ProfessorBinkman: posts the ante 300
+ozrona: posts small blind 1000
+Mishka36: posts big blind 2000
+*** HOLE CARDS ***
+Dealt to ozrona [9c Js]
+blakeannir: folds
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: folds
+VAASCO: folds
+Djonatan22: raises 3000 to 5000
+ProfessorBinkman: calls 5000
+ozrona: folds
+Mishka36: calls 3000
+*** FLOP *** [4s 8s Tc]
+Mishka36: checks
+Djonatan22: bets 9350
+ProfessorBinkman: folds
+Mishka36: calls 9350
+*** TURN *** [4s 8s Tc] [6c]
+Mishka36: checks
+Djonatan22: bets 28050
+Mishka36: folds
+Uncalled bet (28050) returned to Djonatan22
+Djonatan22 collected 37400 from pot
+*** SUMMARY ***
+Total pot 37400 | Rake 0
+Board [4s 8s Tc 6c]
+Seat 1: Mishka36 (big blind) folded on the Turn
+Seat 2: blakeannir folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: VAASCO folded before Flop (didn't bet)
+Seat 7: Djonatan22 collected (37400)
+Seat 8: ProfessorBinkman (button) folded on the Flop
+Seat 9: ozrona (small blind) folded before Flop
+
+PokerStars Hand #260715044642973532600008574: Tournament #9735326, No Limit Hold'em - Level XII (1000/2000 ante 300) - 2026/07/15 20:54:46 ACST [2026/07/15 11:24:46 UTC]
+Table '9735326 4' 9-max Seat #9 is the button
+Seat 1: Mishka36 (238383 in chips)
+Seat 3: frankwalt (100626 in chips)
+Seat 4: Vinsin (75327 in chips)
+Seat 5: 2sly4u2sly (230573 in chips)
+Seat 6: VAASCO (95900 in chips)
+Seat 7: Djonatan22 (277715 in chips)
+Seat 8: ProfessorBinkman (162350 in chips)
+Seat 9: ozrona (24934 in chips)
+Mishka36: posts the ante 300
+frankwalt: posts the ante 300
+Vinsin: posts the ante 300
+2sly4u2sly: posts the ante 300
+VAASCO: posts the ante 300
+Djonatan22: posts the ante 300
+ProfessorBinkman: posts the ante 300
+ozrona: posts the ante 300
+Mishka36: posts small blind 1000
+frankwalt: posts big blind 2000
+*** HOLE CARDS ***
+Dealt to ozrona [4s Qh]
+Vinsin: folds
+2sly4u2sly: calls 2000
+VAASCO: folds
+Djonatan22: folds
+ProfessorBinkman: raises 4000 to 6000
+ozrona: folds
+Mishka36: folds
+frankwalt: folds
+2sly4u2sly: calls 4000
+*** FLOP *** [9s Kh 3h]
+2sly4u2sly: checks
+ProfessorBinkman: bets 8700
+2sly4u2sly: folds
+Uncalled bet (8700) returned to ProfessorBinkman
+ProfessorBinkman collected 17400 from pot
+*** SUMMARY ***
+Total pot 17400 | Rake 0
+Board [9s Kh 3h]
+Seat 1: Mishka36 (small blind) folded before Flop
+Seat 3: frankwalt (big blind) folded before Flop
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded on the Flop
+Seat 6: VAASCO folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: ProfessorBinkman collected (17400)
+Seat 9: ozrona (button) folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600008664: Tournament #9735326, No Limit Hold'em - Level XII (1000/2000 ante 300) - 2026/07/15 20:55:28 ACST [2026/07/15 11:25:28 UTC]
+Table '9735326 4' 9-max Seat #1 is the button
+Seat 1: Mishka36 (237083 in chips)
+Seat 3: frankwalt (98326 in chips)
+Seat 4: Vinsin (75027 in chips)
+Seat 5: 2sly4u2sly (224273 in chips)
+Seat 6: VAASCO (95600 in chips)
+Seat 7: Djonatan22 (277415 in chips)
+Seat 8: ProfessorBinkman (173450 in chips)
+Seat 9: ozrona (24634 in chips)
+frankwalt: posts the ante 300
+Vinsin: posts the ante 300
+2sly4u2sly: posts the ante 300
+VAASCO: posts the ante 300
+Djonatan22: posts the ante 300
+ProfessorBinkman: posts the ante 300
+ozrona: posts the ante 300
+Mishka36: posts the ante 300
+frankwalt: posts small blind 1000
+Vinsin: posts big blind 2000
+*** HOLE CARDS ***
+Dealt to ozrona [8c Jd]
+2sly4u2sly: folds
+VAASCO: folds
+Djonatan22: folds
+ProfessorBinkman: folds
+ozrona: folds
+Mishka36: raises 2000 to 4000
+frankwalt: calls 3000
+Vinsin: calls 2000
+*** FLOP *** [3s 7d 2c]
+frankwalt: bets 10800
+Vinsin: folds
+Mishka36: calls 10800
+*** TURN *** [3s 7d 2c] [6c]
+frankwalt: checks
+Mishka36: bets 9000
+frankwalt: calls 9000
+*** RIVER *** [3s 7d 2c 6c] [9s]
+frankwalt: checks
+Mishka36: checks
+*** SHOW DOWN ***
+Mishka36: shows [Kc Ks]
+frankwalt: shows [Qc 4c]
+Mishka36 collected 54000 from pot
+*** SUMMARY ***
+Total pot 54000 | Rake 0
+Board [3s 7d 2c 6c 9s]
+Seat 1: Mishka36 (button) showed [Kc Ks] and won (54000)
+Seat 3: frankwalt (small blind) showed [Qc 4c] and lost
+Seat 4: Vinsin (big blind) folded on the Flop
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: VAASCO folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: ProfessorBinkman folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600008764: Tournament #9735326, No Limit Hold'em - Level XII (1000/2000 ante 300) - 2026/07/15 20:56:32 ACST [2026/07/15 11:26:32 UTC]
+Table '9735326 4' 9-max Seat #3 is the button
+Seat 1: Mishka36 (266983 in chips)
+Seat 2: Maccavelli764 (100000 in chips)
+Seat 3: frankwalt (74226 in chips)
+Seat 4: Vinsin (70727 in chips)
+Seat 5: 2sly4u2sly (223973 in chips)
+Seat 6: VAASCO (95300 in chips)
+Seat 7: Djonatan22 (277115 in chips)
+Seat 8: ProfessorBinkman (173150 in chips)
+Seat 9: ozrona (24334 in chips)
+Vinsin: posts the ante 300
+2sly4u2sly: posts the ante 300
+VAASCO: posts the ante 300
+Djonatan22: posts the ante 300
+ProfessorBinkman: posts the ante 300
+ozrona: posts the ante 300
+Mishka36: posts the ante 300
+Maccavelli764: posts the ante 300
+frankwalt: posts the ante 300
+Vinsin: posts small blind 1000
+2sly4u2sly: posts big blind 2000
+*** HOLE CARDS ***
+Dealt to ozrona [8s Td]
+VAASCO: folds
+Djonatan22: folds
+ProfessorBinkman: calls 2000
+ozrona: folds
+Mishka36: raises 2000 to 4000
+Maccavelli764: folds
+frankwalt: folds
+Vinsin: calls 3000
+2sly4u2sly: calls 2000
+ProfessorBinkman: calls 2000
+*** FLOP *** [3d Ks 5s]
+Vinsin: checks
+2sly4u2sly: checks
+ProfessorBinkman: checks
+Mishka36: checks
+*** TURN *** [3d Ks 5s] [4d]
+Vinsin: checks
+2sly4u2sly: bets 6800
+ProfessorBinkman: raises 10200 to 17000
+Mishka36: folds
+Vinsin: folds
+2sly4u2sly: calls 10200
+*** RIVER *** [3d Ks 5s 4d] [5h]
+2sly4u2sly: checks
+ProfessorBinkman: bets 26350
+2sly4u2sly: folds
+Uncalled bet (26350) returned to ProfessorBinkman
+ProfessorBinkman collected 52700 from pot
+*** SUMMARY ***
+Total pot 52700 | Rake 0
+Board [3d Ks 5s 4d 5h]
+Seat 1: Mishka36 folded on the Turn
+Seat 2: Maccavelli764 folded before Flop (didn't bet)
+Seat 3: frankwalt (button) folded before Flop (didn't bet)
+Seat 4: Vinsin (small blind) folded on the Turn
+Seat 5: 2sly4u2sly (big blind) folded on the River
+Seat 6: VAASCO folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: ProfessorBinkman collected (52700)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600008934: Tournament #9735326, No Limit Hold'em - Level XII (1000/2000 ante 300) - 2026/07/15 20:58:15 ACST [2026/07/15 11:28:15 UTC]
+Table '9735326 4' 9-max Seat #4 is the button
+Seat 1: Mishka36 (262683 in chips)
+Seat 2: Maccavelli764 (99700 in chips)
+Seat 3: frankwalt (73926 in chips)
+Seat 4: Vinsin (66427 in chips)
+Seat 5: 2sly4u2sly (202673 in chips)
+Seat 6: VAASCO (95000 in chips)
+Seat 7: Djonatan22 (276815 in chips)
+Seat 8: ProfessorBinkman (204550 in chips)
+Seat 9: ozrona (24034 in chips)
+2sly4u2sly: posts the ante 300
+VAASCO: posts the ante 300
+Djonatan22: posts the ante 300
+ProfessorBinkman: posts the ante 300
+ozrona: posts the ante 300
+Mishka36: posts the ante 300
+Maccavelli764: posts the ante 300
+frankwalt: posts the ante 300
+Vinsin: posts the ante 300
+2sly4u2sly: posts small blind 1000
+VAASCO: posts big blind 2000
+*** HOLE CARDS ***
+Dealt to ozrona [2s 4h]
+Djonatan22: folds
+ProfessorBinkman: raises 2000 to 4000
+ozrona: folds
+Mishka36: calls 4000
+Maccavelli764: calls 4000
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: raises 16000 to 20000
+VAASCO: folds
+ProfessorBinkman: calls 16000
+Mishka36: folds
+Maccavelli764: calls 16000
+*** FLOP *** [5c 2h 6c]
+2sly4u2sly: bets 30000
+ProfessorBinkman: folds
+Maccavelli764: folds
+Uncalled bet (30000) returned to 2sly4u2sly
+2sly4u2sly collected 68700 from pot
+*** SUMMARY ***
+Total pot 68700 | Rake 0
+Board [5c 2h 6c]
+Seat 1: Mishka36 folded before Flop (didn't bet)
+Seat 2: Maccavelli764 folded on the Flop
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin (button) folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly (small blind) collected (68700)
+Seat 6: VAASCO (big blind) folded before Flop
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: ProfessorBinkman folded on the Flop
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600009074: Tournament #9735326, No Limit Hold'em - Level XII (1000/2000 ante 300) - 2026/07/15 20:59:32 ACST [2026/07/15 11:29:32 UTC]
+Table '9735326 4' 9-max Seat #5 is the button
+Seat 1: Mishka36 (258383 in chips)
+Seat 2: Maccavelli764 (79400 in chips)
+Seat 3: frankwalt (73626 in chips)
+Seat 4: Vinsin (66127 in chips)
+Seat 5: 2sly4u2sly (251073 in chips)
+Seat 6: VAASCO (92700 in chips)
+Seat 7: Djonatan22 (276515 in chips)
+Seat 8: ProfessorBinkman (184250 in chips)
+Seat 9: ozrona (23734 in chips)
+VAASCO: posts the ante 300
+Djonatan22: posts the ante 300
+ProfessorBinkman: posts the ante 300
+ozrona: posts the ante 300
+Mishka36: posts the ante 300
+Maccavelli764: posts the ante 300
+frankwalt: posts the ante 300
+Vinsin: posts the ante 300
+2sly4u2sly: posts the ante 300
+VAASCO: posts small blind 1000
+Djonatan22: posts big blind 2000
+*** HOLE CARDS ***
+Dealt to ozrona [3s Kc]
+ProfessorBinkman: folds
+ozrona: folds
+Mishka36: calls 2000
+Maccavelli764: folds
+frankwalt: raises 6000 to 8000
+Vinsin: folds
+2sly4u2sly: folds
+VAASCO: folds
+Djonatan22: calls 6000
+Mishka36: folds
+*** FLOP *** [Ah 9d Ad]
+Djonatan22: checks
+frankwalt: bets 16275
+Djonatan22: folds
+Uncalled bet (16275) returned to frankwalt
+frankwalt collected 21700 from pot
+*** SUMMARY ***
+Total pot 21700 | Rake 0
+Board [Ah 9d Ad]
+Seat 1: Mishka36 folded before Flop (didn't bet)
+Seat 2: Maccavelli764 folded before Flop (didn't bet)
+Seat 3: frankwalt collected (21700)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly (button) folded before Flop (didn't bet)
+Seat 6: VAASCO (small blind) folded before Flop
+Seat 7: Djonatan22 (big blind) folded on the Flop
+Seat 8: ProfessorBinkman folded before Flop (didn't bet)
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600009164: Tournament #9735326, No Limit Hold'em - Level XII (1000/2000 ante 300) - 2026/07/15 21:00:17 ACST [2026/07/15 11:30:17 UTC]
+Table '9735326 4' 9-max Seat #6 is the button
+Seat 1: Mishka36 (256083 in chips)
+Seat 2: Maccavelli764 (79100 in chips)
+Seat 3: frankwalt (87026 in chips)
+Seat 4: Vinsin (65827 in chips)
+Seat 5: 2sly4u2sly (250773 in chips)
+Seat 6: VAASCO (91400 in chips)
+Seat 7: Djonatan22 (268215 in chips)
+Seat 8: ProfessorBinkman (183950 in chips)
+Seat 9: ozrona (23434 in chips)
+Djonatan22: posts the ante 300
+ProfessorBinkman: posts the ante 300
+ozrona: posts the ante 300
+Mishka36: posts the ante 300
+Maccavelli764: posts the ante 300
+frankwalt: posts the ante 300
+Vinsin: posts the ante 300
+2sly4u2sly: posts the ante 300
+VAASCO: posts the ante 300
+Djonatan22: posts small blind 1000
+ProfessorBinkman: posts big blind 2000
+*** HOLE CARDS ***
+Dealt to ozrona [7d 4s]
+ozrona: folds
+Mishka36: folds
+Maccavelli764: calls 2000
+frankwalt: calls 2000
+Vinsin: folds
+2sly4u2sly: calls 2000
+VAASCO: folds
+Djonatan22: raises 7000 to 9000
+ProfessorBinkman: folds
+Maccavelli764: folds
+frankwalt: raises 76026 to 85026 and is all-in
+2sly4u2sly: folds
+Djonatan22: folds
+Uncalled bet (76026) returned to frankwalt
+frankwalt collected 26700 from pot
+*** SUMMARY ***
+Total pot 26700 | Rake 0
+Seat 1: Mishka36 folded before Flop (didn't bet)
+Seat 2: Maccavelli764 folded before Flop (didn't bet)
+Seat 3: frankwalt collected (26700)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: VAASCO (button) folded before Flop (didn't bet)
+Seat 7: Djonatan22 (small blind) folded before Flop
+Seat 8: ProfessorBinkman (big blind) folded before Flop
+Seat 9: ozrona folded before Flop (didn't bet)
+
+PokerStars Hand #260715044642973532600009264: Tournament #9735326, No Limit Hold'em - Level XII (1000/2000 ante 300) - 2026/07/15 21:01:19 ACST [2026/07/15 11:31:19 UTC]
+Table '9735326 4' 9-max Seat #7 is the button
+Seat 1: Mishka36 (255783 in chips)
+Seat 2: Maccavelli764 (76800 in chips)
+Seat 3: frankwalt (104426 in chips)
+Seat 4: Vinsin (65527 in chips)
+Seat 5: 2sly4u2sly (248473 in chips)
+Seat 6: VAASCO (91100 in chips)
+Seat 7: Djonatan22 (258915 in chips)
+Seat 8: ProfessorBinkman (181650 in chips)
+Seat 9: ozrona (23134 in chips)
+ProfessorBinkman: posts the ante 300
+ozrona: posts the ante 300
+Mishka36: posts the ante 300
+Maccavelli764: posts the ante 300
+frankwalt: posts the ante 300
+Vinsin: posts the ante 300
+2sly4u2sly: posts the ante 300
+VAASCO: posts the ante 300
+Djonatan22: posts the ante 300
+ProfessorBinkman: posts small blind 1000
+ozrona: posts big blind 2000
+*** HOLE CARDS ***
+Dealt to ozrona [4c 2c]
+Mishka36: folds
+Maccavelli764: folds
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: folds
+VAASCO: folds
+Djonatan22: raises 3000 to 5000
+ProfessorBinkman: calls 4000
+ozrona: calls 3000
+*** FLOP *** [Td Jc 2s]
+ProfessorBinkman: checks
+ozrona: checks
+Djonatan22: bets 13275
+ProfessorBinkman: folds
+ozrona: folds
+Uncalled bet (13275) returned to Djonatan22
+Djonatan22 collected 17700 from pot
+*** SUMMARY ***
+Total pot 17700 | Rake 0
+Board [Td Jc 2s]
+Seat 1: Mishka36 folded before Flop (didn't bet)
+Seat 2: Maccavelli764 folded before Flop (didn't bet)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: VAASCO folded before Flop (didn't bet)
+Seat 7: Djonatan22 (button) collected (17700)
+Seat 8: ProfessorBinkman (small blind) folded on the Flop
+Seat 9: ozrona (big blind) folded on the Flop
+
+PokerStars Hand #260715044642973532600009384: Tournament #9735326, No Limit Hold'em - Level XII (1000/2000 ante 300) - 2026/07/15 21:02:26 ACST [2026/07/15 11:32:26 UTC]
+Table '9735326 4' 9-max Seat #8 is the button
+Seat 1: Mishka36 (255483 in chips)
+Seat 2: Maccavelli764 (76500 in chips)
+Seat 3: frankwalt (104126 in chips)
+Seat 4: Vinsin (65227 in chips)
+Seat 5: 2sly4u2sly (248173 in chips)
+Seat 6: VAASCO (90800 in chips)
+Seat 7: Djonatan22 (271315 in chips)
+Seat 8: ProfessorBinkman (176350 in chips)
+Seat 9: ozrona (17834 in chips)
+ozrona: posts the ante 300
+Mishka36: posts the ante 300
+Maccavelli764: posts the ante 300
+frankwalt: posts the ante 300
+Vinsin: posts the ante 300
+2sly4u2sly: posts the ante 300
+VAASCO: posts the ante 300
+Djonatan22: posts the ante 300
+ProfessorBinkman: posts the ante 300
+ozrona: posts small blind 1000
+Mishka36: posts big blind 2000
+*** HOLE CARDS ***
+Dealt to ozrona [6s Kc]
+Maccavelli764: calls 2000
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: folds
+VAASCO: folds
+Djonatan22: folds
+ProfessorBinkman: raises 2000 to 4000
+ozrona: folds
+Mishka36: calls 2000
+Maccavelli764: calls 2000
+*** FLOP *** [Tc 3s 4s]
+Mishka36: checks
+Maccavelli764: checks
+ProfessorBinkman: checks
+*** TURN *** [Tc 3s 4s] [Qc]
+Mishka36: bets 5000
+Maccavelli764: calls 5000
+ProfessorBinkman: raises 7500 to 12500
+Mishka36: calls 7500
+Maccavelli764: calls 7500
+*** RIVER *** [Tc 3s 4s Qc] [7h]
+Mishka36: checks
+Maccavelli764: checks
+ProfessorBinkman: checks
+*** SHOW DOWN ***
+Mishka36: shows [Ts As]
+ProfessorBinkman: shows [Js Qh]
+ProfessorBinkman collected 53200 from pot
+*** SUMMARY ***
+Total pot 53200 | Rake 0
+Board [Tc 3s 4s Qc 7h]
+Seat 1: Mishka36 (big blind) showed [Ts As] and lost
+Seat 2: Maccavelli764 mucked
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: VAASCO folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: ProfessorBinkman (button) showed [Js Qh] and won (53200)
+Seat 9: ozrona (small blind) folded before Flop
+
+PokerStars Hand #260715044642973532600009544: Tournament #9735326, No Limit Hold'em - Level XII (1000/2000 ante 300) - 2026/07/15 21:03:50 ACST [2026/07/15 11:33:50 UTC]
+Table '9735326 4' 9-max Seat #9 is the button
+Seat 1: Mishka36 (238683 in chips)
+Seat 2: Maccavelli764 (59700 in chips)
+Seat 3: frankwalt (103826 in chips)
+Seat 4: Vinsin (64927 in chips)
+Seat 5: 2sly4u2sly (247873 in chips)
+Seat 6: VAASCO (90500 in chips)
+Seat 7: Djonatan22 (271015 in chips)
+Seat 8: ProfessorBinkman (212750 in chips)
+Seat 9: ozrona (16534 in chips)
+Mishka36: posts the ante 300
+Maccavelli764: posts the ante 300
+frankwalt: posts the ante 300
+Vinsin: posts the ante 300
+2sly4u2sly: posts the ante 300
+VAASCO: posts the ante 300
+Djonatan22: posts the ante 300
+ProfessorBinkman: posts the ante 300
+ozrona: posts the ante 300
+Mishka36: posts small blind 1000
+Maccavelli764: posts big blind 2000
+*** HOLE CARDS ***
+Dealt to ozrona [3c 6c]
+frankwalt: folds
+Vinsin: folds
+2sly4u2sly: folds
+VAASCO: folds
+Djonatan22: folds
+ProfessorBinkman: folds
+ozrona: raises 14234 to 16234 and is all-in
+Mishka36: folds
+Maccavelli764: calls 14234
+*** FLOP *** [2d 5h Ts]
+*** TURN *** [2d 5h Ts] [9c]
+*** RIVER *** [2d 5h Ts 9c] [7d]
+*** SHOW DOWN ***
+ozrona: shows [3c 6c]
+Maccavelli764: shows [Qd 9s]
+Maccavelli764 collected 36168 from pot
+*** SUMMARY ***
+Total pot 36168 | Rake 0
+Board [2d 5h Ts 9c 7d]
+Seat 1: Mishka36 (small blind) folded before Flop
+Seat 2: Maccavelli764 (big blind) showed [Qd 9s] and won (36168)
+Seat 3: frankwalt folded before Flop (didn't bet)
+Seat 4: Vinsin folded before Flop (didn't bet)
+Seat 5: 2sly4u2sly folded before Flop (didn't bet)
+Seat 6: VAASCO folded before Flop (didn't bet)
+Seat 7: Djonatan22 folded before Flop (didn't bet)
+Seat 8: ProfessorBinkman folded before Flop (didn't bet)
+Seat 9: ozrona (button) showed [3c 6c] and lost

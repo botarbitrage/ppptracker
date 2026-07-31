@@ -22,9 +22,15 @@
       font-weight:800; color:var(--green);
     }
     .vld-meta { color:var(--muted); font-size:.85rem; }
-    .vld-note {
+    .vld-badge {
+      font-family:var(--font-head); font-weight:700; font-size:.75rem;
+      border-radius:20px; padding:3px 12px; letter-spacing:.5px;
+    }
+    .vld-badge.pass { background:#00e67622; color:var(--green); border:1px solid #00e67655; }
+    .vld-badge.fail { background:#ff547022; color:#ff5470;      border:1px solid #ff547055; }
+    .vld-rejected {
       border:1px solid #b58a2e66; background:#b58a2e14; color:#e0b95c;
-      border-radius:8px; padding:10px 14px; font-size:.85rem;
+      border-radius:8px; padding:8px 14px; font-size:.8rem;
     }
     td.vld-ok   { color:var(--green); font-weight:700; }
     td.vld-bad  { color:#ff5470;      font-weight:700; }
@@ -43,62 +49,87 @@
     <div style="width:110px"></div>
   </div>
 
-  <div class="section-card mb-4">
-    <div class="section-card-header p-3 pb-0">
-      <h2 class="d-flex align-items-center gap-2">Engine vs PokerTracker 4 (ground truth)</h2>
-      <p class="vld-meta mb-2">
-        Our <code>leak_engine</code> parses the same hand-history text PT4 imported and must
-        reproduce PT4's report numbers cell-for-cell. Phase 0 gate: per-position hand counts.
-        Fixtures live in <code>data/validation/</code>.
-      </p>
-      <div id="vld-meta" class="vld-meta mb-2"></div>
-      <div id="vld-note" class="vld-note mb-3 d-none"></div>
-      <div id="vld-error" class="alert alert-danger py-2 d-none"></div>
-    </div>
-    <div class="table-responsive">
-      <table class="table table-dark table-striped table-hover mb-0">
-        <thead>
-          <tr>
-            <th>Stat</th><th>Position</th>
-            <th class="text-end">Ours</th><th class="text-end">PT4</th>
-            <th class="text-end">Ours %</th><th class="text-end">PT4 %</th>
-            <th class="text-center">Match</th>
-          </tr>
-        </thead>
-        <tbody id="vld-tbody"></tbody>
-      </table>
-    </div>
-  </div>
+  <p class="vld-meta">
+    Our <code>leak_engine</code> parses the same hand-history text PT4 imported and must
+    reproduce PT4's report numbers cell-for-cell. Each suite below pairs tournament export(s)
+    with the PT4 report CSV generated from them. Hands failing pot/stack arithmetic are
+    excluded, mirroring PT4's silent import drops. Fixtures: <code>data/validation/</code>.
+  </p>
+
+  <div id="vld-error" class="alert alert-danger py-2 d-none"></div>
+  <div id="vld-suites"></div>
+  <div id="vld-corpus"></div>
 
 </main>
 <script>
 (async () => {
-  const tbody = document.getElementById('vld-tbody');
-  const meta  = document.getElementById('vld-meta');
-  const note  = document.getElementById('vld-note');
-  const errEl = document.getElementById('vld-error');
+  const suitesEl = document.getElementById('vld-suites');
+  const corpusEl = document.getElementById('vld-corpus');
+  const errEl    = document.getElementById('vld-error');
   try {
     const res  = await fetch('/api/leaks/validate');
     const data = await res.json();
     if (data.error) throw new Error(data.error);
 
-    meta.textContent = `txt: ${data.txt_files.join(', ')} · csv: ${data.csv_file}` +
-      ` · hero: ${data.hero} · hands parsed: ${data.hands_parsed}` +
-      ` · unmapped positions: ${data.unmapped}`;
-    if (data.coverage_note) {
-      note.textContent = data.coverage_note;
-      note.classList.remove('d-none');
-    }
-    tbody.innerHTML = data.cells.map(c => `
-      <tr${c.position === 'total' ? ' style="border-top:2px solid var(--green)"' : ''}>
-        <td>${c.stat}</td>
-        <td>${c.position.toUpperCase()}</td>
-        <td class="text-end">${c.ours ?? '—'}</td>
-        <td class="text-end">${c.pt4 ?? '—'}</td>
-        <td class="text-end vld-share">${c.ours_share != null ? c.ours_share + '%' : ''}</td>
-        <td class="text-end vld-share">${c.pt4_share != null ? c.pt4_share + '%' : ''}</td>
-        <td class="text-center ${c.match ? 'vld-ok' : 'vld-bad'}">${c.match ? '✓' : '✗'}</td>
-      </tr>`).join('');
+    suitesEl.innerHTML = data.suites.map(s => `
+      <div class="section-card mb-4">
+        <div class="section-card-header p-3 pb-2">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <h2 class="mb-0">Suite: ${s.name}</h2>
+            <span class="vld-badge ${s.all_match ? 'pass' : 'fail'}">
+              ${s.all_match ? 'ALL MATCH' : 'MISMATCH'}</span>
+          </div>
+          <div class="vld-meta mt-1">
+            txt: ${s.txt_files.join(', ')} · csv: ${s.csv_file} · hero: ${s.hero}
+            · parsed: ${s.hands_parsed} · unmapped: ${s.unmapped}
+          </div>
+          ${s.hands_rejected.length ? `
+            <div class="vld-rejected mt-2">
+              ${s.hands_rejected.length} hand(s) excluded (PT4 rejects these at import):
+              ${s.hands_rejected.map(r => `<div>#${r.hand_id} — ${r.problems.join('; ')}</div>`).join('')}
+            </div>` : ''}
+        </div>
+        <div class="table-responsive">
+          <table class="table table-dark table-striped table-hover mb-0">
+            <thead><tr>
+              <th>Stat</th><th>Position</th>
+              <th class="text-end">Ours</th><th class="text-end">PT4</th>
+              <th class="text-end">Ours %</th><th class="text-end">PT4 %</th>
+              <th class="text-center">Match</th>
+            </tr></thead>
+            <tbody>
+              ${s.cells.map(c => `
+                <tr${c.position === 'total' ? ' style="border-top:2px solid var(--green)"' : ''}>
+                  <td>${c.stat}</td>
+                  <td>${c.position.toUpperCase()}</td>
+                  <td class="text-end">${c.ours ?? '—'}</td>
+                  <td class="text-end">${c.pt4 ?? '—'}</td>
+                  <td class="text-end vld-share">${c.ours_share != null ? c.ours_share + '%' : ''}</td>
+                  <td class="text-end vld-share">${c.pt4_share != null ? c.pt4_share + '%' : ''}</td>
+                  <td class="text-center ${c.match ? 'vld-ok' : 'vld-bad'}">${c.match ? '✓' : '✗'}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`).join('');
+
+    corpusEl.innerHTML = data.corpus.map(c => `
+      <div class="section-card mb-4">
+        <div class="section-card-header p-3 pb-2">
+          <h2 class="mb-0">Corpus: ${c.name} <span class="vld-meta">(parse robustness — no ground truth)</span></h2>
+          <div class="vld-meta mt-1">
+            txt: ${c.txt_files.join(', ')} · parsed: ${c.hands_parsed}
+            · unmapped: ${c.unmapped}
+            · positions: ${Object.entries(c.positions).map(([k,v]) => `${k} ${v}`).join(' · ')}
+          </div>
+          ${c.hands_rejected.length ? `
+            <div class="vld-rejected mt-2 mb-2">
+              ${c.hands_rejected.length} hand(s) with pot/stack inconsistencies (old exporter output —
+              PT4 likely dropped these too):
+              ${c.hands_rejected.map(r => `<div>#${r.hand_id} — ${r.problems.join('; ')}</div>`).join('')}
+            </div>` : ''}
+        </div>
+      </div>`).join('');
   } catch (e) {
     errEl.textContent = 'Validation failed: ' + e.message;
     errEl.classList.remove('d-none');

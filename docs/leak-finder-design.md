@@ -1,7 +1,8 @@
 # Leak Finder — Design & Delivery Plan
 
-_Status: Phase 0 implemented (validation harness live at `/leaks/validate`); full gate
-pending the second DEEPFREEZE fixture (see §5)._
+_Status: **Phase 0 complete — gate PASSED** (per-position hand counts cell-exact vs the PT4
+per-tournament CSV; validation harness live at `/leaks/validate`). Next: Phase 1 (preflop
+stats)._
 _Owner: Caio · Consulting engineer: Claude_
 
 ## 1. Goal
@@ -150,12 +151,25 @@ First gate is the cheapest and highest-signal: **per-position `Hands` counts mus
 (DeepFreeze: SB 34 / BB 30 / EP 58 / MP 70 / CO 32 / BTN 33 / total 257). If the position buckets
 match, the mapper is right; then we layer stats on top.
 
-**Phase-0 finding:** the DeepFreeze CSV was built from **257** hands but the provided txt covers
-**128** (one of two DEEPFREEZE tournament exports) — so exact matching is blocked on data, not
-code. The harness handles N fixture txts and reports a coverage note plus share-of-total
-comparison meanwhile. To complete the gate, either (a) export the second DEEPFREEZE tournament
-from the app into `data/validation/`, or (b) re-export the PT4 CSV filtered to tournament
-#10002806 only.
+**Phase-0 outcome — gate PASSED** against a per-tournament ground-truth pair
+(`data/validation/10002806/`): BTN 14 · CO 14 · MP 38 · EP 31 · BB 15 · SB 15 · total 127, all
+cell-exact. Three findings along the way:
+
+1. **PT4's EP/MP bucketing is table-size dependent** — EP = the two earliest non-blind seats
+   (positions ≥ N−4), not a fixed {5,6,7}. See Appendix B.
+2. **PT4 silently drops hands that fail pot arithmetic.** The fixture txt has 128 hands; PT4
+   imported 127. The harness mirrors this: `validate_pot()` re-derives each pot from the actions
+   and excludes failing hands from suite aggregation (they're listed in the output).
+3. **Real exporter bug found & fixed** (`hand_exporter.py`): a capped all-in call was recorded
+   as matching the full bet, so the balanced-pot heuristic suppressed the "Uncalled bet
+   returned" line → unbalanced hand → PT4 rejected it. The corpus tournaments show 7 more such
+   hands from old exports. Fixed for future exports; historical fixtures keep the old text
+   (that's what PT4 actually saw).
+
+Fixture layout: `data/validation/<suite>/` (txt + the PT4 CSV generated from exactly those
+txts), `corpus/` (txt-only parse-robustness set), `reference/` (unpaired CSVs). Adding more
+per-tournament pairs (e.g. a final-table one to pin short-handed bucketing) = drop two files in
+a new folder.
 
 ## 6. All-in adjusted BB/100 (the headline "Winrate")
 
@@ -298,10 +312,13 @@ rec-actions match the fold-frequency interpretation).
 
 ## Appendix B — PT4 position scheme
 
-`lookup_positions` collapses seats into six buckets: **SB, BB, EP, MP, CO, BTN**. Numeric hints
-from the `.pt4rpt`: `position = 8` is BB, `position = 9` is SB (from the BB-v-SB steal formula,
-`val_p_raise_aggressor_pos = 9`). EP/MP/CO bucketing is table-size dependent and must replicate
-PT4's mapping; the Phase-0 gate (per-position Hands counts vs the CSV) confirms it.
+`lookup_positions` collapses seats into six buckets: **SB, BB, EP, MP, CO, BTN**. Numeric
+scheme (validated cell-exact in Phase 0): position 0 = BTN counting away from the button
+through non-blind seats (CO = 1, …), BB = 8, SB = 9. Bucketing is **table-size dependent**:
+EP = the two earliest-to-act non-blind seats (positions ≥ N−4 for N active players), MP =
+everything between EP and the CO. So: 9-handed EP {5,6}, 8-handed EP {4,5}, 7-handed EP {3,4}.
+Confirmed for 7–9 players against the #10002806 per-tournament CSV; ≤6-player behaviour is
+guarded (EP requires position ≥ 2) but awaits a final-table ground-truth pair.
 
 ## Appendix C — Open items before/at build
 
@@ -312,5 +329,7 @@ PT4's mapping; the Phase-0 gate (per-position Hands counts vs the CSV) confirms 
 - [ ] Back-fill targets for the ~12 zero-sample cells of the 175 grid if/when they appear in a future BBZ report (nice-to-have; many can be deduced from neighbouring positions' bands).
 - [x] Canonical action model documented — `docs/pppoker-action-model.md` (exporter semantics adopted; `hand_parser` 12/13 flagged as probable bug).
 - [ ] Empirically confirm 12/13 via `python leak_validation.py --audit-actions <records.json>` on a raw JSON export (§8, action-model doc).
-- [ ] Complete the Phase-0 gate: add the second DEEPFREEZE txt to `data/validation/` (or a PT4 CSV filtered to tournament #10002806).
+- [x] Phase-0 gate — **PASSED** with the #10002806 per-tournament pair (127/127, all positions cell-exact).
+- [ ] Optional: add a final-table suite (short-handed hands + PT4 CSV) to pin ≤6-player EP/MP bucketing.
+- [ ] After deploying the exporter fix: regenerate one tournament export, re-import to PT4, confirm the previously-rejected hand now imports.
 - [ ] Pick equity library (`eval7` vs `treys` vs `pokerkit`) — Phase 3.

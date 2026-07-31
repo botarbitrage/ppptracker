@@ -1,0 +1,3167 @@
+PokerStars Hand #260719042917988977200002635: Tournament #9889772, No Limit Hold'em - Level VI (250/500 ante 75) - 2026/07/19 19:39:27 ACST [2026/07/19 10:09:27 UTC]
+Table '9889772 5' 9-max Seat #6 is the button
+Seat 1: limpopou (101586 in chips)
+Seat 2: antynelly (132050 in chips)
+Seat 3: Lefinho 😜 (100665 in chips)
+Seat 4: Alexssrl (253943 in chips)
+Seat 5: ozrona (100000 in chips)
+Seat 6: RhysyG (99700 in chips)
+Seat 7: T3ddy_Or3o (87798 in chips)
+Seat 8: MARMALADZE (75517 in chips)
+Seat 9: CoolerforAll (111427 in chips)
+T3ddy_Or3o: posts the ante 75
+MARMALADZE: posts the ante 75
+CoolerforAll: posts the ante 75
+limpopou: posts the ante 75
+antynelly: posts the ante 75
+Lefinho 😜: posts the ante 75
+Alexssrl: posts the ante 75
+ozrona: posts the ante 75
+RhysyG: posts the ante 75
+T3ddy_Or3o: posts small blind 250
+MARMALADZE: posts big blind 500
+*** HOLE CARDS ***
+Dealt to ozrona [2s 4h]
+CoolerforAll: folds
+limpopou: folds
+antynelly: folds
+Lefinho 😜: raises 1000 to 1500
+Alexssrl: folds
+ozrona: folds
+RhysyG: folds
+T3ddy_Or3o: calls 1250
+MARMALADZE: folds
+*** FLOP *** [Tc 4c 7c]
+T3ddy_Or3o: checks
+Lefinho 😜: bets 1044
+T3ddy_Or3o: folds
+Uncalled bet (1044) returned to Lefinho 😜
+Lefinho 😜 collected 4175 from pot
+*** SUMMARY ***
+Total pot 4175 | Rake 0
+Board [Tc 4c 7c]
+Seat 1: limpopou folded before Flop (didn't bet)
+Seat 2: antynelly folded before Flop (didn't bet)
+Seat 3: Lefinho 😜 collected (4175)
+Seat 4: Alexssrl folded before Flop (didn't bet)
+Seat 5: ozrona folded before Flop (didn't bet)
+Seat 6: RhysyG (button) folded before Flop (didn't bet)
+Seat 7: T3ddy_Or3o (small blind) folded on the Flop
+Seat 8: MARMALADZE (big blind) folded before Flop
+Seat 9: CoolerforAll folded before Flop (didn't bet)
+
+PokerStars Hand #260719042917988977200002695: Tournament #9889772, No Limit Hold'em - Level VI (250/500 ante 75) - 2026/07/19 19:40:14 ACST [2026/07/19 10:10:14 UTC]
+Table '9889772 5' 9-max Seat #7 is the button
+Seat 1: limpopou (101511 in chips)
+Seat 2: antynelly (131975 in chips)
+Seat 3: Lefinho 😜 (103265 in chips)
+Seat 4: Alexssrl (253868 in chips)
+Seat 5: ozrona (99925 in chips)
+Seat 6: RhysyG (99625 in chips)
+Seat 7: T3ddy_Or3o (86223 in chips)
+Seat 8: MARMALADZE (74942 in chips)
+Seat 9: CoolerforAll (111352 in chips)
+MARMALADZE: posts the ante 75
+CoolerforAll: posts the ante 75
+limpopou: posts the ante 75
+antynelly: posts the ante 75
+Lefinho 😜: posts the ante 75
+Alexssrl: posts the ante 75
+ozrona: posts the ante 75
+RhysyG: posts the ante 75
+T3ddy_Or3o: posts the ante 75
+MARMALADZE: posts small blind 250
+CoolerforAll: posts big blind 500
+*** HOLE CARDS ***
+Dealt to ozrona [9d 2d]
+limpopou: folds
+antynelly: raises 1000 to 1500
+Lefinho 😜: calls 1500
+Alexssrl: folds
+ozrona: folds
+RhysyG: calls 1500
+T3ddy_Or3o: calls 1500
+MARMALADZE: folds
+CoolerforAll: folds
+*** FLOP *** [Qs Js Ts]
+antynelly: bets 3712
+Lefinho 😜: folds
+RhysyG: raises 7424 to 11136
+T3ddy_Or3o: calls 11136
+antynelly: calls 7424
+*** TURN *** [Qs Js Ts] [5d]
+antynelly: checks
+RhysyG: bets 24472
+T3ddy_Or3o: folds
+antynelly: calls 24472
+*** RIVER *** [Qs Js Ts 5d] [5h]
+antynelly: checks
+RhysyG: bets 62442 and is all-in
+antynelly: calls 62442
+*** SHOW DOWN ***
+antynelly: shows [As Kc]
+RhysyG: shows [Jc Ks]
+antynelly collected 214661 from pot
+*** SUMMARY ***
+Total pot 214661 | Rake 0
+Board [Qs Js Ts 5d 5h]
+Seat 1: limpopou folded before Flop (didn't bet)
+Seat 2: antynelly showed [As Kc] and won (214661)
+Seat 3: Lefinho 😜 folded on the Flop
+Seat 4: Alexssrl folded before Flop (didn't bet)
+Seat 5: ozrona folded before Flop (didn't bet)
+Seat 6: RhysyG showed [Jc Ks] and lost
+Seat 7: T3ddy_Or3o (button) folded on the Turn
+Seat 8: MARMALADZE (small blind) folded before Flop
+Seat 9: CoolerforAll (big blind) folded before Flop
+
+PokerStars Hand #260719042917988977200002755: Tournament #9889772, No Limit Hold'em - Level VI (250/500 ante 75) - 2026/07/19 19:41:33 ACST [2026/07/19 10:11:33 UTC]
+Table '9889772 5' 9-max Seat #8 is the button
+Seat 1: limpopou (101436 in chips)
+Seat 2: antynelly (247011 in chips)
+Seat 3: Lefinho 😜 (101690 in chips)
+Seat 4: Alexssrl (253793 in chips)
+Seat 5: ozrona (99850 in chips)
+Seat 7: T3ddy_Or3o (73512 in chips)
+Seat 8: MARMALADZE (74617 in chips)
+Seat 9: CoolerforAll (110777 in chips)
+CoolerforAll: posts the ante 75
+limpopou: posts the ante 75
+antynelly: posts the ante 75
+Lefinho 😜: posts the ante 75
+Alexssrl: posts the ante 75
+ozrona: posts the ante 75
+T3ddy_Or3o: posts the ante 75
+MARMALADZE: posts the ante 75
+CoolerforAll: posts small blind 250
+limpopou: posts big blind 500
+*** HOLE CARDS ***
+Dealt to ozrona [Ts 5d]
+antynelly: folds
+Lefinho 😜: folds
+Alexssrl: folds
+ozrona: folds
+T3ddy_Or3o: raises 1500 to 2000
+MARMALADZE: folds
+CoolerforAll: folds
+limpopou: calls 1500
+*** FLOP *** [9h 4d Kc]
+limpopou: checks
+T3ddy_Or3o: checks
+*** TURN *** [9h 4d Kc] [3h]
+limpopou: checks
+T3ddy_Or3o: checks
+*** RIVER *** [9h 4d Kc 3h] [9d]
+limpopou: checks
+T3ddy_Or3o: checks
+*** SHOW DOWN ***
+limpopou: shows [Jc Ac]
+T3ddy_Or3o: shows [3s As]
+T3ddy_Or3o collected 4850 from pot
+*** SUMMARY ***
+Total pot 4850 | Rake 0
+Board [9h 4d Kc 3h 9d]
+Seat 1: limpopou (big blind) showed [Jc Ac] and lost
+Seat 2: antynelly folded before Flop (didn't bet)
+Seat 3: Lefinho 😜 folded before Flop (didn't bet)
+Seat 4: Alexssrl folded before Flop (didn't bet)
+Seat 5: ozrona folded before Flop (didn't bet)
+Seat 7: T3ddy_Or3o showed [3s As] and won (4850)
+Seat 8: MARMALADZE (button) folded before Flop (didn't bet)
+Seat 9: CoolerforAll (small blind) folded before Flop
+
+PokerStars Hand #260719042917988977200002785: Tournament #9889772, No Limit Hold'em - Level VI (250/500 ante 75) - 2026/07/19 19:42:07 ACST [2026/07/19 10:12:07 UTC]
+Table '9889772 5' 9-max Seat #9 is the button
+Seat 1: limpopou (99361 in chips)
+Seat 2: antynelly (246936 in chips)
+Seat 3: Lefinho 😜 (101615 in chips)
+Seat 4: Alexssrl (253718 in chips)
+Seat 5: ozrona (99775 in chips)
+Seat 7: T3ddy_Or3o (76287 in chips)
+Seat 8: MARMALADZE (74542 in chips)
+Seat 9: CoolerforAll (110452 in chips)
+limpopou: posts the ante 75
+antynelly: posts the ante 75
+Lefinho 😜: posts the ante 75
+Alexssrl: posts the ante 75
+ozrona: posts the ante 75
+T3ddy_Or3o: posts the ante 75
+MARMALADZE: posts the ante 75
+CoolerforAll: posts the ante 75
+limpopou: posts small blind 250
+antynelly: posts big blind 500
+*** HOLE CARDS ***
+Dealt to ozrona [2c 9s]
+Lefinho 😜: folds
+Alexssrl: folds
+ozrona: folds
+T3ddy_Or3o: folds
+MARMALADZE: folds
+CoolerforAll: raises 500 to 1000
+limpopou: folds
+antynelly: calls 500
+*** FLOP *** [Js 7c Tc]
+antynelly: checks
+CoolerforAll: bets 950
+antynelly: calls 950
+*** TURN *** [Js 7c Tc] [Td]
+antynelly: checks
+CoolerforAll: bets 2375
+antynelly: folds
+Uncalled bet (2375) returned to CoolerforAll
+CoolerforAll collected 4750 from pot
+*** SUMMARY ***
+Total pot 4750 | Rake 0
+Board [Js 7c Tc Td]
+Seat 1: limpopou (small blind) folded before Flop
+Seat 2: antynelly (big blind) folded on the Turn
+Seat 3: Lefinho 😜 folded before Flop (didn't bet)
+Seat 4: Alexssrl folded before Flop (didn't bet)
+Seat 5: ozrona folded before Flop (didn't bet)
+Seat 7: T3ddy_Or3o folded before Flop (didn't bet)
+Seat 8: MARMALADZE folded before Flop (didn't bet)
+Seat 9: CoolerforAll (button) collected (4750)
+
+PokerStars Hand #260719042917988977200002845: Tournament #9889772, No Limit Hold'em - Level VI (250/500 ante 75) - 2026/07/19 19:43:02 ACST [2026/07/19 10:13:02 UTC]
+Table '9889772 5' 9-max Seat #1 is the button
+Seat 1: limpopou (99036 in chips)
+Seat 2: antynelly (244911 in chips)
+Seat 3: Lefinho 😜 (101540 in chips)
+Seat 4: Alexssrl (253643 in chips)
+Seat 5: ozrona (99700 in chips)
+Seat 6: pineapple wong (100000 in chips)
+Seat 7: T3ddy_Or3o (76212 in chips)
+Seat 8: MARMALADZE (74467 in chips)
+Seat 9: CoolerforAll (113177 in chips)
+antynelly: posts the ante 75
+Lefinho 😜: posts the ante 75
+Alexssrl: posts the ante 75
+ozrona: posts the ante 75
+pineapple wong: posts the ante 75
+T3ddy_Or3o: posts the ante 75
+MARMALADZE: posts the ante 75
+CoolerforAll: posts the ante 75
+limpopou: posts the ante 75
+antynelly: posts small blind 250
+Lefinho 😜: posts big blind 500
+*** HOLE CARDS ***
+Dealt to ozrona [Qc Tc]
+Alexssrl: folds
+ozrona: calls 500
+pineapple wong: folds
+T3ddy_Or3o: folds
+MARMALADZE: raises 1250 to 1750
+CoolerforAll: calls 1750
+limpopou: folds
+antynelly: calls 1500
+Lefinho 😜: folds
+ozrona: calls 1250
+*** FLOP *** [Ks Th Jh]
+antynelly: checks
+ozrona: checks
+MARMALADZE: checks
+CoolerforAll: checks
+*** TURN *** [Ks Th Jh] [3d]
+antynelly: checks
+ozrona: bets 5450
+MARMALADZE: folds
+CoolerforAll: folds
+antynelly: calls 5450
+*** RIVER *** [Ks Th Jh 3d] [6s]
+antynelly: checks
+ozrona: checks
+*** SHOW DOWN ***
+ozrona: shows [Qc Tc]
+antynelly: shows [3h Ah]
+ozrona collected 19075 from pot
+*** SUMMARY ***
+Total pot 19075 | Rake 0
+Board [Ks Th Jh 3d 6s]
+Seat 1: limpopou (button) folded before Flop (didn't bet)
+Seat 2: antynelly (small blind) showed [3h Ah] and lost
+Seat 3: Lefinho 😜 (big blind) folded before Flop
+Seat 4: Alexssrl folded before Flop (didn't bet)
+Seat 5: ozrona showed [Qc Tc] and won (19075)
+Seat 6: pineapple wong folded before Flop (didn't bet)
+Seat 7: T3ddy_Or3o folded before Flop (didn't bet)
+Seat 8: MARMALADZE folded on the Turn
+Seat 9: CoolerforAll folded on the Turn
+
+PokerStars Hand #260719042917988977200002945: Tournament #9889772, No Limit Hold'em - Level VI (250/500 ante 75) - 2026/07/19 19:44:53 ACST [2026/07/19 10:14:53 UTC]
+Table '9889772 5' 9-max Seat #2 is the button
+Seat 1: limpopou (98961 in chips)
+Seat 2: antynelly (237636 in chips)
+Seat 3: Lefinho 😜 (100965 in chips)
+Seat 4: Alexssrl (253568 in chips)
+Seat 5: ozrona (111500 in chips)
+Seat 6: pineapple wong (99925 in chips)
+Seat 7: T3ddy_Or3o (76137 in chips)
+Seat 8: MARMALADZE (72642 in chips)
+Seat 9: CoolerforAll (111352 in chips)
+Lefinho 😜: posts the ante 75
+Alexssrl: posts the ante 75
+ozrona: posts the ante 75
+pineapple wong: posts the ante 75
+T3ddy_Or3o: posts the ante 75
+MARMALADZE: posts the ante 75
+CoolerforAll: posts the ante 75
+limpopou: posts the ante 75
+antynelly: posts the ante 75
+Lefinho 😜: posts small blind 250
+Alexssrl: posts big blind 500
+*** HOLE CARDS ***
+Dealt to ozrona [6c 3s]
+ozrona: folds
+pineapple wong: raises 1000 to 1500
+T3ddy_Or3o: folds
+MARMALADZE: folds
+CoolerforAll: folds
+limpopou: folds
+antynelly: folds
+Lefinho 😜: folds
+Alexssrl: folds
+Uncalled bet (1000) returned to pineapple wong
+pineapple wong collected 1925 from pot
+*** SUMMARY ***
+Total pot 1925 | Rake 0
+Seat 1: limpopou folded before Flop (didn't bet)
+Seat 2: antynelly (button) folded before Flop (didn't bet)
+Seat 3: Lefinho 😜 (small blind) folded before Flop
+Seat 4: Alexssrl (big blind) folded before Flop
+Seat 5: ozrona folded before Flop (didn't bet)
+Seat 6: pineapple wong collected (1925)
+Seat 7: T3ddy_Or3o folded before Flop (didn't bet)
+Seat 8: MARMALADZE folded before Flop (didn't bet)
+Seat 9: CoolerforAll folded before Flop (didn't bet)
+
+PokerStars Hand #260719042917988977200002965: Tournament #9889772, No Limit Hold'em - Level VI (250/500 ante 75) - 2026/07/19 19:45:09 ACST [2026/07/19 10:15:09 UTC]
+Table '9889772 5' 9-max Seat #3 is the button
+Seat 1: limpopou (98886 in chips)
+Seat 2: antynelly (237561 in chips)
+Seat 3: Lefinho 😜 (100640 in chips)
+Seat 4: Alexssrl (252993 in chips)
+Seat 5: ozrona (111425 in chips)
+Seat 6: pineapple wong (101275 in chips)
+Seat 7: T3ddy_Or3o (76062 in chips)
+Seat 8: MARMALADZE (72567 in chips)
+Seat 9: CoolerforAll (111277 in chips)
+Alexssrl: posts the ante 75
+ozrona: posts the ante 75
+pineapple wong: posts the ante 75
+T3ddy_Or3o: posts the ante 75
+MARMALADZE: posts the ante 75
+CoolerforAll: posts the ante 75
+limpopou: posts the ante 75
+antynelly: posts the ante 75
+Lefinho 😜: posts the ante 75
+Alexssrl: posts small blind 250
+ozrona: posts big blind 500
+*** HOLE CARDS ***
+Dealt to ozrona [2s 7s]
+pineapple wong: folds
+T3ddy_Or3o: folds
+MARMALADZE: folds
+CoolerforAll: folds
+limpopou: folds
+antynelly: calls 500
+Lefinho 😜: raises 1500 to 2000
+Alexssrl: folds
+ozrona: folds
+antynelly: calls 1500
+*** FLOP *** [Js 5h Ks]
+antynelly: checks
+Lefinho 😜: bets 5425
+antynelly: folds
+Uncalled bet (5425) returned to Lefinho 😜
+Lefinho 😜 collected 5425 from pot
+*** SUMMARY ***
+Total pot 5425 | Rake 0
+Board [Js 5h Ks]
+Seat 1: limpopou folded before Flop (didn't bet)
+Seat 2: antynelly folded on the Flop
+Seat 3: Lefinho 😜 (button) collected (5425)
+Seat 4: Alexssrl (small blind) folded before Flop
+Seat 5: ozrona (big blind) folded before Flop
+Seat 6: pineapple wong folded before Flop (didn't bet)
+Seat 7: T3ddy_Or3o folded before Flop (didn't bet)
+Seat 8: MARMALADZE folded before Flop (didn't bet)
+Seat 9: CoolerforAll folded before Flop (didn't bet)
+
+PokerStars Hand #260719042917988977200003005: Tournament #9889772, No Limit Hold'em - Level VI (250/500 ante 75) - 2026/07/19 19:45:51 ACST [2026/07/19 10:15:51 UTC]
+Table '9889772 5' 9-max Seat #4 is the button
+Seat 1: limpopou (98811 in chips)
+Seat 2: antynelly (235486 in chips)
+Seat 3: Lefinho 😜 (103990 in chips)
+Seat 4: Alexssrl (252668 in chips)
+Seat 5: ozrona (110850 in chips)
+Seat 6: pineapple wong (101200 in chips)
+Seat 7: T3ddy_Or3o (75987 in chips)
+Seat 8: MARMALADZE (72492 in chips)
+Seat 9: CoolerforAll (111202 in chips)
+ozrona: posts the ante 75
+pineapple wong: posts the ante 75
+T3ddy_Or3o: posts the ante 75
+MARMALADZE: posts the ante 75
+CoolerforAll: posts the ante 75
+limpopou: posts the ante 75
+antynelly: posts the ante 75
+Lefinho 😜: posts the ante 75
+Alexssrl: posts the ante 75
+ozrona: posts small blind 250
+pineapple wong: posts big blind 500
+*** HOLE CARDS ***
+Dealt to ozrona [7s Kc]
+T3ddy_Or3o: folds
+MARMALADZE: folds
+CoolerforAll: folds
+limpopou: folds
+antynelly: folds
+Lefinho 😜: folds
+Alexssrl: raises 1000 to 1500
+ozrona: calls 1250
+pineapple wong: folds
+*** FLOP *** [9s 9c 4h]
+ozrona: checks
+Alexssrl: bets 4175
+ozrona: folds
+Uncalled bet (4175) returned to Alexssrl
+Alexssrl collected 4175 from pot
+*** SUMMARY ***
+Total pot 4175 | Rake 0
+Board [9s 9c 4h]
+Seat 1: limpopou folded before Flop (didn't bet)
+Seat 2: antynelly folded before Flop (didn't bet)
+Seat 3: Lefinho 😜 folded before Flop (didn't bet)
+Seat 4: Alexssrl (button) collected (4175)
+Seat 5: ozrona (small blind) folded on the Flop
+Seat 6: pineapple wong (big blind) folded before Flop
+Seat 7: T3ddy_Or3o folded before Flop (didn't bet)
+Seat 8: MARMALADZE folded before Flop (didn't bet)
+Seat 9: CoolerforAll folded before Flop (didn't bet)
+
+PokerStars Hand #260719042917988977200003065: Tournament #9889772, No Limit Hold'em - Level VI (250/500 ante 75) - 2026/07/19 19:46:59 ACST [2026/07/19 10:16:59 UTC]
+Table '9889772 5' 9-max Seat #5 is the button
+Seat 1: limpopou (98736 in chips)
+Seat 2: antynelly (235411 in chips)
+Seat 3: Lefinho 😜 (103915 in chips)
+Seat 4: Alexssrl (255268 in chips)
+Seat 5: ozrona (109275 in chips)
+Seat 6: pineapple wong (100625 in chips)
+Seat 7: T3ddy_Or3o (75912 in chips)
+Seat 8: MARMALADZE (72417 in chips)
+Seat 9: CoolerforAll (111127 in chips)
+pineapple wong: posts the ante 75
+T3ddy_Or3o: posts the ante 75
+MARMALADZE: posts the ante 75
+CoolerforAll: posts the ante 75
+limpopou: posts the ante 75
+antynelly: posts the ante 75
+Lefinho 😜: posts the ante 75
+Alexssrl: posts the ante 75
+ozrona: posts the ante 75
+pineapple wong: posts small blind 250
+T3ddy_Or3o: posts big blind 500
+*** HOLE CARDS ***
+Dealt to ozrona [Ah 3c]
+MARMALADZE: folds
+CoolerforAll: folds
+limpopou: folds
+antynelly: calls 500
+Lefinho 😜: raises 1500 to 2000
+Alexssrl: folds
+ozrona: calls 2000
+pineapple wong: calls 1750
+T3ddy_Or3o: calls 1500
+antynelly: calls 1500
+*** FLOP *** [Js 8d 3h]
+pineapple wong: checks
+T3ddy_Or3o: checks
+antynelly: checks
+Lefinho 😜: bets 5338
+ozrona: calls 5338
+pineapple wong: folds
+T3ddy_Or3o: folds
+antynelly: folds
+*** TURN *** [Js 8d 3h] [6c]
+Lefinho 😜: checks
+ozrona: checks
+*** RIVER *** [Js 8d 3h 6c] [2d]
+Lefinho 😜: checks
+ozrona: bets 13484
+Lefinho 😜: calls 13484
+*** SHOW DOWN ***
+ozrona: shows [Ah 3c]
+Lefinho 😜: shows [Td Jd]
+Lefinho 😜 collected 48319 from pot
+*** SUMMARY ***
+Total pot 48319 | Rake 0
+Board [Js 8d 3h 6c 2d]
+Seat 1: limpopou folded before Flop (didn't bet)
+Seat 2: antynelly folded on the Flop
+Seat 3: Lefinho 😜 showed [Td Jd] and won (48319)
+Seat 4: Alexssrl folded before Flop (didn't bet)
+Seat 5: ozrona (button) showed [Ah 3c] and lost
+Seat 6: pineapple wong (small blind) folded on the Flop
+Seat 7: T3ddy_Or3o (big blind) folded on the Flop
+Seat 8: MARMALADZE folded before Flop (didn't bet)
+Seat 9: CoolerforAll folded before Flop (didn't bet)
+
+PokerStars Hand #260719042917988977200003165: Tournament #9889772, No Limit Hold'em - Level VII (300/600 ante 75) - 2026/07/19 19:49:02 ACST [2026/07/19 10:19:02 UTC]
+Table '9889772 5' 9-max Seat #6 is the button
+Seat 1: limpopou (98661 in chips)
+Seat 2: antynelly (233336 in chips)
+Seat 3: Lefinho 😜 (131337 in chips)
+Seat 4: Alexssrl (255193 in chips)
+Seat 5: ozrona (88378 in chips)
+Seat 6: pineapple wong (98550 in chips)
+Seat 7: T3ddy_Or3o (73837 in chips)
+Seat 8: MARMALADZE (72342 in chips)
+Seat 9: CoolerforAll (111052 in chips)
+T3ddy_Or3o: posts the ante 75
+MARMALADZE: posts the ante 75
+CoolerforAll: posts the ante 75
+limpopou: posts the ante 75
+antynelly: posts the ante 75
+Lefinho 😜: posts the ante 75
+Alexssrl: posts the ante 75
+ozrona: posts the ante 75
+pineapple wong: posts the ante 75
+T3ddy_Or3o: posts small blind 300
+MARMALADZE: posts big blind 600
+*** HOLE CARDS ***
+Dealt to ozrona [2c 4d]
+CoolerforAll: folds
+limpopou: raises 900 to 1500
+antynelly: folds
+Lefinho 😜: folds
+Alexssrl: folds
+ozrona: folds
+pineapple wong: calls 1500
+T3ddy_Or3o: folds
+MARMALADZE: folds
+*** FLOP *** [6s 6d 2h]
+limpopou: checks
+pineapple wong: checks
+*** TURN *** [6s 6d 2h] [3d]
+limpopou: bets 2287
+pineapple wong: calls 2287
+*** RIVER *** [6s 6d 2h 3d] [Qs]
+limpopou: bets 6099
+pineapple wong: folds
+Uncalled bet (6099) returned to limpopou
+limpopou collected 9149 from pot
+*** SUMMARY ***
+Total pot 9149 | Rake 0
+Board [6s 6d 2h 3d Qs]
+Seat 1: limpopou collected (9149)
+Seat 2: antynelly folded before Flop (didn't bet)
+Seat 3: Lefinho 😜 folded before Flop (didn't bet)
+Seat 4: Alexssrl folded before Flop (didn't bet)
+Seat 5: ozrona folded before Flop (didn't bet)
+Seat 6: pineapple wong (button) folded on the River
+Seat 7: T3ddy_Or3o (small blind) folded before Flop
+Seat 8: MARMALADZE (big blind) folded before Flop
+Seat 9: CoolerforAll folded before Flop (didn't bet)
+
+PokerStars Hand #260719042917988977200003205: Tournament #9889772, No Limit Hold'em - Level VII (300/600 ante 75) - 2026/07/19 19:49:55 ACST [2026/07/19 10:19:55 UTC]
+Table '9889772 5' 9-max Seat #7 is the button
+Seat 1: limpopou (103948 in chips)
+Seat 2: antynelly (233261 in chips)
+Seat 3: Lefinho 😜 (131262 in chips)
+Seat 4: Alexssrl (255118 in chips)
+Seat 5: ozrona (88303 in chips)
+Seat 6: pineapple wong (94688 in chips)
+Seat 7: T3ddy_Or3o (73462 in chips)
+Seat 8: MARMALADZE (71667 in chips)
+Seat 9: CoolerforAll (110977 in chips)
+MARMALADZE: posts the ante 75
+CoolerforAll: posts the ante 75
+limpopou: posts the ante 75
+antynelly: posts the ante 75
+Lefinho 😜: posts the ante 75
+Alexssrl: posts the ante 75
+ozrona: posts the ante 75
+pineapple wong: posts the ante 75
+T3ddy_Or3o: posts the ante 75
+MARMALADZE: posts small blind 300
+CoolerforAll: posts big blind 600
+*** HOLE CARDS ***
+Dealt to ozrona [2h Ts]
+limpopou: folds
+antynelly: folds
+Lefinho 😜: calls 600
+Alexssrl: calls 600
+ozrona: folds
+pineapple wong: folds
+T3ddy_Or3o: folds
+MARMALADZE: folds
+CoolerforAll: checks
+*** FLOP *** [Kc 9h 8d]
+CoolerforAll: checks
+Lefinho 😜: checks
+Alexssrl: bets 2775
+CoolerforAll: folds
+Lefinho 😜: raises 6244 to 9019
+Alexssrl: folds
+Uncalled bet (6244) returned to Lefinho 😜
+Lefinho 😜 collected 8325 from pot
+*** SUMMARY ***
+Total pot 8325 | Rake 0
+Board [Kc 9h 8d]
+Seat 1: limpopou folded before Flop (didn't bet)
+Seat 2: antynelly folded before Flop (didn't bet)
+Seat 3: Lefinho 😜 collected (8325)
+Seat 4: Alexssrl folded on the Flop
+Seat 5: ozrona folded before Flop (didn't bet)
+Seat 6: pineapple wong folded before Flop (didn't bet)
+Seat 7: T3ddy_Or3o (button) folded before Flop (didn't bet)
+Seat 8: MARMALADZE (small blind) folded before Flop
+Seat 9: CoolerforAll (big blind) folded on the Flop
+
+PokerStars Hand #260719042917988977200003285: Tournament #9889772, No Limit Hold'em - Level VII (300/600 ante 75) - 2026/07/19 19:51:22 ACST [2026/07/19 10:21:22 UTC]
+Table '9889772 5' 9-max Seat #8 is the button
+Seat 1: limpopou (103873 in chips)
+Seat 2: antynelly (233186 in chips)
+Seat 3: Lefinho 😜 (136137 in chips)
+Seat 4: Alexssrl (251668 in chips)
+Seat 5: ozrona (88228 in chips)
+Seat 6: pineapple wong (94613 in chips)
+Seat 7: T3ddy_Or3o (73387 in chips)
+Seat 8: MARMALADZE (71292 in chips)
+Seat 9: CoolerforAll (110302 in chips)
+CoolerforAll: posts the ante 75
+limpopou: posts the ante 75
+antynelly: posts the ante 75
+Lefinho 😜: posts the ante 75
+Alexssrl: posts the ante 75
+ozrona: posts the ante 75
+pineapple wong: posts the ante 75
+T3ddy_Or3o: posts the ante 75
+MARMALADZE: posts the ante 75
+CoolerforAll: posts small blind 300
+limpopou: posts big blind 600
+*** HOLE CARDS ***
+Dealt to ozrona [Qc Td]
+antynelly: folds
+Lefinho 😜: folds
+Alexssrl: folds
+ozrona: raises 1500 to 2100
+pineapple wong: folds
+T3ddy_Or3o: folds
+MARMALADZE: folds
+CoolerforAll: folds
+limpopou: calls 1500
+*** FLOP *** [Jc 4h 7s]
+limpopou: checks
+ozrona: bets 2025
+limpopou: raises 3037 to 5062
+ozrona: calls 3037
+*** TURN *** [Jc 4h 7s] [6h]
+limpopou: bets 5099
+ozrona: folds
+Uncalled bet (5099) returned to limpopou
+limpopou collected 15299 from pot
+*** SUMMARY ***
+Total pot 15299 | Rake 0
+Board [Jc 4h 7s 6h]
+Seat 1: limpopou (big blind) collected (15299)
+Seat 2: antynelly folded before Flop (didn't bet)
+Seat 3: Lefinho 😜 folded before Flop (didn't bet)
+Seat 4: Alexssrl folded before Flop (didn't bet)
+Seat 5: ozrona folded on the Turn
+Seat 6: pineapple wong folded before Flop (didn't bet)
+Seat 7: T3ddy_Or3o folded before Flop (didn't bet)
+Seat 8: MARMALADZE (button) folded before Flop (didn't bet)
+Seat 9: CoolerforAll (small blind) folded before Flop
+
+PokerStars Hand #260719042917988977200003375: Tournament #9889772, No Limit Hold'em - Level VII (300/600 ante 75) - 2026/07/19 19:52:45 ACST [2026/07/19 10:22:45 UTC]
+Table '9889772 5' 9-max Seat #9 is the button
+Seat 1: limpopou (111935 in chips)
+Seat 2: antynelly (233111 in chips)
+Seat 3: Lefinho 😜 (136062 in chips)
+Seat 4: Alexssrl (251593 in chips)
+Seat 5: ozrona (80991 in chips)
+Seat 6: pineapple wong (94538 in chips)
+Seat 7: T3ddy_Or3o (73312 in chips)
+Seat 8: MARMALADZE (71217 in chips)
+Seat 9: CoolerforAll (109927 in chips)
+limpopou: posts the ante 75
+antynelly: posts the ante 75
+Lefinho 😜: posts the ante 75
+Alexssrl: posts the ante 75
+ozrona: posts the ante 75
+pineapple wong: posts the ante 75
+T3ddy_Or3o: posts the ante 75
+MARMALADZE: posts the ante 75
+CoolerforAll: posts the ante 75
+limpopou: posts small blind 300
+antynelly: posts big blind 600
+*** HOLE CARDS ***
+Dealt to ozrona [Jc Th]
+Lefinho 😜: folds
+Alexssrl: folds
+ozrona: raises 1500 to 2100
+pineapple wong: calls 2100
+T3ddy_Or3o: folds
+MARMALADZE: folds
+CoolerforAll: calls 2100
+limpopou: raises 6000 to 8100
+antynelly: folds
+ozrona: calls 6000
+pineapple wong: calls 6000
+CoolerforAll: calls 6000
+*** FLOP *** [9h 3s 2c]
+limpopou: bets 17437
+ozrona: folds
+pineapple wong: folds
+CoolerforAll: calls 17437
+*** TURN *** [9h 3s 2c] [Ac]
+limpopou: checks
+CoolerforAll: checks
+*** RIVER *** [9h 3s 2c Ac] [5h]
+limpopou: checks
+CoolerforAll: checks
+*** SHOW DOWN ***
+limpopou: shows [Jd Js]
+limpopou collected 68549 from pot
+*** SUMMARY ***
+Total pot 68549 | Rake 0
+Board [9h 3s 2c Ac 5h]
+Seat 1: limpopou (small blind) showed [Jd Js] and won (68549)
+Seat 2: antynelly (big blind) folded before Flop
+Seat 3: Lefinho 😜 folded before Flop (didn't bet)
+Seat 4: Alexssrl folded before Flop (didn't bet)
+Seat 5: ozrona folded on the Flop
+Seat 6: pineapple wong folded on the Flop
+Seat 7: T3ddy_Or3o folded before Flop (didn't bet)
+Seat 8: MARMALADZE folded before Flop (didn't bet)
+Seat 9: CoolerforAll (button) mucked
+
+PokerStars Hand #260719042917988977200003475: Tournament #9889772, No Limit Hold'em - Level VII (300/600 ante 75) - 2026/07/19 19:54:37 ACST [2026/07/19 10:24:37 UTC]
+Table '9889772 5' 9-max Seat #1 is the button
+Seat 1: limpopou (154872 in chips)
+Seat 2: antynelly (232436 in chips)
+Seat 3: Lefinho 😜 (135987 in chips)
+Seat 4: Alexssrl (251518 in chips)
+Seat 5: ozrona (72816 in chips)
+Seat 6: pineapple wong (86363 in chips)
+Seat 7: T3ddy_Or3o (73237 in chips)
+Seat 8: MARMALADZE (71142 in chips)
+Seat 9: CoolerforAll (84315 in chips)
+antynelly: posts the ante 75
+Lefinho 😜: posts the ante 75
+Alexssrl: posts the ante 75
+ozrona: posts the ante 75
+pineapple wong: posts the ante 75
+T3ddy_Or3o: posts the ante 75
+MARMALADZE: posts the ante 75
+CoolerforAll: posts the ante 75
+limpopou: posts the ante 75
+antynelly: posts small blind 300
+Lefinho 😜: posts big blind 600
+*** HOLE CARDS ***
+Dealt to ozrona [7d 8h]
+Alexssrl: folds
+ozrona: folds
+pineapple wong: calls 600
+T3ddy_Or3o: folds
+MARMALADZE: raises 1200 to 1800
+CoolerforAll: folds
+limpopou: calls 1800
+antynelly: folds
+Lefinho 😜: folds
+pineapple wong: calls 1200
+*** FLOP *** [3c 7s 6s]
+pineapple wong: checks
+MARMALADZE: bets 1200
+limpopou: calls 1200
+pineapple wong: calls 1200
+*** TURN *** [3c 7s 6s] [2h]
+pineapple wong: checks
+MARMALADZE: checks
+limpopou: checks
+*** RIVER *** [3c 7s 6s 2h] [4c]
+pineapple wong: checks
+MARMALADZE: checks
+limpopou: bets 7050
+pineapple wong: calls 7050
+MARMALADZE: folds
+*** SHOW DOWN ***
+pineapple wong: shows [5c Ah]
+limpopou: shows [8c Kc]
+pineapple wong collected 24675 from pot
+*** SUMMARY ***
+Total pot 24675 | Rake 0
+Board [3c 7s 6s 2h 4c]
+Seat 1: limpopou (button) showed [8c Kc] and lost
+Seat 2: antynelly (small blind) folded before Flop
+Seat 3: Lefinho 😜 (big blind) folded before Flop
+Seat 4: Alexssrl folded before Flop (didn't bet)
+Seat 5: ozrona folded before Flop (didn't bet)
+Seat 6: pineapple wong showed [5c Ah] and won (24675)
+Seat 7: T3ddy_Or3o folded before Flop (didn't bet)
+Seat 8: MARMALADZE folded on the River
+Seat 9: CoolerforAll folded before Flop (didn't bet)
+
+PokerStars Hand #260719042917988977200003545: Tournament #9889772, No Limit Hold'em - Level VII (300/600 ante 75) - 2026/07/19 19:55:55 ACST [2026/07/19 10:25:55 UTC]
+Table '9889772 5' 9-max Seat #2 is the button
+Seat 1: limpopou (144747 in chips)
+Seat 2: antynelly (232061 in chips)
+Seat 3: Lefinho 😜 (135312 in chips)
+Seat 4: Alexssrl (251443 in chips)
+Seat 5: ozrona (72741 in chips)
+Seat 6: pineapple wong (100913 in chips)
+Seat 7: T3ddy_Or3o (73162 in chips)
+Seat 8: MARMALADZE (68067 in chips)
+Seat 9: CoolerforAll (84240 in chips)
+Lefinho 😜: posts the ante 75
+Alexssrl: posts the ante 75
+ozrona: posts the ante 75
+pineapple wong: posts the ante 75
+T3ddy_Or3o: posts the ante 75
+MARMALADZE: posts the ante 75
+CoolerforAll: posts the ante 75
+limpopou: posts the ante 75
+antynelly: posts the ante 75
+Lefinho 😜: posts small blind 300
+Alexssrl: posts big blind 600
+*** HOLE CARDS ***
+Dealt to ozrona [5d Js]
+ozrona: folds
+pineapple wong: raises 1200 to 1800
+T3ddy_Or3o: folds
+MARMALADZE: folds
+CoolerforAll: folds
+limpopou: calls 1800
+antynelly: folds
+Lefinho 😜: folds
+Alexssrl: calls 1200
+*** FLOP *** [4s 6d 6c]
+Alexssrl: checks
+pineapple wong: checks
+limpopou: checks
+*** TURN *** [4s 6d 6c] [6s]
+Alexssrl: checks
+pineapple wong: bets 2125
+limpopou: folds
+Alexssrl: raises 5313 to 7438
+pineapple wong: folds
+Uncalled bet (5313) returned to Alexssrl
+Alexssrl collected 10625 from pot
+*** SUMMARY ***
+Total pot 10625 | Rake 0
+Board [4s 6d 6c 6s]
+Seat 1: limpopou folded on the Turn
+Seat 2: antynelly (button) folded before Flop (didn't bet)
+Seat 3: Lefinho 😜 (small blind) folded before Flop
+Seat 4: Alexssrl (big blind) collected (10625)
+Seat 5: ozrona folded before Flop (didn't bet)
+Seat 6: pineapple wong folded on the Turn
+Seat 7: T3ddy_Or3o folded before Flop (didn't bet)
+Seat 8: MARMALADZE folded before Flop (didn't bet)
+Seat 9: CoolerforAll folded before Flop (didn't bet)
+
+PokerStars Hand #260719042917988977200003605: Tournament #9889772, No Limit Hold'em - Level VII (300/600 ante 75) - 2026/07/19 19:56:49 ACST [2026/07/19 10:26:49 UTC]
+Table '9889772 5' 9-max Seat #3 is the button
+Seat 1: limpopou (142872 in chips)
+Seat 2: antynelly (231986 in chips)
+Seat 3: Lefinho 😜 (134937 in chips)
+Seat 4: Alexssrl (258068 in chips)
+Seat 5: ozrona (72666 in chips)
+Seat 6: pineapple wong (96913 in chips)
+Seat 7: T3ddy_Or3o (73087 in chips)
+Seat 8: MARMALADZE (67992 in chips)
+Seat 9: CoolerforAll (84165 in chips)
+Alexssrl: posts the ante 75
+ozrona: posts the ante 75
+pineapple wong: posts the ante 75
+T3ddy_Or3o: posts the ante 75
+MARMALADZE: posts the ante 75
+CoolerforAll: posts the ante 75
+limpopou: posts the ante 75
+antynelly: posts the ante 75
+Lefinho 😜: posts the ante 75
+Alexssrl: posts small blind 300
+ozrona: posts big blind 600
+*** HOLE CARDS ***
+Dealt to ozrona [3s Ad]
+pineapple wong: folds
+T3ddy_Or3o: folds
+MARMALADZE: raises 600 to 1200
+CoolerforAll: calls 1200
+limpopou: folds
+antynelly: folds
+Lefinho 😜: folds
+Alexssrl: folds
+ozrona: calls 600
+*** FLOP *** [Js 2d 2h]
+ozrona: checks
+MARMALADZE: bets 1500
+CoolerforAll: calls 1500
+ozrona: folds
+*** TURN *** [Js 2d 2h] [6s]
+MARMALADZE: bets 3787
+CoolerforAll: folds
+Uncalled bet (3787) returned to MARMALADZE
+MARMALADZE collected 7575 from pot
+*** SUMMARY ***
+Total pot 7575 | Rake 0
+Board [Js 2d 2h 6s]
+Seat 1: limpopou folded before Flop (didn't bet)
+Seat 2: antynelly folded before Flop (didn't bet)
+Seat 3: Lefinho 😜 (button) folded before Flop (didn't bet)
+Seat 4: Alexssrl (small blind) folded before Flop
+Seat 5: ozrona (big blind) folded on the Flop
+Seat 6: pineapple wong folded before Flop (didn't bet)
+Seat 7: T3ddy_Or3o folded before Flop (didn't bet)
+Seat 8: MARMALADZE collected (7575)
+Seat 9: CoolerforAll folded on the Turn
+
+PokerStars Hand #260719042917988977200003655: Tournament #9889772, No Limit Hold'em - Level VII (300/600 ante 75) - 2026/07/19 19:57:41 ACST [2026/07/19 10:27:41 UTC]
+Table '9889772 5' 9-max Seat #4 is the button
+Seat 1: limpopou (142797 in chips)
+Seat 2: antynelly (231911 in chips)
+Seat 3: Lefinho 😜 (134862 in chips)
+Seat 4: Alexssrl (257693 in chips)
+Seat 5: ozrona (71391 in chips)
+Seat 6: pineapple wong (96838 in chips)
+Seat 7: T3ddy_Or3o (73012 in chips)
+Seat 8: MARMALADZE (72792 in chips)
+Seat 9: CoolerforAll (81390 in chips)
+ozrona: posts the ante 75
+pineapple wong: posts the ante 75
+T3ddy_Or3o: posts the ante 75
+MARMALADZE: posts the ante 75
+CoolerforAll: posts the ante 75
+limpopou: posts the ante 75
+antynelly: posts the ante 75
+Lefinho 😜: posts the ante 75
+Alexssrl: posts the ante 75
+ozrona: posts small blind 300
+pineapple wong: posts big blind 600
+*** HOLE CARDS ***
+Dealt to ozrona [9d 5d]
+T3ddy_Or3o: folds
+MARMALADZE: raises 1200 to 1800
+CoolerforAll: calls 1800
+limpopou: folds
+antynelly: calls 1800
+Lefinho 😜: folds
+Alexssrl: folds
+ozrona: folds
+pineapple wong: calls 1200
+*** FLOP *** [9s 5h 5c]
+pineapple wong: checks
+MARMALADZE: checks
+CoolerforAll: checks
+antynelly: checks
+*** TURN *** [9s 5h 5c] [Kd]
+pineapple wong: checks
+MARMALADZE: bets 4087
+CoolerforAll: folds
+antynelly: folds
+pineapple wong: folds
+Uncalled bet (4087) returned to MARMALADZE
+MARMALADZE collected 8175 from pot
+*** SUMMARY ***
+Total pot 8175 | Rake 0
+Board [9s 5h 5c Kd]
+Seat 1: limpopou folded before Flop (didn't bet)
+Seat 2: antynelly folded on the Turn
+Seat 3: Lefinho 😜 folded before Flop (didn't bet)
+Seat 4: Alexssrl (button) folded before Flop (didn't bet)
+Seat 5: ozrona (small blind) folded before Flop
+Seat 6: pineapple wong (big blind) folded on the Turn
+Seat 7: T3ddy_Or3o folded before Flop (didn't bet)
+Seat 8: MARMALADZE collected (8175)
+Seat 9: CoolerforAll folded on the Turn
+
+PokerStars Hand #260719042917988977200003715: Tournament #9889772, No Limit Hold'em - Level VII (300/600 ante 75) - 2026/07/19 19:58:50 ACST [2026/07/19 10:28:50 UTC]
+Table '9889772 5' 9-max Seat #5 is the button
+Seat 1: limpopou (142722 in chips)
+Seat 2: antynelly (230036 in chips)
+Seat 3: Lefinho 😜 (134787 in chips)
+Seat 4: Alexssrl (257618 in chips)
+Seat 5: ozrona (71016 in chips)
+Seat 6: pineapple wong (94963 in chips)
+Seat 8: MARMALADZE (79092 in chips)
+Seat 9: CoolerforAll (79515 in chips)
+pineapple wong: posts the ante 75
+MARMALADZE: posts the ante 75
+CoolerforAll: posts the ante 75
+limpopou: posts the ante 75
+antynelly: posts the ante 75
+Lefinho 😜: posts the ante 75
+Alexssrl: posts the ante 75
+ozrona: posts the ante 75
+pineapple wong: posts small blind 300
+MARMALADZE: posts big blind 600
+*** HOLE CARDS ***
+Dealt to ozrona [8s 7s]
+CoolerforAll: folds
+limpopou: folds
+antynelly: folds
+Lefinho 😜: raises 1200 to 1800
+Alexssrl: raises 8100 to 9900
+ozrona: folds
+pineapple wong: folds
+MARMALADZE: folds
+Lefinho 😜: calls 8100
+*** FLOP *** [9s Ts 7c]
+Lefinho 😜: checks
+Alexssrl: checks
+*** TURN *** [9s Ts 7c] [Kd]
+Lefinho 😜: checks
+Alexssrl: bets 5325
+Lefinho 😜: raises 15975 to 21300
+Alexssrl: calls 15975
+*** RIVER *** [9s Ts 7c Kd] [6c]
+Lefinho 😜: bets 63900
+Alexssrl: folds
+Uncalled bet (63900) returned to Lefinho 😜
+Lefinho 😜 collected 63900 from pot
+*** SUMMARY ***
+Total pot 63900 | Rake 0
+Board [9s Ts 7c Kd 6c]
+Seat 1: limpopou folded before Flop (didn't bet)
+Seat 2: antynelly folded before Flop (didn't bet)
+Seat 3: Lefinho 😜 collected (63900)
+Seat 4: Alexssrl folded on the River
+Seat 5: ozrona (button) folded before Flop (didn't bet)
+Seat 6: pineapple wong (small blind) folded before Flop
+Seat 8: MARMALADZE (big blind) folded before Flop
+Seat 9: CoolerforAll folded before Flop (didn't bet)
+
+PokerStars Hand #260719042917988977200003845: Tournament #9889772, No Limit Hold'em - Level VIII (400/800 ante 100) - 2026/07/19 20:00:29 ACST [2026/07/19 10:30:29 UTC]
+Table '9889772 5' 9-max Seat #6 is the button
+Seat 1: limpopou (142647 in chips)
+Seat 2: antynelly (229961 in chips)
+Seat 3: Lefinho 😜 (167412 in chips)
+Seat 4: Alexssrl (226343 in chips)
+Seat 5: ozrona (70941 in chips)
+Seat 6: pineapple wong (94588 in chips)
+Seat 8: MARMALADZE (78417 in chips)
+MARMALADZE: posts the ante 100
+limpopou: posts the ante 100
+antynelly: posts the ante 100
+Lefinho 😜: posts the ante 100
+Alexssrl: posts the ante 100
+ozrona: posts the ante 100
+pineapple wong: posts the ante 100
+MARMALADZE: posts small blind 400
+limpopou: posts big blind 800
+*** HOLE CARDS ***
+Dealt to ozrona [Ks 7d]
+antynelly: folds
+Lefinho 😜: folds
+Alexssrl: raises 800 to 1600
+ozrona: folds
+pineapple wong: calls 1600
+MARMALADZE: folds
+limpopou: calls 800
+*** FLOP *** [Th 5s 3h]
+limpopou: checks
+Alexssrl: checks
+pineapple wong: bets 1966
+limpopou: calls 1966
+Alexssrl: folds
+*** TURN *** [Th 5s 3h] [Ac]
+limpopou: checks
+pineapple wong: checks
+*** RIVER *** [Th 5s 3h Ac] [Ts]
+limpopou: checks
+pineapple wong: bets 4916
+limpopou: folds
+Uncalled bet (4916) returned to pineapple wong
+pineapple wong collected 9832 from pot
+*** SUMMARY ***
+Total pot 9832 | Rake 0
+Board [Th 5s 3h Ac Ts]
+Seat 1: limpopou (big blind) folded on the River
+Seat 2: antynelly folded before Flop (didn't bet)
+Seat 3: Lefinho 😜 folded before Flop (didn't bet)
+Seat 4: Alexssrl folded on the Flop
+Seat 5: ozrona folded before Flop (didn't bet)
+Seat 6: pineapple wong (button) collected (9832)
+Seat 8: MARMALADZE (small blind) folded before Flop
+
+PokerStars Hand #260719042917988977200003905: Tournament #9889772, No Limit Hold'em - Level VIII (400/800 ante 100) - 2026/07/19 20:01:30 ACST [2026/07/19 10:31:30 UTC]
+Table '9889772 5' 9-max Seat #8 is the button
+Seat 1: limpopou (138981 in chips)
+Seat 2: antynelly (229861 in chips)
+Seat 3: Lefinho 😜 (167312 in chips)
+Seat 4: Alexssrl (224643 in chips)
+Seat 5: ozrona (70841 in chips)
+Seat 6: pineapple wong (100754 in chips)
+Seat 7: Bumer75 (200335 in chips)
+Seat 8: MARMALADZE (77917 in chips)
+limpopou: posts the ante 100
+antynelly: posts the ante 100
+Lefinho 😜: posts the ante 100
+Alexssrl: posts the ante 100
+ozrona: posts the ante 100
+pineapple wong: posts the ante 100
+Bumer75: posts the ante 100
+MARMALADZE: posts the ante 100
+limpopou: posts small blind 400
+antynelly: posts big blind 800
+*** HOLE CARDS ***
+Dealt to ozrona [2h 6c]
+Lefinho 😜: folds
+Alexssrl: folds
+ozrona: folds
+pineapple wong: calls 800
+Bumer75: folds
+MARMALADZE: folds
+limpopou: folds
+antynelly: checks
+*** FLOP *** [Ad 8s 3s]
+antynelly: checks
+pineapple wong: checks
+*** TURN *** [Ad 8s 3s] [7h]
+antynelly: checks
+pineapple wong: checks
+*** RIVER *** [Ad 8s 3s 7h] [4d]
+antynelly: checks
+pineapple wong: checks
+*** SHOW DOWN ***
+antynelly: shows [Qc Jc]
+antynelly collected 2800 from pot
+*** SUMMARY ***
+Total pot 2800 | Rake 0
+Board [Ad 8s 3s 7h 4d]
+Seat 1: limpopou (small blind) folded before Flop
+Seat 2: antynelly (big blind) showed [Qc Jc] and won (2800)
+Seat 3: Lefinho 😜 folded before Flop (didn't bet)
+Seat 4: Alexssrl folded before Flop (didn't bet)
+Seat 5: ozrona folded before Flop (didn't bet)
+Seat 6: pineapple wong mucked
+Seat 7: Bumer75 folded before Flop (didn't bet)
+Seat 8: MARMALADZE (button) folded before Flop (didn't bet)
+
+PokerStars Hand #260719042917988977200003995: Tournament #9889772, No Limit Hold'em - Level VIII (400/800 ante 100) - 2026/07/19 20:02:19 ACST [2026/07/19 10:32:19 UTC]
+Table '9889772 5' 9-max Seat #1 is the button
+Seat 1: limpopou (138481 in chips)
+Seat 2: antynelly (231761 in chips)
+Seat 3: Lefinho 😜 (167212 in chips)
+Seat 4: Alexssrl (224543 in chips)
+Seat 5: ozrona (70741 in chips)
+Seat 6: pineapple wong (99854 in chips)
+Seat 7: Bumer75 (200235 in chips)
+Seat 8: MARMALADZE (77817 in chips)
+antynelly: posts the ante 100
+Lefinho 😜: posts the ante 100
+Alexssrl: posts the ante 100
+ozrona: posts the ante 100
+pineapple wong: posts the ante 100
+Bumer75: posts the ante 100
+MARMALADZE: posts the ante 100
+limpopou: posts the ante 100
+antynelly: posts small blind 400
+Lefinho 😜: posts big blind 800
+*** HOLE CARDS ***
+Dealt to ozrona [Qc 7d]
+Alexssrl: raises 1600 to 2400
+ozrona: folds
+pineapple wong: folds
+Bumer75: folds
+MARMALADZE: folds
+limpopou: calls 2400
+antynelly: folds
+Lefinho 😜: folds
+*** FLOP *** [5c 8s Js]
+Alexssrl: bets 3400
+limpopou: calls 3400
+*** TURN *** [5c 8s Js] [As]
+Alexssrl: checks
+limpopou: bets 6800
+Alexssrl: calls 6800
+*** RIVER *** [5c 8s Js As] [6c]
+Alexssrl: checks
+limpopou: checks
+*** SHOW DOWN ***
+limpopou: shows [Ac 9s]
+Alexssrl: shows [Jd Kc]
+limpopou collected 27200 from pot
+*** SUMMARY ***
+Total pot 27200 | Rake 0
+Board [5c 8s Js As 6c]
+Seat 1: limpopou (button) showed [Ac 9s] and won (27200)
+Seat 2: antynelly (small blind) folded before Flop
+Seat 3: Lefinho 😜 (big blind) folded before Flop
+Seat 4: Alexssrl showed [Jd Kc] and lost
+Seat 5: ozrona folded before Flop (didn't bet)
+Seat 6: pineapple wong folded before Flop (didn't bet)
+Seat 7: Bumer75 folded before Flop (didn't bet)
+Seat 8: MARMALADZE folded before Flop (didn't bet)
+
+PokerStars Hand #260719042917988977200004015: Tournament #9889772, No Limit Hold'em - Level VIII (400/800 ante 100) - 2026/07/19 20:03:06 ACST [2026/07/19 10:33:06 UTC]
+Table '9889772 5' 9-max Seat #2 is the button
+Seat 1: limpopou (152981 in chips)
+Seat 2: antynelly (231261 in chips)
+Seat 3: Lefinho 😜 (166312 in chips)
+Seat 4: Alexssrl (211843 in chips)
+Seat 5: ozrona (70641 in chips)
+Seat 6: pineapple wong (99754 in chips)
+Seat 7: Bumer75 (200135 in chips)
+Seat 8: MARMALADZE (77717 in chips)
+Lefinho 😜: posts the ante 100
+Alexssrl: posts the ante 100
+ozrona: posts the ante 100
+pineapple wong: posts the ante 100
+Bumer75: posts the ante 100
+MARMALADZE: posts the ante 100
+limpopou: posts the ante 100
+antynelly: posts the ante 100
+Lefinho 😜: posts small blind 400
+Alexssrl: posts big blind 800
+*** HOLE CARDS ***
+Dealt to ozrona [5d 8s]
+ozrona: folds
+pineapple wong: raises 2400 to 3200
+Bumer75: folds
+MARMALADZE: calls 3200
+limpopou: calls 3200
+antynelly: folds
+Lefinho 😜: folds
+Alexssrl: folds
+*** FLOP *** [5h Kh 2c]
+pineapple wong: bets 7733
+MARMALADZE: folds
+limpopou: folds
+Uncalled bet (7733) returned to pineapple wong
+pineapple wong collected 11600 from pot
+*** SUMMARY ***
+Total pot 11600 | Rake 0
+Board [5h Kh 2c]
+Seat 1: limpopou folded on the Flop
+Seat 2: antynelly (button) folded before Flop (didn't bet)
+Seat 3: Lefinho 😜 (small blind) folded before Flop
+Seat 4: Alexssrl (big blind) folded before Flop
+Seat 5: ozrona folded before Flop (didn't bet)
+Seat 6: pineapple wong collected (11600)
+Seat 7: Bumer75 folded before Flop (didn't bet)
+Seat 8: MARMALADZE folded on the Flop
+
+PokerStars Hand #260719042917988977200004065: Tournament #9889772, No Limit Hold'em - Level VIII (400/800 ante 100) - 2026/07/19 20:03:56 ACST [2026/07/19 10:33:56 UTC]
+Table '9889772 5' 9-max Seat #3 is the button
+Seat 1: limpopou (149681 in chips)
+Seat 2: antynelly (231161 in chips)
+Seat 3: Lefinho 😜 (165812 in chips)
+Seat 4: Alexssrl (210943 in chips)
+Seat 5: ozrona (70541 in chips)
+Seat 6: pineapple wong (108054 in chips)
+Seat 7: Bumer75 (200035 in chips)
+Seat 8: MARMALADZE (74417 in chips)
+Alexssrl: posts the ante 100
+ozrona: posts the ante 100
+pineapple wong: posts the ante 100
+Bumer75: posts the ante 100
+MARMALADZE: posts the ante 100
+limpopou: posts the ante 100
+antynelly: posts the ante 100
+Lefinho 😜: posts the ante 100
+Alexssrl: posts small blind 400
+ozrona: posts big blind 800
+*** HOLE CARDS ***
+Dealt to ozrona [2s 6s]
+pineapple wong: folds
+Bumer75: folds
+MARMALADZE: folds
+limpopou: folds
+antynelly: calls 800
+Lefinho 😜: raises 2400 to 3200
+Alexssrl: folds
+ozrona: calls 2400
+antynelly: folds
+*** FLOP *** [7c 9h 2d]
+ozrona: checks
+Lefinho 😜: checks
+*** TURN *** [7c 9h 2d] [8s]
+ozrona: checks
+Lefinho 😜: bets 4200
+ozrona: calls 4200
+*** RIVER *** [7c 9h 2d 8s] [Ah]
+ozrona: checks
+Lefinho 😜: checks
+*** SHOW DOWN ***
+ozrona: shows [2s 6s]
+Lefinho 😜: shows [Tc 9c]
+Lefinho 😜 collected 16800 from pot
+*** SUMMARY ***
+Total pot 16800 | Rake 0
+Board [7c 9h 2d 8s Ah]
+Seat 1: limpopou folded before Flop (didn't bet)
+Seat 2: antynelly folded before Flop (didn't bet)
+Seat 3: Lefinho 😜 (button) showed [Tc 9c] and won (16800)
+Seat 4: Alexssrl (small blind) folded before Flop
+Seat 5: ozrona (big blind) showed [2s 6s] and lost
+Seat 6: pineapple wong folded before Flop (didn't bet)
+Seat 7: Bumer75 folded before Flop (didn't bet)
+Seat 8: MARMALADZE folded before Flop (didn't bet)
+
+PokerStars Hand #260719042917988977200004175: Tournament #9889772, No Limit Hold'em - Level VIII (400/800 ante 100) - 2026/07/19 20:05:31 ACST [2026/07/19 10:35:31 UTC]
+Table '9889772 5' 9-max Seat #4 is the button
+Seat 1: limpopou (149581 in chips)
+Seat 2: antynelly (230261 in chips)
+Seat 3: Lefinho 😜 (175112 in chips)
+Seat 4: Alexssrl (210443 in chips)
+Seat 5: ozrona (63041 in chips)
+Seat 6: pineapple wong (107954 in chips)
+Seat 7: Bumer75 (199935 in chips)
+Seat 8: MARMALADZE (74317 in chips)
+Seat 9: AACRAKKA (100000 in chips)
+ozrona: posts the ante 100
+pineapple wong: posts the ante 100
+Bumer75: posts the ante 100
+MARMALADZE: posts the ante 100
+AACRAKKA: posts the ante 100
+limpopou: posts the ante 100
+antynelly: posts the ante 100
+Lefinho 😜: posts the ante 100
+Alexssrl: posts the ante 100
+ozrona: posts small blind 400
+pineapple wong: posts big blind 800
+*** HOLE CARDS ***
+Dealt to ozrona [8d 5s]
+Bumer75: folds
+MARMALADZE: folds
+AACRAKKA: folds
+limpopou: raises 1200 to 2000
+antynelly: calls 2000
+Lefinho 😜: calls 2000
+Alexssrl: calls 2000
+ozrona: calls 1600
+pineapple wong: calls 1200
+*** FLOP *** [Kh Js 3h]
+ozrona: checks
+pineapple wong: checks
+limpopou: bets 4300
+antynelly: calls 4300
+Lefinho 😜: folds
+Alexssrl: calls 4300
+ozrona: folds
+pineapple wong: folds
+*** TURN *** [Kh Js 3h] [Qc]
+limpopou: checks
+antynelly: bets 12100
+Alexssrl: folds
+limpopou: calls 12100
+*** RIVER *** [Kh Js 3h Qc] [4h]
+limpopou: bets 33333
+antynelly: calls 33333
+*** SHOW DOWN ***
+antynelly: shows [Jd Jc]
+limpopou: shows [Tc Td]
+antynelly collected 116666 from pot
+*** SUMMARY ***
+Total pot 116666 | Rake 0
+Board [Kh Js 3h Qc 4h]
+Seat 1: limpopou showed [Tc Td] and lost
+Seat 2: antynelly showed [Jd Jc] and won (116666)
+Seat 3: Lefinho 😜 folded on the Flop
+Seat 4: Alexssrl (button) folded on the Turn
+Seat 5: ozrona (small blind) folded on the Flop
+Seat 6: pineapple wong (big blind) folded on the Flop
+Seat 7: Bumer75 folded before Flop (didn't bet)
+Seat 8: MARMALADZE folded before Flop (didn't bet)
+Seat 9: AACRAKKA folded before Flop (didn't bet)
+
+PokerStars Hand #260719042917988977200004275: Tournament #9889772, No Limit Hold'em - Level VIII (400/800 ante 100) - 2026/07/19 20:07:14 ACST [2026/07/19 10:37:14 UTC]
+Table '9889772 5' 9-max Seat #5 is the button
+Seat 1: limpopou (97748 in chips)
+Seat 2: antynelly (295094 in chips)
+Seat 3: Lefinho 😜 (173012 in chips)
+Seat 4: Alexssrl (204043 in chips)
+Seat 5: ozrona (60941 in chips)
+Seat 6: pineapple wong (105854 in chips)
+Seat 7: Bumer75 (199835 in chips)
+Seat 8: MARMALADZE (74217 in chips)
+Seat 9: AACRAKKA (99900 in chips)
+pineapple wong: posts the ante 100
+Bumer75: posts the ante 100
+MARMALADZE: posts the ante 100
+AACRAKKA: posts the ante 100
+limpopou: posts the ante 100
+antynelly: posts the ante 100
+Lefinho 😜: posts the ante 100
+Alexssrl: posts the ante 100
+ozrona: posts the ante 100
+pineapple wong: posts small blind 400
+Bumer75: posts big blind 800
+*** HOLE CARDS ***
+Dealt to ozrona [8s Qc]
+MARMALADZE: raises 800 to 1600
+AACRAKKA: folds
+limpopou: calls 1600
+antynelly: calls 1600
+Lefinho 😜: folds
+Alexssrl: folds
+ozrona: folds
+pineapple wong: calls 1200
+Bumer75: folds
+*** FLOP *** [4d 8c Qh]
+pineapple wong: checks
+MARMALADZE: bets 1600
+limpopou: calls 1600
+antynelly: calls 1600
+pineapple wong: raises 3200 to 4800
+MARMALADZE: calls 3200
+limpopou: calls 3200
+antynelly: calls 3200
+*** TURN *** [4d 8c Qh] [3s]
+pineapple wong: bets 13650
+MARMALADZE: calls 13650
+limpopou: calls 13650
+antynelly: folds
+*** RIVER *** [4d 8c Qh 3s] [3d]
+pineapple wong: checks
+MARMALADZE: bets 20000
+limpopou: raises 57598 to 77598 and is all-in
+pineapple wong: folds
+MARMALADZE: calls 34067 and is all-in
+Uncalled bet (24431) returned to limpopou
+*** SHOW DOWN ***
+limpopou: shows [6h 3h]
+MARMALADZE: shows [4s 4h]
+MARMALADZE collected 175484 from pot
+*** SUMMARY ***
+Total pot 175484 | Rake 0
+Board [4d 8c Qh 3s 3d]
+Seat 1: limpopou showed [6h 3h] and lost
+Seat 2: antynelly folded on the Turn
+Seat 3: Lefinho 😜 folded before Flop (didn't bet)
+Seat 4: Alexssrl folded before Flop (didn't bet)
+Seat 5: ozrona (button) folded before Flop (didn't bet)
+Seat 6: pineapple wong (small blind) folded on the River
+Seat 7: Bumer75 (big blind) folded before Flop
+Seat 8: MARMALADZE showed [4s 4h] and won (175484)
+Seat 9: AACRAKKA folded before Flop (didn't bet)
+
+PokerStars Hand #260719042917988977200004355: Tournament #9889772, No Limit Hold'em - Level VIII (400/800 ante 100) - 2026/07/19 20:08:47 ACST [2026/07/19 10:38:47 UTC]
+Table '9889772 5' 9-max Seat #6 is the button
+Seat 1: limpopou (24431 in chips)
+Seat 2: antynelly (288594 in chips)
+Seat 3: Lefinho 😜 (172912 in chips)
+Seat 4: Alexssrl (203943 in chips)
+Seat 5: ozrona (60841 in chips)
+Seat 6: pineapple wong (85704 in chips)
+Seat 7: Bumer75 (198935 in chips)
+Seat 9: AACRAKKA (99800 in chips)
+Bumer75: posts the ante 100
+AACRAKKA: posts the ante 100
+limpopou: posts the ante 100
+antynelly: posts the ante 100
+Lefinho 😜: posts the ante 100
+Alexssrl: posts the ante 100
+ozrona: posts the ante 100
+pineapple wong: posts the ante 100
+Bumer75: posts small blind 400
+AACRAKKA: posts big blind 800
+*** HOLE CARDS ***
+Dealt to ozrona [Qh 2d]
+limpopou: raises 23531 to 24331 and is all-in
+antynelly: folds
+Lefinho 😜: folds
+Alexssrl: folds
+ozrona: folds
+pineapple wong: folds
+Bumer75: folds
+AACRAKKA: calls 23531
+*** FLOP *** [4c 4s 5d]
+*** TURN *** [4c 4s 5d] [3d]
+*** RIVER *** [4c 4s 5d 3d] [7c]
+*** SHOW DOWN ***
+AACRAKKA: shows [Td Ah]
+limpopou: shows [Tc 9c]
+AACRAKKA collected 49862 from pot
+*** SUMMARY ***
+Total pot 49862 | Rake 0
+Board [4c 4s 5d 3d 7c]
+Seat 1: limpopou showed [Tc 9c] and lost
+Seat 2: antynelly folded before Flop (didn't bet)
+Seat 3: Lefinho 😜 folded before Flop (didn't bet)
+Seat 4: Alexssrl folded before Flop (didn't bet)
+Seat 5: ozrona folded before Flop (didn't bet)
+Seat 6: pineapple wong (button) folded before Flop (didn't bet)
+Seat 7: Bumer75 (small blind) folded before Flop
+Seat 9: AACRAKKA (big blind) showed [Td Ah] and won (49862)
+
+PokerStars Hand #260719042917988977200004534: Tournament #9889772, No Limit Hold'em - Level VIII (400/800 ante 100) - 2026/07/19 20:10:54 ACST [2026/07/19 10:40:54 UTC]
+Table '9889772 4' 9-max Seat #6 is the button
+Seat 1: Kjangoat (215027 in chips)
+Seat 2: baesmabend (136015 in chips)
+Seat 3: pp13720639 (363790 in chips)
+Seat 4: CapFlow (83320 in chips)
+Seat 5: ozrona (60741 in chips)
+Seat 6: JSH1880 (98300 in chips)
+Seat 8: zebot11 (98156 in chips)
+Seat 9: daonna (135650 in chips)
+zebot11: posts the ante 100
+daonna: posts the ante 100
+Kjangoat: posts the ante 100
+baesmabend: posts the ante 100
+pp13720639: posts the ante 100
+CapFlow: posts the ante 100
+ozrona: posts the ante 100
+JSH1880: posts the ante 100
+zebot11: posts small blind 400
+daonna: posts big blind 800
+*** HOLE CARDS ***
+Dealt to ozrona [8d 5h]
+Kjangoat: raises 2400 to 3200
+baesmabend: folds
+pp13720639: folds
+CapFlow: folds
+ozrona: folds
+JSH1880: folds
+zebot11: calls 2800
+daonna: folds
+*** FLOP *** [6d 6h 2c]
+zebot11: checks
+Kjangoat: bets 8000
+zebot11: calls 8000
+*** TURN *** [6d 6h 2c] [Td]
+zebot11: checks
+Kjangoat: bets 24000
+zebot11: raises 32000 to 56000
+Kjangoat: calls 32000
+*** RIVER *** [6d 6h 2c Td] [7s]
+zebot11: bets 30856 and is all-in
+Kjangoat: calls 30856
+*** SHOW DOWN ***
+zebot11: shows [3h 6s]
+Kjangoat: shows [Ad 9h]
+zebot11 collected 197712 from pot
+*** SUMMARY ***
+Total pot 197712 | Rake 0
+Board [6d 6h 2c Td 7s]
+Seat 1: Kjangoat showed [Ad 9h] and lost
+Seat 2: baesmabend folded before Flop (didn't bet)
+Seat 3: pp13720639 folded before Flop (didn't bet)
+Seat 4: CapFlow folded before Flop (didn't bet)
+Seat 5: ozrona folded before Flop (didn't bet)
+Seat 6: JSH1880 (button) folded before Flop (didn't bet)
+Seat 8: zebot11 (small blind) showed [3h 6s] and won (197712)
+Seat 9: daonna (big blind) folded before Flop
+
+PokerStars Hand #260719042917988977200004614: Tournament #9889772, No Limit Hold'em - Level IX (500/1000 ante 150) - 2026/07/19 20:11:57 ACST [2026/07/19 10:41:57 UTC]
+Table '9889772 4' 9-max Seat #8 is the button
+Seat 1: Kjangoat (116871 in chips)
+Seat 2: baesmabend (135915 in chips)
+Seat 3: pp13720639 (363690 in chips)
+Seat 4: CapFlow (83220 in chips)
+Seat 5: ozrona (60641 in chips)
+Seat 6: JSH1880 (98200 in chips)
+Seat 7: KING-COBRA (137596 in chips)
+Seat 8: zebot11 (197712 in chips)
+Seat 9: daonna (134750 in chips)
+daonna: posts the ante 150
+Kjangoat: posts the ante 150
+baesmabend: posts the ante 150
+pp13720639: posts the ante 150
+CapFlow: posts the ante 150
+ozrona: posts the ante 150
+JSH1880: posts the ante 150
+KING-COBRA: posts the ante 150
+zebot11: posts the ante 150
+daonna: posts small blind 500
+Kjangoat: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to ozrona [3d Jh]
+baesmabend: folds
+pp13720639: folds
+CapFlow: folds
+ozrona: folds
+JSH1880: folds
+KING-COBRA: folds
+zebot11: calls 1000
+daonna: calls 500
+Kjangoat: checks
+*** FLOP *** [2d 5h Kd]
+daonna: checks
+Kjangoat: bets 4350
+zebot11: folds
+daonna: calls 4350
+*** TURN *** [2d 5h Kd] [Qd]
+daonna: bets 6525
+Kjangoat: calls 6525
+*** RIVER *** [2d 5h Kd Qd] [Td]
+daonna: bets 26100
+Kjangoat: folds
+Uncalled bet (26100) returned to daonna
+daonna collected 26100 from pot
+*** SUMMARY ***
+Total pot 26100 | Rake 0
+Board [2d 5h Kd Qd Td]
+Seat 1: Kjangoat (big blind) folded on the River
+Seat 2: baesmabend folded before Flop (didn't bet)
+Seat 3: pp13720639 folded before Flop (didn't bet)
+Seat 4: CapFlow folded before Flop (didn't bet)
+Seat 5: ozrona folded before Flop (didn't bet)
+Seat 6: JSH1880 folded before Flop (didn't bet)
+Seat 7: KING-COBRA folded before Flop (didn't bet)
+Seat 8: zebot11 (button) folded on the Flop
+Seat 9: daonna (small blind) collected (26100)
+
+PokerStars Hand #260719042917988977200004714: Tournament #9889772, No Limit Hold'em - Level IX (500/1000 ante 150) - 2026/07/19 20:13:14 ACST [2026/07/19 10:43:14 UTC]
+Table '9889772 4' 9-max Seat #9 is the button
+Seat 1: Kjangoat (104846 in chips)
+Seat 2: baesmabend (135765 in chips)
+Seat 3: pp13720639 (363540 in chips)
+Seat 4: CapFlow (83070 in chips)
+Seat 5: ozrona (60491 in chips)
+Seat 6: JSH1880 (98050 in chips)
+Seat 7: KING-COBRA (137446 in chips)
+Seat 8: zebot11 (196562 in chips)
+Seat 9: daonna (148825 in chips)
+Kjangoat: posts the ante 150
+baesmabend: posts the ante 150
+pp13720639: posts the ante 150
+CapFlow: posts the ante 150
+ozrona: posts the ante 150
+JSH1880: posts the ante 150
+KING-COBRA: posts the ante 150
+zebot11: posts the ante 150
+daonna: posts the ante 150
+Kjangoat: posts small blind 500
+baesmabend: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to ozrona [Kc 3d]
+pp13720639: calls 1000
+CapFlow: folds
+ozrona: folds
+JSH1880: folds
+KING-COBRA: folds
+zebot11: folds
+daonna: folds
+Kjangoat: raises 2500 to 3500
+baesmabend: folds
+pp13720639: calls 2500
+*** FLOP *** [8d Qc 3c]
+Kjangoat: bets 6900
+pp13720639: raises 10350 to 17250
+Kjangoat: calls 10350
+*** TURN *** [8d Qc 3c] [5h]
+Kjangoat: checks
+pp13720639: checks
+*** RIVER *** [8d Qc 3c 5h] [9d]
+Kjangoat: bets 29900
+pp13720639: raises 312240 to 342140 and is all-in
+Kjangoat: folds
+Uncalled bet (312240) returned to pp13720639
+pp13720639 collected 103650 from pot
+*** SUMMARY ***
+Total pot 103650 | Rake 0
+Board [8d Qc 3c 5h 9d]
+Seat 1: Kjangoat (small blind) folded on the River
+Seat 2: baesmabend (big blind) folded before Flop
+Seat 3: pp13720639 collected (103650)
+Seat 4: CapFlow folded before Flop (didn't bet)
+Seat 5: ozrona folded before Flop (didn't bet)
+Seat 6: JSH1880 folded before Flop (didn't bet)
+Seat 7: KING-COBRA folded before Flop (didn't bet)
+Seat 8: zebot11 folded before Flop (didn't bet)
+Seat 9: daonna (button) folded before Flop (didn't bet)
+
+PokerStars Hand #260719042917988977200004774: Tournament #9889772, No Limit Hold'em - Level IX (500/1000 ante 150) - 2026/07/19 20:14:19 ACST [2026/07/19 10:44:19 UTC]
+Table '9889772 4' 9-max Seat #1 is the button
+Seat 1: Kjangoat (54046 in chips)
+Seat 2: baesmabend (134615 in chips)
+Seat 3: pp13720639 (416390 in chips)
+Seat 4: CapFlow (82920 in chips)
+Seat 5: ozrona (60341 in chips)
+Seat 6: JSH1880 (97900 in chips)
+Seat 7: KING-COBRA (137296 in chips)
+Seat 8: zebot11 (196412 in chips)
+Seat 9: daonna (148675 in chips)
+baesmabend: posts the ante 150
+pp13720639: posts the ante 150
+CapFlow: posts the ante 150
+ozrona: posts the ante 150
+JSH1880: posts the ante 150
+KING-COBRA: posts the ante 150
+zebot11: posts the ante 150
+daonna: posts the ante 150
+Kjangoat: posts the ante 150
+baesmabend: posts small blind 500
+pp13720639: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to ozrona [8h 7c]
+CapFlow: folds
+ozrona: folds
+JSH1880: raises 1000 to 2000
+KING-COBRA: folds
+zebot11: calls 2000
+daonna: calls 2000
+Kjangoat: folds
+baesmabend: calls 1500
+pp13720639: calls 1000
+*** FLOP *** [Qs 7s 5c]
+baesmabend: checks
+pp13720639: checks
+JSH1880: bets 3783
+zebot11: calls 3783
+daonna: calls 3783
+baesmabend: folds
+pp13720639: calls 3783
+*** TURN *** [Qs 7s 5c] [6s]
+pp13720639: bets 26482
+JSH1880: folds
+zebot11: calls 26482
+daonna: folds
+*** RIVER *** [Qs 7s 5c 6s] [As]
+pp13720639: checks
+zebot11: bets 32000
+pp13720639: calls 32000
+*** SHOW DOWN ***
+zebot11: shows [9d Ks]
+zebot11 collected 143446 from pot
+*** SUMMARY ***
+Total pot 143446 | Rake 0
+Board [Qs 7s 5c 6s As]
+Seat 1: Kjangoat (button) folded before Flop (didn't bet)
+Seat 2: baesmabend (small blind) folded on the Flop
+Seat 3: pp13720639 (big blind) mucked
+Seat 4: CapFlow folded before Flop (didn't bet)
+Seat 5: ozrona folded before Flop (didn't bet)
+Seat 6: JSH1880 folded on the Turn
+Seat 7: KING-COBRA folded before Flop (didn't bet)
+Seat 8: zebot11 showed [9d Ks] and won (143446)
+Seat 9: daonna folded on the Turn
+
+PokerStars Hand #260719042917988977200004874: Tournament #9889772, No Limit Hold'em - Level IX (500/1000 ante 150) - 2026/07/19 20:15:43 ACST [2026/07/19 10:45:43 UTC]
+Table '9889772 4' 9-max Seat #2 is the button
+Seat 1: Kjangoat (53896 in chips)
+Seat 2: baesmabend (132465 in chips)
+Seat 3: pp13720639 (351975 in chips)
+Seat 4: CapFlow (82770 in chips)
+Seat 5: ozrona (60191 in chips)
+Seat 6: JSH1880 (91967 in chips)
+Seat 7: KING-COBRA (137146 in chips)
+Seat 8: zebot11 (275443 in chips)
+Seat 9: daonna (142742 in chips)
+pp13720639: posts the ante 150
+CapFlow: posts the ante 150
+ozrona: posts the ante 150
+JSH1880: posts the ante 150
+KING-COBRA: posts the ante 150
+zebot11: posts the ante 150
+daonna: posts the ante 150
+Kjangoat: posts the ante 150
+baesmabend: posts the ante 150
+pp13720639: posts small blind 500
+CapFlow: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to ozrona [Tc Qc]
+ozrona: calls 1000
+JSH1880: folds
+KING-COBRA: calls 1000
+zebot11: folds
+daonna: folds
+Kjangoat: folds
+baesmabend: folds
+pp13720639: raises 2500 to 3500
+CapFlow: folds
+ozrona: calls 2500
+KING-COBRA: calls 2500
+*** FLOP *** [2h Qs 6d]
+pp13720639: bets 4783
+ozrona: calls 4783
+KING-COBRA: folds
+*** TURN *** [2h Qs 6d] [Qh]
+pp13720639: bets 11958
+ozrona: calls 11958
+*** RIVER *** [2h Qs 6d Qh] [Jd]
+pp13720639: bets 31888
+ozrona: calls 31888 and is all-in
+*** SHOW DOWN ***
+ozrona: shows [Tc Qc]
+pp13720639: shows [Kh Jc]
+ozrona collected 110108 from pot
+*** SUMMARY ***
+Total pot 110108 | Rake 0
+Board [2h Qs 6d Qh Jd]
+Seat 1: Kjangoat folded before Flop (didn't bet)
+Seat 2: baesmabend (button) folded before Flop (didn't bet)
+Seat 3: pp13720639 (small blind) showed [Kh Jc] and lost
+Seat 4: CapFlow (big blind) folded before Flop
+Seat 5: ozrona showed [Tc Qc] and won (110108)
+Seat 6: JSH1880 folded before Flop (didn't bet)
+Seat 7: KING-COBRA folded on the Flop
+Seat 8: zebot11 folded before Flop (didn't bet)
+Seat 9: daonna folded before Flop (didn't bet)
+
+PokerStars Hand #260719042917988977200004964: Tournament #9889772, No Limit Hold'em - Level IX (500/1000 ante 150) - 2026/07/19 20:17:20 ACST [2026/07/19 10:47:20 UTC]
+Table '9889772 4' 9-max Seat #3 is the button
+Seat 1: Kjangoat (53746 in chips)
+Seat 2: baesmabend (132315 in chips)
+Seat 3: pp13720639 (292584 in chips)
+Seat 4: CapFlow (81620 in chips)
+Seat 5: ozrona (125832 in chips)
+Seat 6: JSH1880 (91817 in chips)
+Seat 7: KING-COBRA (133496 in chips)
+Seat 8: zebot11 (275293 in chips)
+Seat 9: daonna (142592 in chips)
+CapFlow: posts the ante 150
+ozrona: posts the ante 150
+JSH1880: posts the ante 150
+KING-COBRA: posts the ante 150
+zebot11: posts the ante 150
+daonna: posts the ante 150
+Kjangoat: posts the ante 150
+baesmabend: posts the ante 150
+pp13720639: posts the ante 150
+CapFlow: posts small blind 500
+ozrona: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to ozrona [Qc 4s]
+JSH1880: folds
+KING-COBRA: folds
+zebot11: raises 2000 to 3000
+daonna: raises 4500 to 7500
+Kjangoat: folds
+baesmabend: folds
+pp13720639: calls 7500
+CapFlow: folds
+ozrona: folds
+zebot11: calls 4500
+*** FLOP *** [9d 7h Ah]
+zebot11: checks
+daonna: bets 14000
+pp13720639: calls 14000
+zebot11: calls 14000
+*** TURN *** [9d 7h Ah] [Td]
+zebot11: checks
+daonna: bets 22450
+pp13720639: calls 22450
+zebot11: folds
+*** RIVER *** [9d 7h Ah Td] [Kh]
+daonna: bets 37416
+pp13720639: raises 211068 to 248484 and is all-in
+daonna: folds
+Uncalled bet (211068) returned to pp13720639
+pp13720639 collected 187082 from pot
+*** SUMMARY ***
+Total pot 187082 | Rake 0
+Board [9d 7h Ah Td Kh]
+Seat 1: Kjangoat folded before Flop (didn't bet)
+Seat 2: baesmabend folded before Flop (didn't bet)
+Seat 3: pp13720639 (button) collected (187082)
+Seat 4: CapFlow (small blind) folded before Flop
+Seat 5: ozrona (big blind) folded before Flop
+Seat 6: JSH1880 folded before Flop (didn't bet)
+Seat 7: KING-COBRA folded before Flop (didn't bet)
+Seat 8: zebot11 folded on the Turn
+Seat 9: daonna folded on the River
+
+PokerStars Hand #260719042917988977200005084: Tournament #9889772, No Limit Hold'em - Level IX (500/1000 ante 150) - 2026/07/19 20:18:45 ACST [2026/07/19 10:48:45 UTC]
+Table '9889772 4' 9-max Seat #4 is the button
+Seat 1: Kjangoat (53596 in chips)
+Seat 2: baesmabend (132165 in chips)
+Seat 3: pp13720639 (398150 in chips)
+Seat 4: CapFlow (80970 in chips)
+Seat 5: ozrona (124682 in chips)
+Seat 6: JSH1880 (91667 in chips)
+Seat 7: KING-COBRA (133346 in chips)
+Seat 8: zebot11 (253643 in chips)
+Seat 9: daonna (61076 in chips)
+ozrona: posts the ante 150
+JSH1880: posts the ante 150
+KING-COBRA: posts the ante 150
+zebot11: posts the ante 150
+daonna: posts the ante 150
+Kjangoat: posts the ante 150
+baesmabend: posts the ante 150
+pp13720639: posts the ante 150
+CapFlow: posts the ante 150
+ozrona: posts small blind 500
+JSH1880: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to ozrona [4s Th]
+KING-COBRA: folds
+zebot11: calls 1000
+daonna: folds
+Kjangoat: folds
+baesmabend: folds
+pp13720639: raises 1500 to 2500
+CapFlow: calls 2500
+ozrona: folds
+JSH1880: calls 1500
+zebot11: calls 1500
+*** FLOP *** [4c Js 2d]
+JSH1880: checks
+zebot11: checks
+pp13720639: checks
+CapFlow: bets 8888
+JSH1880: folds
+zebot11: folds
+pp13720639: folds
+Uncalled bet (8888) returned to CapFlow
+CapFlow collected 11850 from pot
+*** SUMMARY ***
+Total pot 11850 | Rake 0
+Board [4c Js 2d]
+Seat 1: Kjangoat folded before Flop (didn't bet)
+Seat 2: baesmabend folded before Flop (didn't bet)
+Seat 3: pp13720639 folded on the Flop
+Seat 4: CapFlow (button) collected (11850)
+Seat 5: ozrona (small blind) folded before Flop
+Seat 6: JSH1880 (big blind) folded on the Flop
+Seat 7: KING-COBRA folded before Flop (didn't bet)
+Seat 8: zebot11 folded on the Flop
+Seat 9: daonna folded before Flop (didn't bet)
+
+PokerStars Hand #260719042917988977200005144: Tournament #9889772, No Limit Hold'em - Level IX (500/1000 ante 150) - 2026/07/19 20:19:49 ACST [2026/07/19 10:49:49 UTC]
+Table '9889772 4' 9-max Seat #5 is the button
+Seat 1: Kjangoat (53446 in chips)
+Seat 2: baesmabend (132015 in chips)
+Seat 3: pp13720639 (395500 in chips)
+Seat 4: CapFlow (90170 in chips)
+Seat 5: ozrona (124032 in chips)
+Seat 6: JSH1880 (89017 in chips)
+Seat 7: KING-COBRA (133196 in chips)
+Seat 8: zebot11 (250993 in chips)
+Seat 9: daonna (60926 in chips)
+JSH1880: posts the ante 150
+KING-COBRA: posts the ante 150
+zebot11: posts the ante 150
+daonna: posts the ante 150
+Kjangoat: posts the ante 150
+baesmabend: posts the ante 150
+pp13720639: posts the ante 150
+CapFlow: posts the ante 150
+ozrona: posts the ante 150
+JSH1880: posts small blind 500
+KING-COBRA: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to ozrona [5c Js]
+zebot11: folds
+daonna: raises 2500 to 3500
+Kjangoat: calls 3500
+baesmabend: raises 19250 to 22750
+pp13720639: folds
+CapFlow: folds
+ozrona: folds
+JSH1880: folds
+KING-COBRA: folds
+daonna: raises 34526 to 57276 and is all-in
+Kjangoat: folds
+baesmabend: calls 34526
+*** FLOP *** [9s Kd 3c]
+*** TURN *** [9s Kd 3c] [8d]
+*** RIVER *** [9s Kd 3c 8d] [9d]
+*** SHOW DOWN ***
+daonna: shows [Ad Qd]
+baesmabend: shows [Td Tc]
+daonna collected 120902 from pot
+*** SUMMARY ***
+Total pot 120902 | Rake 0
+Board [9s Kd 3c 8d 9d]
+Seat 1: Kjangoat folded before Flop (didn't bet)
+Seat 2: baesmabend showed [Td Tc] and lost
+Seat 3: pp13720639 folded before Flop (didn't bet)
+Seat 4: CapFlow folded before Flop (didn't bet)
+Seat 5: ozrona (button) folded before Flop (didn't bet)
+Seat 6: JSH1880 (small blind) folded before Flop
+Seat 7: KING-COBRA (big blind) folded before Flop
+Seat 8: zebot11 folded before Flop (didn't bet)
+Seat 9: daonna showed [Ad Qd] and won (120902)
+
+PokerStars Hand #260719042917988977200005224: Tournament #9889772, No Limit Hold'em - Level IX (500/1000 ante 150) - 2026/07/19 20:20:46 ACST [2026/07/19 10:50:46 UTC]
+Table '9889772 4' 9-max Seat #6 is the button
+Seat 1: Kjangoat (49796 in chips)
+Seat 2: baesmabend (71089 in chips)
+Seat 3: pp13720639 (395350 in chips)
+Seat 4: CapFlow (90020 in chips)
+Seat 5: ozrona (123882 in chips)
+Seat 6: JSH1880 (88367 in chips)
+Seat 7: KING-COBRA (132046 in chips)
+Seat 8: zebot11 (250843 in chips)
+Seat 9: daonna (127902 in chips)
+KING-COBRA: posts the ante 150
+zebot11: posts the ante 150
+daonna: posts the ante 150
+Kjangoat: posts the ante 150
+baesmabend: posts the ante 150
+pp13720639: posts the ante 150
+CapFlow: posts the ante 150
+ozrona: posts the ante 150
+JSH1880: posts the ante 150
+KING-COBRA: posts small blind 500
+zebot11: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to ozrona [5h 4s]
+daonna: folds
+Kjangoat: folds
+baesmabend: folds
+pp13720639: folds
+CapFlow: raises 2000 to 3000
+ozrona: folds
+JSH1880: calls 3000
+KING-COBRA: folds
+zebot11: calls 2000
+*** FLOP *** [6s Kh 4h]
+zebot11: checks
+CapFlow: checks
+JSH1880: checks
+*** TURN *** [6s Kh 4h] [6d]
+zebot11: bets 4200
+CapFlow: folds
+JSH1880: calls 4200
+*** RIVER *** [6s Kh 4h 6d] [Tc]
+zebot11: bets 7200
+JSH1880: folds
+Uncalled bet (7200) returned to zebot11
+zebot11 collected 19250 from pot
+*** SUMMARY ***
+Total pot 19250 | Rake 0
+Board [6s Kh 4h 6d Tc]
+Seat 1: Kjangoat folded before Flop (didn't bet)
+Seat 2: baesmabend folded before Flop (didn't bet)
+Seat 3: pp13720639 folded before Flop (didn't bet)
+Seat 4: CapFlow folded on the Turn
+Seat 5: ozrona folded before Flop (didn't bet)
+Seat 6: JSH1880 (button) folded on the River
+Seat 7: KING-COBRA (small blind) folded before Flop
+Seat 8: zebot11 (big blind) collected (19250)
+Seat 9: daonna folded before Flop (didn't bet)
+
+PokerStars Hand #260719042917988977200005314: Tournament #9889772, No Limit Hold'em - Level IX (500/1000 ante 150) - 2026/07/19 20:21:58 ACST [2026/07/19 10:51:58 UTC]
+Table '9889772 4' 9-max Seat #7 is the button
+Seat 1: Kjangoat (49646 in chips)
+Seat 2: baesmabend (70939 in chips)
+Seat 3: pp13720639 (395200 in chips)
+Seat 4: CapFlow (86870 in chips)
+Seat 5: ozrona (123732 in chips)
+Seat 6: JSH1880 (81017 in chips)
+Seat 7: KING-COBRA (131396 in chips)
+Seat 8: zebot11 (262743 in chips)
+Seat 9: daonna (127752 in chips)
+zebot11: posts the ante 150
+daonna: posts the ante 150
+Kjangoat: posts the ante 150
+baesmabend: posts the ante 150
+pp13720639: posts the ante 150
+CapFlow: posts the ante 150
+ozrona: posts the ante 150
+JSH1880: posts the ante 150
+KING-COBRA: posts the ante 150
+zebot11: posts small blind 500
+daonna: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to ozrona [3h 6h]
+Kjangoat: calls 1000
+baesmabend: folds
+pp13720639: calls 1000
+CapFlow: folds
+ozrona: folds
+JSH1880: folds
+KING-COBRA: calls 1000
+zebot11: calls 500
+daonna: checks
+*** FLOP *** [5h Tc 5s]
+zebot11: checks
+daonna: checks
+Kjangoat: bets 6350
+pp13720639: folds
+KING-COBRA: folds
+zebot11: folds
+daonna: folds
+Uncalled bet (6350) returned to Kjangoat
+Kjangoat collected 6350 from pot
+*** SUMMARY ***
+Total pot 6350 | Rake 0
+Board [5h Tc 5s]
+Seat 1: Kjangoat collected (6350)
+Seat 2: baesmabend folded before Flop (didn't bet)
+Seat 3: pp13720639 folded on the Flop
+Seat 4: CapFlow folded before Flop (didn't bet)
+Seat 5: ozrona folded before Flop (didn't bet)
+Seat 6: JSH1880 folded before Flop (didn't bet)
+Seat 7: KING-COBRA (button) folded on the Flop
+Seat 8: zebot11 (small blind) folded on the Flop
+Seat 9: daonna (big blind) folded on the Flop
+
+PokerStars Hand #260719042917988977200005414: Tournament #9889772, No Limit Hold'em - Level X (600/1200 ante 200) - 2026/07/19 20:23:19 ACST [2026/07/19 10:53:19 UTC]
+Table '9889772 4' 9-max Seat #8 is the button
+Seat 2: baesmabend (70789 in chips)
+Seat 3: pp13720639 (394050 in chips)
+Seat 4: CapFlow (86720 in chips)
+Seat 5: ozrona (123582 in chips)
+Seat 6: JSH1880 (80867 in chips)
+Seat 7: KING-COBRA (130246 in chips)
+Seat 8: zebot11 (261593 in chips)
+Seat 9: daonna (126602 in chips)
+daonna: posts the ante 200
+baesmabend: posts the ante 200
+pp13720639: posts the ante 200
+CapFlow: posts the ante 200
+ozrona: posts the ante 200
+JSH1880: posts the ante 200
+KING-COBRA: posts the ante 200
+zebot11: posts the ante 200
+daonna: posts small blind 600
+baesmabend: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to ozrona [Qs Qc]
+pp13720639: calls 1200
+CapFlow: folds
+ozrona: raises 3600 to 4800
+JSH1880: calls 4800
+KING-COBRA: folds
+zebot11: calls 4800
+daonna: folds
+baesmabend: folds
+pp13720639: calls 3600
+*** FLOP *** [Tc 8d 3d]
+pp13720639: bets 11300
+ozrona: calls 11300
+JSH1880: folds
+zebot11: calls 11300
+*** TURN *** [Tc 8d 3d] [2s]
+pp13720639: bets 18833
+ozrona: calls 18833
+zebot11: calls 18833
+*** RIVER *** [Tc 8d 3d 2s] [Jd]
+pp13720639: checks
+ozrona: checks
+zebot11: bets 56000
+pp13720639: folds
+ozrona: folds
+Uncalled bet (56000) returned to zebot11
+zebot11 collected 112999 from pot
+*** SUMMARY ***
+Total pot 112999 | Rake 0
+Board [Tc 8d 3d 2s Jd]
+Seat 2: baesmabend (big blind) folded before Flop
+Seat 3: pp13720639 folded on the River
+Seat 4: CapFlow folded before Flop (didn't bet)
+Seat 5: ozrona folded on the River
+Seat 6: JSH1880 folded on the Flop
+Seat 7: KING-COBRA folded before Flop (didn't bet)
+Seat 8: zebot11 (button) collected (112999)
+Seat 9: daonna (small blind) folded before Flop
+
+PokerStars Hand #260719042917988977200005604: Tournament #9889772, No Limit Hold'em - Level X (600/1200 ante 200) - 2026/07/19 20:30:01 ACST [2026/07/19 11:00:01 UTC]
+Table '9889772 4' 9-max Seat #9 is the button
+Seat 2: baesmabend (69389 in chips)
+Seat 3: pp13720639 (358917 in chips)
+Seat 4: CapFlow (86520 in chips)
+Seat 5: ozrona (88449 in chips)
+Seat 6: JSH1880 (75867 in chips)
+Seat 7: KING-COBRA (130046 in chips)
+Seat 8: zebot11 (339459 in chips)
+Seat 9: daonna (125802 in chips)
+baesmabend: posts the ante 200
+pp13720639: posts the ante 200
+CapFlow: posts the ante 200
+ozrona: posts the ante 200
+JSH1880: posts the ante 200
+KING-COBRA: posts the ante 200
+zebot11: posts the ante 200
+daonna: posts the ante 200
+baesmabend: posts small blind 600
+pp13720639: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to ozrona [Tc 3c]
+CapFlow: folds
+ozrona: folds
+JSH1880: folds
+KING-COBRA: raises 2400 to 3600
+zebot11: calls 3600
+daonna: folds
+baesmabend: folds
+pp13720639: calls 2400
+*** FLOP *** [3d 2s 9h]
+pp13720639: checks
+KING-COBRA: bets 3200
+zebot11: calls 3200
+pp13720639: folds
+*** TURN *** [3d 2s 9h] [4c]
+KING-COBRA: bets 11640
+zebot11: calls 11640
+*** RIVER *** [3d 2s 9h 4c] [8c]
+KING-COBRA: bets 28453
+zebot11: folds
+Uncalled bet (28453) returned to KING-COBRA
+KING-COBRA collected 42680 from pot
+*** SUMMARY ***
+Total pot 42680 | Rake 0
+Board [3d 2s 9h 4c 8c]
+Seat 2: baesmabend (small blind) folded before Flop
+Seat 3: pp13720639 (big blind) folded on the Flop
+Seat 4: CapFlow folded before Flop (didn't bet)
+Seat 5: ozrona folded before Flop (didn't bet)
+Seat 6: JSH1880 folded before Flop (didn't bet)
+Seat 7: KING-COBRA collected (42680)
+Seat 8: zebot11 folded on the River
+Seat 9: daonna (button) folded before Flop (didn't bet)
+
+PokerStars Hand #260719042917988977200005694: Tournament #9889772, No Limit Hold'em - Level X (600/1200 ante 200) - 2026/07/19 20:31:28 ACST [2026/07/19 11:01:28 UTC]
+Table '9889772 4' 9-max Seat #2 is the button
+Seat 1: Holyone77 (70700 in chips)
+Seat 2: baesmabend (68589 in chips)
+Seat 3: pp13720639 (355117 in chips)
+Seat 4: CapFlow (86320 in chips)
+Seat 5: ozrona (88249 in chips)
+Seat 6: JSH1880 (75667 in chips)
+Seat 7: KING-COBRA (154086 in chips)
+Seat 8: zebot11 (320819 in chips)
+Seat 9: daonna (125602 in chips)
+pp13720639: posts the ante 200
+CapFlow: posts the ante 200
+ozrona: posts the ante 200
+JSH1880: posts the ante 200
+KING-COBRA: posts the ante 200
+zebot11: posts the ante 200
+daonna: posts the ante 200
+Holyone77: posts the ante 200
+baesmabend: posts the ante 200
+pp13720639: posts small blind 600
+CapFlow: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to ozrona [7h 9s]
+ozrona: folds
+JSH1880: folds
+KING-COBRA: folds
+zebot11: calls 1200
+daonna: folds
+Holyone77: folds
+baesmabend: raises 3600 to 4800
+pp13720639: folds
+CapFlow: raises 80120 to 84920 and is all-in
+zebot11: folds
+baesmabend: folds
+Uncalled bet (81320) returned to CapFlow
+CapFlow collected 12000 from pot
+*** SUMMARY ***
+Total pot 12000 | Rake 0
+Seat 1: Holyone77 folded before Flop (didn't bet)
+Seat 2: baesmabend (button) folded before Flop (didn't bet)
+Seat 3: pp13720639 (small blind) folded before Flop
+Seat 4: CapFlow (big blind) collected (12000)
+Seat 5: ozrona folded before Flop (didn't bet)
+Seat 6: JSH1880 folded before Flop (didn't bet)
+Seat 7: KING-COBRA folded before Flop (didn't bet)
+Seat 8: zebot11 folded before Flop (didn't bet)
+Seat 9: daonna folded before Flop (didn't bet)
+
+PokerStars Hand #260719042917988977200005744: Tournament #9889772, No Limit Hold'em - Level X (600/1200 ante 200) - 2026/07/19 20:32:11 ACST [2026/07/19 11:02:11 UTC]
+Table '9889772 4' 9-max Seat #3 is the button
+Seat 1: Holyone77 (70500 in chips)
+Seat 2: baesmabend (63589 in chips)
+Seat 3: pp13720639 (354317 in chips)
+Seat 4: CapFlow (94520 in chips)
+Seat 5: ozrona (88049 in chips)
+Seat 6: JSH1880 (75467 in chips)
+Seat 7: KING-COBRA (153886 in chips)
+Seat 8: zebot11 (319419 in chips)
+Seat 9: daonna (125402 in chips)
+CapFlow: posts the ante 200
+ozrona: posts the ante 200
+JSH1880: posts the ante 200
+KING-COBRA: posts the ante 200
+zebot11: posts the ante 200
+daonna: posts the ante 200
+Holyone77: posts the ante 200
+baesmabend: posts the ante 200
+pp13720639: posts the ante 200
+CapFlow: posts small blind 600
+ozrona: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to ozrona [9c Ac]
+JSH1880: folds
+KING-COBRA: folds
+zebot11: folds
+daonna: folds
+Holyone77: folds
+baesmabend: folds
+pp13720639: folds
+CapFlow: raises 1800 to 3000
+ozrona: folds
+Uncalled bet (1800) returned to CapFlow
+CapFlow collected 4200 from pot
+*** SUMMARY ***
+Total pot 4200 | Rake 0
+Seat 1: Holyone77 folded before Flop (didn't bet)
+Seat 2: baesmabend folded before Flop (didn't bet)
+Seat 3: pp13720639 (button) folded before Flop (didn't bet)
+Seat 4: CapFlow (small blind) collected (4200)
+Seat 5: ozrona (big blind) folded before Flop
+Seat 6: JSH1880 folded before Flop (didn't bet)
+Seat 7: KING-COBRA folded before Flop (didn't bet)
+Seat 8: zebot11 folded before Flop (didn't bet)
+Seat 9: daonna folded before Flop (didn't bet)
+
+PokerStars Hand #260719042917988977200005824: Tournament #9889772, No Limit Hold'em - Level X (600/1200 ante 200) - 2026/07/19 20:33:01 ACST [2026/07/19 11:03:01 UTC]
+Table '9889772 4' 9-max Seat #4 is the button
+Seat 1: Holyone77 (70300 in chips)
+Seat 2: baesmabend (63389 in chips)
+Seat 3: pp13720639 (354117 in chips)
+Seat 4: CapFlow (97320 in chips)
+Seat 5: ozrona (86649 in chips)
+Seat 6: JSH1880 (75267 in chips)
+Seat 7: KING-COBRA (153686 in chips)
+Seat 8: zebot11 (319219 in chips)
+Seat 9: daonna (125202 in chips)
+ozrona: posts the ante 200
+JSH1880: posts the ante 200
+KING-COBRA: posts the ante 200
+zebot11: posts the ante 200
+daonna: posts the ante 200
+Holyone77: posts the ante 200
+baesmabend: posts the ante 200
+pp13720639: posts the ante 200
+CapFlow: posts the ante 200
+ozrona: posts small blind 600
+JSH1880: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to ozrona [6h 4c]
+KING-COBRA: folds
+zebot11: raises 3600 to 4800
+daonna: folds
+Holyone77: folds
+baesmabend: folds
+pp13720639: raises 14400 to 19200
+CapFlow: folds
+ozrona: folds
+JSH1880: folds
+zebot11: calls 14400
+*** FLOP *** [Ts 6s 7s]
+zebot11: checks
+pp13720639: checks
+*** TURN *** [Ts 6s 7s] [Kc]
+zebot11: bets 32000
+pp13720639: calls 32000
+*** RIVER *** [Ts 6s 7s Kc] [8c]
+zebot11: checks
+pp13720639: bets 302717 and is all-in
+zebot11: calls 267819 and is all-in
+Uncalled bet (34898) returned to pp13720639
+*** SHOW DOWN ***
+zebot11: shows [9h 9c]
+pp13720639: shows [As 9s]
+pp13720639 collected 641638 from pot
+*** SUMMARY ***
+Total pot 641638 | Rake 0
+Board [Ts 6s 7s Kc 8c]
+Seat 1: Holyone77 folded before Flop (didn't bet)
+Seat 2: baesmabend folded before Flop (didn't bet)
+Seat 3: pp13720639 showed [As 9s] and won (641638)
+Seat 4: CapFlow (button) folded before Flop (didn't bet)
+Seat 5: ozrona (small blind) folded before Flop
+Seat 6: JSH1880 (big blind) folded before Flop
+Seat 7: KING-COBRA folded before Flop (didn't bet)
+Seat 8: zebot11 showed [9h 9c] and lost
+Seat 9: daonna folded before Flop (didn't bet)
+
+PokerStars Hand #2607190429179889772000059510: Tournament #9889772, No Limit Hold'em - Level X (600/1200 ante 200) - 2026/07/19 20:34:45 ACST [2026/07/19 11:04:45 UTC]
+Table '9889772 10' 9-max Seat #2 is the button
+Seat 1: Shnez (74773 in chips)
+Seat 2: Sakha_Khan (32222 in chips)
+Seat 3: Kid Sol (48654 in chips)
+Seat 4: aaduhero- (410230 in chips)
+Seat 5: baesmabend (63189 in chips)
+Seat 6: pp13720639 (676536 in chips)
+Seat 7: CapFlow (97120 in chips)
+Seat 8: ozrona (85849 in chips)
+Seat 9: JSH1880 (73867 in chips)
+Kid Sol: posts the ante 200
+aaduhero-: posts the ante 200
+baesmabend: posts the ante 200
+pp13720639: posts the ante 200
+CapFlow: posts the ante 200
+ozrona: posts the ante 200
+JSH1880: posts the ante 200
+Shnez: posts the ante 200
+Sakha_Khan: posts the ante 200
+Kid Sol: posts small blind 600
+aaduhero-: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to ozrona [6h 6s]
+baesmabend: folds
+pp13720639: folds
+CapFlow: folds
+ozrona: calls 1200
+JSH1880: folds
+Shnez: calls 1200
+Sakha_Khan: folds
+Kid Sol: calls 600
+aaduhero-: raises 4800 to 6000
+ozrona: calls 4800
+Shnez: calls 4800
+Kid Sol: folds
+*** FLOP *** [9c 6c Ah]
+aaduhero-: bets 6150
+ozrona: calls 6150
+Shnez: folds
+*** TURN *** [9c 6c Ah] [7d]
+aaduhero-: checks
+ozrona: bets 26400
+aaduhero-: folds
+Uncalled bet (26400) returned to ozrona
+ozrona collected 33300 from pot
+*** SUMMARY ***
+Total pot 33300 | Rake 0
+Board [9c 6c Ah 7d]
+Seat 1: Shnez folded on the Flop
+Seat 2: Sakha_Khan (button) folded before Flop (didn't bet)
+Seat 3: Kid Sol (small blind) folded before Flop
+Seat 4: aaduhero- (big blind) folded on the Turn
+Seat 5: baesmabend folded before Flop (didn't bet)
+Seat 6: pp13720639 folded before Flop (didn't bet)
+Seat 7: CapFlow folded before Flop (didn't bet)
+Seat 8: ozrona collected (33300)
+Seat 9: JSH1880 folded before Flop (didn't bet)
+
+PokerStars Hand #2607190429179889772000061010: Tournament #9889772, No Limit Hold'em - Level X (600/1200 ante 200) - 2026/07/19 20:36:20 ACST [2026/07/19 11:06:20 UTC]
+Table '9889772 10' 9-max Seat #3 is the button
+Seat 1: Shnez (68573 in chips)
+Seat 2: Sakha_Khan (32022 in chips)
+Seat 3: Kid Sol (47254 in chips)
+Seat 4: aaduhero- (397880 in chips)
+Seat 5: baesmabend (62989 in chips)
+Seat 6: pp13720639 (676336 in chips)
+Seat 7: CapFlow (96920 in chips)
+Seat 8: ozrona (106799 in chips)
+Seat 9: JSH1880 (73667 in chips)
+aaduhero-: posts the ante 200
+baesmabend: posts the ante 200
+pp13720639: posts the ante 200
+CapFlow: posts the ante 200
+ozrona: posts the ante 200
+JSH1880: posts the ante 200
+Shnez: posts the ante 200
+Sakha_Khan: posts the ante 200
+Kid Sol: posts the ante 200
+aaduhero-: posts small blind 600
+baesmabend: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to ozrona [Ts 4s]
+pp13720639: folds
+CapFlow: raises 2400 to 3600
+ozrona: folds
+JSH1880: folds
+Shnez: calls 3600
+Sakha_Khan: folds
+Kid Sol: folds
+aaduhero-: calls 3000
+baesmabend: calls 2400
+*** FLOP *** [6c 8s Tc]
+aaduhero-: checks
+baesmabend: bets 4050
+CapFlow: calls 4050
+Shnez: calls 4050
+aaduhero-: raises 8100 to 12150
+baesmabend: raises 42989 to 55139 and is all-in
+CapFlow: folds
+Shnez: folds
+aaduhero-: calls 42989
+*** TURN *** [6c 8s Tc] [Ah]
+*** RIVER *** [6c 8s Tc Ah] [Ac]
+*** SHOW DOWN ***
+aaduhero-: shows [7c Jc]
+baesmabend: shows [6h 8h]
+aaduhero- collected 134578 from pot
+*** SUMMARY ***
+Total pot 134578 | Rake 0
+Board [6c 8s Tc Ah Ac]
+Seat 1: Shnez folded on the Flop
+Seat 2: Sakha_Khan folded before Flop (didn't bet)
+Seat 3: Kid Sol (button) folded before Flop (didn't bet)
+Seat 4: aaduhero- (small blind) showed [7c Jc] and won (134578)
+Seat 5: baesmabend (big blind) showed [6h 8h] and lost
+Seat 6: pp13720639 folded before Flop (didn't bet)
+Seat 7: CapFlow folded on the Flop
+Seat 8: ozrona folded before Flop (didn't bet)
+Seat 9: JSH1880 folded before Flop (didn't bet)
+
+PokerStars Hand #2607190429179889772000062310: Tournament #9889772, No Limit Hold'em - Level X (600/1200 ante 200) - 2026/07/19 20:37:58 ACST [2026/07/19 11:07:58 UTC]
+Table '9889772 10' 9-max Seat #4 is the button
+Seat 1: Shnez (60723 in chips)
+Seat 2: Sakha_Khan (31822 in chips)
+Seat 3: Kid Sol (47054 in chips)
+Seat 4: aaduhero- (476369 in chips)
+Seat 6: pp13720639 (676136 in chips)
+Seat 7: CapFlow (89070 in chips)
+Seat 8: ozrona (106599 in chips)
+Seat 9: JSH1880 (73467 in chips)
+pp13720639: posts the ante 200
+CapFlow: posts the ante 200
+ozrona: posts the ante 200
+JSH1880: posts the ante 200
+Shnez: posts the ante 200
+Sakha_Khan: posts the ante 200
+Kid Sol: posts the ante 200
+aaduhero-: posts the ante 200
+pp13720639: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to ozrona [6c Ac]
+CapFlow: folds
+ozrona: raises 1800 to 3000
+JSH1880: calls 3000
+Shnez: calls 3000
+Sakha_Khan: folds
+Kid Sol: calls 3000
+aaduhero-: folds
+pp13720639: calls 1800
+*** FLOP *** [9h 7h 4d]
+pp13720639: checks
+ozrona: checks
+JSH1880: checks
+Shnez: bets 16600
+Kid Sol: raises 27254 to 43854 and is all-in
+pp13720639: folds
+ozrona: folds
+JSH1880: folds
+Shnez: folds
+Uncalled bet (27254) returned to Kid Sol
+Kid Sol collected 49800 from pot
+*** SUMMARY ***
+Total pot 49800 | Rake 0
+Board [9h 7h 4d]
+Seat 1: Shnez folded on the Flop
+Seat 2: Sakha_Khan folded before Flop (didn't bet)
+Seat 3: Kid Sol collected (49800)
+Seat 4: aaduhero- (button) folded before Flop (didn't bet)
+Seat 6: pp13720639 (big blind) folded on the Flop
+Seat 7: CapFlow folded before Flop (didn't bet)
+Seat 8: ozrona folded on the Flop
+Seat 9: JSH1880 folded on the Flop
+
+PokerStars Hand #2607190429179889772000063310: Tournament #9889772, No Limit Hold'em - Level X (600/1200 ante 200) - 2026/07/19 20:39:08 ACST [2026/07/19 11:09:08 UTC]
+Table '9889772 10' 9-max Seat #5 is the button
+Seat 1: Shnez (40923 in chips)
+Seat 2: Sakha_Khan (31622 in chips)
+Seat 3: Kid Sol (77054 in chips)
+Seat 4: aaduhero- (476169 in chips)
+Seat 6: pp13720639 (672936 in chips)
+Seat 7: CapFlow (88870 in chips)
+Seat 8: ozrona (103399 in chips)
+Seat 9: JSH1880 (70267 in chips)
+pp13720639: posts the ante 200
+CapFlow: posts the ante 200
+ozrona: posts the ante 200
+JSH1880: posts the ante 200
+Shnez: posts the ante 200
+Sakha_Khan: posts the ante 200
+Kid Sol: posts the ante 200
+aaduhero-: posts the ante 200
+pp13720639: posts small blind 600
+CapFlow: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to ozrona [6d 9s]
+ozrona: folds
+JSH1880: folds
+Shnez: calls 1200
+Sakha_Khan: folds
+Kid Sol: calls 1200
+aaduhero-: folds
+pp13720639: calls 600
+CapFlow: checks
+*** FLOP *** [5h 8s 7h]
+pp13720639: bets 3200
+CapFlow: folds
+Shnez: calls 3200
+Kid Sol: folds
+*** TURN *** [5h 8s 7h] [2d]
+pp13720639: bets 8533
+Shnez: folds
+Uncalled bet (8533) returned to pp13720639
+pp13720639 collected 12800 from pot
+*** SUMMARY ***
+Total pot 12800 | Rake 0
+Board [5h 8s 7h 2d]
+Seat 1: Shnez folded on the Turn
+Seat 2: Sakha_Khan folded before Flop (didn't bet)
+Seat 3: Kid Sol folded on the Flop
+Seat 4: aaduhero- folded before Flop (didn't bet)
+Seat 6: pp13720639 (small blind) collected (12800)
+Seat 7: CapFlow (big blind) folded on the Flop
+Seat 8: ozrona folded before Flop (didn't bet)
+Seat 9: JSH1880 folded before Flop (didn't bet)
+
+PokerStars Hand #2607190429179889772000064610: Tournament #9889772, No Limit Hold'em - Level XI (800/1600 ante 200) - 2026/07/19 20:40:22 ACST [2026/07/19 11:10:22 UTC]
+Table '9889772 10' 9-max Seat #6 is the button
+Seat 1: Shnez (36323 in chips)
+Seat 2: Sakha_Khan (31422 in chips)
+Seat 3: Kid Sol (75654 in chips)
+Seat 4: aaduhero- (475969 in chips)
+Seat 6: pp13720639 (681136 in chips)
+Seat 7: CapFlow (87470 in chips)
+Seat 8: ozrona (103199 in chips)
+Seat 9: JSH1880 (70067 in chips)
+CapFlow: posts the ante 200
+ozrona: posts the ante 200
+JSH1880: posts the ante 200
+Shnez: posts the ante 200
+Sakha_Khan: posts the ante 200
+Kid Sol: posts the ante 200
+aaduhero-: posts the ante 200
+pp13720639: posts the ante 200
+CapFlow: posts small blind 800
+ozrona: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to ozrona [Kh Ts]
+JSH1880: folds
+Shnez: calls 1600
+Sakha_Khan: folds
+Kid Sol: folds
+aaduhero-: raises 4800 to 6400
+pp13720639: folds
+CapFlow: raises 12000 to 18400
+ozrona: folds
+Shnez: folds
+aaduhero-: calls 12000
+*** FLOP *** [4c As 5c]
+CapFlow: bets 32400
+aaduhero-: calls 32400
+*** TURN *** [4c As 5c] [Th]
+CapFlow: checks
+aaduhero-: bets 424169 and is all-in
+CapFlow: folds
+Uncalled bet (424169) returned to aaduhero-
+aaduhero- collected 106400 from pot
+*** SUMMARY ***
+Total pot 106400 | Rake 0
+Board [4c As 5c Th]
+Seat 1: Shnez folded before Flop (didn't bet)
+Seat 2: Sakha_Khan folded before Flop (didn't bet)
+Seat 3: Kid Sol folded before Flop (didn't bet)
+Seat 4: aaduhero- collected (106400)
+Seat 6: pp13720639 (button) folded before Flop (didn't bet)
+Seat 7: CapFlow (small blind) folded on the Turn
+Seat 8: ozrona (big blind) folded before Flop
+Seat 9: JSH1880 folded before Flop (didn't bet)
+
+PokerStars Hand #2607190429179889772000065410: Tournament #9889772, No Limit Hold'em - Level XI (800/1600 ante 200) - 2026/07/19 20:41:31 ACST [2026/07/19 11:11:31 UTC]
+Table '9889772 10' 9-max Seat #7 is the button
+Seat 1: Shnez (34523 in chips)
+Seat 2: Sakha_Khan (31222 in chips)
+Seat 3: Kid Sol (75454 in chips)
+Seat 4: aaduhero- (531369 in chips)
+Seat 6: pp13720639 (680936 in chips)
+Seat 7: CapFlow (36470 in chips)
+Seat 8: ozrona (101399 in chips)
+Seat 9: JSH1880 (69867 in chips)
+ozrona: posts the ante 200
+JSH1880: posts the ante 200
+Shnez: posts the ante 200
+Sakha_Khan: posts the ante 200
+Kid Sol: posts the ante 200
+aaduhero-: posts the ante 200
+pp13720639: posts the ante 200
+CapFlow: posts the ante 200
+ozrona: posts small blind 800
+JSH1880: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to ozrona [6s Th]
+Shnez: folds
+Sakha_Khan: calls 1600
+Kid Sol: calls 1600
+aaduhero-: folds
+pp13720639: folds
+CapFlow: folds
+ozrona: calls 800
+JSH1880: checks
+*** FLOP *** [3h 5d Ks]
+ozrona: checks
+JSH1880: checks
+Sakha_Khan: bets 4000
+Kid Sol: calls 4000
+ozrona: folds
+JSH1880: folds
+*** TURN *** [3h 5d Ks] [Td]
+Sakha_Khan: checks
+Kid Sol: bets 9600
+Sakha_Khan: raises 15822 to 25422 and is all-in
+Kid Sol: calls 15822
+*** RIVER *** [3h 5d Ks Td] [4s]
+*** SHOW DOWN ***
+Kid Sol: shows [9c Kd]
+Sakha_Khan: shows [Ac As]
+Sakha_Khan collected 66844 from pot
+*** SUMMARY ***
+Total pot 66844 | Rake 0
+Board [3h 5d Ks Td 4s]
+Seat 1: Shnez folded before Flop (didn't bet)
+Seat 2: Sakha_Khan showed [Ac As] and won (66844)
+Seat 3: Kid Sol showed [9c Kd] and lost
+Seat 4: aaduhero- folded before Flop (didn't bet)
+Seat 6: pp13720639 folded before Flop (didn't bet)
+Seat 7: CapFlow (button) folded before Flop (didn't bet)
+Seat 8: ozrona (small blind) folded on the Flop
+Seat 9: JSH1880 (big blind) folded on the Flop
+
+PokerStars Hand #2607190429179889772000066510: Tournament #9889772, No Limit Hold'em - Level XI (800/1600 ante 200) - 2026/07/19 20:42:39 ACST [2026/07/19 11:12:39 UTC]
+Table '9889772 10' 9-max Seat #8 is the button
+Seat 1: Shnez (34323 in chips)
+Seat 2: Sakha_Khan (66844 in chips)
+Seat 3: Kid Sol (44232 in chips)
+Seat 4: aaduhero- (531169 in chips)
+Seat 6: pp13720639 (680736 in chips)
+Seat 7: CapFlow (36270 in chips)
+Seat 8: ozrona (99599 in chips)
+Seat 9: JSH1880 (68067 in chips)
+JSH1880: posts the ante 200
+Shnez: posts the ante 200
+Sakha_Khan: posts the ante 200
+Kid Sol: posts the ante 200
+aaduhero-: posts the ante 200
+pp13720639: posts the ante 200
+CapFlow: posts the ante 200
+ozrona: posts the ante 200
+JSH1880: posts small blind 800
+Shnez: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to ozrona [2c 6c]
+Sakha_Khan: folds
+Kid Sol: folds
+aaduhero-: folds
+pp13720639: folds
+CapFlow: raises 3200 to 4800
+ozrona: folds
+JSH1880: folds
+Shnez: calls 3200
+*** FLOP *** [5s Qc Js]
+Shnez: checks
+CapFlow: bets 3000
+Shnez: calls 3000
+*** TURN *** [5s Qc Js] [4d]
+Shnez: checks
+CapFlow: bets 13500
+Shnez: folds
+Uncalled bet (13500) returned to CapFlow
+CapFlow collected 18000 from pot
+*** SUMMARY ***
+Total pot 18000 | Rake 0
+Board [5s Qc Js 4d]
+Seat 1: Shnez (big blind) folded on the Turn
+Seat 2: Sakha_Khan folded before Flop (didn't bet)
+Seat 3: Kid Sol folded before Flop (didn't bet)
+Seat 4: aaduhero- folded before Flop (didn't bet)
+Seat 6: pp13720639 folded before Flop (didn't bet)
+Seat 7: CapFlow collected (18000)
+Seat 8: ozrona (button) folded before Flop (didn't bet)
+Seat 9: JSH1880 (small blind) folded before Flop
+
+PokerStars Hand #2607190429179889772000067610: Tournament #9889772, No Limit Hold'em - Level XI (800/1600 ante 200) - 2026/07/19 20:43:39 ACST [2026/07/19 11:13:39 UTC]
+Table '9889772 10' 9-max Seat #9 is the button
+Seat 1: Shnez (26323 in chips)
+Seat 2: Sakha_Khan (66644 in chips)
+Seat 3: Kid Sol (44032 in chips)
+Seat 4: aaduhero- (530969 in chips)
+Seat 6: pp13720639 (680536 in chips)
+Seat 7: CapFlow (46270 in chips)
+Seat 8: ozrona (99399 in chips)
+Seat 9: JSH1880 (67067 in chips)
+Shnez: posts the ante 200
+Sakha_Khan: posts the ante 200
+Kid Sol: posts the ante 200
+aaduhero-: posts the ante 200
+pp13720639: posts the ante 200
+CapFlow: posts the ante 200
+ozrona: posts the ante 200
+JSH1880: posts the ante 200
+Shnez: posts small blind 800
+Sakha_Khan: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to ozrona [7c 7s]
+Kid Sol: folds
+aaduhero-: folds
+pp13720639: raises 1600 to 3200
+CapFlow: folds
+ozrona: calls 3200
+JSH1880: folds
+Shnez: calls 2400
+Sakha_Khan: calls 1600
+*** FLOP *** [Ks 5s 6c]
+Shnez: checks
+Sakha_Khan: checks
+pp13720639: bets 7200
+ozrona: calls 7200
+Shnez: raises 14523 to 21723 and is all-in
+Sakha_Khan: folds
+pp13720639: calls 14523
+ozrona: folds
+*** TURN *** [Ks 5s 6c] [9h]
+*** RIVER *** [Ks 5s 6c 9h] [Qc]
+*** SHOW DOWN ***
+pp13720639: shows [6d Ah]
+Shnez: shows [Kd 5c]
+Shnez collected 65046 from pot
+*** SUMMARY ***
+Total pot 65046 | Rake 0
+Board [Ks 5s 6c 9h Qc]
+Seat 1: Shnez (small blind) showed [Kd 5c] and won (65046)
+Seat 2: Sakha_Khan (big blind) folded on the Flop
+Seat 3: Kid Sol folded before Flop (didn't bet)
+Seat 4: aaduhero- folded before Flop (didn't bet)
+Seat 6: pp13720639 showed [6d Ah] and lost
+Seat 7: CapFlow folded before Flop (didn't bet)
+Seat 8: ozrona folded on the Flop
+Seat 9: JSH1880 (button) folded before Flop (didn't bet)
+
+PokerStars Hand #2607190429179889772000068510: Tournament #9889772, No Limit Hold'em - Level XI (800/1600 ante 200) - 2026/07/19 20:44:48 ACST [2026/07/19 11:14:48 UTC]
+Table '9889772 10' 9-max Seat #1 is the button
+Seat 1: Shnez (66246 in chips)
+Seat 2: Sakha_Khan (63244 in chips)
+Seat 3: Kid Sol (43832 in chips)
+Seat 4: aaduhero- (530769 in chips)
+Seat 6: pp13720639 (655413 in chips)
+Seat 7: CapFlow (46070 in chips)
+Seat 8: ozrona (88799 in chips)
+Seat 9: JSH1880 (66867 in chips)
+Sakha_Khan: posts the ante 200
+Kid Sol: posts the ante 200
+aaduhero-: posts the ante 200
+pp13720639: posts the ante 200
+CapFlow: posts the ante 200
+ozrona: posts the ante 200
+JSH1880: posts the ante 200
+Shnez: posts the ante 200
+Sakha_Khan: posts small blind 800
+Kid Sol: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to ozrona [As 8h]
+aaduhero-: folds
+pp13720639: folds
+CapFlow: folds
+ozrona: raises 2000 to 3600
+JSH1880: folds
+Shnez: folds
+Sakha_Khan: folds
+Kid Sol: raises 38432 to 42032 and is all-in
+ozrona: calls 38432
+*** FLOP *** [Kc Td 9h]
+*** TURN *** [Kc Td 9h] [Qc]
+*** RIVER *** [Kc Td 9h Qc] [2d]
+*** SHOW DOWN ***
+Kid Sol: shows [Qh Jd]
+ozrona: shows [As 8h]
+Kid Sol collected 86464 from pot
+*** SUMMARY ***
+Total pot 86464 | Rake 0
+Board [Kc Td 9h Qc 2d]
+Seat 1: Shnez (button) folded before Flop (didn't bet)
+Seat 2: Sakha_Khan (small blind) folded before Flop
+Seat 3: Kid Sol (big blind) showed [Qh Jd] and won (86464)
+Seat 4: aaduhero- folded before Flop (didn't bet)
+Seat 6: pp13720639 folded before Flop (didn't bet)
+Seat 7: CapFlow folded before Flop (didn't bet)
+Seat 8: ozrona showed [As 8h] and lost
+Seat 9: JSH1880 folded before Flop (didn't bet)
+
+PokerStars Hand #2607190429179889772000069710: Tournament #9889772, No Limit Hold'em - Level XI (800/1600 ante 200) - 2026/07/19 20:45:44 ACST [2026/07/19 11:15:44 UTC]
+Table '9889772 10' 9-max Seat #2 is the button
+Seat 1: Shnez (66046 in chips)
+Seat 2: Sakha_Khan (62244 in chips)
+Seat 3: Kid Sol (88064 in chips)
+Seat 4: aaduhero- (530569 in chips)
+Seat 6: pp13720639 (655213 in chips)
+Seat 7: CapFlow (45870 in chips)
+Seat 8: ozrona (46567 in chips)
+Seat 9: JSH1880 (66667 in chips)
+Kid Sol: posts the ante 200
+aaduhero-: posts the ante 200
+pp13720639: posts the ante 200
+CapFlow: posts the ante 200
+ozrona: posts the ante 200
+JSH1880: posts the ante 200
+Shnez: posts the ante 200
+Sakha_Khan: posts the ante 200
+Kid Sol: posts small blind 800
+aaduhero-: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to ozrona [9c Jh]
+pp13720639: folds
+CapFlow: raises 3200 to 4800
+ozrona: folds
+JSH1880: folds
+Shnez: folds
+Sakha_Khan: folds
+Kid Sol: folds
+aaduhero-: calls 3200
+*** FLOP *** [3c Jd 3s]
+aaduhero-: checks
+CapFlow: bets 9000
+aaduhero-: folds
+Uncalled bet (9000) returned to CapFlow
+CapFlow collected 12000 from pot
+*** SUMMARY ***
+Total pot 12000 | Rake 0
+Board [3c Jd 3s]
+Seat 1: Shnez folded before Flop (didn't bet)
+Seat 2: Sakha_Khan (button) folded before Flop (didn't bet)
+Seat 3: Kid Sol (small blind) folded before Flop
+Seat 4: aaduhero- (big blind) folded on the Flop
+Seat 6: pp13720639 folded before Flop (didn't bet)
+Seat 7: CapFlow collected (12000)
+Seat 8: ozrona folded before Flop (didn't bet)
+Seat 9: JSH1880 folded before Flop (didn't bet)
+
+PokerStars Hand #2607190429179889772000070110: Tournament #9889772, No Limit Hold'em - Level XI (800/1600 ante 200) - 2026/07/19 20:46:21 ACST [2026/07/19 11:16:21 UTC]
+Table '9889772 10' 9-max Seat #3 is the button
+Seat 1: Shnez (65846 in chips)
+Seat 2: Sakha_Khan (62044 in chips)
+Seat 3: Kid Sol (87064 in chips)
+Seat 4: aaduhero- (525569 in chips)
+Seat 6: pp13720639 (655013 in chips)
+Seat 7: CapFlow (52870 in chips)
+Seat 8: ozrona (46367 in chips)
+Seat 9: JSH1880 (66467 in chips)
+aaduhero-: posts the ante 200
+pp13720639: posts the ante 200
+CapFlow: posts the ante 200
+ozrona: posts the ante 200
+JSH1880: posts the ante 200
+Shnez: posts the ante 200
+Sakha_Khan: posts the ante 200
+Kid Sol: posts the ante 200
+aaduhero-: posts small blind 800
+pp13720639: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to ozrona [2d Qd]
+CapFlow: folds
+ozrona: folds
+JSH1880: raises 1600 to 3200
+Shnez: folds
+Sakha_Khan: calls 3200
+Kid Sol: folds
+aaduhero-: folds
+pp13720639: calls 1600
+*** FLOP *** [Kd 5d Js]
+pp13720639: checks
+JSH1880: bets 4000
+Sakha_Khan: calls 4000
+pp13720639: calls 4000
+*** TURN *** [Kd 5d Js] [Qs]
+pp13720639: checks
+JSH1880: checks
+Sakha_Khan: bets 12000
+pp13720639: folds
+JSH1880: calls 12000
+*** RIVER *** [Kd 5d Js Qs] [5s]
+JSH1880: checks
+Sakha_Khan: bets 42644 and is all-in
+JSH1880: folds
+Uncalled bet (42644) returned to Sakha_Khan
+Sakha_Khan collected 48000 from pot
+*** SUMMARY ***
+Total pot 48000 | Rake 0
+Board [Kd 5d Js Qs 5s]
+Seat 1: Shnez folded before Flop (didn't bet)
+Seat 2: Sakha_Khan collected (48000)
+Seat 3: Kid Sol (button) folded before Flop (didn't bet)
+Seat 4: aaduhero- (small blind) folded before Flop
+Seat 6: pp13720639 (big blind) folded on the Turn
+Seat 7: CapFlow folded before Flop (didn't bet)
+Seat 8: ozrona folded before Flop (didn't bet)
+Seat 9: JSH1880 folded on the River
+
+PokerStars Hand #2607190429179889772000071510: Tournament #9889772, No Limit Hold'em - Level XI (800/1600 ante 200) - 2026/07/19 20:47:47 ACST [2026/07/19 11:17:47 UTC]
+Table '9889772 10' 9-max Seat #4 is the button
+Seat 1: Shnez (65646 in chips)
+Seat 2: Sakha_Khan (90644 in chips)
+Seat 3: Kid Sol (86864 in chips)
+Seat 4: aaduhero- (524569 in chips)
+Seat 6: pp13720639 (647613 in chips)
+Seat 7: CapFlow (52670 in chips)
+Seat 8: ozrona (46167 in chips)
+Seat 9: JSH1880 (47067 in chips)
+pp13720639: posts the ante 200
+CapFlow: posts the ante 200
+ozrona: posts the ante 200
+JSH1880: posts the ante 200
+Shnez: posts the ante 200
+Sakha_Khan: posts the ante 200
+Kid Sol: posts the ante 200
+aaduhero-: posts the ante 200
+pp13720639: posts small blind 800
+CapFlow: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to ozrona [Ah 5s]
+ozrona: folds
+JSH1880: folds
+Shnez: calls 1600
+Sakha_Khan: folds
+Kid Sol: raises 3200 to 4800
+aaduhero-: folds
+pp13720639: folds
+CapFlow: folds
+Shnez: calls 3200
+*** FLOP *** [Td 7d 5d]
+Shnez: checks
+Kid Sol: bets 7600
+Shnez: folds
+Uncalled bet (7600) returned to Kid Sol
+Kid Sol collected 13600 from pot
+*** SUMMARY ***
+Total pot 13600 | Rake 0
+Board [Td 7d 5d]
+Seat 1: Shnez folded on the Flop
+Seat 2: Sakha_Khan folded before Flop (didn't bet)
+Seat 3: Kid Sol collected (13600)
+Seat 4: aaduhero- (button) folded before Flop (didn't bet)
+Seat 6: pp13720639 (small blind) folded before Flop
+Seat 7: CapFlow (big blind) folded before Flop
+Seat 8: ozrona folded before Flop (didn't bet)
+Seat 9: JSH1880 folded before Flop (didn't bet)
+
+PokerStars Hand #2607190429179889772000072410: Tournament #9889772, No Limit Hold'em - Level XI (800/1600 ante 200) - 2026/07/19 20:48:40 ACST [2026/07/19 11:18:40 UTC]
+Table '9889772 10' 9-max Seat #6 is the button
+Seat 1: Shnez (60646 in chips)
+Seat 2: Sakha_Khan (90444 in chips)
+Seat 3: Kid Sol (95464 in chips)
+Seat 4: aaduhero- (524369 in chips)
+Seat 6: pp13720639 (646613 in chips)
+Seat 7: CapFlow (50870 in chips)
+Seat 8: ozrona (45967 in chips)
+Seat 9: JSH1880 (46867 in chips)
+CapFlow: posts the ante 200
+ozrona: posts the ante 200
+JSH1880: posts the ante 200
+Shnez: posts the ante 200
+Sakha_Khan: posts the ante 200
+Kid Sol: posts the ante 200
+aaduhero-: posts the ante 200
+pp13720639: posts the ante 200
+CapFlow: posts small blind 800
+ozrona: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to ozrona [Js Kh]
+JSH1880: folds
+Shnez: calls 1600
+Sakha_Khan: folds
+Kid Sol: calls 1600
+aaduhero-: folds
+pp13720639: folds
+CapFlow: folds
+ozrona: raises 43367 to 44967 and is all-in
+Shnez: folds
+Kid Sol: folds
+Uncalled bet (44967) returned to ozrona
+ozrona collected 5600 from pot
+*** SUMMARY ***
+Total pot 5600 | Rake 0
+Seat 1: Shnez folded before Flop (didn't bet)
+Seat 2: Sakha_Khan folded before Flop (didn't bet)
+Seat 3: Kid Sol folded before Flop (didn't bet)
+Seat 4: aaduhero- folded before Flop (didn't bet)
+Seat 6: pp13720639 (button) folded before Flop (didn't bet)
+Seat 7: CapFlow (small blind) folded before Flop
+Seat 8: ozrona (big blind) collected (5600)
+Seat 9: JSH1880 folded before Flop (didn't bet)
+
+PokerStars Hand #2607190429179889772000073310: Tournament #9889772, No Limit Hold'em - Level XI (800/1600 ante 200) - 2026/07/19 20:49:43 ACST [2026/07/19 11:19:43 UTC]
+Table '9889772 10' 9-max Seat #7 is the button
+Seat 1: Shnez (58846 in chips)
+Seat 2: Sakha_Khan (90244 in chips)
+Seat 3: Kid Sol (93664 in chips)
+Seat 4: aaduhero- (524169 in chips)
+Seat 6: pp13720639 (646413 in chips)
+Seat 7: CapFlow (49870 in chips)
+Seat 8: ozrona (51367 in chips)
+Seat 9: JSH1880 (46667 in chips)
+ozrona: posts the ante 200
+JSH1880: posts the ante 200
+Shnez: posts the ante 200
+Sakha_Khan: posts the ante 200
+Kid Sol: posts the ante 200
+aaduhero-: posts the ante 200
+pp13720639: posts the ante 200
+CapFlow: posts the ante 200
+ozrona: posts small blind 800
+JSH1880: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to ozrona [Ad 9h]
+Shnez: folds
+Sakha_Khan: raises 1600 to 3200
+Kid Sol: folds
+aaduhero-: folds
+pp13720639: folds
+CapFlow: folds
+ozrona: folds
+JSH1880: calls 1600
+*** FLOP *** [Qc 5c Td]
+JSH1880: checks
+Sakha_Khan: bets 2933
+JSH1880: calls 2933
+*** TURN *** [Qc 5c Td] [Ah]
+JSH1880: checks
+Sakha_Khan: bets 7333
+JSH1880: raises 9532 to 16865
+Sakha_Khan: folds
+Uncalled bet (9532) returned to JSH1880
+JSH1880 collected 29332 from pot
+*** SUMMARY ***
+Total pot 29332 | Rake 0
+Board [Qc 5c Td Ah]
+Seat 1: Shnez folded before Flop (didn't bet)
+Seat 2: Sakha_Khan folded on the Turn
+Seat 3: Kid Sol folded before Flop (didn't bet)
+Seat 4: aaduhero- folded before Flop (didn't bet)
+Seat 6: pp13720639 folded before Flop (didn't bet)
+Seat 7: CapFlow (button) folded before Flop (didn't bet)
+Seat 8: ozrona (small blind) folded before Flop
+Seat 9: JSH1880 (big blind) collected (29332)
+
+PokerStars Hand #2607190429179889772000074410: Tournament #9889772, No Limit Hold'em - Level XI (800/1600 ante 200) - 2026/07/19 20:50:57 ACST [2026/07/19 11:20:57 UTC]
+Table '9889772 10' 9-max Seat #8 is the button
+Seat 1: Shnez (58646 in chips)
+Seat 2: Sakha_Khan (76578 in chips)
+Seat 3: Kid Sol (93464 in chips)
+Seat 4: aaduhero- (523969 in chips)
+Seat 6: pp13720639 (646213 in chips)
+Seat 7: CapFlow (49670 in chips)
+Seat 8: ozrona (50367 in chips)
+Seat 9: JSH1880 (62333 in chips)
+JSH1880: posts the ante 200
+Shnez: posts the ante 200
+Sakha_Khan: posts the ante 200
+Kid Sol: posts the ante 200
+aaduhero-: posts the ante 200
+pp13720639: posts the ante 200
+CapFlow: posts the ante 200
+ozrona: posts the ante 200
+JSH1880: posts small blind 800
+Shnez: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to ozrona [Tc Ah]
+Sakha_Khan: folds
+Kid Sol: calls 1600
+aaduhero-: folds
+pp13720639: calls 1600
+CapFlow: folds
+ozrona: raises 5600 to 7200
+JSH1880: folds
+Shnez: folds
+Kid Sol: calls 5600
+pp13720639: calls 5600
+*** FLOP *** [Qd 6s 5c]
+Kid Sol: checks
+pp13720639: checks
+ozrona: checks
+*** TURN *** [Qd 6s 5c] [Ad]
+Kid Sol: checks
+pp13720639: bets 8533
+ozrona: raises 34434 to 42967 and is all-in
+Kid Sol: folds
+pp13720639: calls 34434
+*** RIVER *** [Qd 6s 5c Ad] [4s]
+*** SHOW DOWN ***
+ozrona: shows [Tc Ah]
+pp13720639: shows [4d As]
+pp13720639 collected 111534 from pot
+*** SUMMARY ***
+Total pot 111534 | Rake 0
+Board [Qd 6s 5c Ad 4s]
+Seat 1: Shnez (big blind) folded before Flop
+Seat 2: Sakha_Khan folded before Flop (didn't bet)
+Seat 3: Kid Sol folded on the Turn
+Seat 4: aaduhero- folded before Flop (didn't bet)
+Seat 6: pp13720639 showed [4d As] and won (111534)
+Seat 7: CapFlow folded before Flop (didn't bet)
+Seat 8: ozrona (button) showed [Tc Ah] and lost
+Seat 9: JSH1880 (small blind) folded before Flop

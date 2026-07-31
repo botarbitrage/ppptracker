@@ -199,7 +199,11 @@ def _street_lines(flow, street_name, seat_map, initial_bet=0,
             player_bets[sid] = player_bets.get(sid, 0) + chips
             street_inv[sid]  = street_inv.get(sid, 0) + chips
         elif t in _CALL_TYPES:
-            player_bets[sid] = current_bet
+            # Record the TRUE cumulative commitment, not current_bet: an
+            # all-in call capped below the bet must not look like a full match,
+            # or the balanced-pot heuristic suppresses a real uncalled return
+            # (PT4 then rejects the hand as unbalanced).
+            player_bets[sid] = player_bets.get(sid, 0) + chips
             street_inv[sid]  = street_inv.get(sid, 0) + chips
         if line:
             lines.append(line)
@@ -543,7 +547,11 @@ def hand_to_ps_block(record, tz=None, stack_overrides=None, blind_levels=None):
         if t in _RAISE_TYPES:
             _disp_pb[sid] = current_bet
         elif t in _CALL_TYPES:
-            _disp_pb[sid] = current_bet
+            # True cumulative commitment (chips is already corrected/capped) —
+            # a capped all-in call must not register as matching current_bet,
+            # or _pf_balanced wrongly suppresses the uncalled-bet return line
+            # and PT4 rejects the hand as unbalanced.
+            _disp_pb[sid] = _disp_pb.get(sid, 0) + chips
         elif t in _BET_TYPES:
             _disp_pb[sid] = _disp_pb.get(sid, 0) + chips
         if line:
