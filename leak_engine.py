@@ -366,6 +366,263 @@ def validate_pot(hand):
     return problems
 
 
+# ── Phase 1: preflop stats ──────────────────────────────────────────────────
+# Each stat is a (made, opportunity) pair per hand, hero-perspective, matching
+# the PT4/BBZ definitions decoded from the .pt4rpt (design doc Appendix A).
+#
+# 'global' stats are the ones whose BBZ report formula lost the position
+# grouping (the CSV repeats one population-wide value on every position row).
+# We still compute true per-position splits for them; the validation gate
+# compares them population-wide, matching what PT4 actually emitted.
+
+PREFLOP_STATS = [
+    # key                        CSV/BBZ column label                global?
+    ('raise_first',              'Raise First',                      False),
+    ('limp_open',                'Limp Open',                        True),
+    ('limp_raise',               'Limp/Raise',                       False),
+    ('limp_call',                'Limp/Call',                        False),
+    ('limp_fold',                'Limp/Fold',                        False),
+    ('raise_sb_open_limp',       'Raise SB Open Limp',               True),
+    ('fold_bb_v_sb',             'Fold BB v SB',                     False),
+    ('fold_to_steal',            'Fold to Steal',                    False),
+    ('call_pf_2bet',             'Call PF 2Bet',                     False),
+    ('threebet_pf',              '3Bet PF',                          False),
+    ('threebet_steal',           '3Bet Steal',                       False),
+    ('threebet_nai_u35',         '3Bet NAI <35',                     True),
+    ('twobet_pf_fold',           '2Bet PF & Fold',                   False),
+    ('raise_4bet_pf',            'Raise & 4Bet+ PF',                 False),
+    ('threebet_pf_fold',         '3Bet PF & Fold',                   False),
+    ('fold_4bet_after_3bet_u30', 'Fold to PF 4Bet After 3Bet <30',   True),
+    ('pf_squeeze',               'PF Squeeze',                       False),
+]
+
+_VERB_CHAR = {'raise': 'R', 'bet': 'R', 'call': 'C', 'fold': 'F', 'check': 'X'}
+
+
+def _hero_preflop_walk(hand):
+    """
+    Replay the preflop action and capture the hero's decision contexts.
+
+    Returns (contexts, state) where each context describes the situation at
+    one hero action: verb, raises seen so far, limpers/callers before the
+    action, whether a raise was legally available, etc. State carries
+    hand-level facts (first raiser, limpers before the first raise, …).
+    """
+    hero = hand['hero']
+    hero_stack = hand['stacks'].get(hero, 0)
+    hero_ante = sum(p['amount'] for p in hand['posts']
+                    if p['kind'] == 'ante' and p['name'] == hero)
+
+    committed = {}                       # per-player chips committed preflop
+    for p in hand['posts']:
+        if p['kind'] in ('sb', 'bb'):
+            committed[p['name']] = committed.get(p['name'], 0) + p['amount']
+    current_bet = hand['bb_amt']
+
+    n_raises = 0
+    limpers = 0                          # callers before any raise
+    limpers_at_first_raise = 0
+    first_limper = None
+    callers_since_raise = 0
+    first_raiser = None
+    aggressor = None
+    aggressor_allin = False
+    folded = set()
+    hero_str = ''
+    contexts = []
+
+    for a in hand['streets']['preflop']:
+        name, verb, amt = a['name'], a['verb'], a['amount']
+        if name == hero:
+            call_amt = max(0, current_bet - committed.get(hero, 0))
+            remaining = hero_stack - hero_ante - committed.get(hero, 0)
+            others_live = any(n != hero and n != aggressor and n not in folded
+                              for n in hand['seats'].values())
+            contexts.append({
+                'verb': verb,
+                'allin': a.get('allin', False),
+                'n_raises': n_raises,
+                'limpers': limpers,
+                'callers_since_raise': callers_since_raise,
+                'aggressor': aggressor,
+                'aggressor_allin': aggressor_allin,
+                'others_live': others_live,
+                'first_action': hero_str == '',
+                'call_amt': call_amt,
+                'can_raise': call_amt < remaining,
+            })
+            hero_str += _VERB_CHAR.get(verb, '?')
+        if verb in ('raise', 'bet'):
+            if n_raises == 0:
+                first_raiser = name
+                limpers_at_first_raise = limpers
+            n_raises += 1
+            aggressor = name
+            aggressor_allin = a.get('allin', False)
+            callers_since_raise = 0
+            committed[name] = amt        # raise amounts are raise-TO totals
+            current_bet = max(current_bet, amt)
+        elif verb == 'call':
+            if n_raises == 0:
+                limpers += 1
+                if first_limper is None:
+                    first_limper = name
+            else:
+                callers_since_raise += 1
+            committed[name] = committed.get(name, 0) + amt
+        elif verb == 'fold':
+            folded.add(name)
+
+    state = {
+        'hero_str': hero_str,
+        'first_raiser': first_raiser,
+        'limpers_at_first_raise': limpers_at_first_raise,
+        'first_limper': first_limper,
+    }
+    return contexts, state
+
+
+def preflop_stat_flags(hand):
+    """
+    {key: (made, opp)} for every PREFLOP_STATS entry, for one IR hand's hero.
+    made/opp are 0/1 — the per-hand contribution to the aggregate counters.
+    """
+    flags = {key: (0, 0) for key, _label, _g in PREFLOP_STATS}
+    hero = hand.get('hero')
+    if not hero or hero not in hand['stacks']:
+        return flags
+
+    positions = pt4_positions(hand)
+    hero_np = positions.get(hero)
+    bb_amt = hand['bb_amt'] or 0
+    stack_bb = (hand['stacks'].get(hero, 0) / bb_amt) if bb_amt else 0.0
+
+    ctxs, st = _hero_preflop_walk(hand)
+    hero_str = st['hero_str']
+
+    def first_ctx(pred):
+        return next((c for c in ctxs if pred(c)), None)
+
+    def put(key, made, opp):
+        flags[key] = (1 if (made and opp) else 0, 1 if opp else 0)
+
+    # ── Open / RFI / open-limp ──
+    c_open = first_ctx(lambda c: c['first_action'] and c['n_raises'] == 0
+                       and c['limpers'] == 0)
+    open_opp = c_open is not None
+    put('raise_first', open_opp and c_open['verb'] == 'raise', open_opp)
+    put('limp_open', open_opp and c_open['verb'] == 'call', open_opp)
+
+    # ── Limp family ── (hero limped, then faced a raise; his next action
+    # partitions the denominator via the PT4 action-string patterns)
+    limped = any(c['verb'] == 'call' and c['n_raises'] == 0 for c in ctxs)
+    limp_faced = limped and len(hero_str) >= 2
+    put('limp_raise', hero_str.startswith('CR'), limp_faced)
+    put('limp_call', hero_str.startswith('CC'), limp_faced)
+    put('limp_fold', hero_str.startswith('CF'), limp_faced)
+
+    # ── Facing exactly one raise (2bet defense / 3bet opportunity) ──
+    c_2b = first_ctx(lambda c: c['n_raises'] == 1 and c['call_amt'] > 0)
+    twobet_def_opp = c_2b is not None
+
+    def raise_available(c):
+        """PT4 grants a re-raise opportunity when the hero has chips beyond
+        the call AND raising is legal/meaningful: facing an all-in with no
+        other live player left is call-or-fold only (a raise the hero
+        actually made proves the opportunity existed)."""
+        if c['verb'] == 'raise':
+            return True
+        if not c['can_raise']:
+            return False
+        return not (c['aggressor_allin'] and not c['others_live'])
+
+    put('call_pf_2bet', twobet_def_opp and c_2b['verb'] == 'call', twobet_def_opp)
+    threebet_opp = twobet_def_opp and raise_available(c_2b)
+    threebet = threebet_opp and c_2b['verb'] == 'raise'
+    put('threebet_pf', threebet, threebet_opp)
+    put('threebet_nai_u35',
+        threebet and not c_2b['allin'] and stack_bb <= 35,
+        threebet_opp and stack_bb <= 35)
+
+    # ── Squeeze: facing one raise plus at least one caller of it ──
+    sq_opp = twobet_def_opp and c_2b['callers_since_raise'] >= 1
+    put('pf_squeeze', sq_opp and c_2b['verb'] == 'raise', sq_opp)
+
+    # ── Steal defense (blinds facing a first-in open from CO/BTN/SB) ──
+    fr = st['first_raiser']
+    fr_np = positions.get(fr) if fr else None
+    steal_attempt = (fr is not None and st['limpers_at_first_raise'] == 0
+                     and fr_np in (0, 1, 9))
+    # A cold-call between the steal and the blind kills the steal-defense
+    # situation (it becomes a squeeze spot, not blind defense).
+    blind_def_opp = False
+    if steal_attempt and c_2b is not None and hero_np in (8, 9) \
+            and c_2b['callers_since_raise'] == 0:
+        blind_def_opp = (fr_np in (0, 1)) if hero_np == 9 else (fr_np in (0, 1, 9))
+    put('fold_to_steal', blind_def_opp and hero_str == 'F', blind_def_opp)
+    put('threebet_steal', blind_def_opp and hero_str.startswith('R'), blind_def_opp)
+
+    # ── BB defending vs an SB open-raise ──
+    bb_v_sb = blind_def_opp and hero_np == 8 and fr_np == 9
+    put('fold_bb_v_sb', bb_v_sb and hero_str == 'F', bb_v_sb)
+
+    # ── BB facing exactly one limper who is the SB ──
+    rslib_opp = (hero_np == 8
+                 and first_ctx(lambda c: c['first_action'] and c['n_raises'] == 0
+                               and c['limpers'] == 1) is not None
+                 and st['first_limper'] is not None
+                 and positions.get(st['first_limper']) == 9)
+    put('raise_sb_open_limp', rslib_opp and hero_str.startswith('R'), rslib_opp)
+
+    # ── Open-raiser facing a 3bet+ ──
+    made_first_raise = any(c['verb'] == 'raise' and c['n_raises'] == 0 for c in ctxs)
+    c_f3b = first_ctx(lambda c: c['n_raises'] >= 2 and c['call_amt'] > 0) \
+        if made_first_raise else None
+    f3b_opp = c_f3b is not None
+    put('twobet_pf_fold', f3b_opp and c_f3b['verb'] == 'fold', f3b_opp)
+    # 4bet opportunity = facing exactly the 3bet (a later raise means the
+    # 4th bet was already made by someone else), with a raise available.
+    fourbet_opp = f3b_opp and c_f3b['n_raises'] == 2 and raise_available(c_f3b)
+    put('raise_4bet_pf', fourbet_opp and c_f3b['verb'] == 'raise', fourbet_opp)
+
+    # ── 3bettor facing a 4bet+ ──
+    c_f4b = first_ctx(lambda c: c['n_raises'] >= 3 and c['call_amt'] > 0) \
+        if threebet else None
+    f4b_opp = c_f4b is not None
+    put('threebet_pf_fold', f4b_opp and c_f4b['verb'] == 'fold', f4b_opp)
+    put('fold_4bet_after_3bet_u30',
+        f4b_opp and c_f4b['verb'] == 'fold' and stack_bb <= 30,
+        f4b_opp and stack_bb <= 30)
+
+    return flags
+
+
+def aggregate_stats(hands):
+    """
+    Aggregate preflop stats over IR hands.
+    Returns {'positions': {bucket: {'hands': n, 'stats': {key: {made, opp}}}},
+             'global':   {key: {made, opp}}}   (population-wide sums)
+    """
+    positions = {b: {'hands': 0,
+                     'stats': {k: {'made': 0, 'opp': 0} for k, _l, _g in PREFLOP_STATS}}
+                 for b in POSITION_BUCKETS}
+    glob = {k: {'made': 0, 'opp': 0} for k, _l, _g in PREFLOP_STATS}
+
+    for h in hands:
+        bucket = hero_position(h)
+        flags = preflop_stat_flags(h)
+        if bucket in positions:
+            positions[bucket]['hands'] += 1
+            for k, (made, opp) in flags.items():
+                positions[bucket]['stats'][k]['made'] += made
+                positions[bucket]['stats'][k]['opp'] += opp
+        for k, (made, opp) in flags.items():
+            glob[k]['made'] += made
+            glob[k]['opp'] += opp
+
+    return {'positions': positions, 'global': glob}
+
+
 # ── Aggregation (Phase 0: hands per position) ───────────────────────────────
 
 def aggregate_positions(hands):

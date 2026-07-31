@@ -1,9 +1,9 @@
 # Leak Finder — Design & Delivery Plan
 
-_Status: **Phase 0 complete — gate PASSED at scale** (349 hands / 4 tournaments / 5–9 player
-tables, cell-exact vs PT4 on every position, after also finding and fixing PT4's own "phantom
-missing hands" import bug — see §10. Validation harness live at `/leaks/validate`). Next: Phase 1
-(preflop stats)._
+_Status: **Phase 1 complete — all 17 preflop stats validated cell-exact vs PT4** on both suites
+(204 diff cells; 2 documented accepted-deviation cells where PT4 is internally inconsistent —
+see Appendix C). The `/leaks` page is live: per-position preflop report over all saved
+tournaments with BBZ targets and provisional verdicts. Next: Phase 2 (postflop stats)._
 _Owner: Caio · Consulting engineer: Claude_
 
 ## 1. Goal
@@ -234,8 +234,8 @@ What the harvest established:
 
 | Phase | Build | **Visible in UI** | Validation gate |
 |------|-------|-------------------|-----------------|
-| **0 — Foundations** | Canonical action model; `position_bucket`; CSV → ground-truth parser; diff endpoint | **Validation grid** (dev page): our counts vs PT4, per cell | Per-position **Hands** counts match the CSV |
-| **1 — Preflop** | All preflop flags (RFI, limp family, 3-bet/opp, fold-to-steal, call-2bet, 4-bet, squeeze, BB-v-SB); `aggregate()` | **`/leaks` page**: by-position table, preflop columns, coloured cells | Preflop columns match PT4 CSV |
+| **0 — Foundations ✅** | Canonical action model; `position_bucket`; CSV → ground-truth parser; diff endpoint | **Validation grid** (dev page): our counts vs PT4, per cell | Per-position **Hands** counts match the CSV — **PASSED** |
+| **1 — Preflop ✅** | All preflop flags (RFI, limp family, 3-bet/opp, fold-to-steal, call-2bet, 4-bet, squeeze, BB-v-SB); `aggregate_stats()`; `records_to_ps_text()` runtime adapter | **`/leaks` page**: by-position preflop report with BBZ targets + provisional verdicts | Preflop columns match PT4 CSV — **PASSED** (2 accepted-deviation cells, Appendix C) |
 | **2 — Postflop** | Flop/turn/river flags (c-bet/float/probe/donk/check-raise/fold-to; HU & 3-bet variants) | **By Position + By Action tabs**, postflop rows added | Postflop columns match (true per-position) |
 | **3 — Headline winrate** | `equity.py`; all-in-adj bb/100 per position | **"Winrate: X bb"** on each position row + total | All-In Adj BB/100 matches CSV |
 | **4 — Verdicts** | Seed `/config/leak_ranges` from `data/bbz_leak_ranges.json`; `classify()`; sample-size gating | **All / Good / Bad pills** + expandable per-stat detail (Hero / Result / Target / Rec. action) | Good/Bad counts reproduce the BBZ screenshots (BTN 4/17, CO 2/25, MP 3/26, EP 1/25, BB 2/27, SB 2/29) |
@@ -379,4 +379,12 @@ mixed-table-size dataset — it closed a symmetric ±4-hand EP/MP gap exactly.
 - [x] Phase-0 gate — **PASSED** with the #10002806 per-tournament pair (127/127, all positions cell-exact).
 - [x] ≤6-player EP/MP bucketing — **PASSED**, confirmed via the 349-hand `deepfreeze_all4` suite (§10, Appendix B).
 - [x] "Phantom missing hands" (PT4 reporting far fewer hands than imported) — **RESOLVED**, root cause was PT4-side, not our data; see §10 case study.
+- [x] Phase-1 gate — **PASSED**: all 17 preflop stats cell-exact on both suites. Four stats
+      confirmed *position-blind* in the BBZ report ("Limp Open", "Raise SB Open Limp",
+      "3Bet NAI <35", "Fold to PF 4Bet After 3Bet <30" — their custom formulas lost the position
+      grouping); gated population-wide, while `/leaks` shows true per-position splits (decision Q4).
+- [x] Known accepted deviation (±1): PT4 grants a 4bet opportunity in hand #…68510 (BB shoves
+      all-in, everyone else folded — a 4bet is impossible) while denying it in the structurally
+      identical #…8466 in the same report. We follow the rules of poker; the two cells are
+      pinned exactly in `leak_validation.ACCEPTED_DEVIATIONS` so any drift re-fails the gate.
 - [ ] Pick equity library (`eval7` vs `treys` vs `pokerkit`) — Phase 3.

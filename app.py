@@ -1075,10 +1075,105 @@ def firebase_config():
     return jsonify(cfg)
 
 
-# ── Leak Finder (Phase 0: validation harness dev page) ──────────────────────
-# Compares leak_engine output against the PT4 report CSV ground truth stored
-# in data/validation/. Dev/diagnostic tool: exposes only aggregate counts from
-# committed fixtures, so it is intentionally unauthenticated.
+# ── Leak Finder ──────────────────────────────────────────────────────────────
+# /leaks — the user-facing report (Phase 1: preflop stats, per position).
+# /leaks/validate — dev page diffing leak_engine output against the PT4 report
+# CSV ground truth in data/validation/ (aggregate fixture counts only, so it
+# is intentionally unauthenticated).
+
+_BBZ_RANGES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                'data', 'bbz_leak_ranges.json')
+
+
+def _load_bbz_targets():
+    """{(position, stat_label): {'target': [lo, hi], 'rec': str}} from the
+    harvested BBZ range table (design doc §7)."""
+    import json as _jj
+    try:
+        with open(_BBZ_RANGES_PATH, encoding='utf-8') as fh:
+            data = _jj.load(fh)
+    except Exception:
+        return {}
+    out = {}
+    for pos, pdata in (data.get('positions') or {}).items():
+        for s in pdata.get('stats') or []:
+            out[(pos, s['label'])] = {'target': s.get('target'), 'rec': s.get('rec')}
+    return out
+
+
+@app.route('/leaks')
+def leaks_page():
+    return render_template('leaks.html')
+
+
+@app.route('/api/leaks')
+def leaks_api():
+    from hand_exporter import records_to_ps_text
+    from leak_engine import (parse_ps_text, aggregate_stats, validate_pot,
+                             POSITION_BUCKETS, PREFLOP_STATS)
+
+    uid = _verify_bearer(request)   # inits the Admin SDK internally
+    if not uid:
+        return jsonify({'error': 'Unauthorized'}), 401
+    db = _get_admin_db()
+    user_snap = db.collection('users').document(uid).get()
+    if not user_snap.exists or not user_snap.to_dict().get('is_pro'):
+        return jsonify({'error': 'Pro subscription required'}), 403
+
+    docs = db.collection('users').document(uid).collection('tournaments').get()
+    tids = [doc.id for doc in docs]
+
+    def _load_one(tid):
+        records, _d = _fetch_tournament_records(uid, tid)
+        if not records:
+            return None
+        # No blind ladder resolution here: it only affects the cosmetic
+        # "Level" header labels, which the leak engine ignores — and
+        # resolving it costs a Firestore scan per tournament.
+        text, _stats = records_to_ps_text(records)
+        return parse_ps_text(text)
+
+    hands, n_tourneys, skipped = [], 0, 0
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        for parsed in pool.map(_load_one, tids):
+            if parsed is None:
+                continue
+            n_tourneys += 1
+            for h in parsed:
+                if validate_pot(h):
+                    skipped += 1
+                else:
+                    hands.append(h)
+
+    agg = aggregate_stats(hands)
+    targets = _load_bbz_targets()
+
+    positions = []
+    for bucket in POSITION_BUCKETS:
+        p = agg['positions'][bucket]
+        rows = []
+        for key, label, _is_global in PREFLOP_STATS:
+            st = p['stats'][key]
+            made, opp = st['made'], st['opp']
+            t = targets.get((bucket, label)) or {}
+            pct = round(made / opp * 100, 2) if opp else None
+            target = t.get('target')
+            result = None
+            if pct is not None and target:
+                result = ('LOW' if pct < target[0]
+                          else 'HIGH' if pct > target[1] else 'GOOD')
+            rows.append({'key': key, 'label': label, 'pct': pct,
+                         'made': made, 'opp': opp,
+                         'target': target, 'result': result})
+        positions.append({'position': bucket, 'hands': p['hands'], 'stats': rows})
+
+    return jsonify({
+        'meta': {'tournaments': n_tourneys, 'hands': len(hands),
+                 'hands_skipped': skipped, 'phase': 1,
+                 'scope': 'all saved tournaments — preflop stats'},
+        'positions': positions,
+    })
+
 
 @app.route('/leaks/validate')
 def leaks_validate_page():

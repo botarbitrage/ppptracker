@@ -34,7 +34,9 @@
     }
     td.vld-ok   { color:var(--green); font-weight:700; }
     td.vld-bad  { color:#ff5470;      font-weight:700; }
-    .vld-share  { color:var(--muted); font-size:.78rem; }
+    td.vld-dev  { color:#e0b95c;      font-weight:700; }
+    .vld-num    { color:var(--muted); font-size:.82rem; }
+    tr.vld-stat-first td { border-top:1px solid #ffffff2e; }
   </style>
 </head>
 <body>
@@ -93,21 +95,26 @@
           <table class="table table-dark table-striped table-hover mb-0">
             <thead><tr>
               <th>Stat</th><th>Position</th>
-              <th class="text-end">Ours</th><th class="text-end">PT4</th>
               <th class="text-end">Ours %</th><th class="text-end">PT4 %</th>
+              <th class="text-end">Ours n</th><th class="text-end">PT4 n</th>
               <th class="text-center">Match</th>
             </tr></thead>
             <tbody>
-              ${s.cells.map(c => `
-                <tr${c.position === 'total' ? ' style="border-top:2px solid var(--green)"' : ''}>
-                  <td>${c.stat}</td>
+              ${s.cells.map((c, i) => {
+                const firstOfStat = i === 0 || s.cells[i-1].stat !== c.stat;
+                const mark = c.accepted_deviation ? '◆' : (c.match ? '✓' : '✗');
+                const cls  = c.accepted_deviation ? 'vld-dev' : (c.match ? 'vld-ok' : 'vld-bad');
+                return `
+                <tr class="${firstOfStat ? 'vld-stat-first' : ''}">
+                  <td>${firstOfStat ? c.stat : ''}</td>
                   <td>${c.position.toUpperCase()}</td>
-                  <td class="text-end">${c.ours ?? '—'}</td>
-                  <td class="text-end">${c.pt4 ?? '—'}</td>
-                  <td class="text-end vld-share">${c.ours_share != null ? c.ours_share + '%' : ''}</td>
-                  <td class="text-end vld-share">${c.pt4_share != null ? c.pt4_share + '%' : ''}</td>
-                  <td class="text-center ${c.match ? 'vld-ok' : 'vld-bad'}">${c.match ? '✓' : '✗'}</td>
-                </tr>`).join('')}
+                  <td class="text-end vld-num">${c.ours_pct ?? '—'}</td>
+                  <td class="text-end vld-num">${c.pt4_pct ?? '—'}</td>
+                  <td class="text-end">${c.ours_n ?? '—'}</td>
+                  <td class="text-end">${c.pt4_n ?? '—'}</td>
+                  <td class="text-center ${cls}" title="${c.accepted_deviation ? 'Accepted deviation — PT4 internally inconsistent, see design doc' : ''}">${mark}</td>
+                </tr>`;
+              }).join('')}
             </tbody>
           </table>
         </div>

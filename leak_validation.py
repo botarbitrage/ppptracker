@@ -25,8 +25,8 @@ import glob
 import io
 import os
 
-from leak_engine import (parse_ps_text, aggregate_positions, validate_pot,
-                         POSITION_BUCKETS)
+from leak_engine import (parse_ps_text, aggregate_positions, aggregate_stats,
+                         validate_pot, POSITION_BUCKETS, PREFLOP_STATS)
 
 VALIDATION_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                               'data', 'validation')
@@ -55,7 +55,9 @@ def parse_pt4_csv(path):
         rows = list(csv.reader(fh))
     if not rows:
         return {}
-    header = rows[0]
+    # Headers are stripped: some PT4 columns carry trailing spaces
+    # ("Raise & 4Bet+ PF ", "Fold to PF 4Bet After 3Bet <30 ").
+    header = [h.strip() for h in rows[0]]
     out = {}
     for row in rows[1:]:
         if not row or all(not c.strip() for c in row):
@@ -93,13 +95,26 @@ def _parse_files(txt_paths):
     return hands
 
 
+# ── Accepted deviations ─────────────────────────────────────────────────────
+# Cells where PT4's output is internally inconsistent and our engine's answer
+# is the poker-correct one. Keyed exactly (suite, stat, position, ours_n,
+# pt4_n) so ANY change in either side re-triggers a real failure.
+#
+# Raise & 4Bet+ PF, deepfreeze_all4 MP: hand #…68510 — hero opened, the BB
+# shoved all-in, everyone else already folded. A 4bet is impossible (call or
+# fold only), yet PT4 grants a 4bet opportunity here while denying it in the
+# structurally identical EP hand #…8466 in the same report. We follow the
+# rules of poker; PT4's inconsistency is documented in the design doc.
+ACCEPTED_DEVIATIONS = {
+    ('deepfreeze_all4', 'Raise & 4Bet+ PF', 'MP', 5, 6),
+    ('deepfreeze_all4', 'Raise & 4Bet+ PF', 'total', 7, 8),
+}
+
+
 # ── Diff ────────────────────────────────────────────────────────────────────
 
 def _cells_hands(ours, pt4):
-    """Phase 0 cells: per-position hand counts, ours vs PT4. Includes each
-    side's share of its own total for eyeballing distribution drift."""
-    our_total = ours.get('total') or 0
-    pt4_total = (pt4.get('total') or {}).get('Hands') or 0
+    """Per-position hand counts, ours vs PT4 (the Phase 0 gate)."""
     cells = []
     for pos in list(POSITION_BUCKETS) + ['total']:
         pt4_val = (pt4.get(pos) or {}).get('Hands')
@@ -107,13 +122,74 @@ def _cells_hands(ours, pt4):
         cells.append({
             'stat': 'Hands',
             'position': pos,
-            'ours': our_val,
-            'pt4': pt4_val,
-            'ours_share': round(our_val / our_total * 100, 1) if our_total else None,
-            'pt4_share': (round(pt4_val / pt4_total * 100, 1)
-                          if (pt4_val is not None and pt4_total) else None),
+            'ours_pct': None, 'pt4_pct': None,
+            'ours_n': our_val,
+            'pt4_n': int(pt4_val) if pt4_val is not None else None,
             'match': (pt4_val is not None and our_val == int(pt4_val)),
         })
+    return cells
+
+
+def _pct(made, opp):
+    return round(made / opp * 100, 2) if opp else None
+
+
+def _pct_match(ours, pt4, ours_n=None, pt4_n=None):
+    if ours_n == 0 and pt4_n == 0:
+        # Empty cell: PT4 renders '-' on position rows but '0.00' on the
+        # totals row — both mean "no opportunities", same as our None.
+        return True
+    if ours is None and pt4 is None:
+        return True
+    if ours is None or pt4 is None:
+        return False
+    return abs(ours - pt4) <= 0.01
+
+
+def _cells_preflop(agg, pt4):
+    """
+    Phase 1 cells: every preflop stat vs the PT4 CSV.
+    Grouped stats compare per position (+ total); 'global' stats (whose BBZ
+    formula lost the position grouping — the CSV repeats one population value
+    per row) compare population-wide on a single ALL row.
+    """
+    cells = []
+    for key, label, is_global in PREFLOP_STATS:
+        count_col = label + ' Count'
+        if is_global:
+            g = agg['global'][key]
+            row = pt4.get('BTN') or {}
+            pt4_pct, pt4_n = row.get(label), row.get(count_col)
+            ours_pct = _pct(g['made'], g['opp'])
+            cells.append({
+                'stat': label, 'position': 'ALL',
+                'ours_pct': ours_pct, 'pt4_pct': pt4_pct,
+                'ours_n': g['opp'],
+                'pt4_n': int(pt4_n) if pt4_n is not None else None,
+                'match': (pt4_n is not None and g['opp'] == int(pt4_n)
+                          and _pct_match(ours_pct, pt4_pct, g['opp'], int(pt4_n))),
+            })
+            continue
+        for pos in list(POSITION_BUCKETS) + ['total']:
+            if pos == 'total':
+                made = sum(agg['positions'][b]['stats'][key]['made']
+                           for b in POSITION_BUCKETS)
+                opp = sum(agg['positions'][b]['stats'][key]['opp']
+                          for b in POSITION_BUCKETS)
+            else:
+                made = agg['positions'][pos]['stats'][key]['made']
+                opp = agg['positions'][pos]['stats'][key]['opp']
+            row = pt4.get(pos) or {}
+            pt4_pct, pt4_n = row.get(label), row.get(count_col)
+            ours_pct = _pct(made, opp)
+            cells.append({
+                'stat': label, 'position': pos,
+                'ours_pct': ours_pct, 'pt4_pct': pt4_pct,
+                'ours_n': opp,
+                'pt4_n': int(pt4_n) if pt4_n is not None else None,
+                'match': (pt4_n is not None and opp == int(pt4_n)
+                          and _pct_match(ours_pct, pt4_pct, opp, int(pt4_n))),
+            })
     return cells
 
 
@@ -132,7 +208,14 @@ def _run_suite(name, txt_paths, csv_path):
 
     ours = aggregate_positions(accepted)
     pt4 = parse_pt4_csv(csv_path)
-    cells = _cells_hands(ours, pt4)
+    agg = aggregate_stats(accepted)
+    cells = _cells_hands(ours, pt4) + _cells_preflop(agg, pt4)
+
+    for c in cells:
+        if not c['match'] and (name, c['stat'], c['position'],
+                               c['ours_n'], c['pt4_n']) in ACCEPTED_DEVIATIONS:
+            c['match'] = True
+            c['accepted_deviation'] = True
 
     return {
         'name': name,
@@ -212,18 +295,22 @@ def audit_action_types(records):
 
 # ── CLI ─────────────────────────────────────────────────────────────────────
 
-def _print_suite(s):
+def _print_suite(s, only_mismatches=False):
     print(f"== suite {s['name']}  (txt: {', '.join(s['txt_files'])} · csv: {s['csv_file']})")
     print(f"   hero: {s['hero']} · parsed: {s['hands_parsed']} · "
           f"rejected (PT4 mirror): {len(s['hands_rejected'])} · unmapped: {s['unmapped']}")
     for r in s['hands_rejected']:
         print(f"   REJECTED {r['hand_id']}: {'; '.join(r['problems'])}")
-    print(f"   {'stat':<8}{'pos':<7}{'ours':>6}{'pt4':>6}   match")
-    for c in s['cells']:
-        pt4v = '-' if c['pt4'] is None else int(c['pt4'])
-        print(f"   {c['stat']:<8}{c['position']:<7}{c['ours']:>6}{pt4v:>6}   "
+    shown = [c for c in s['cells'] if not (only_mismatches and c['match'])]
+    print(f"   {'stat':<34}{'pos':<7}{'ours%':>8}{'pt4%':>8}{'ours_n':>7}{'pt4_n':>7}   match")
+    for c in shown:
+        f = lambda v: '-' if v is None else v
+        print(f"   {c['stat']:<34}{c['position']:<7}{f(c['ours_pct']):>8}"
+              f"{f(c['pt4_pct']):>8}{f(c['ours_n']):>7}{f(c['pt4_n']):>7}   "
               f"{'OK' if c['match'] else 'X'}")
-    print(f"   → {'ALL MATCH' if s['all_match'] else 'MISMATCH'}")
+    n_bad = sum(1 for c in s['cells'] if not c['match'])
+    total = len(s['cells'])
+    print(f"   → {'ALL MATCH' if s['all_match'] else f'{n_bad}/{total} cells MISMATCH'}")
 
 
 if __name__ == '__main__':

@@ -894,6 +894,98 @@ def validate_hands(records):
     )
 
 
+
+def _records_to_blocks(records, tz, blind_levels_by_room):
+    """
+    Convert records to PokerStars text blocks (oldest-first), carrying the
+    per-player computed-stack overrides from hand to hand. This is the core
+    of export_pokerstars, shared with records_to_ps_text so the leak engine
+    consumes the exact same text a file export would produce.
+    Returns (blocks, {attempted, converted, warned, skipped}).
+    """
+    import re as _re3
+    blind_levels_by_room = blind_levels_by_room or {}
+
+    def _norm_room2(name):
+        return _re3.sub(r'[^A-Z0-9 ]', '', (name or '').upper()).strip()
+
+    records = sorted(records, key=lambda r: r.get('summary', {}).get('C', 0))
+
+    attempted = converted = warned = skipped = 0
+    blocks = []
+    computed_stacks = {}   # {player_name → end stack computed from previous hand}
+
+    for i, rec in enumerate(records):
+        # Build stack overrides from computed_stacks with safeguards.
+        # Threshold: discard override when |diff| > 2×BB (likely rebuy or cascade error).
+        stack_overrides = {}
+        _fh_r   = rec.get('full_hand', {})
+        _info_r = _fh_r.get('info', {})
+        _sum_r  = rec.get('summary', {})
+        _sb_r   = _rc(_sum_r.get('G') or _info_r.get('room', {}).get('small_blind', 0))
+        _bb_r   = (_sb_r * 2) if _sb_r else 0
+        # Compute prehand antes+blinds per player name so _listed is on the same
+        # pre-hand basis as computed_stacks (which are post-previous-hand stacks).
+        _flow_r  = _scale_flow(_fh_r.get('flow', {}))
+        _sid2nm_r = {p.get('seatid', -1): (p.get('user_name') or '').strip()
+                     for p in _info_r.get('players', [])}
+        _prehand_paid_r = {}  # player_name -> antes+blinds paid this hand
+        for _a_r in _flow_r.get('pre_flop', {}).get('actions', []):
+            if _a_r.get('type') in (8, 9, 10):
+                _n_r = _sid2nm_r.get(_a_r.get('seatid'), '')
+                if _n_r:
+                    _prehand_paid_r[_n_r] = _prehand_paid_r.get(_n_r, 0) + (_a_r.get('chips') or 0)
+        for _p_r in _info_r.get('players', []):
+            _nm_r = (_p_r.get('user_name') or '').strip()
+            if not _nm_r or _nm_r not in computed_stacks:
+                continue
+            # Restore to pre-hand basis (hand_chips is post-ante/blind)
+            _listed   = _rc(_p_r.get('hand_chips', 0) or 0) + _prehand_paid_r.get(_nm_r, 0)
+            _computed = computed_stacks[_nm_r]
+            if _computed < 0:
+                continue                             # safeguard: computation went negative
+            if _bb_r and abs(_listed - _computed) > 2 * _bb_r:
+                continue                             # large diff: likely rebuy or cascade error
+            stack_overrides[_nm_r] = _computed
+
+        _room_r = _info_r.get('room', {}).get('room_name', '')
+        _levels_r = blind_levels_by_room.get(_norm_room2(_room_r))
+
+        try:
+            block, w, end_stacks = hand_to_ps_block(rec, tz, stack_overrides or None, _levels_r)
+            computed_stacks.update(end_stacks)
+            if block is None:
+                skipped += 1
+                gid = rec.get('summary', {}).get('D', f'index-{i+1}')
+                blocks.append(f"# SKIPPED hand {gid}: {'; '.join(w)}")
+            elif w:
+                warned += 1
+                blocks.append(block)
+            else:
+                converted += 1
+                blocks.append(block)
+        except Exception as exc:
+            skipped += 1
+            gid = rec.get('summary', {}).get('D', f'index-{i+1}')
+            blocks.append(f"# SKIPPED hand {gid}: unexpected error — {exc}")
+        attempted += 1
+
+    return blocks, dict(attempted=attempted, converted=converted,
+                        warned=warned, skipped=skipped)
+
+
+def records_to_ps_text(records, tz=None, blind_levels_by_room=None):
+    """
+    Records → PokerStars-dialect text (no file I/O). Same conversion path as
+    export_pokerstars, so downstream consumers (the leak engine) see exactly
+    the text a user export would contain.
+    """
+    if tz is None:
+        tz = _ADELAIDE_TZ
+    blocks, stats = _records_to_blocks(records, tz, blind_levels_by_room)
+    return '\n\n'.join(blocks) + '\n', stats
+
+
 # ── Full export ─────────────────────────────────────────────────────────────
 
 def export_pokerstars(records, tz=None, platform=None, blind_levels_by_room=None):
@@ -948,67 +1040,9 @@ def export_pokerstars(records, tz=None, platform=None, blind_levels_by_room=None
     filepath = os.path.join('exports', 'pokerstars', filename)
 
     # Sort oldest→newest so PT4's stack-continuity checks pass
-    records = sorted(records, key=lambda r: r.get('summary', {}).get('C', 0))
-
-    attempted = converted = warned = skipped = 0
-    blocks = []
-    computed_stacks = {}   # {player_name → end stack computed from previous hand}
-
-    for i, rec in enumerate(records):
-        # Build stack overrides from computed_stacks with safeguards.
-        # Threshold: discard override when |diff| > 2×BB (likely rebuy or cascade error).
-        stack_overrides = {}
-        _fh_r   = rec.get('full_hand', {})
-        _info_r = _fh_r.get('info', {})
-        _sum_r  = rec.get('summary', {})
-        _sb_r   = _rc(_sum_r.get('G') or _info_r.get('room', {}).get('small_blind', 0))
-        _bb_r   = (_sb_r * 2) if _sb_r else 0
-        # Compute prehand antes+blinds per player name so _listed is on the same
-        # pre-hand basis as computed_stacks (which are post-previous-hand stacks).
-        _flow_r  = _scale_flow(_fh_r.get('flow', {}))
-        _sid2nm_r = {p.get('seatid', -1): (p.get('user_name') or '').strip()
-                     for p in _info_r.get('players', [])}
-        _prehand_paid_r = {}  # player_name -> antes+blinds paid this hand
-        for _a_r in _flow_r.get('pre_flop', {}).get('actions', []):
-            if _a_r.get('type') in (8, 9, 10):
-                _n_r = _sid2nm_r.get(_a_r.get('seatid'), '')
-                if _n_r:
-                    _prehand_paid_r[_n_r] = _prehand_paid_r.get(_n_r, 0) + (_a_r.get('chips') or 0)
-        for _p_r in _info_r.get('players', []):
-            _nm_r = (_p_r.get('user_name') or '').strip()
-            if not _nm_r or _nm_r not in computed_stacks:
-                continue
-            # Restore to pre-hand basis (hand_chips is post-ante/blind)
-            _listed   = _rc(_p_r.get('hand_chips', 0) or 0) + _prehand_paid_r.get(_nm_r, 0)
-            _computed = computed_stacks[_nm_r]
-            if _computed < 0:
-                continue                             # safeguard: computation went negative
-            if _bb_r and abs(_listed - _computed) > 2 * _bb_r:
-                continue                             # large diff: likely rebuy or cascade error
-            stack_overrides[_nm_r] = _computed
-
-        _room_r = _info_r.get('room', {}).get('room_name', '')
-        _levels_r = blind_levels_by_room.get(_norm_room(_room_r))
-
-        try:
-            block, w, end_stacks = hand_to_ps_block(rec, tz, stack_overrides or None, _levels_r)
-            computed_stacks.update(end_stacks)
-            if block is None:
-                skipped += 1
-                gid = rec.get('summary', {}).get('D', f'index-{i+1}')
-                blocks.append(f"# SKIPPED hand {gid}: {'; '.join(w)}")
-            elif w:
-                warned += 1
-                blocks.append(block)
-            else:
-                converted += 1
-                blocks.append(block)
-        except Exception as exc:
-            skipped += 1
-            gid = rec.get('summary', {}).get('D', f'index-{i+1}')
-            blocks.append(f"# SKIPPED hand {gid}: unexpected error — {exc}")
-        attempted += 1
-
+    blocks, stats = _records_to_blocks(records, tz, blind_levels_by_room)
+    attempted, converted = stats['attempted'], stats['converted']
+    warned, skipped = stats['warned'], stats['skipped']
     log_lines = [
         '=' * 72,
         'CONVERSION LOG',
