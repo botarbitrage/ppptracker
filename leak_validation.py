@@ -26,7 +26,7 @@ import io
 import os
 
 from leak_engine import (parse_ps_text, aggregate_positions, aggregate_stats,
-                         validate_pot, POSITION_BUCKETS, PREFLOP_STATS)
+                         validate_pot, POSITION_BUCKETS, ALL_STATS)
 
 VALIDATION_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                               'data', 'validation')
@@ -154,7 +154,7 @@ def _cells_preflop(agg, pt4):
     per row) compare population-wide on a single ALL row.
     """
     cells = []
-    for key, label, is_global in PREFLOP_STATS:
+    for key, label, is_global in ALL_STATS:
         count_col = label + ' Count'
         if is_global:
             g = agg['global'][key]

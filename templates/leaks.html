@@ -60,6 +60,11 @@
     .lk-dot-na   { background:#ffffff33; }
     td.lk-rec-bad  { color:#ff5470; }
     td.lk-rec-good { color:var(--green); }
+    tr.lk-street-row td {
+      font-family:var(--font-head); font-size:.7rem; font-weight:700;
+      letter-spacing:1px; text-transform:uppercase; color:var(--muted);
+      background:#ffffff0a; padding-top:9px; padding-bottom:5px;
+    }
   </style>
 </head>
 <body>
@@ -75,9 +80,10 @@
   </div>
 
   <div class="lk-note mb-3">
-    <b>Phase 1 — preflop stats</b> over all your saved tournaments, computed by position.
-    Targets are BBZ's coaching ranges; verdicts are provisional until postflop stats and the
-    all-in-adjusted winrate land in the next phases.
+    <b>Phase 2 — preflop + postflop stats</b> over all your saved tournaments, by position.
+    Targets are BBZ's coaching ranges. Position uses PokerTracker's mapping at 7–9 handed and
+    extends it below that, so EP always means the earliest seat(s) at your table.
+    The all-in-adjusted winrate lands in the next phase.
   </div>
 
   <div id="lk-status" class="lk-meta mb-3">Signing in…</div>
@@ -89,6 +95,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script>
 const POS_ORDER = ['BTN', 'CO', 'MP', 'EP', 'BB', 'SB'];
+const STREETS = ['Preflop', 'Flop', 'Turn', 'River'];
 
 function fmtPct(v) { return v == null ? '—' : v.toFixed(2).replace(/\.?0+$/, '') + '%'; }
 
@@ -126,20 +133,24 @@ function renderReport(data) {
               <th>Rec. action</th>
             </tr></thead>
             <tbody>
-              ${rows.map(s => {
-                const isBad = s.result === 'LOW' || s.result === 'HIGH';
-                const dot = s.result ? (isBad ? 'lk-dot-bad' : 'lk-dot-good') : 'lk-dot-na';
-                const rec = !s.result ? '' :
-                  s.result === 'GOOD' ? 'Good job' :
-                  s.result === 'LOW' ? 'More' : 'Less';
-                return `
-                <tr>
-                  <td><span class="lk-name-dot ${dot}"></span>${s.label}<span class="lk-count">${s.opp}</span></td>
-                  <td class="text-end">${fmtPct(s.pct)}</td>
-                  <td class="text-center">${s.result ? `<span class="lk-badge ${s.result}">${s.result}</span>` : ''}</td>
-                  <td class="text-end">${s.target ? s.target[0] + '% – ' + s.target[1] + '%' : '—'}</td>
-                  <td class="${isBad ? 'lk-rec-bad' : s.result ? 'lk-rec-good' : ''}">${rec}</td>
-                </tr>`;
+              ${STREETS.map(street => {
+                const group = rows.filter(s => s.street === street);
+                if (!group.length) return '';
+                return `<tr class="lk-street-row"><td colspan="5">${street}</td></tr>` +
+                  group.map(s => {
+                    const isBad = s.result === 'LOW' || s.result === 'HIGH';
+                    const dot = s.result ? (isBad ? 'lk-dot-bad' : 'lk-dot-good') : 'lk-dot-na';
+                    const rec = !s.result ? '' :
+                      s.result === 'GOOD' ? 'Good job' : (s.rec || (s.result === 'LOW' ? 'More' : 'Less'));
+                    return `
+                    <tr>
+                      <td><span class="lk-name-dot ${dot}"></span>${s.label}<span class="lk-count">${s.opp}</span></td>
+                      <td class="text-end">${fmtPct(s.pct)}</td>
+                      <td class="text-center">${s.result ? `<span class="lk-badge ${s.result}">${s.result}</span>` : ''}</td>
+                      <td class="text-end">${s.target ? s.target[0] + '% – ' + s.target[1] + '%' : '—'}</td>
+                      <td class="${isBad ? 'lk-rec-bad' : s.result ? 'lk-rec-good' : ''}">${rec}</td>
+                    </tr>`;
+                  }).join('');
               }).join('')}
             </tbody>
           </table>

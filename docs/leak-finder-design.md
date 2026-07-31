@@ -1,9 +1,10 @@
 # Leak Finder — Design & Delivery Plan
 
-_Status: **Phase 1 complete — all 17 preflop stats validated cell-exact vs PT4** on both suites
-(204 diff cells; 2 documented accepted-deviation cells where PT4 is internally inconsistent —
-see Appendix C). The `/leaks` page is live: per-position preflop report over all saved
-tournaments with BBZ targets and provisional verdicts. Next: Phase 2 (postflop stats)._
+_Status: **Phase 2 complete — all 39 stats (17 preflop + 22 postflop) validated cell-exact vs
+PT4** on both suites (172 diff cells each; 2 documented accepted-deviation cells where PT4 is
+internally inconsistent — see Appendix C). The `/leaks` page shows the full by-position report
+over all saved tournaments, grouped by street, with BBZ targets and verdicts. Position bucketing
+for the report was also corrected (Appendix B). Next: Phase 3 (all-in adjusted BB/100)._
 _Owner: Caio · Consulting engineer: Claude_
 
 ## 1. Goal
@@ -236,7 +237,7 @@ What the harvest established:
 |------|-------|-------------------|-----------------|
 | **0 — Foundations ✅** | Canonical action model; `position_bucket`; CSV → ground-truth parser; diff endpoint | **Validation grid** (dev page): our counts vs PT4, per cell | Per-position **Hands** counts match the CSV — **PASSED** |
 | **1 — Preflop ✅** | All preflop flags (RFI, limp family, 3-bet/opp, fold-to-steal, call-2bet, 4-bet, squeeze, BB-v-SB); `aggregate_stats()`; `records_to_ps_text()` runtime adapter | **`/leaks` page**: by-position preflop report with BBZ targets + provisional verdicts | Preflop columns match PT4 CSV — **PASSED** (2 accepted-deviation cells, Appendix C) |
-| **2 — Postflop** | Flop/turn/river flags (c-bet/float/probe/donk/check-raise/fold-to; HU & 3-bet variants) | **By Position + By Action tabs**, postflop rows added | Postflop columns match (true per-position) |
+| **2 — Postflop ✅** | Flop/turn/river flags (c-bet/float/probe/donk/check-raise/fold-to; HU & 3-bet variants); `report` position scheme | **`/leaks` grouped by street**, postflop rows added | Postflop columns match PT4 CSV — **PASSED** |
 | **3 — Headline winrate** | `equity.py`; all-in-adj bb/100 per position | **"Winrate: X bb"** on each position row + total | All-In Adj BB/100 matches CSV |
 | **4 — Verdicts** | Seed `/config/leak_ranges` from `data/bbz_leak_ranges.json`; `classify()`; sample-size gating | **All / Good / Bad pills** + expandable per-stat detail (Hero / Result / Target / Rec. action) | Good/Bad counts reproduce the BBZ screenshots (BTN 4/17, CO 2/25, MP 3/26, EP 1/25, BB 2/27, SB 2/29) |
 | **5 — Cut the cord** | Filter bar (tournament / buy-in value / date range); count-vector caching; remove "export→PT4→BBZ" guidance; nav entry | **Filters + polished standalone Leak Finder**; single-click flow | End-to-end: saved tournaments → report with no external tools |
@@ -350,22 +351,43 @@ rec-actions match the fold-frequency interpretation).
 | Hands | count of hands played at that position |
 | All-In Adj BB/100 | `amt_expected_bb_won / (hands / 100)` — see §6 |
 
-## Appendix B — PT4 position scheme
+## Appendix B — Position schemes
 
 `lookup_positions` collapses seats into six buckets: **SB, BB, EP, MP, CO, BTN**. Numeric
 scheme (validated cell-exact): position 0 = BTN counting away from the button through non-blind
-seats (CO = 1, …), BB = 8, SB = 9. Bucketing is **table-size dependent**:
+seats (CO = 1, …), BB = 8, SB = 9. Numeric position equals *players still to act behind you,
+minus the two blinds*, independent of table size.
 
-- **7–9 players:** EP = the two earliest-to-act non-blind seats (positions ≥ N−4). MP = everything
-  between EP and CO. So 9-handed EP {5,6}, 8-handed EP {4,5}, 7-handed EP {3,4}.
-- **≤6 players: no EP bucket at all** — those seats fold into MP instead. Short tables don't get a
-  distinct "early" position in PT4's scheme.
+The engine carries **two bucketings**, selected by `position_bucket(..., scheme=)`:
 
-Confirmed cell-exact against PT4 report CSVs across **349 hands spanning 5–9 player tables**
-(four DeepFreeze tournaments, `data/validation/deepfreeze_all4/`, 2026-07-31) — every one of the
-six position totals matches exactly (BTN 44, CO 43, MP 97, EP 78, BB 43, SB 44). The ≤6-player
-rule was found by testing the hypothesis "PT4 has no EP bucket below 7-handed" against this
-mixed-table-size dataset — it closed a symmetric ±4-hand EP/MP gap exactly.
+**`pt4`** — reproduces PokerTracker exactly; the validation gate depends on it and it must never
+drift. EP = the two earliest non-blind seats (positions ≥ N−4) at 7–9 handed; **tables of ≤6
+players get no EP bucket at all**, those seats fall into MP.
+
+**`report`** — what `/leaks` displays. Identical to `pt4` at 7–9 handed (EP = earliest
+⌈pool/2⌉ seats, capped at 2, which reproduces PT4's mapping exactly); it only fills the gap PT4
+leaves below 7-handed, so 6-max and 5-max UTG are EP rather than MP.
+
+| seats | pool (2..K) | `pt4` EP | `report` EP |
+|---|---|---|---|
+| 9-handed | 2–6 | {5,6} | {5,6} |
+| 8-handed | 2–5 | {4,5} | {4,5} |
+| 7-handed | 2–4 | {3,4} | {3,4} |
+| 6-handed | 2–3 | — (both MP) | {3} |
+| 5-handed | 2 | — (MP) | {2} |
+
+**Why the report needed its own scheme.** On a field that is ~60% short-handed (measured:
+5-handed 22%, 6-handed 38% of 4,403 hands), PT4's no-EP-below-7 rule put **772 of 1,062 MP
+hands** there purely because the table was short — burying every early-position hand inside MP
+and starving EP. Distribution before → after: MP 1,062 → 574 and EP 381 → 869, with the other
+four buckets unchanged (BTN 721, CO 707, BB 775, SB 757), i.e. from a 381–1,062 spread to a
+574–869 one.
+
+**Known trade-off.** Because numeric position encodes "players behind", any relative scheme
+mixes slightly different strategic depths inside one row (6-max UTG and 9-max UTG both land in
+EP though they face different numbers of opponents). Filtering by table size — a natural
+companion to the Phase 5 filter bar — is the principled fix; the scheme choice only decides
+labelling.
 
 ## Appendix C — Open items before/at build
 
@@ -387,4 +409,14 @@ mixed-table-size dataset — it closed a symmetric ±4-hand EP/MP gap exactly.
       all-in, everyone else folded — a 4bet is impossible) while denying it in the structurally
       identical #…8466 in the same report. We follow the rules of poker; the two cells are
       pinned exactly in `leak_validation.ACCEPTED_DEVIATIONS` so any drift re-fails the gate.
+- [x] Phase-2 gate — **PASSED**: all 22 postflop stats cell-exact on both suites. Confirmed rule:
+      **every stat carrying a custom "(HU)" restriction is position-blind** in the BBZ report
+      (their heads-up filter keyed off the hand-level `cnt_players_f`, collapsing the position
+      grouping), while non-HU stats keep per-position grouping. Definitions that the diff pinned
+      down: facing a c-bet is hero's first decision *with a bet to call* (not their first action
+      — the OOP line checks first); c-bets form a chain (flop c-bettor → turn → river), so a flop
+      check-raiser is not "continuing"; donk/probe require acting before the previous street's
+      aggressor; turn float requires position; "3bet+ pot" does not require hero to have been the
+      original raiser.
+- [x] Report position bucketing corrected for short-handed tables (Appendix B).
 - [ ] Pick equity library (`eval7` vs `treys` vs `pokerkit`) — Phase 3.

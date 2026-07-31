@@ -1,15 +1,18 @@
 """
-leak_engine.py — Leak Finder core (Phase 0).
+leak_engine.py — Leak Finder core.
 
 Pure functions, no I/O (mirrors tournament_analyzer.py's design): parse hands
 into a normalized intermediate representation (IR), map seats to PokerTracker's
-six position buckets, and aggregate per-position counts.
+six position buckets, and aggregate per-hand stat flags by position.
 
-Phase 0 scope: the PokerStars-dialect text parser (the exact dialect our own
-hand_exporter.py emits — the same text PT4 ingested, so validation compares
-like-for-like), the PT4 position mapper, and per-position hand counts.
-Later phases add per-hand stat flags on top of the same IR, plus a
-`from_records()` adapter to run directly off the PPPoker JSON in storage.
+Input is the PokerStars-dialect text our own hand_exporter.py emits — the same
+text PT4 ingested, so the validation harness compares like-for-like, and the
+live report reaches it via hand_exporter.records_to_ps_text() without touching
+the filesystem.
+
+Stats are (made, opportunity) pairs per hand: 17 preflop and 22 postflop,
+matching the report columns decoded from the BBZ .pt4rpt (design doc
+Appendix A) and validated cell-exact against PT4's own CSV exports.
 
 The IR is a plain dict per hand:
   hand_id, tourney_id, table_size, btn_seat,
@@ -39,14 +42,30 @@ import re
 # are EP, everything between them and the CO is MP. With N active players the
 # non-blind positions run 0..N-3, so EP = positions ≥ N-4:
 #     9-handed → EP {5,6} · 8-handed → EP {4,5} · 7-handed → EP {3,4}
-# Tables of 6 or fewer players have NO EP bucket at all — PT4 folds those
-# seats into MP instead (short tables don't get a distinct "early" position).
 # Validated cell-exact against PT4 report CSVs across 349 hands spanning 5-9
 # player tables (four DeepFreeze tournaments, 2026-07-31).
 POSITION_BUCKETS = ('BTN', 'CO', 'MP', 'EP', 'BB', 'SB')
 
+# Two schemes:
+#   'pt4'    — reproduces PokerTracker exactly (the validation gate depends on
+#              this and must never drift). PT4 gives EP the two earliest
+#              non-blind seats at 7-9 handed and has NO EP bucket at all for
+#              tables of 6 or fewer, dumping those seats into MP.
+#   'report' — what the Leak Finder shows. Identical to 'pt4' at 7-9 handed;
+#              it only fills PT4's short-table gap so EP always means "the
+#              earliest seat(s) at your table". Without this, 6-max and 5-max
+#              UTG are labelled MP, which (on a field that is ~60% short-
+#              handed) buries early-position hands inside MP and starves EP.
+#
+# Caveat worth knowing when reading the report: numeric position equals
+# "players still to act behind you, minus the two blinds" regardless of table
+# size, so a relative scheme necessarily mixes slightly different strategic
+# depths inside one row. Filtering by table size (Phase 5) is the principled
+# way to remove that mixing; the schemes here only decide the labelling.
+SCHEMES = ('pt4', 'report')
 
-def position_bucket(numeric_pos, n_players=9):
+
+def position_bucket(numeric_pos, n_players=9, scheme='pt4'):
     """PT4 numeric position + table size → SB|BB|EP|MP|CO|BTN (None if unknown)."""
     if numeric_pos is None:
         return None
@@ -59,11 +78,18 @@ def position_bucket(numeric_pos, n_players=9):
     if numeric_pos == 1:
         return 'CO'
     n = n_players or 9
-    if n <= 6:
+    if scheme == 'pt4':
+        if n <= 6:
+            return 'MP'
+        return 'EP' if numeric_pos >= max(2, n - 4) else 'MP'
+    # 'report': EP takes the earliest ceil(pool/2) seats, capped at 2 — which
+    # is exactly PT4's mapping for 7/8/9-handed and extends it below that.
+    highest = n - 3                      # highest non-blind numeric seat
+    pool = max(0, highest - 1)           # seats 2..highest are the EP/MP pool
+    if pool <= 0:
         return 'MP'
-    if numeric_pos >= max(2, n - 4):
-        return 'EP'
-    return 'MP'
+    ep_seats = min(2, (pool + 1) // 2)
+    return 'EP' if numeric_pos >= highest - ep_seats + 1 else 'MP'
 
 
 def pt4_positions(hand):
@@ -109,12 +135,13 @@ def pt4_positions(hand):
     return pos
 
 
-def hero_position(hand):
+def hero_position(hand, scheme='pt4'):
     """The hero's position bucket for one IR hand, or None."""
     hero = hand.get('hero')
     if not hero:
         return None
-    return position_bucket(pt4_positions(hand).get(hero), len(hand['seats']))
+    return position_bucket(pt4_positions(hand).get(hero),
+                           len(hand['seats']), scheme)
 
 
 # ── PokerStars-dialect parser ───────────────────────────────────────────────
@@ -476,21 +503,28 @@ def _hero_preflop_walk(hand):
     state = {
         'hero_str': hero_str,
         'first_raiser': first_raiser,
+        'last_raiser': aggressor,          # the preflop aggressor
+        'n_raises_total': n_raises,
         'limpers_at_first_raise': limpers_at_first_raise,
         'first_limper': first_limper,
     }
     return contexts, state
 
 
-def preflop_stat_flags(hand):
+def preflop_stat_flags(hand, with_context=False):
     """
     {key: (made, opp)} for every PREFLOP_STATS entry, for one IR hand's hero.
     made/opp are 0/1 — the per-hand contribution to the aggregate counters.
+    With with_context=True also returns the preflop facts the postflop stats
+    depend on (aggressor, 3bet-pot flags, hero's preflop line).
     """
     flags = {key: (0, 0) for key, _label, _g in PREFLOP_STATS}
+    empty_ctx = {'pfa': None, 'hero_line': '', 'n_raises': 0,
+                 'hero_faced_raise': False, 'hero_called_raise': False,
+                 'faced_3bet': False, 'faced_4bet': False, 'in_3bet_pot': False}
     hero = hand.get('hero')
     if not hero or hero not in hand['stacks']:
-        return flags
+        return (flags, empty_ctx) if with_context else flags
 
     positions = pt4_positions(hand)
     hero_np = positions.get(hero)
@@ -594,23 +628,328 @@ def preflop_stat_flags(hand):
         f4b_opp and c_f4b['verb'] == 'fold' and stack_bb <= 30,
         f4b_opp and stack_bb <= 30)
 
+    if not with_context:
+        return flags
+
+    context = {
+        'pfa': st['last_raiser'],
+        'hero_line': hero_str,
+        'n_raises': st['n_raises_total'],
+        'hero_faced_raise': any(c['call_amt'] > 0 and c['n_raises'] >= 1
+                                for c in ctxs),
+        'hero_called_raise': any(c['verb'] == 'call' and c['n_raises'] >= 1
+                                 for c in ctxs),
+        'faced_3bet': f3b_opp,
+        'faced_4bet': f4b_opp,
+        # Any spot where hero faced the 3rd bet or beyond — PT4's
+        # flg_p_3bet_def_opp / flg_p_4bet_def_opp do not require hero to have
+        # been the original raiser, so a cold-caller who then faces a 3bet
+        # also puts the hand in a "3bet+ pot".
+        'in_3bet_pot': any(c['n_raises'] >= 2 and c['call_amt'] > 0
+                           for c in ctxs),
+    }
+    return flags, context
+
+
+# ── Phase 2: postflop stats ─────────────────────────────────────────────────
+# Every stat carrying a custom "(HU)" restriction is position-blind in the BBZ
+# report: their heads-up filter keyed off a hand-level field (cnt_players_f),
+# which collapsed the position grouping so one population-wide value is
+# repeated on all six rows. Verified against every PT4 CSV we hold. Those are
+# flagged global and gated population-wide; the rest keep per-position
+# grouping. The UI always shows true per-position splits (decision Q4).
+
+POSTFLOP_STATS = [
+    # key                 report/CSV column label   global?
+    ('f_cbet_oop_hu',     'CBet F OOP (HU)',        True),
+    ('f_cbet_ip_hu',      'CBet F IP (HU)',         True),
+    ('f_float_hu',        'Float F HU',             True),
+    ('f_fold_cbet_hu',    'Fold to F Cbet (HU)',    True),
+    ('f_fold_cbet_3b',    'Fold to F CBet (3B)',    False),
+    ('f_fold_float_hu',   'Fold to F Float HU',     True),
+    ('f_cbet_fold_hu',    'CBet F & Fold (HU)',     True),
+    ('f_raise_cbet_hu',   'Raise F CBet (HU)',      True),
+    ('f_xr_hu',           'XR Flop HU',             True),
+    ('f_raise_cbet_3b',   'Raise F CBet (3B)',      False),
+    ('t_donk_hu',         'Donk T (HU)',            True),
+    ('t_cbet_hu',         'CBet T (HU)',            True),
+    ('t_float',           'Float T',                False),
+    ('t_probe_hu',        'Probe T (HU)',           True),
+    ('t_probe_bet_r',     'Probe T HU & Bet R',     True),
+    ('t_fold_cbet',       'Fold to T CBet',         False),
+    ('t_fold_probe_hu',   'F to T Pr (HU)',         True),
+    ('t_raise_cbet',      'Raise T CBet',           False),
+    ('t_raise_probe_hu',  'Raise T Probe (HU)',     True),
+    ('r_donk',            'Donk R',                 False),
+    ('r_cbet',            'CBet R',                 False),
+    ('r_fold_cbet',       'Fold to R CBet',         False),
+]
+
+ALL_STATS = PREFLOP_STATS + POSTFLOP_STATS
+
+_PREFIX_STREET = {'f_': 'Flop', 't_': 'Turn', 'r_': 'River'}
+STAT_STREET = {k: 'Preflop' for k, _l, _g in PREFLOP_STATS}
+STAT_STREET.update({k: _PREFIX_STREET[k[:2]] for k, _l, _g in POSTFLOP_STATS})
+STREETS_ORDER = ('Preflop', 'Flop', 'Turn', 'River')
+
+_STREETS = ('preflop', 'flop', 'turn', 'river')
+
+
+def _folded_by(hand, street):
+    """Names that folded before `street` began."""
+    out = set()
+    for s in _STREETS[:_STREETS.index(street)]:
+        for a in hand['streets'][s]:
+            if a['verb'] == 'fold':
+                out.add(a['name'])
+    return out
+
+
+def _postflop_order(hand, names):
+    """Names in postflop action order (button acts last)."""
+    btn = hand.get('btn_seat')
+    if btn is None:
+        btn = max(hand['seats'], default=0)
+    seat_of = {v: k for k, v in hand['seats'].items()}
+    return sorted(names, key=lambda nm: (seat_of.get(nm, 0) - btn - 1) % 100)
+
+
+def _street_walk(hand, street, hero):
+    """
+    Hero's decision contexts on one postflop street, plus street facts.
+    Each context: verb, facing (chips to call), n_bets seen so far, first_bettor.
+    """
+    ctxs = []
+    current, committed = 0, {}
+    n_bets, first_bettor, aggressor = 0, None, None
+    acted = set()
+    for a in hand['streets'][street]:
+        nm, verb, amt = a['name'], a['verb'], a['amount']
+        if nm == hero:
+            ctxs.append({'verb': verb,
+                         'facing': max(0, current - committed.get(hero, 0)),
+                         'n_bets': n_bets, 'first_bettor': first_bettor,
+                         'acted_before': set(acted)})
+        acted.add(nm)
+        if verb == 'bet':
+            if n_bets == 0:
+                first_bettor = nm
+            n_bets += 1
+            aggressor = nm
+            committed[nm] = committed.get(nm, 0) + amt
+            current = max(current, committed[nm])
+        elif verb == 'raise':
+            n_bets += 1
+            aggressor = nm
+            committed[nm] = amt
+            current = max(current, amt)
+        elif verb == 'call':
+            committed[nm] = committed.get(nm, 0) + amt
+    return ctxs, {'n_bets': n_bets, 'first_bettor': first_bettor,
+                  'aggressor': aggressor}
+
+
+def postflop_stat_flags(hand, pre):
+    """
+    {key: (made, opp)} for POSTFLOP_STATS. `pre` carries the preflop facts the
+    postflop definitions depend on (aggressor, 3bet-pot flags, hero's line).
+    """
+    flags = {k: (0, 0) for k, _l, _g in POSTFLOP_STATS}
+    hero = hand.get('hero')
+
+    def put(key, made, opp):
+        flags[key] = (1 if (made and opp) else 0, 1 if opp else 0)
+
+    def facing_ctx(ctxs, start=0):
+        """Hero's first decision at or after `start` where there is a bet to
+        call — the out-of-position line (check, then face the bet) means this
+        is usually NOT hero's first action on the street."""
+        return next((c for c in ctxs[start:] if c['facing'] > 0), None)
+
+    board = hand.get('board') or []
+    if not hero or len(board) < 3:
+        return flags
+
+    live_f = [nm for nm in hand['seats'].values()
+              if nm not in _folded_by(hand, 'flop')]
+    if hero not in live_f:
+        return flags
+    hu_f = len(live_f) == 2                      # PT4's cnt_players_f = 2
+    order_f = _postflop_order(hand, live_f)
+    hero_ip_f = bool(order_f) and order_f[-1] == hero
+
+    pfa = pre['pfa']
+    f_ctx, f_info = _street_walk(hand, 'flop', hero)
+    if not f_ctx:
+        return flags
+    first = f_ctx[0]
+
+    # ── Flop ──
+    # C-bet: hero was the preflop aggressor and the action reached them unbet.
+    cbet_opp = (hero == pfa) and first['n_bets'] == 0
+    cbet = cbet_opp and first['verb'] == 'bet'
+    put('f_cbet_oop_hu', cbet, cbet_opp and hu_f and not hero_ip_f)
+    put('f_cbet_ip_hu', cbet, cbet_opp and hu_f and hero_ip_f)
+
+    # Facing the preflop aggressor's c-bet.
+    f_def = facing_ctx(f_ctx)
+    cbet_def_opp = (hero != pfa and f_def is not None
+                    and f_def['first_bettor'] == pfa)
+    def_verb = f_def['verb'] if f_def else None
+    put('f_fold_cbet_hu', def_verb == 'fold', cbet_def_opp and hu_f)
+    put('f_raise_cbet_hu', def_verb == 'raise', cbet_def_opp and hu_f)
+    # 3bet+ pot variants are NOT heads-up restricted and keep position grouping.
+    in_3bet_pot = pre['in_3bet_pot']
+    put('f_fold_cbet_3b', def_verb == 'fold', cbet_def_opp and in_3bet_pot)
+    put('f_raise_cbet_3b', def_verb == 'raise', cbet_def_opp and in_3bet_pot)
+
+    # Check-raise: checked, then faced a bet.
+    xr_face = facing_ctx(f_ctx, 1) if first['verb'] == 'check' else None
+    xr_opp = xr_face is not None
+    put('f_xr_hu', xr_opp and xr_face['verb'] == 'raise', xr_opp and hu_f)
+
+    # C-bet then face a raise.
+    raise_back = facing_ctx(f_ctx, 1) if cbet else None
+    cbet_raised = raise_back is not None
+    put('f_cbet_fold_hu', cbet_raised and raise_back['verb'] == 'fold',
+        cbet_raised and hu_f)
+
+    # Float: called exactly one preflop raise in position, and it checks to hero.
+    float_opp = (hero != pfa and pre['hero_line'].strip('C') == ''
+                 and pre['hero_called_raise'] and pre['n_raises'] == 1
+                 and hero_ip_f and first['n_bets'] == 0)
+    put('f_float_hu', first['verb'] == 'bet', float_opp and hu_f)
+
+    # Facing a float: hero was the uncontested preflop raiser, checked OOP,
+    # and got bet into.
+    float_face = (facing_ctx(f_ctx, 1)
+                  if (hero == pfa and not pre['hero_faced_raise']
+                      and first['n_bets'] == 0 and first['verb'] == 'check')
+                  else None)
+    float_def_opp = float_face is not None
+    put('f_fold_float_hu', float_def_opp and float_face['verb'] == 'fold',
+        float_def_opp and hu_f)
+
+    # ── Turn ──
+    if len(board) < 4:
+        return flags
+    live_t = [nm for nm in hand['seats'].values()
+              if nm not in _folded_by(hand, 'turn')]
+    if hero not in live_t:
+        return flags
+    order_t = _postflop_order(hand, live_t)
+    hero_ip_t = bool(order_t) and order_t[-1] == hero
+    f_aggr = f_info['aggressor']
+    t_ctx, t_info = _street_walk(hand, 'turn', hero)
+    if not t_ctx:
+        return flags
+    t_first = t_ctx[0]
+
+    # Donk: bet before the previous street's aggressor gets to act.
+    donk_opp = (f_aggr is not None and f_aggr != hero
+                and t_first['n_bets'] == 0
+                and f_aggr not in t_first['acted_before'])
+    put('t_donk_hu', t_first['verb'] == 'bet', donk_opp and hu_f)
+
+    # Turn c-bet: hero c-bet the flop and the turn reaches them unbet
+    # (a continuation chain, so a flop check-raise is not a "c-bet").
+    t_cbet_opp = (cbet and t_first['n_bets'] == 0)
+    t_cbet = t_cbet_opp and t_first['verb'] == 'bet'
+    put('t_cbet_hu', t_cbet, t_cbet_opp and hu_f)
+
+    # Probe: preflop caller, flop checked through, hero opens the turn before
+    # the preflop aggressor acts.
+    probe_opp = (hero != pfa and pre['hero_faced_raise']
+                 and f_info['n_bets'] == 0 and t_first['n_bets'] == 0
+                 and pfa not in t_first['acted_before'])
+    probe = probe_opp and t_first['verb'] == 'bet'
+    put('t_probe_hu', probe, probe_opp and hu_f)
+
+    # Float turn: called a flop bet in position, then the flop bettor checks
+    # the turn to hero.
+    t_float_opp = (f_def is not None and f_def['verb'] == 'call'
+                   and t_first['n_bets'] == 0 and hero_ip_t
+                   and f_aggr in t_first['acted_before'])
+    put('t_float', t_first['verb'] == 'bet', t_float_opp)
+
+    # Facing a turn c-bet — only the player who c-bet the flop can be
+    # "continuing", so this mirrors the chain rule used for hero's own c-bets.
+    flop_cbettor = pfa if (pfa is not None
+                           and f_info['first_bettor'] == pfa) else None
+    t_def = facing_ctx(t_ctx)
+    t_cbet_def_opp = (flop_cbettor is not None and flop_cbettor != hero
+                      and t_def is not None
+                      and t_def['first_bettor'] == flop_cbettor)
+    t_def_verb = t_def['verb'] if t_def else None
+    put('t_fold_cbet', t_def_verb == 'fold', t_cbet_def_opp)
+    put('t_raise_cbet', t_def_verb == 'raise', t_cbet_def_opp)
+
+    # Facing a turn probe: hero had the flop c-bet chance, checked, now faces a bet.
+    t_probe_def_opp = (cbet_opp and first['verb'] == 'check'
+                       and t_def is not None)
+    put('t_fold_probe_hu', t_probe_def_opp and t_def_verb == 'fold',
+        t_probe_def_opp and hu_f)
+    put('t_raise_probe_hu', t_probe_def_opp and t_def_verb == 'raise',
+        t_probe_def_opp and hu_f)
+
+    # ── River ──
+    if len(board) < 5:
+        return flags
+    if hero in _folded_by(hand, 'river'):
+        return flags
+    t_aggr = t_info['aggressor']
+    r_ctx, _r_info = _street_walk(hand, 'river', hero)
+    if not r_ctx:
+        return flags
+    r_first = r_ctx[0]
+
+    r_donk_opp = (t_aggr is not None and t_aggr != hero
+                  and r_first['n_bets'] == 0
+                  and t_aggr not in r_first['acted_before'])
+    put('r_donk', r_first['verb'] == 'bet', r_donk_opp)
+
+    # River c-bet continues the turn c-bet (same chain rule as the turn).
+    r_cbet_opp = (t_cbet and r_first['n_bets'] == 0)
+    put('r_cbet', r_first['verb'] == 'bet', r_cbet_opp)
+
+    turn_cbettor = (flop_cbettor if (flop_cbettor is not None
+                                     and t_info['first_bettor'] == flop_cbettor)
+                    else None)
+    r_def = facing_ctx(r_ctx)
+    r_cbet_def_opp = (turn_cbettor is not None and turn_cbettor != hero
+                      and r_def is not None
+                      and r_def['first_bettor'] == turn_cbettor)
+    put('r_fold_cbet', r_def is not None and r_def['verb'] == 'fold',
+        r_cbet_def_opp)
+
+    # Probe the turn heads-up, then get the chance to open the river.
+    put('t_probe_bet_r', r_first['verb'] == 'bet',
+        probe and hu_f and r_first['n_bets'] == 0)
+
     return flags
 
 
-def aggregate_stats(hands):
+def hand_stat_flags(hand):
+    """{key: (made, opp)} for every stat (preflop + postflop) in one hand."""
+    flags, pre = preflop_stat_flags(hand, with_context=True)
+    flags.update(postflop_stat_flags(hand, pre))
+    return flags
+
+
+def aggregate_stats(hands, scheme='pt4'):
     """
-    Aggregate preflop stats over IR hands.
+    Aggregate all stats over IR hands.
     Returns {'positions': {bucket: {'hands': n, 'stats': {key: {made, opp}}}},
              'global':   {key: {made, opp}}}   (population-wide sums)
     """
-    positions = {b: {'hands': 0,
-                     'stats': {k: {'made': 0, 'opp': 0} for k, _l, _g in PREFLOP_STATS}}
+    keys = [k for k, _l, _g in ALL_STATS]
+    positions = {b: {'hands': 0, 'stats': {k: {'made': 0, 'opp': 0} for k in keys}}
                  for b in POSITION_BUCKETS}
-    glob = {k: {'made': 0, 'opp': 0} for k, _l, _g in PREFLOP_STATS}
+    glob = {k: {'made': 0, 'opp': 0} for k in keys}
 
     for h in hands:
-        bucket = hero_position(h)
-        flags = preflop_stat_flags(h)
+        bucket = hero_position(h, scheme)
+        flags = hand_stat_flags(h)
         if bucket in positions:
             positions[bucket]['hands'] += 1
             for k, (made, opp) in flags.items():

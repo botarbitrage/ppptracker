@@ -1110,7 +1110,7 @@ def leaks_page():
 def leaks_api():
     from hand_exporter import records_to_ps_text
     from leak_engine import (parse_ps_text, aggregate_stats, validate_pot,
-                             POSITION_BUCKETS, PREFLOP_STATS)
+                             POSITION_BUCKETS, ALL_STATS, STAT_STREET)
 
     uid = _verify_bearer(request)   # inits the Admin SDK internally
     if not uid:
@@ -1145,14 +1145,16 @@ def leaks_api():
                 else:
                     hands.append(h)
 
-    agg = aggregate_stats(hands)
+    # 'report' bucketing: identical to PT4 at 7-9 handed, but it also gives
+    # short tables an EP bucket so 6-max/5-max UTG is not filed under MP.
+    agg = aggregate_stats(hands, scheme='report')
     targets = _load_bbz_targets()
 
     positions = []
     for bucket in POSITION_BUCKETS:
         p = agg['positions'][bucket]
         rows = []
-        for key, label, _is_global in PREFLOP_STATS:
+        for key, label, _is_global in ALL_STATS:
             st = p['stats'][key]
             made, opp = st['made'], st['opp']
             t = targets.get((bucket, label)) or {}
@@ -1163,14 +1165,14 @@ def leaks_api():
                 result = ('LOW' if pct < target[0]
                           else 'HIGH' if pct > target[1] else 'GOOD')
             rows.append({'key': key, 'label': label, 'pct': pct,
-                         'made': made, 'opp': opp,
-                         'target': target, 'result': result})
+                         'made': made, 'opp': opp, 'street': STAT_STREET[key],
+                         'target': target, 'rec': t.get('rec'), 'result': result})
         positions.append({'position': bucket, 'hands': p['hands'], 'stats': rows})
 
     return jsonify({
         'meta': {'tournaments': n_tourneys, 'hands': len(hands),
-                 'hands_skipped': skipped, 'phase': 1,
-                 'scope': 'all saved tournaments — preflop stats'},
+                 'hands_skipped': skipped, 'phase': 2,
+                 'scope': 'all saved tournaments — preflop + postflop stats'},
         'positions': positions,
     })
 
