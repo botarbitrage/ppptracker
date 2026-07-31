@@ -193,6 +193,37 @@ def _cells_preflop(agg, pt4):
     return cells
 
 
+def _cells_winrate(agg, pt4):
+    """
+    All-In Adj BB/100, ours vs PT4 — INFORMATIONAL ONLY (`gated: False`).
+    Our figure is poker-correct (exact runout enumeration, proper side pots)
+    and tracks PT4 closely on clean heads-up all-ins, but PT4's column could
+    not be reproduced cell-exact: structurally identical hands appear on both
+    sides of its adjustment. See design doc §11.
+    """
+    cells = []
+    tot_bb = tot_n = 0
+    for pos in list(POSITION_BUCKETS) + ['total']:
+        if pos == 'total':
+            bb, n = tot_bb, tot_n
+        else:
+            p = agg['positions'][pos]
+            bb, n = p['bb_adj'], p['hands']
+            tot_bb += bb
+            tot_n += n
+        ours = round(bb / n * 100, 2) if n else None
+        pt4_val = (pt4.get(pos) or {}).get('All-In Adj BB/100')
+        cells.append({
+            'stat': 'All-In Adj BB/100', 'position': pos,
+            'ours_pct': ours, 'pt4_pct': pt4_val,
+            'ours_n': n, 'pt4_n': n,
+            'gated': False,
+            'match': (ours is not None and pt4_val is not None
+                      and abs(ours - pt4_val) <= 0.01),
+        })
+    return cells
+
+
 def _run_suite(name, txt_paths, csv_path):
     hands = _parse_files(txt_paths)
 
@@ -208,8 +239,9 @@ def _run_suite(name, txt_paths, csv_path):
 
     ours = aggregate_positions(accepted)
     pt4 = parse_pt4_csv(csv_path)
-    agg = aggregate_stats(accepted)
+    agg = aggregate_stats(accepted, winrate=True)
     cells = _cells_hands(ours, pt4) + _cells_preflop(agg, pt4)
+    cells += _cells_winrate(agg, pt4)
 
     for c in cells:
         if not c['match'] and (name, c['stat'], c['position'],
@@ -226,7 +258,8 @@ def _run_suite(name, txt_paths, csv_path):
         'hero': next((h['hero'] for h in hands if h.get('hero')), None),
         'unmapped': ours.get('unmapped', 0),
         'cells': cells,
-        'all_match': all(c['match'] for c in cells),
+        'all_match': all(c['match'] for c in cells
+                         if c.get('gated', True)),
     }
 
 

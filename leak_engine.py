@@ -936,25 +936,39 @@ def hand_stat_flags(hand):
     return flags
 
 
-def aggregate_stats(hands, scheme='pt4'):
+def aggregate_stats(hands, scheme='pt4', winrate=False):
     """
     Aggregate all stats over IR hands.
-    Returns {'positions': {bucket: {'hands': n, 'stats': {key: {made, opp}}}},
+    Returns {'positions': {bucket: {'hands': n, 'stats': {key: {made, opp}},
+                                    'bb': realised, 'bb_adj': all-in adjusted}},
              'global':   {key: {made, opp}}}   (population-wide sums)
+
+    winrate=True also accumulates the big-blind results. That runs the equity
+    engine, which is much slower than the flag counting, so it is opt-in.
     """
     keys = [k for k, _l, _g in ALL_STATS]
-    positions = {b: {'hands': 0, 'stats': {k: {'made': 0, 'opp': 0} for k in keys}}
+    positions = {b: {'hands': 0, 'bb': 0.0, 'bb_adj': 0.0,
+                     'stats': {k: {'made': 0, 'opp': 0} for k in keys}}
                  for b in POSITION_BUCKETS}
     glob = {k: {'made': 0, 'opp': 0} for k in keys}
+
+    result_bb = None
+    if winrate:
+        from equity import hero_result_bb as result_bb
 
     for h in hands:
         bucket = hero_position(h, scheme)
         flags = hand_stat_flags(h)
         if bucket in positions:
-            positions[bucket]['hands'] += 1
+            p = positions[bucket]
+            p['hands'] += 1
             for k, (made, opp) in flags.items():
-                positions[bucket]['stats'][k]['made'] += made
-                positions[bucket]['stats'][k]['opp'] += opp
+                p['stats'][k]['made'] += made
+                p['stats'][k]['opp'] += opp
+            if result_bb is not None:
+                realised, adjusted = result_bb(h)
+                p['bb'] += realised
+                p['bb_adj'] += adjusted
         for k, (made, opp) in flags.items():
             glob[k]['made'] += made
             glob[k]['opp'] += opp

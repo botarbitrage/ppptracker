@@ -37,6 +37,8 @@
     }
     .lk-pos-kv   { color:var(--muted); font-size:.85rem; }
     .lk-pos-kv b { color:var(--text); font-weight:600; }
+    .lk-wr-pos   { color:var(--green) !important; }
+    .lk-wr-neg   { color:#ff5470 !important; }
     .lk-pills { margin-left:auto; display:flex; gap:6px; }
     .lk-pill {
       font-family:var(--font-head); font-size:.72rem; font-weight:700;
@@ -98,11 +100,16 @@ const POS_ORDER = ['BTN', 'CO', 'MP', 'EP', 'BB', 'SB'];
 const STREETS = ['Preflop', 'Flop', 'Turn', 'River'];
 
 function fmtPct(v) { return v == null ? '—' : v.toFixed(2).replace(/\.?0+$/, '') + '%'; }
+function fmtBB(v)  { return v == null ? '—' : (v >= 0 ? '+' : '') + Math.round(v) + 'bb'; }
 
 function renderReport(data) {
-  document.getElementById('lk-status').textContent =
+  document.getElementById('lk-status').innerHTML =
     `${data.meta.hands.toLocaleString()} hands · ${data.meta.tournaments} tournaments` +
-    (data.meta.hands_skipped ? ` · ${data.meta.hands_skipped} hands excluded (pot inconsistencies)` : '');
+    ` · overall winrate <b class="${data.meta.winrate_bb100 >= 0 ? 'lk-wr-pos' : 'lk-wr-neg'}">` +
+    `${fmtBB(data.meta.winrate_bb100)}/100</b>` +
+    ` <span title="Before all-in equity adjustment">(raw ${fmtBB(data.meta.winrate_raw_bb100)}/100)</span>` +
+    (data.meta.hands_skipped ? ` · ${data.meta.hands_skipped} hands excluded (pot inconsistencies)` : '') +
+    (data.meta.hands_unadjusted ? ` · <span style="color:#e0b95c">${data.meta.hands_unadjusted} all-in hands not yet equity-adjusted — reload to finish</span>` : '');
 
   const byPos = Object.fromEntries(data.positions.map(p => [p.position, p]));
   document.getElementById('lk-cards').innerHTML = POS_ORDER.map(posName => {
@@ -117,6 +124,8 @@ function renderReport(data) {
       <div class="lk-pos-head">
         <span class="lk-caret">▸</span>
         <span class="lk-pos-name">${p.position}</span>
+        <span class="lk-pos-kv" title="All-in adjusted big blinds won per 100 hands">Winrate:
+          <b class="${p.winrate_bb100 >= 0 ? 'lk-wr-pos' : 'lk-wr-neg'}">${fmtBB(p.winrate_bb100)}</b></span>
         <span class="lk-pos-kv">Hands: <b>${p.hands}</b></span>
         <div class="lk-pills">
           <span class="lk-pill all">All (${evaluated})</span>

@@ -35,6 +35,7 @@
     td.vld-ok   { color:var(--green); font-weight:700; }
     td.vld-bad  { color:#ff5470;      font-weight:700; }
     td.vld-dev  { color:#e0b95c;      font-weight:700; }
+    td.vld-info { color:#9ec3e6;      font-weight:700; }
     .vld-num    { color:var(--muted); font-size:.82rem; }
     tr.vld-stat-first td { border-top:1px solid #ffffff2e; }
   </style>
@@ -102,8 +103,11 @@
             <tbody>
               ${s.cells.map((c, i) => {
                 const firstOfStat = i === 0 || s.cells[i-1].stat !== c.stat;
-                const mark = c.accepted_deviation ? '◆' : (c.match ? '✓' : '✗');
-                const cls  = c.accepted_deviation ? 'vld-dev' : (c.match ? 'vld-ok' : 'vld-bad');
+                const ungated = c.gated === false;
+                const mark = ungated ? (c.match ? '✓' : '≈')
+                           : c.accepted_deviation ? '◆' : (c.match ? '✓' : '✗');
+                const cls  = ungated ? 'vld-info'
+                           : c.accepted_deviation ? 'vld-dev' : (c.match ? 'vld-ok' : 'vld-bad');
                 return `
                 <tr class="${firstOfStat ? 'vld-stat-first' : ''}">
                   <td>${firstOfStat ? c.stat : ''}</td>
@@ -112,7 +116,9 @@
                   <td class="text-end vld-num">${c.pt4_pct ?? '—'}</td>
                   <td class="text-end">${c.ours_n ?? '—'}</td>
                   <td class="text-end">${c.pt4_n ?? '—'}</td>
-                  <td class="text-center ${cls}" title="${c.accepted_deviation ? 'Accepted deviation — PT4 internally inconsistent, see design doc' : ''}">${mark}</td>
+                  <td class="text-center ${cls}" title="${
+                    ungated ? 'Informational — not gated. Our figure is poker-correct; PT4\\'s column could not be reproduced cell-exact (design doc §11).'
+                    : c.accepted_deviation ? 'Accepted deviation — PT4 internally inconsistent, see design doc' : ''}">${mark}</td>
                 </tr>`;
               }).join('')}
             </tbody>

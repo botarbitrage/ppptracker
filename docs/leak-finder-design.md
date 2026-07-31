@@ -1,10 +1,10 @@
 # Leak Finder — Design & Delivery Plan
 
-_Status: **Phase 2 complete — all 39 stats (17 preflop + 22 postflop) validated cell-exact vs
-PT4** on both suites (172 diff cells each; 2 documented accepted-deviation cells where PT4 is
-internally inconsistent — see Appendix C). The `/leaks` page shows the full by-position report
-over all saved tournaments, grouped by street, with BBZ targets and verdicts. Position bucketing
-for the report was also corrected (Appendix B). Next: Phase 3 (all-in adjusted BB/100)._
+_Status: **Phase 3 shipped with one honest caveat.** All 39 stats stay cell-exact vs PT4. The
+all-in-adjusted winrate is now computed and shown on `/leaks`, using exact runout enumeration and
+proper side-pot settlement — but PT4's `All-In Adj BB/100` column could **not** be reproduced
+cell-exact, so that figure is reported as informational rather than gated (§11). Next: Phase 4
+(verdict polish + sample-size gating) and Phase 5 (filters + caching)._
 _Owner: Caio · Consulting engineer: Claude_
 
 ## 1. Goal
@@ -238,7 +238,7 @@ What the harvest established:
 | **0 — Foundations ✅** | Canonical action model; `position_bucket`; CSV → ground-truth parser; diff endpoint | **Validation grid** (dev page): our counts vs PT4, per cell | Per-position **Hands** counts match the CSV — **PASSED** |
 | **1 — Preflop ✅** | All preflop flags (RFI, limp family, 3-bet/opp, fold-to-steal, call-2bet, 4-bet, squeeze, BB-v-SB); `aggregate_stats()`; `records_to_ps_text()` runtime adapter | **`/leaks` page**: by-position preflop report with BBZ targets + provisional verdicts | Preflop columns match PT4 CSV — **PASSED** (2 accepted-deviation cells, Appendix C) |
 | **2 — Postflop ✅** | Flop/turn/river flags (c-bet/float/probe/donk/check-raise/fold-to; HU & 3-bet variants); `report` position scheme | **`/leaks` grouped by street**, postflop rows added | Postflop columns match PT4 CSV — **PASSED** |
-| **3 — Headline winrate** | `equity.py`; all-in-adj bb/100 per position | **"Winrate: X bb"** on each position row + total | All-In Adj BB/100 matches CSV |
+| **3 — Headline winrate ⚠️** | `equity.py` — exact enumeration, side-pot layers, persistent cache | **"Winrate: X bb"** on each position card + overall | Reported, **not gated** — PT4's column not reproducible cell-exact (§11) |
 | **4 — Verdicts** | Seed `/config/leak_ranges` from `data/bbz_leak_ranges.json`; `classify()`; sample-size gating | **All / Good / Bad pills** + expandable per-stat detail (Hero / Result / Target / Rec. action) | Good/Bad counts reproduce the BBZ screenshots (BTN 4/17, CO 2/25, MP 3/26, EP 1/25, BB 2/27, SB 2/29) |
 | **5 — Cut the cord** | Filter bar (tournament / buy-in value / date range); count-vector caching; remove "export→PT4→BBZ" guidance; nav entry | **Filters + polished standalone Leak Finder**; single-click flow | End-to-end: saved tournaments → report with no external tools |
 
@@ -283,6 +283,39 @@ useful context for future debugging:
 Takeaway for future debugging of "PT4 shows fewer hands than we exported": check for a
 byte-identical-input, different-output case *first* — it's the cheapest way to rule our code in
 or out before chasing structural theories in the data.
+
+## 11. Phase 3 finding: the all-in-adjusted winrate does not reconcile with PT4
+
+**What we built.** `equity.py` computes each hand's all-in-adjusted result: it detects the street
+where the money went in, enumerates *every* remaining runout exactly (never Monte Carlo — the gate
+compares to two decimals, which sampling error cannot hold), settles main and side pots layer by
+layer, and splits ties. The realised-money side is provably right: hero's net plus every
+opponent's net sums to **exactly zero on all 476 validation hands**.
+
+**What matches.** On clean heads-up all-ins our figure tracks PT4 almost exactly — EP in both
+suites lands within **0.02–0.03 bb/100** of PT4 after adjustment (e.g. 29.08 vs 29.06 across 78
+hands), which is what you would expect from correct equity and correct money.
+
+**What doesn't.** Two positions in each suite disagree materially (BB and MP), and every position
+carries a small residual (~0.1–0.25 bb/100) even where no hand is adjusted at all — implying PT4's
+*realised* baseline also differs slightly from ours. Attempts to infer PT4's inclusion rule failed
+because **structurally identical hands land on both sides of it**: in `#…8466` the villain shoves
+and hero calls covering, and PT4 adjusts; in `#…68510` the villain shoves and hero calls covering,
+and PT4 does not. No rule keyed on street, all-in ordering, who covered whom, side pots, or pot
+size separates the two. Without PT4's internal `amt_expected_won` per hand we cannot close this.
+
+**Decision.** Ship our number and label it honestly, consistent with decision Q4 (prefer
+correctness over reproducing a source quirk). `/leaks` shows it as the headline "Winrate"; the
+validation grid lists it with `gated: false`, rendered `≈` in blue, so the delta stays visible and
+never silently passes. Should PT4's per-hand expected values become available, this is
+re-openable.
+
+**Cost and caching.** A preflop all-in enumerates C(48,5) = 1,712,304 runouts (~2s); flop/turn/
+river all-ins are trivial. Across the live 4,403-hand history ~290 hands qualify, so a cold
+computation is far too slow for a request. Equity depends only on the card layout and can never
+change, so results are cached as pot-size-independent share *fractions* in
+`data/equity_cache.json`, warmed offline and committed. The per-tournament aggregate cache in §3
+(Phase 5) remains the durable fix for the rest of the report's cost.
 
 ## Appendix A — Stat → formula map (from the `.pt4rpt`)
 
@@ -419,4 +452,10 @@ labelling.
       aggressor; turn float requires position; "3bet+ pot" does not require hero to have been the
       original raiser.
 - [x] Report position bucketing corrected for short-handed tables (Appendix B).
-- [ ] Pick equity library (`eval7` vs `treys` vs `pokerkit`) — Phase 3.
+- [x] Equity library — **eval7** (C evaluator). Note its `py_hand_vs_range_exact` is broken in the
+      current build (always returns 0.0) and its Monte Carlo drifts in the 3rd decimal, so we
+      enumerate runouts ourselves with `eval7.evaluate`.
+- [x] Phase-3 winrate — shipped, **reported but not gated**; PT4's column not reproducible (§11).
+- [ ] Re-open the winrate reconciliation if PT4 per-hand `amt_expected_won` values become available.
+- [ ] Phase 5: per-tournament aggregate cache (makes the whole report instant, supersedes the
+      equity-only cache file).

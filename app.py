@@ -1147,7 +1147,25 @@ def leaks_api():
 
     # 'report' bucketing: identical to PT4 at 7-9 handed, but it also gives
     # short tables an EP bucket so 6-max/5-max UTG is not filed under MP.
-    agg = aggregate_stats(hands, scheme='report')
+    # Cap new equity enumeration so an un-warmed cache can never stall the
+    # request; uncomputed hands fall back to their realised result and are
+    # reported as partial coverage.
+    unadjusted = 0
+    try:
+        from equity import set_budget, skipped_count, save_cache
+        set_budget(25)
+    except Exception:
+        set_budget = skipped_count = save_cache = None
+
+    agg = aggregate_stats(hands, scheme='report', winrate=True)
+
+    if save_cache:
+        try:
+            save_cache()      # persist any newly enumerated all-in equities
+            unadjusted = skipped_count()
+        except Exception:
+            pass
+        set_budget(None)
     targets = _load_bbz_targets()
 
     positions = []
@@ -1167,12 +1185,25 @@ def leaks_api():
             rows.append({'key': key, 'label': label, 'pct': pct,
                          'made': made, 'opp': opp, 'street': STAT_STREET[key],
                          'target': target, 'rec': t.get('rec'), 'result': result})
-        positions.append({'position': bucket, 'hands': p['hands'], 'stats': rows})
+        n = p['hands']
+        positions.append({
+            'position': bucket, 'hands': n, 'stats': rows,
+            'winrate_bb100': round(p['bb_adj'] / n * 100, 2) if n else None,
+            'winrate_raw_bb100': round(p['bb'] / n * 100, 2) if n else None,
+        })
 
+    total_hands = sum(p['hands'] for p in positions)
+    total_adj = sum(agg['positions'][b]['bb_adj'] for b in POSITION_BUCKETS)
+    total_raw = sum(agg['positions'][b]['bb'] for b in POSITION_BUCKETS)
     return jsonify({
-        'meta': {'tournaments': n_tourneys, 'hands': len(hands),
-                 'hands_skipped': skipped, 'phase': 2,
-                 'scope': 'all saved tournaments — preflop + postflop stats'},
+        'meta': {
+            'tournaments': n_tourneys, 'hands': len(hands),
+            'hands_skipped': skipped, 'phase': 3,
+            'hands_unadjusted': unadjusted,
+            'winrate_bb100': round(total_adj / total_hands * 100, 2) if total_hands else None,
+            'winrate_raw_bb100': round(total_raw / total_hands * 100, 2) if total_hands else None,
+            'scope': 'all saved tournaments — preflop + postflop stats',
+        },
         'positions': positions,
     })
 
