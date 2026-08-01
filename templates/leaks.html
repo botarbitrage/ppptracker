@@ -73,6 +73,39 @@
     th.lk-sortable { cursor:pointer; user-select:none; white-space:nowrap; }
     th.lk-sortable:hover { color:var(--text); }
     .lk-sort-arrow { display:inline-block; width:10px; color:var(--green); font-size:.65rem; }
+    .lk-filter-row {
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:12px 16px;
+    }
+    .lk-filter-btn, .lk-apply, .lk-reset {
+      font-family:var(--font-head); font-size:.78rem; font-weight:600;
+      border-radius:7px; padding:6px 12px; cursor:pointer;
+      background:#ffffff10; color:var(--text); border:1px solid #ffffff26;
+    }
+    .lk-filter-btn:hover, .lk-reset:hover { background:#ffffff1a; }
+    .lk-apply { background:#00e67622; color:var(--green); border-color:#00e67655; }
+    .lk-apply:hover { background:#00e67633; }
+    .lk-date-lbl { color:var(--muted); font-size:.78rem; display:flex; align-items:center; gap:6px; }
+    .lk-date {
+      background:#ffffff10; color:var(--text); border:1px solid #ffffff26;
+      border-radius:7px; padding:5px 8px; font-size:.78rem; color-scheme:dark;
+    }
+    .lk-room-panel { border-top:1px solid #ffffff14; padding:10px 16px 14px; }
+    .lk-room-actions { font-size:.75rem; color:var(--muted); margin-bottom:8px; }
+    .lk-room-actions a { color:var(--green); text-decoration:none; }
+    .lk-room-list {
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+      gap:4px 14px; max-height:260px; overflow-y:auto;
+    }
+    .lk-room-item {
+      display:flex; align-items:center; gap:8px; font-size:.8rem;
+      color:var(--text); cursor:pointer; padding:3px 0;
+    }
+    .lk-room-item input { accent-color:var(--green); flex:none; }
+    .lk-room-item .n { color:var(--muted); font-size:.74rem; margin-left:auto; }
+    .lk-warn {
+      border:1px solid #b58a2e66; background:#b58a2e14; color:#e0b95c;
+      border-radius:8px; padding:8px 14px; font-size:.8rem;
+    }
   </style>
 </head>
 <body>
@@ -96,7 +129,27 @@
     hands) instead of a verdict. Click <b>Result</b> to sort best-first or worst-first.
   </div>
 
+  <div id="lk-filterbar" class="section-card mb-3 d-none">
+    <div class="lk-filter-row">
+      <button class="lk-filter-btn" id="lk-rooms-btn" onclick="toggleRoomPanel()">
+        Tournaments: <b id="lk-rooms-label">All</b> <span style="opacity:.6">▾</span>
+      </button>
+      <label class="lk-date-lbl">From <input type="date" id="lk-from" class="lk-date"></label>
+      <label class="lk-date-lbl">To <input type="date" id="lk-to" class="lk-date"></label>
+      <button class="lk-apply" onclick="applyFilters()">Apply</button>
+      <button class="lk-reset" onclick="resetFilters()">Reset</button>
+    </div>
+    <div id="lk-room-panel" class="lk-room-panel d-none">
+      <div class="lk-room-actions">
+        <a href="#" onclick="selectRooms(true);return false">Select all</a> ·
+        <a href="#" onclick="selectRooms(false);return false">Clear</a>
+      </div>
+      <div id="lk-room-list" class="lk-room-list"></div>
+    </div>
+  </div>
+
   <div id="lk-status" class="lk-meta mb-3">Signing in…</div>
+  <div id="lk-warn" class="lk-warn mb-3 d-none"></div>
   <div id="lk-error" class="alert alert-danger py-2 d-none"></div>
   <div id="lk-cards"></div>
 
@@ -266,9 +319,96 @@ function cycleSort(position) {
   if (arrow) arrow.textContent = sortArrow(position);
 }
 
+// ── Filters ────────────────────────────────────────────────────────────────
+// Filters select whole tournaments, never partial ones: a session that runs
+// past midnight stays intact instead of being cut in half by a date bound.
+let ROOMS = [];               // [{key,label,tournaments,hands}]
+let FILTERS_BUILT = false;
+let AUTH_USER = null;
+
+function toggleRoomPanel() {
+  document.getElementById('lk-room-panel').classList.toggle('d-none');
+}
+
+function selectedRooms() {
+  return Array.from(document.querySelectorAll('#lk-room-list input:checked'))
+              .map(el => el.value);
+}
+
+function selectRooms(on) {
+  document.querySelectorAll('#lk-room-list input').forEach(el => { el.checked = on; });
+  updateRoomsLabel();
+}
+
+function updateRoomsLabel() {
+  const sel = selectedRooms();
+  const el = document.getElementById('lk-rooms-label');
+  el.textContent = (sel.length === 0 || sel.length === ROOMS.length)
+    ? `All (${ROOMS.length})` : `${sel.length} of ${ROOMS.length}`;
+}
+
+function buildFilterBar(filters) {
+  if (FILTERS_BUILT) return;
+  ROOMS = filters.rooms || [];
+  document.getElementById('lk-room-list').innerHTML = ROOMS.map(r => `
+    <label class="lk-room-item" title="${esc(r.label)}">
+      <input type="checkbox" value="${esc(r.key)}" checked onchange="updateRoomsLabel()">
+      <span>${r.label}</span><span class="n">${r.hands}</span>
+    </label>`).join('');
+  const from = document.getElementById('lk-from'), to = document.getElementById('lk-to');
+  if (filters.date_min) { from.min = to.min = filters.date_min; }
+  if (filters.date_max) { from.max = to.max = filters.date_max; }
+  updateRoomsLabel();
+  document.getElementById('lk-filterbar').classList.remove('d-none');
+  FILTERS_BUILT = true;
+}
+
+function currentQuery() {
+  const params = new URLSearchParams();
+  const sel = selectedRooms();
+  // Sending every room is the same as sending none; keep the URL short.
+  if (sel.length && sel.length < ROOMS.length) params.set('rooms', sel.join(','));
+  const from = document.getElementById('lk-from').value;
+  const to = document.getElementById('lk-to').value;
+  if (from) params.set('from', from);
+  if (to) params.set('to', to);
+  const q = params.toString();
+  return q ? '?' + q : '';
+}
+
+function applyFilters() { loadReport(currentQuery()); }
+
+function resetFilters() {
+  selectRooms(true);
+  document.getElementById('lk-from').value = '';
+  document.getElementById('lk-to').value = '';
+  loadReport('');
+}
+
+// Warn when a slice is too thin to say much, rather than letting the user
+// discover a wall of "neh".
+function sampleWarning(meta) {
+  const el = document.getElementById('lk-warn');
+  const perPos = meta.hands / 6;
+  const msgs = [];
+  if (meta.hands === 0) {
+    msgs.push('No hands match this filter.');
+  } else if (perPos < 60) {
+    msgs.push(`This slice is thin — ${meta.hands.toLocaleString()} hands (~${Math.round(perPos)} per position). ` +
+              `Most stats will show <b>neh</b>; widen the filter for firmer verdicts.`);
+  }
+  if (meta.tournaments_pending) {
+    msgs.push(`${meta.tournaments_pending} tournament(s) still being summarised — reload to include them.`);
+  }
+  el.innerHTML = msgs.join('<br>');
+  el.classList.toggle('d-none', msgs.length === 0);
+}
+
 function renderReport(data) {
   MIN_SAMPLE = data.meta.min_sample || MIN_SAMPLE;
   document.getElementById('lk-min-sample-note').textContent = MIN_SAMPLE;
+  if (data.filters) buildFilterBar(data.filters);
+  sampleWarning(data.meta);
 
   document.getElementById('lk-status').innerHTML =
     `${data.meta.hands.toLocaleString()} hands · ${data.meta.tournaments} tournaments` +
@@ -323,6 +463,26 @@ function renderReport(data) {
   }).join('');
 }
 
+async function loadReport(query) {
+  const statusEl = document.getElementById('lk-status');
+  const errEl = document.getElementById('lk-error');
+  if (!AUTH_USER) return;
+  errEl.classList.add('d-none');
+  statusEl.textContent = 'Crunching your saved tournaments…';
+  try {
+    const token = await AUTH_USER.getIdToken();
+    const res = await fetch('/api/leaks' + (query || ''),
+                            { headers: { 'Authorization': 'Bearer ' + token } });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    renderReport(data);
+  } catch (e) {
+    statusEl.textContent = '';
+    errEl.textContent = e.message;
+    errEl.classList.remove('d-none');
+  }
+}
+
 (async () => {
   const statusEl = document.getElementById('lk-status');
   const errEl = document.getElementById('lk-error');
@@ -338,18 +498,8 @@ function renderReport(data) {
         statusEl.innerHTML = 'Please <a href="/">sign in on the main page</a> first, then come back.';
         return;
       }
-      statusEl.textContent = 'Crunching your saved tournaments…';
-      try {
-        const token = await user.getIdToken();
-        const res = await fetch('/api/leaks', { headers: { 'Authorization': 'Bearer ' + token } });
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
-        renderReport(data);
-      } catch (e) {
-        statusEl.textContent = '';
-        errEl.textContent = e.message;
-        errEl.classList.remove('d-none');
-      }
+      AUTH_USER = user;
+      loadReport('');
     });
   } catch (e) {
     statusEl.textContent = '';

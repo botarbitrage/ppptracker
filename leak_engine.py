@@ -997,6 +997,61 @@ def hand_stat_flags(hand):
     return flags
 
 
+# Bump whenever a stat definition, the position scheme, or the winrate maths
+# changes — cached per-tournament vectors carrying an older version are
+# recomputed rather than silently serving stale numbers.
+ENGINE_VERSION = 1
+
+
+def hands_to_vector(hands, scheme='report'):
+    """
+    Compress a tournament's hands into a summable count-vector — the unit the
+    per-tournament cache stores. Summing vectors is exactly equivalent to
+    re-counting the underlying hands, because every stat is a (made,
+    opportunity) pair and the winrate is a big-blind total: both are additive.
+    Percentages and verdicts are derived after summing, never stored.
+    """
+    agg = aggregate_stats(hands, scheme=scheme, winrate=True)
+    return {
+        bucket: {
+            'hands': p['hands'],
+            # Full float precision: rounding here would accumulate across
+            # summed tournaments (harmless in magnitude, but it makes a cached
+            # report differ from a freshly computed one, which the equivalence
+            # test below rightly flags).
+            'bb': p['bb'],
+            'bb_adj': p['bb_adj'],
+            # [made, opp] pairs keep the stored JSON small.
+            'stats': {k: [v['made'], v['opp']] for k, v in p['stats'].items()},
+        }
+        for bucket, p in agg['positions'].items()
+    }
+
+
+def merge_vectors(vectors):
+    """Sum count-vectors into the shape aggregate_stats() returns, so callers
+    can treat a cached multi-tournament report exactly like a freshly
+    computed one."""
+    keys = [k for k, _l, _g in ALL_STATS]
+    out = {b: {'hands': 0, 'bb': 0.0, 'bb_adj': 0.0,
+               'stats': {k: {'made': 0, 'opp': 0} for k in keys}}
+           for b in POSITION_BUCKETS}
+    for vec in vectors:
+        for bucket, p in (vec or {}).items():
+            dest = out.get(bucket)
+            if not dest:
+                continue
+            dest['hands'] += p.get('hands', 0)
+            dest['bb'] += p.get('bb', 0.0)
+            dest['bb_adj'] += p.get('bb_adj', 0.0)
+            for k, pair in (p.get('stats') or {}).items():
+                slot = dest['stats'].get(k)
+                if slot:
+                    slot['made'] += pair[0]
+                    slot['opp'] += pair[1]
+    return {'positions': out}
+
+
 def aggregate_stats(hands, scheme='pt4', winrate=False):
     """
     Aggregate all stats over IR hands.

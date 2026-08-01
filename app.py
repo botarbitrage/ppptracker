@@ -1106,12 +1106,96 @@ def leaks_page():
     return render_template('leaks.html')
 
 
+# ── Per-tournament leak cache ────────────────────────────────────────────────
+# A tournament's hands compress to a count-vector (~490 numbers) that is
+# additive: summing vectors equals re-counting hands. Caching those makes a
+# filtered report one Firestore read plus arithmetic, instead of re-reading
+# and re-parsing every hand blob (~10s) on every filter change.
+
+def _leak_cache_ref(db, uid, tid):
+    return db.collection('users').document(uid).collection('leak_cache').document(tid)
+
+
+def _build_leak_vector(uid, tid):
+    """Parse one tournament's hands and compress them to a count-vector.
+    Returns (vector, hands_used, hands_skipped) or None when unreadable."""
+    from hand_exporter import records_to_ps_text
+    from leak_engine import parse_ps_text, validate_pot, hands_to_vector
+
+    records, _doc = _fetch_tournament_records(uid, tid)
+    if not records:
+        return None
+    # No blind-ladder resolution here: it only affects the cosmetic "Level"
+    # header, which the leak engine ignores, and costs a Firestore scan.
+    text, _stats = records_to_ps_text(records)
+    hands, skipped = [], 0
+    for h in parse_ps_text(text):
+        if validate_pot(h):
+            skipped += 1          # PT4 drops these too — see design doc §5
+        else:
+            hands.append(h)
+    return hands_to_vector(hands, scheme='report'), len(hands), skipped
+
+
+def _load_leak_vectors(db, uid, tourney_docs, budget_s=25):
+    """
+    {tid: {'vector', 'hands', 'skipped'}} for the given tournaments, served
+    from cache and rebuilt where missing or stale. A stale entry is one whose
+    engine version or source `updated_at` no longer matches, so re-imports and
+    stat-definition changes both invalidate automatically.
+
+    Rebuilds are bounded by `budget_s`: anything past the budget is left for a
+    later request and reported as pending, so a cold cache degrades to a
+    partial report instead of hanging.
+    """
+    import json as _jj
+    import time as _tt
+    from leak_engine import ENGINE_VERSION
+
+    cached = {}
+    for snap in db.collection('users').document(uid).collection('leak_cache').get():
+        cached[snap.id] = snap.to_dict()
+
+    out, pending = {}, 0
+    deadline = _tt.monotonic() + budget_s
+    for tid, meta in tourney_docs.items():
+        entry = cached.get(tid)
+        fresh = (entry
+                 and entry.get('v') == ENGINE_VERSION
+                 and entry.get('src_updated_at') == meta.get('updated_at'))
+        if fresh:
+            try:
+                out[tid] = {'vector': _jj.loads(entry['data']),
+                            'hands': entry.get('hands', 0),
+                            'skipped': entry.get('skipped', 0)}
+                continue
+            except (ValueError, KeyError):
+                pass              # corrupt entry — fall through and rebuild
+        if _tt.monotonic() >= deadline:
+            pending += 1
+            continue
+        built = _build_leak_vector(uid, tid)
+        if not built:
+            continue
+        vector, n_hands, n_skipped = built
+        out[tid] = {'vector': vector, 'hands': n_hands, 'skipped': n_skipped}
+        try:
+            _leak_cache_ref(db, uid, tid).set({
+                'v': ENGINE_VERSION,
+                'src_updated_at': meta.get('updated_at'),
+                'data': _jj.dumps(vector, separators=(',', ':')),
+                'hands': n_hands, 'skipped': n_skipped,
+                'built_at': int(_tt.time()),
+            })
+        except Exception:
+            pass                  # cache write is best-effort, never fatal
+    return out, pending
+
+
 @app.route('/api/leaks')
 def leaks_api():
-    from hand_exporter import records_to_ps_text
-    from leak_engine import (parse_ps_text, aggregate_stats, validate_pot,
-                             POSITION_BUCKETS, ALL_STATS, STAT_STREET, classify,
-                             delta_from_target, MIN_SAMPLE)
+    from leak_engine import (POSITION_BUCKETS, ALL_STATS, STAT_STREET, classify,
+                             delta_from_target, MIN_SAMPLE, merge_vectors)
 
     uid = _verify_bearer(request)   # inits the Admin SDK internally
     if not uid:
@@ -1121,52 +1205,75 @@ def leaks_api():
     if not user_snap.exists or not user_snap.to_dict().get('is_pro'):
         return jsonify({'error': 'Pro subscription required'}), 403
 
-    docs = db.collection('users').document(uid).collection('tournaments').get()
-    tids = [doc.id for doc in docs]
+    # ── Available tournaments (filter options) ──
+    tourneys = {}
+    for doc in db.collection('users').document(uid).collection('tournaments').get():
+        d = doc.to_dict()
+        room = d.get('room_name') or ''
+        tourneys[doc.id] = {
+            'room_key': _norm_room_name(room) or '(unnamed)',
+            'room_label': room or '(unnamed)',
+            'earliest_ts': d.get('earliest_ts'),
+            'updated_at': d.get('updated_at'),
+            'hands': d.get('hands', 0),
+        }
 
-    def _load_one(tid):
-        records, _d = _fetch_tournament_records(uid, tid)
-        if not records:
+    rooms = {}
+    for meta in tourneys.values():
+        r = rooms.setdefault(meta['room_key'],
+                             {'key': meta['room_key'], 'label': meta['room_label'],
+                              'tournaments': 0, 'hands': 0})
+        r['tournaments'] += 1
+        r['hands'] += meta['hands']
+    all_ts = [m['earliest_ts'] for m in tourneys.values() if m['earliest_ts']]
+
+    # ── Apply filters (they select whole tournaments, never partial ones) ──
+    want_rooms = {r for r in (request.args.get('rooms') or '').split(',') if r}
+    def _ts_arg(name):
+        raw = (request.args.get(name) or '').strip()
+        if not raw:
             return None
-        # No blind ladder resolution here: it only affects the cosmetic
-        # "Level" header labels, which the leak engine ignores — and
-        # resolving it costs a Firestore scan per tournament.
-        text, _stats = records_to_ps_text(records)
-        return parse_ps_text(text)
+        try:
+            from datetime import datetime as _d, timezone as _tz
+            return int(_d.strptime(raw, '%Y-%m-%d')
+                       .replace(tzinfo=_tz.utc).timestamp())
+        except ValueError:
+            return None
+    ts_from, ts_to = _ts_arg('from'), _ts_arg('to')
+    if ts_to is not None:
+        ts_to += 86399            # 'to' is inclusive of the whole day
 
-    hands, n_tourneys, skipped = [], 0, 0
-    with ThreadPoolExecutor(max_workers=8) as pool:
-        for parsed in pool.map(_load_one, tids):
-            if parsed is None:
-                continue
-            n_tourneys += 1
-            for h in parsed:
-                if validate_pot(h):
-                    skipped += 1
-                else:
-                    hands.append(h)
+    selected = {}
+    for tid, meta in tourneys.items():
+        if want_rooms and meta['room_key'] not in want_rooms:
+            continue
+        ts = meta['earliest_ts']
+        if ts_from is not None and (ts is None or ts < ts_from):
+            continue
+        if ts_to is not None and (ts is None or ts > ts_to):
+            continue
+        selected[tid] = meta
 
-    # 'report' bucketing: identical to PT4 at 7-9 handed, but it also gives
-    # short tables an EP bucket so 6-max/5-max UTG is not filed under MP.
-    # Cap new equity enumeration so an un-warmed cache can never stall the
-    # request; uncomputed hands fall back to their realised result and are
-    # reported as partial coverage.
+    # ── Cached vectors → one summed aggregate ──
     unadjusted = 0
     try:
         from equity import set_budget, skipped_count, save_cache
-        set_budget(25)
+        set_budget(20)
     except Exception:
         set_budget = skipped_count = save_cache = None
 
-    agg = aggregate_stats(hands, scheme='report', winrate=True)
+    loaded, pending = _load_leak_vectors(db, uid, selected)
 
     if save_cache:
         try:
-            save_cache()      # persist any newly enumerated all-in equities
+            save_cache()          # persist any newly enumerated all-in equities
             unadjusted = skipped_count()
         except Exception:
             pass
         set_budget(None)
+
+    agg = merge_vectors(v['vector'] for v in loaded.values())
+    total_skipped = sum(v['skipped'] for v in loaded.values())
     targets = _load_bbz_targets()
 
     positions = []
@@ -1195,14 +1302,26 @@ def leaks_api():
     total_hands = sum(p['hands'] for p in positions)
     total_adj = sum(agg['positions'][b]['bb_adj'] for b in POSITION_BUCKETS)
     total_raw = sum(agg['positions'][b]['bb'] for b in POSITION_BUCKETS)
+    from datetime import datetime as _dt2, timezone as _tz2
+    def _day(ts):
+        return _dt2.fromtimestamp(ts, tz=_tz2).strftime('%Y-%m-%d') if ts else None
+
     return jsonify({
         'meta': {
-            'tournaments': n_tourneys, 'hands': len(hands),
-            'hands_skipped': skipped, 'phase': 4, 'min_sample': MIN_SAMPLE,
+            'tournaments': len(loaded), 'hands': total_hands,
+            'hands_skipped': total_skipped, 'phase': 5, 'min_sample': MIN_SAMPLE,
             'hands_unadjusted': unadjusted,
+            'tournaments_pending': pending,
             'winrate_bb100': round(total_adj / total_hands * 100, 2) if total_hands else None,
             'winrate_raw_bb100': round(total_raw / total_hands * 100, 2) if total_hands else None,
-            'scope': 'all saved tournaments — preflop + postflop stats',
+        },
+        'filters': {
+            'rooms': sorted(rooms.values(), key=lambda r: -r['hands']),
+            'date_min': _day(min(all_ts)) if all_ts else None,
+            'date_max': _day(max(all_ts)) if all_ts else None,
+            'applied': {'rooms': sorted(want_rooms),
+                        'from': request.args.get('from') or None,
+                        'to': request.args.get('to') or None},
         },
         'positions': positions,
     })

@@ -1,11 +1,10 @@
 # Leak Finder — Design & Delivery Plan
 
-_Status: **Phase 4 complete, plus two UX review passes** (§13, §14). Every stat lists for every
-position (39 rows each); the report table is Name · Hero · Target · Result · Rec. Action, with
-the sample count beside the name, street separator rows, per-stat hover descriptions, and a
-Result pill that grades severity (good / low / mid / high / neh) and sorts best-first or
-worst-first. Report position bucketing tuned in §13. Next: Phase 5 (filters + per-tournament
-caching)._
+_Status: **Phase 5 complete — the Leak Finder is now standalone.** Filters (tournament +
+date range) select whole tournaments and re-report in ~1s, backed by a per-tournament count-vector
+cache that replaces the ~10s full re-parse (§15). All prior gates still pass, plus a new
+equivalence test proving a cached report equals a freshly computed one. The original three-tool
+pipeline is fully replaced._
 _Owner: Caio · Consulting engineer: Claude_
 
 ## 1. Goal
@@ -23,10 +22,9 @@ existing PokerStars-export functionality stays on the main page untouched; expor
 for users who want PT4, but the Leak Finder never touches them at runtime (the `.txt`/CSV files
 appear only in the offline validation harness, §5).
 
-Flow: open **Leak Finder** page → filter saved tournaments (by tournament, buy-in value, dates)
-→ the engine aggregates the matching persisted hands → by-position / by-action stat report with
-good/bad verdicts, equivalent to the BBZ screenshots. Initial phases ship with a single report
-over **all** saved tournaments; the filters arrive in a later phase (§9).
+Flow: open **Leak Finder** page → filter saved tournaments (by tournament and date range; the
+buy-in filter was dropped by decision, §15) → the engine aggregates the matching persisted hands
+→ a by-position stat report with good/bad verdicts, equivalent to the BBZ screenshots.
 
 We already own the raw material for every column. This document specifies the engine, how it
 slots into the existing app, and a phased plan where **every phase ships something visible in the
@@ -90,8 +88,8 @@ leak_ranges.py      # thin loader/typing over the /config/leak_ranges Firestore 
 
 ```
 GET  /leaks                              -> render templates/leaks.html   (Pro-gated page)
-GET  /api/leaks?from=&to=&tourney=       -> aggregated leak report JSON for the signed-in hero
-                                            (loads persisted tournament blobs, runs the engine)
+GET  /api/leaks?rooms=&from=&to=         -> aggregated leak report JSON for the signed-in hero
+                                            (sums cached per-tournament count-vectors, §15)
 GET  /api/leaks/validate  (dev/admin)    -> our counts vs the imported PT4 CSV, per cell (§5)
 ```
 
@@ -101,21 +99,17 @@ GET  /api/leaks/validate  (dev/admin)    -> our counts vs the imported PT4 CSV, 
   `data/bbz_leak_ranges.json` (§7). Per-position: each position carries its own list of
   evaluated stats (the membership mask) with `target: [min, max]` bands. The engine is agnostic
   to the numbers; updating ranges is a data edit, not a code change.
-- **Per-tournament cache (optimization, Phase 5):** store the aggregated count-vector
-  (`{position: {stat: {made, opp}}}` + all-in sums) on each `users/{uid}/tournaments/{tid}` doc
-  at import time. The cross-tournament report then sums vectors (~480 numbers/tournament) instead
-  of re-reading every blob. v1 computes on-read (acceptable, consistent with how
-  `analyze_tournament` already runs on page load).
+- **Per-tournament cache — shipped in Phase 5 (§15):** the count-vector lives in its own
+  `users/{uid}/leak_cache/{tid}` doc (not on the tournament doc), versioned by
+  `leak_engine.ENGINE_VERSION` and the source `updated_at` so it self-invalidates. Reports sum
+  vectors instead of re-reading blobs: ~10s → ~1s.
 
 ### Report scope
 
 The BBZ report is a **cross-tournament aggregate** (screenshot: 3,454 hands / 84 tournaments).
-So `/api/leaks` aggregates across the hero's persisted tournaments. The page gets a filter bar
-with three filters — **tournament, buy-in value, and date range** — that select which saved
-tournaments feed the report (buy-in resolves from the tournament-config docs via the existing
-room-name matching, `_norm_room_name`/`_resolve_tournament_cfg`). Initial phases ship a single
-report over **all** saved tournaments; the filter bar lands in Phase 5. Pro-gated, exactly like
-the existing persisted-tournament features.
+So `/api/leaks` aggregates across the hero's persisted tournaments, narrowed by the **tournament**
+and **date-range** filters (§15). Pro-gated, exactly like the existing persisted-tournament
+features.
 
 ## 4. UI plan (reuse existing components)
 
@@ -241,7 +235,7 @@ What the harvest established:
 | **2 — Postflop ✅** | Flop/turn/river flags (c-bet/float/probe/donk/check-raise/fold-to; HU & 3-bet variants); `report` position scheme | **`/leaks` grouped by street**, postflop rows added | Postflop columns match PT4 CSV — **PASSED** |
 | **3 — Headline winrate ⚠️** | `equity.py` — exact enumeration, side-pot layers, persistent cache | **"Winrate: X bb"** on each position card + overall | Reported, **not gated** — PT4's column not reproducible cell-exact (§11) |
 | **4 — Verdicts ✅** | `classify()` in `leak_engine.py`; sample-size gating (`MIN_SAMPLE=5`); local-JSON target loader (no Firestore move — see §12) | **All / Good / Bad / Low-sample pills**, `INSUFFICIENT` badge in the stat table | Classifier boundary logic matches **163/163** harvested BBZ verdicts — **PASSED** |
-| **5 — Cut the cord** | Filter bar (tournament / buy-in value / date range); count-vector caching; remove "export→PT4→BBZ" guidance; nav entry | **Filters + polished standalone Leak Finder**; single-click flow | End-to-end: saved tournaments → report with no external tools |
+| **5 — Cut the cord ✅** | Filter bar (tournament + date range; buy-in dropped by decision, §15); per-tournament count-vector cache | **Filters + standalone Leak Finder**, ~1s per filtered report | Cached report equals a fresh computation (`test_leak_cache.py`) — **PASSED** |
 
 Estimate: **~2 weeks to a solid v1** (Phases 0–4) that matches PT4 numbers on the validation set;
 Phase 5 + exact-parity edge cases follow.
@@ -418,6 +412,60 @@ feeds the Result pill instead of its own column.
   from the engine's own validated definitions (not the garbled `.pt4rpt` strings). Coverage is
   asserted in CI-style check — 39/39, no missing or typo'd keys.
 
+## 15. Phase 5: filters and the per-tournament cache
+
+**Filters select whole tournaments, never partial ones.** Both filters narrow the same list of
+saved tournaments, and every hand of a selected tournament is included. The date filter therefore
+keys on the tournament's **start** (`earliest_ts`), so a session running past midnight stays
+intact instead of being sliced in half.
+
+- **Tournament** — multi-select over `room_name`, normalized via `_norm_room_name` so the emoji
+  prefixes in PPPoker's room names don't fragment the list (21 distinct rooms across 93 saved
+  tournaments). Each option shows its hand count. Selecting all is equivalent to selecting none.
+- **Date range** — inclusive on both ends; the `to` bound covers the whole day.
+
+**Buy-in was dropped by decision (2026-08-01).** It resolved from the `/tournaments` config by
+room name (85/93 tournaments), but each room maps to exactly one buy-in, so buy-in is a *grouping*
+of rooms rather than an independent axis: selecting "TEXAS" **and** "3.04 AUD" would return zero
+hands because TEXAS is 6.08. Picking rooms already determines the stakes, so the second filter was
+removed rather than shipped with a confusing empty-intersection failure mode. This also retired
+the "(no buy-in set)" special case for the 8 tournaments whose room has no config doc.
+
+**Sample dilution is surfaced, not hidden.** `MIN_SAMPLE` stays at 5 regardless of filter
+(decision 2026-08-01) so verdicts stay comparable between views. Because a narrow filter shrinks
+samples fast — LUCKY DAY 1,756 hands (~293/position) but MINI only 154 (~26/position) — the page
+warns above the report when a slice falls under ~60 hands/position that most stats will read
+`neh`, instead of letting the user discover a wall of grey.
+
+### The cache
+
+Re-reading and re-parsing every hand blob cost ~10s; paying that on every filter change was
+unworkable. Each tournament's hands now compress to a **count-vector** — per position: hands, the
+two big-blind totals, and a `[made, opp]` pair per stat (~490 numbers, ~5.4 KB JSON) — stored at
+`users/{uid}/leak_cache/{tid}`.
+
+Summing vectors is *exactly* equivalent to re-counting hands, because every quantity is additive:
+stats are integer pairs and the winrate is a big-blind total. Percentages and verdicts are always
+derived after summing, never stored. **`test_leak_cache.py` proves this on real fixtures** through
+the same JSON round-trip Firestore performs — integer counts must match exactly; big-blind totals
+compare within 1e-9, since float addition is not associative and per-tournament subtotals differ
+from one flat sum in the last bit (~1e-14 relative, twelve orders of magnitude below the displayed
+two decimals).
+
+Entries carry `v` (`leak_engine.ENGINE_VERSION`) and `src_updated_at` (the tournament doc's
+`updated_at`), so a re-import or any change to a stat definition, the position scheme, or the
+winrate maths invalidates them automatically — **bump `ENGINE_VERSION` when changing engine
+semantics.** Rebuilds are bounded by a time budget (as with the equity cache), so a cold cache
+degrades to a partial report reporting `tournaments_pending` rather than hanging the request.
+
+Measured: cold build of all 93 tournaments ~89s (one-off, warmed offline); filtered reports
+thereafter **~0.6–1.2s**, unfiltered included.
+
+**Filtering stays server-side.** Shipping all vectors to the browser would make filtering
+instant, but it would require a JavaScript reimplementation of `classify()` — the function pinned
+by a 163-case gate (§12) — and a second copy is how drift starts. A sub-second round-trip is the
+better trade for keeping correctness in one validated place.
+
 ## Appendix A — Stat → formula map (from the `.pt4rpt`)
 
 All stats are `numerator / denominator × 100`. Grouped by street. Label alignments previously
@@ -563,5 +611,9 @@ labelling.
       hit (low end); high end assumed symmetric pending a confirming data point.
 - [x] Sample-size gating shipped at `MIN_SAMPLE = 5` (`leak_engine.classify`); 60/152 live cells
       reclassified from a confident verdict to `INSUFFICIENT`.
-- [ ] Phase 5: per-tournament aggregate cache (makes the whole report instant, supersedes the
-      equity-only cache file); filter bar (tournament / buy-in / date range).
+- [x] Phase 5 — per-tournament count-vector cache (~10s → ~1s) and the tournament + date filter
+      bar, with a cache-equivalence test (§15).
+- [ ] Optional follow-up: build a tournament's vector at import time (in `_merge_tournament`) so a
+      newly imported tournament is never the slow path on first view; the lazy backfill already
+      covers it, just less promptly.
+- [ ] Harvest the 71 missing BBZ targets — 31 already have live samples (§13).
