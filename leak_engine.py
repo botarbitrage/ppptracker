@@ -84,12 +84,19 @@ def position_bucket(numeric_pos, n_players=9, scheme='pt4'):
         return 'EP' if numeric_pos >= max(2, n - 4) else 'MP'
     # 'report': EP takes the earliest ceil(pool/2) seats, capped at 2 — which
     # is exactly PT4's mapping for 7/8/9-handed and extends it below that.
+    # Exception: a pool of exactly 1 seat (5-handed) goes to MP, not EP —
+    # empirically the better split. A single seat is a binary either/or
+    # (there's no way to split one seat 50/50), and on a field that is ~60%
+    # short-handed, routing it to EP overshot the correction the other way
+    # (EP 869 vs MP 574, a 399-hand total deviation from the 734 average);
+    # routing it to MP nearly halves the imbalance (227) — still not zero,
+    # because a single discrete seat can't average out an aggregate gap.
     highest = n - 3                      # highest non-blind numeric seat
     pool = max(0, highest - 1)           # seats 2..highest are the EP/MP pool
     if pool <= 0:
         return 'MP'
-    ep_seats = min(2, (pool + 1) // 2)
-    return 'EP' if numeric_pos >= highest - ep_seats + 1 else 'MP'
+    ep_seats = 0 if pool == 1 else min(2, (pool + 1) // 2)
+    return 'EP' if ep_seats and numeric_pos >= highest - ep_seats + 1 else 'MP'
 
 
 def pt4_positions(hand):
@@ -724,6 +731,27 @@ def classify(pct, target, opp=None, min_sample=None):
     if pct >= target[1]:
         return 'HIGH'
     return 'GOOD'
+
+
+def delta_from_target(pct, target):
+    """
+    Signed distance from the target band, normalized by the band's own width
+    so stats on very different scales (a 5-8% target vs a 55-65% one) are
+    comparable: 0 inside the band, negative below the floor, positive above
+    the ceiling, in units of "band widths" (-1.0 means one whole band-width
+    below the floor). None when there's nothing to compare (no pct/target).
+    Drives both the sort order and the color grading on /leaks — sorting by
+    |delta| ranks the worst leak highest regardless of the stat's native scale.
+    """
+    if pct is None or not target:
+        return None
+    lo, hi = target
+    width = (hi - lo) or 1
+    if pct <= lo:
+        return (pct - lo) / width
+    if pct >= hi:
+        return (pct - hi) / width
+    return 0.0
 
 _STREETS = ('preflop', 'flop', 'turn', 'river')
 

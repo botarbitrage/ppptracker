@@ -1110,7 +1110,8 @@ def leaks_page():
 def leaks_api():
     from hand_exporter import records_to_ps_text
     from leak_engine import (parse_ps_text, aggregate_stats, validate_pot,
-                             POSITION_BUCKETS, ALL_STATS, STAT_STREET, classify)
+                             POSITION_BUCKETS, ALL_STATS, STAT_STREET, classify,
+                             delta_from_target, MIN_SAMPLE)
 
     uid = _verify_bearer(request)   # inits the Admin SDK internally
     if not uid:
@@ -1179,9 +1180,11 @@ def leaks_api():
             pct = round(made / opp * 100, 2) if opp else None
             target = t.get('target')
             result = classify(pct, target, opp)
+            delta = delta_from_target(pct, target)
             rows.append({'key': key, 'label': label, 'pct': pct,
                          'made': made, 'opp': opp, 'street': STAT_STREET[key],
-                         'target': target, 'rec': t.get('rec'), 'result': result})
+                         'target': target, 'rec': t.get('rec'), 'result': result,
+                         'delta': round(delta, 3) if delta is not None else None})
         n = p['hands']
         positions.append({
             'position': bucket, 'hands': n, 'stats': rows,
@@ -1195,7 +1198,7 @@ def leaks_api():
     return jsonify({
         'meta': {
             'tournaments': n_tourneys, 'hands': len(hands),
-            'hands_skipped': skipped, 'phase': 3,
+            'hands_skipped': skipped, 'phase': 4, 'min_sample': MIN_SAMPLE,
             'hands_unadjusted': unadjusted,
             'winrate_bb100': round(total_adj / total_hands * 100, 2) if total_hands else None,
             'winrate_raw_bb100': round(total_raw / total_hands * 100, 2) if total_hands else None,

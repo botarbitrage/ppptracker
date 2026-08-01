@@ -1,11 +1,10 @@
 # Leak Finder — Design & Delivery Plan
 
-_Status: **Phase 4 complete.** Verdicts (LOW/GOOD/HIGH) now run through one shared `classify()`,
-validated at **163/163** against verdicts harvested directly off the BBZ UI — an independent
-check of the boundary logic alone, since the live dataset has since outgrown that snapshot.
-Sample-size gating (§8) is live: on the current 4,403-hand report, **60 of 152 evaluated cells
-(39%) were previously given a confident verdict on fewer than 5 opportunities**; they now render
-`INSUFFICIENT` rather than a color. Next: Phase 5 (filters + per-tournament caching)._
+_Status: **Phase 4 complete, plus a UX review pass** (§13): every stat always lists for every
+position (39 rows each, not just ones with samples); the All pill now counts low-sample stats;
+sample-count notation redesigned away from BBZ's subscript style; Result/Rec. Action columns are
+sortable by distance-from-target with a new colour-graded Δ column; the report position scheme
+was tuned further (§12/§13). Next: Phase 5 (filters + per-tournament caching)._
 _Owner: Caio · Consulting engineer: Claude_
 
 ## 1. Goal
@@ -349,6 +348,53 @@ Firestore doc so "updating ranges is a data edit, not a code change." Loading di
 `data/bbz_leak_ranges.json` already satisfies that — editing the file and redeploying is a data
 edit, no code change, and Caio is the only user, so there is no live-multi-tenant editing need
 that would justify the added moving part. Revisit only if that changes.
+
+## 13. Post-Phase-4 UX review (2026-08-01)
+
+A review pass before starting Phase 5 raised six points; each is addressed below.
+
+**1. Where targets come from, and how to fill the gaps.** Every target is a value Caio read
+directly off the BBZ UI on 2026-07-30 into `data/bbz_leak_ranges.json` (§7) — there is no formula
+generating them, so a stat with no target has simply never been harvested. Of the full 234-cell
+grid (39 stats × 6 positions), **163 are harvested and 71 are not**. Cross-referencing the 71
+against the live report found **31 that already have real samples** and would show a verdict the
+moment a target exists — topped by **Limp Open** (EP 816 hands, CO 379, MP 341, BTN 248
+opportunities) and the **Limp/Raise-Call-Fold family** at EP/MP/CO/BTN. Direction: open BBZ's
+report again (it should reflect more hands now than the original 3,454-hand snapshot, since the
+underlying PT4 database keeps growing) and screenshot the "+" detail for those rows the same way
+as the original harvest (§7) — the highest-value targets to fetch first are exactly the 31 listed
+above, ranked by sample size. Send screenshots and they merge into the same JSON file, no code
+change.
+
+**2/3. All 39 stats always shown; the "All" pill recount.** `/leaks` no longer hides stats with
+zero opportunities — every position lists all 39, so row counts stop varying by position (they
+previously ranged 27–34, purely an artifact of which stats happened to have both a target *and* a
+sample). The **All** pill now counts Good + Bad + Low-sample (previously Good + Bad only); a
+stat with zero samples or no target isn't counted in any pill since there's nothing to say about
+it yet, but it still renders in the table.
+
+**4. Sample-count notation.** The BBZ-style subscript glued to the stat name (`Raise First␣122`)
+is gone; opportunity count is now its own **N** column, and Hero % is separate from it — visually
+distinct from the source rather than mirroring it.
+
+**6. Position balance, revisited.** The 5-handed table's single "extra" seat (previously routed
+to EP) now goes to MP instead — see the code comment on `position_bucket`'s `'report'` branch for
+the exact reasoning. This is a binary, per-hand choice (one seat, no way to split it), so it
+cannot zero out the imbalance, only pick the better of two options: **total deviation from the
+734-hand average drops from 399 to 227** (BTN 721, CO 707, MP 783, EP 660, BB 775, SB 757). The
+residual imbalance flips direction (EP now slightly under, was slightly over) rather than
+vanishing — flagged in code as the practical ceiling of a seat-counting approach; eliminating it
+requires abandoning strict seat-based bucketing, which is a larger change than this review scope.
+
+**7. Sorting and colour grading.** `leak_engine.delta_from_target()` gives every stat a signed
+distance from its target band, normalized by the band's own width (so a 5–8% target and a
+55–65% one are comparable on the same scale) — 0 inside the band, negative below the floor,
+positive above the ceiling. **Result** and **Rec. Action** column headers are both clickable and
+share one sort key: ascending ranks by smallest `|delta|` first (closest to target = best),
+descending ranks largest first (furthest from target = most improvement needed); stats with no
+delta (zero-sample, low-sample, or no target) always sort to the bottom in both directions, per
+spec. A new **Δ** column renders the signed delta as a colour-graded chip (green → amber → red)
+so severity is visible without reading the number.
 
 ## Appendix A — Stat → formula map (from the `.pt4rpt`)
 

@@ -39,17 +39,22 @@
     .lk-pos-kv b { color:var(--text); font-weight:600; }
     .lk-wr-pos   { color:var(--green) !important; }
     .lk-wr-neg   { color:#ff5470 !important; }
-    .lk-pills { margin-left:auto; display:flex; gap:6px; }
+    .lk-pills { margin-left:auto; display:flex; gap:6px; flex-wrap:wrap; }
     .lk-pill {
       font-family:var(--font-head); font-size:.72rem; font-weight:700;
-      border-radius:20px; padding:2px 10px; letter-spacing:.4px;
+      border-radius:20px; padding:2px 10px; letter-spacing:.4px; white-space:nowrap;
     }
     .lk-pill.all  { background:#ffffff14; color:var(--text);  border:1px solid #ffffff2a; }
     .lk-pill.good { background:#00e67618; color:var(--green); border:1px solid #00e67650; }
     .lk-pill.bad  { background:#ff547018; color:#ff5470;      border:1px solid #ff547050; }
     .lk-pill.thin { background:#ffffff0a; color:var(--muted); border:1px solid #ffffff20; }
     .lk-caret { color:var(--muted); font-size:.8rem; width:14px; }
-    .lk-count { color:var(--muted); font-size:.68rem; vertical-align:sub; margin-left:2px; }
+    .lk-street-tag {
+      font-family:var(--font-head); font-size:.63rem; font-weight:700;
+      letter-spacing:.5px; text-transform:uppercase; color:var(--muted);
+      background:#ffffff0d; border-radius:4px; padding:2px 6px; white-space:nowrap;
+    }
+    .lk-n { color:var(--muted); font-size:.85rem; }
     .lk-badge {
       font-family:var(--font-head); font-size:.68rem; font-weight:700;
       border-radius:14px; padding:1px 10px; letter-spacing:.5px;
@@ -58,22 +63,26 @@
     .lk-badge.HIGH { background:#ff547018; color:#ff5470;      border:1px solid #ff547055; }
     .lk-badge.GOOD { background:#00e67618; color:var(--green); border:1px solid #00e67655; }
     .lk-badge.THIN { background:#ffffff0a; color:var(--muted); border:1px solid #ffffff20; font-style:italic; }
-    .lk-name-dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:7px; }
+    .lk-name-dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:7px; flex:none; }
     .lk-dot-bad  { background:#ff5470; }
     .lk-dot-good { background:var(--green); }
     .lk-dot-na   { background:#ffffff33; }
     td.lk-rec-bad  { color:#ff5470; }
     td.lk-rec-good { color:var(--green); }
     td.lk-rec-thin { color:var(--muted); font-style:italic; }
-    tr.lk-street-row td {
-      font-family:var(--font-head); font-size:.7rem; font-weight:700;
-      letter-spacing:1px; text-transform:uppercase; color:var(--muted);
-      background:#ffffff0a; padding-top:9px; padding-bottom:5px;
+    .lk-delta-chip {
+      display:inline-block; min-width:44px; text-align:center;
+      font-family:var(--font-head); font-size:.72rem; font-weight:700;
+      border-radius:10px; padding:2px 7px;
     }
+    .lk-delta-na { color:var(--muted); }
+    th.lk-sortable { cursor:pointer; user-select:none; white-space:nowrap; }
+    th.lk-sortable:hover { color:var(--text); }
+    .lk-sort-arrow { display:inline-block; width:10px; color:var(--green); font-size:.65rem; }
   </style>
 </head>
 <body>
-<main class="container-fluid py-4 px-3 px-md-5" style="max-width:980px;margin:0 auto">
+<main class="container-fluid py-4 px-3 px-md-5" style="max-width:1080px;margin:0 auto">
 
   <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
     <a href="/" class="page-back">
@@ -85,10 +94,11 @@
   </div>
 
   <div class="lk-note mb-3">
-    <b>Phase 3 — full stat set + all-in adjusted winrate</b> over all your saved tournaments,
-    by position. Targets are BBZ's coaching ranges. Position uses PokerTracker's mapping at
-    7–9 handed and extends it below that, so EP always means the earliest seat(s) at your
-    table. Winrate replaces all-in pot results with the equity held when the money went in.
+    <b>Phase 4 — verdicts &amp; sample-size gating</b> over all your saved tournaments, by
+    position. Targets are BBZ's coaching ranges. Every stat is always listed, even with zero
+    samples; stats under <span id="lk-min-sample-note">5</span> opportunities show
+    "low n" rather than a color verdict — BBZ verdicts samples as small as 1. Click
+    <b>Result</b> or <b>Rec. Action</b> to sort by how far each stat sits from its target.
   </div>
 
   <div id="lk-status" class="lk-meta mb-3">Signing in…</div>
@@ -100,13 +110,89 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script>
 const POS_ORDER = ['BTN', 'CO', 'MP', 'EP', 'BB', 'SB'];
-const STREETS = ['Preflop', 'Flop', 'Turn', 'River'];
-const MIN_SAMPLE = 5;   // mirrors leak_engine.MIN_SAMPLE — display text only
+let MIN_SAMPLE = 5;           // overwritten from data.meta.min_sample once loaded
+let REPORT_DATA = null;       // {position: rowsArray} kept so sorting never re-fetches
+const SORT_STATE = {};        // {position: 'asc'|'desc'|null}
 
 function fmtPct(v) { return v == null ? '—' : v.toFixed(2).replace(/\.?0+$/, '') + '%'; }
 function fmtBB(v)  { return v == null ? '—' : (v >= 0 ? '+' : '') + Math.round(v) + 'bb'; }
 
+// Green -> amber -> red, by |delta| in band-widths (0 = on target, capped at 1.5).
+function deltaColor(delta) {
+  const CAP = 1.5;
+  const t = Math.min(Math.abs(delta), CAP) / CAP;
+  const stops = t <= 0.5
+    ? [[0,230,118], [224,185,92], t / 0.5]
+    : [[224,185,92], [255,84,112], (t - 0.5) / 0.5];
+  const [[r1,g1,b1],[r2,g2,b2],f] = stops;
+  const r = Math.round(r1 + (r2-r1)*f), g = Math.round(g1 + (g2-g1)*f), b = Math.round(b1 + (b2-b1)*f);
+  return `rgb(${r},${g},${b})`;
+}
+
+function deltaChip(delta) {
+  if (delta == null) return '<span class="lk-delta-na">—</span>';
+  const color = deltaColor(delta);
+  const label = delta === 0 ? '0.0' : (delta > 0 ? '+' : '') + delta.toFixed(1);
+  const title = delta === 0 ? 'On target'
+    : `${Math.abs(delta).toFixed(2)} target-band widths ${delta < 0 ? 'below the floor' : 'above the ceiling'}`;
+  return `<span class="lk-delta-chip" style="background:${color}22;color:${color};border:1px solid ${color}66" title="${title}">${label}</span>`;
+}
+
+// Rows with no delta (low sample, zero sample, or no target yet) always sort last,
+// in both directions. Default (dir=null) keeps the natural street-grouped order.
+function sortedRows(rows, dir) {
+  if (!dir) return rows;
+  const withDelta = rows.filter(s => s.delta != null);
+  const withoutDelta = rows.filter(s => s.delta == null);
+  withDelta.sort((a, b) => dir === 'asc'
+    ? Math.abs(a.delta) - Math.abs(b.delta)
+    : Math.abs(b.delta) - Math.abs(a.delta));
+  return withDelta.concat(withoutDelta);
+}
+
+function renderRows(position) {
+  const rows = sortedRows(REPORT_DATA[position], SORT_STATE[position]);
+  return rows.map(s => {
+    const isBad = s.result === 'LOW' || s.result === 'HIGH';
+    const isThin = s.result === 'INSUFFICIENT';
+    const dot = isBad ? 'lk-dot-bad' : s.result === 'GOOD' ? 'lk-dot-good' : 'lk-dot-na';
+    const rec = isThin ? `Need ${MIN_SAMPLE}+ hands`
+      : !s.result ? (s.opp ? 'No target yet' : '')
+      : s.result === 'GOOD' ? 'Good job' : (s.rec || (s.result === 'LOW' ? 'More' : 'Less'));
+    const badge = isThin
+      ? `<span class="lk-badge THIN" title="Only ${s.opp} opportunit${s.opp===1?'y':'ies'} — too little data for a verdict">low n</span>`
+      : s.result ? `<span class="lk-badge ${s.result}">${s.result}</span>`
+      : `<span class="lk-n">—</span>`;
+    return `
+    <tr>
+      <td><span class="lk-name-dot ${dot}"></span>${s.label}</td>
+      <td><span class="lk-street-tag">${s.street}</span></td>
+      <td class="text-end">${fmtPct(s.pct)}</td>
+      <td class="text-end lk-n">${s.opp}</td>
+      <td class="text-center">${deltaChip(s.delta)}</td>
+      <td class="text-center">${badge}</td>
+      <td class="text-end">${s.target ? s.target[0] + '% – ' + s.target[1] + '%' : '—'}</td>
+      <td class="${isBad ? 'lk-rec-bad' : s.result === 'GOOD' ? 'lk-rec-good' : 'lk-rec-thin'}">${rec}</td>
+    </tr>`;
+  }).join('');
+}
+
+function sortArrow(position) {
+  const dir = SORT_STATE[position];
+  return dir === 'asc' ? '▲' : dir === 'desc' ? '▼' : '';
+}
+
+function cycleSort(position) {
+  const cur = SORT_STATE[position];
+  SORT_STATE[position] = cur === null ? 'asc' : cur === 'asc' ? 'desc' : null;
+  document.querySelectorAll(`tbody[data-position="${position}"]`)[0].innerHTML = renderRows(position);
+  document.querySelectorAll(`[data-sort-arrow="${position}"]`).forEach(el => el.textContent = sortArrow(position));
+}
+
 function renderReport(data) {
+  MIN_SAMPLE = data.meta.min_sample || MIN_SAMPLE;
+  document.getElementById('lk-min-sample-note').textContent = MIN_SAMPLE;
+
   document.getElementById('lk-status').innerHTML =
     `${data.meta.hands.toLocaleString()} hands · ${data.meta.tournaments} tournaments` +
     ` · overall winrate <b class="${data.meta.winrate_bb100 >= 0 ? 'lk-wr-pos' : 'lk-wr-neg'}">` +
@@ -115,15 +201,17 @@ function renderReport(data) {
     (data.meta.hands_skipped ? ` · ${data.meta.hands_skipped} hands excluded (pot inconsistencies)` : '') +
     (data.meta.hands_unadjusted ? ` · <span style="color:#e0b95c">${data.meta.hands_unadjusted} all-in hands not yet equity-adjusted — reload to finish</span>` : '');
 
+  REPORT_DATA = {};
   const byPos = Object.fromEntries(data.positions.map(p => [p.position, p]));
   document.getElementById('lk-cards').innerHTML = POS_ORDER.map(posName => {
     const p = byPos[posName];
     if (!p) return '';
-    const rows = p.stats.filter(s => s.opp > 0);
-    const good = rows.filter(s => s.result === 'GOOD').length;
-    const bad  = rows.filter(s => s.result === 'LOW' || s.result === 'HIGH').length;
-    const thin = rows.filter(s => s.result === 'INSUFFICIENT').length;
-    const evaluated = good + bad;
+    REPORT_DATA[posName] = p.stats;
+    SORT_STATE[posName] = null;
+    const good = p.stats.filter(s => s.result === 'GOOD').length;
+    const bad  = p.stats.filter(s => s.result === 'LOW' || s.result === 'HIGH').length;
+    const thin = p.stats.filter(s => s.result === 'INSUFFICIENT').length;
+    const evaluated = good + bad + thin;
     return `
     <div class="section-card mb-3 lk-pos-card" onclick="this.querySelector('.lk-body').classList.toggle('d-none')">
       <div class="lk-pos-head">
@@ -136,42 +224,22 @@ function renderReport(data) {
           <span class="lk-pill all">All (${evaluated})</span>
           <span class="lk-pill good">Good (${good})</span>
           <span class="lk-pill bad">Bad (${bad})</span>
-          ${thin ? `<span class="lk-pill thin" title="Fewer than ${MIN_SAMPLE} opportunities — too little data for a verdict">Low sample (${thin})</span>` : ''}
+          <span class="lk-pill thin" title="Fewer than ${MIN_SAMPLE} opportunities — too little data for a verdict">Low sample (${thin})</span>
         </div>
       </div>
       <div class="lk-body d-none" onclick="event.stopPropagation()">
         <div class="table-responsive">
           <table class="table table-dark table-striped mb-0">
             <thead><tr>
-              <th>Name</th><th class="text-end">Hero</th>
-              <th class="text-center">Result</th><th class="text-end">Target</th>
-              <th>Rec. action</th>
+              <th>Name</th><th>Street</th><th class="text-end">Hero %</th>
+              <th class="text-end">N</th><th class="text-center">Δ</th>
+              <th class="text-center lk-sortable" onclick="cycleSort('${p.position}')">
+                Result <span class="lk-sort-arrow" data-sort-arrow="${p.position}"></span></th>
+              <th class="text-end">Target</th>
+              <th class="lk-sortable" onclick="cycleSort('${p.position}')">
+                Rec. Action <span class="lk-sort-arrow" data-sort-arrow="${p.position}"></span></th>
             </tr></thead>
-            <tbody>
-              ${STREETS.map(street => {
-                const group = rows.filter(s => s.street === street);
-                if (!group.length) return '';
-                return `<tr class="lk-street-row"><td colspan="5">${street}</td></tr>` +
-                  group.map(s => {
-                    const isBad = s.result === 'LOW' || s.result === 'HIGH';
-                    const isThin = s.result === 'INSUFFICIENT';
-                    const dot = isBad ? 'lk-dot-bad' : s.result === 'GOOD' ? 'lk-dot-good' : 'lk-dot-na';
-                    const rec = isThin ? `Need ${MIN_SAMPLE}+ hands` : !s.result ? '' :
-                      s.result === 'GOOD' ? 'Good job' : (s.rec || (s.result === 'LOW' ? 'More' : 'Less'));
-                    const badge = isThin
-                      ? `<span class="lk-badge THIN" title="Only ${s.opp} opportunit${s.opp===1?'y':'ies'} — too little data for a verdict">low n</span>`
-                      : s.result ? `<span class="lk-badge ${s.result}">${s.result}</span>` : '';
-                    return `
-                    <tr>
-                      <td><span class="lk-name-dot ${dot}"></span>${s.label}<span class="lk-count">${s.opp}</span></td>
-                      <td class="text-end">${fmtPct(s.pct)}</td>
-                      <td class="text-center">${badge}</td>
-                      <td class="text-end">${s.target ? s.target[0] + '% – ' + s.target[1] + '%' : '—'}</td>
-                      <td class="${isBad ? 'lk-rec-bad' : s.result === 'GOOD' ? 'lk-rec-good' : 'lk-rec-thin'}">${rec}</td>
-                    </tr>`;
-                  }).join('');
-              }).join('')}
-            </tbody>
+            <tbody data-position="${p.position}">${renderRows(p.position)}</tbody>
           </table>
         </div>
       </div>
