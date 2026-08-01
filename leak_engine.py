@@ -692,6 +692,39 @@ STAT_STREET = {k: 'Preflop' for k, _l, _g in PREFLOP_STATS}
 STAT_STREET.update({k: _PREFIX_STREET[k[:2]] for k, _l, _g in POSTFLOP_STATS})
 STREETS_ORDER = ('Preflop', 'Flop', 'Turn', 'River')
 
+# Below this many opportunities a rate is too noisy to color LOW/GOOD/HIGH —
+# a stat that fired once or twice says almost nothing about a leak. 26% of
+# BBZ's own harvested cells sit under this bar and get a confident verdict
+# anyway (data/bbz_leak_ranges.json); we render those 'INSUFFICIENT' instead.
+# This only affects verdict color, never the raw pct/count shown.
+MIN_SAMPLE = 5
+
+
+def classify(pct, target, opp=None, min_sample=None):
+    """
+    Strictly inside (target[0], target[1]) -> GOOD; at-or-below the floor ->
+    LOW; at-or-above the ceiling -> HIGH. None when there's nothing to
+    classify (no pct or no target), or 'INSUFFICIENT' when opp is given and
+    falls under min_sample (default MIN_SAMPLE). Pass min_sample=0 (or leave
+    opp=None) to skip the gate — used when validating the boundary logic
+    itself against a fixed sample.
+
+    The boundary is closed (<=/>=), confirmed against one exact hit in the
+    harvested BBZ verdicts (data/bbz_leak_ranges.json: "F to T Pr (HU)" at
+    hero%=30 against target [30, 40] renders LOW, not GOOD) — the low end is
+    the only boundary actually observed at an exact value; the high end is
+    assumed symmetric.
+    """
+    if pct is None or not target:
+        return None
+    if opp is not None and opp < (MIN_SAMPLE if min_sample is None else min_sample):
+        return 'INSUFFICIENT'
+    if pct <= target[0]:
+        return 'LOW'
+    if pct >= target[1]:
+        return 'HIGH'
+    return 'GOOD'
+
 _STREETS = ('preflop', 'flop', 'turn', 'river')
 
 

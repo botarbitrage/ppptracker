@@ -23,10 +23,11 @@ import — the ground-truth CSV never saw them. They are listed in the output.
 import csv
 import glob
 import io
+import json
 import os
 
 from leak_engine import (parse_ps_text, aggregate_positions, aggregate_stats,
-                         validate_pot, POSITION_BUCKETS, ALL_STATS)
+                         validate_pot, POSITION_BUCKETS, ALL_STATS, classify)
 
 VALIDATION_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                               'data', 'validation')
@@ -297,8 +298,12 @@ def run_validation(txt_paths=None, csv_path=None):
 
 
 def run_all():
-    """Alias kept for the Flask endpoint."""
-    return run_validation()
+    """Everything the /leaks/validate page renders: suites, corpus, and the
+    Phase 4 classifier-fidelity check. all_match folds in the classifier."""
+    result = run_validation()
+    result['classifier'] = run_classifier_check()
+    result['all_match'] = result['all_match'] and result['classifier']['all_match']
+    return result
 
 
 # ── Raw-record action-type audit (see docs/pppoker-action-model.md) ────────
@@ -324,6 +329,35 @@ def audit_action_types(records):
                     d['zero_chips'] += 1
     return {f'{s}/type{t}': v for (s, t), v in sorted(tally.items(),
             key=lambda kv: (kv[0][0], kv[0][1] if kv[0][1] is not None else -1))}
+
+
+# ── Phase 4: classifier fidelity vs the harvested BBZ verdicts ──────────────
+# data/bbz_leak_ranges.json holds 163 (hero%, target, result) triples read
+# directly off the BBZ UI (design doc S7) — independent ground truth for the
+# LOW/GOOD/HIGH boundary logic, unlike the stat *counts* which have since
+# drifted as more hands were played. Sample-size gating is our own addition
+# (S4/S11) so it is deliberately NOT applied here: this checks the boundary
+# math alone, with opp=None (ungated), against what BBZ actually rendered.
+
+_BBZ_RANGES_PATH = os.path.join(VALIDATION_DIR, '..', 'bbz_leak_ranges.json')
+
+
+def run_classifier_check(path=None):
+    path = path or _BBZ_RANGES_PATH
+    with open(path, encoding='utf-8') as fh:
+        data = json.load(fh)
+    cells = []
+    for pos, pdata in data.get('positions', {}).items():
+        for s in pdata.get('stats', []):
+            obs = s['observed']
+            ours = classify(obs['hero'], s['target'], opp=None)
+            cells.append({
+                'position': pos, 'stat': s['label'],
+                'hero_pct': obs['hero'], 'target': s['target'],
+                'bbz_result': obs['result'], 'ours_result': ours,
+                'match': ours == obs['result'],
+            })
+    return {'cells': cells, 'all_match': all(c['match'] for c in cells)}
 
 
 # ── CLI ─────────────────────────────────────────────────────────────────────
@@ -376,4 +410,14 @@ if __name__ == '__main__':
               f"unmapped: {c['unmapped']} · positions: {c['positions']}")
         for r in c['hands_rejected']:
             print(f"   POT-INVALID {r['hand_id']}: {'; '.join(r['problems'])}")
+    if 'classifier' in result:
+        clf = result['classifier']
+        bad = [c for c in clf['cells'] if not c['match']]
+        print(f"== classifier fidelity vs harvested BBZ verdicts  "
+              f"({len(clf['cells'])} cells)")
+        for c in bad:
+            print(f"   MISMATCH {c['position']:<4} {c['stat']:<28} "
+                  f"hero={c['hero_pct']} target={c['target']} "
+                  f"bbz={c['bbz_result']} ours={c['ours_result']}")
+        print(f"   → {'ALL MATCH' if clf['all_match'] else f'{len(bad)} MISMATCH'}")
     raise SystemExit(0 if result['all_match'] else 1)

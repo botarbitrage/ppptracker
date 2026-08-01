@@ -47,6 +47,7 @@
     .lk-pill.all  { background:#ffffff14; color:var(--text);  border:1px solid #ffffff2a; }
     .lk-pill.good { background:#00e67618; color:var(--green); border:1px solid #00e67650; }
     .lk-pill.bad  { background:#ff547018; color:#ff5470;      border:1px solid #ff547050; }
+    .lk-pill.thin { background:#ffffff0a; color:var(--muted); border:1px solid #ffffff20; }
     .lk-caret { color:var(--muted); font-size:.8rem; width:14px; }
     .lk-count { color:var(--muted); font-size:.68rem; vertical-align:sub; margin-left:2px; }
     .lk-badge {
@@ -56,12 +57,14 @@
     .lk-badge.LOW  { background:#ff547018; color:#ff5470;      border:1px solid #ff547055; }
     .lk-badge.HIGH { background:#ff547018; color:#ff5470;      border:1px solid #ff547055; }
     .lk-badge.GOOD { background:#00e67618; color:var(--green); border:1px solid #00e67655; }
+    .lk-badge.THIN { background:#ffffff0a; color:var(--muted); border:1px solid #ffffff20; font-style:italic; }
     .lk-name-dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:7px; }
     .lk-dot-bad  { background:#ff5470; }
     .lk-dot-good { background:var(--green); }
     .lk-dot-na   { background:#ffffff33; }
     td.lk-rec-bad  { color:#ff5470; }
     td.lk-rec-good { color:var(--green); }
+    td.lk-rec-thin { color:var(--muted); font-style:italic; }
     tr.lk-street-row td {
       font-family:var(--font-head); font-size:.7rem; font-weight:700;
       letter-spacing:1px; text-transform:uppercase; color:var(--muted);
@@ -98,6 +101,7 @@
 <script>
 const POS_ORDER = ['BTN', 'CO', 'MP', 'EP', 'BB', 'SB'];
 const STREETS = ['Preflop', 'Flop', 'Turn', 'River'];
+const MIN_SAMPLE = 5;   // mirrors leak_engine.MIN_SAMPLE — display text only
 
 function fmtPct(v) { return v == null ? '—' : v.toFixed(2).replace(/\.?0+$/, '') + '%'; }
 function fmtBB(v)  { return v == null ? '—' : (v >= 0 ? '+' : '') + Math.round(v) + 'bb'; }
@@ -118,7 +122,8 @@ function renderReport(data) {
     const rows = p.stats.filter(s => s.opp > 0);
     const good = rows.filter(s => s.result === 'GOOD').length;
     const bad  = rows.filter(s => s.result === 'LOW' || s.result === 'HIGH').length;
-    const evaluated = rows.filter(s => s.result).length;
+    const thin = rows.filter(s => s.result === 'INSUFFICIENT').length;
+    const evaluated = good + bad;
     return `
     <div class="section-card mb-3 lk-pos-card" onclick="this.querySelector('.lk-body').classList.toggle('d-none')">
       <div class="lk-pos-head">
@@ -131,6 +136,7 @@ function renderReport(data) {
           <span class="lk-pill all">All (${evaluated})</span>
           <span class="lk-pill good">Good (${good})</span>
           <span class="lk-pill bad">Bad (${bad})</span>
+          ${thin ? `<span class="lk-pill thin" title="Fewer than ${MIN_SAMPLE} opportunities — too little data for a verdict">Low sample (${thin})</span>` : ''}
         </div>
       </div>
       <div class="lk-body d-none" onclick="event.stopPropagation()">
@@ -148,16 +154,20 @@ function renderReport(data) {
                 return `<tr class="lk-street-row"><td colspan="5">${street}</td></tr>` +
                   group.map(s => {
                     const isBad = s.result === 'LOW' || s.result === 'HIGH';
-                    const dot = s.result ? (isBad ? 'lk-dot-bad' : 'lk-dot-good') : 'lk-dot-na';
-                    const rec = !s.result ? '' :
+                    const isThin = s.result === 'INSUFFICIENT';
+                    const dot = isBad ? 'lk-dot-bad' : s.result === 'GOOD' ? 'lk-dot-good' : 'lk-dot-na';
+                    const rec = isThin ? `Need ${MIN_SAMPLE}+ hands` : !s.result ? '' :
                       s.result === 'GOOD' ? 'Good job' : (s.rec || (s.result === 'LOW' ? 'More' : 'Less'));
+                    const badge = isThin
+                      ? `<span class="lk-badge THIN" title="Only ${s.opp} opportunit${s.opp===1?'y':'ies'} — too little data for a verdict">low n</span>`
+                      : s.result ? `<span class="lk-badge ${s.result}">${s.result}</span>` : '';
                     return `
                     <tr>
                       <td><span class="lk-name-dot ${dot}"></span>${s.label}<span class="lk-count">${s.opp}</span></td>
                       <td class="text-end">${fmtPct(s.pct)}</td>
-                      <td class="text-center">${s.result ? `<span class="lk-badge ${s.result}">${s.result}</span>` : ''}</td>
+                      <td class="text-center">${badge}</td>
                       <td class="text-end">${s.target ? s.target[0] + '% – ' + s.target[1] + '%' : '—'}</td>
-                      <td class="${isBad ? 'lk-rec-bad' : s.result ? 'lk-rec-good' : ''}">${rec}</td>
+                      <td class="${isBad ? 'lk-rec-bad' : s.result === 'GOOD' ? 'lk-rec-good' : 'lk-rec-thin'}">${rec}</td>
                     </tr>`;
                   }).join('');
               }).join('')}

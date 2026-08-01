@@ -1,10 +1,11 @@
 # Leak Finder — Design & Delivery Plan
 
-_Status: **Phase 3 shipped with one honest caveat.** All 39 stats stay cell-exact vs PT4. The
-all-in-adjusted winrate is now computed and shown on `/leaks`, using exact runout enumeration and
-proper side-pot settlement — but PT4's `All-In Adj BB/100` column could **not** be reproduced
-cell-exact, so that figure is reported as informational rather than gated (§11). Next: Phase 4
-(verdict polish + sample-size gating) and Phase 5 (filters + caching)._
+_Status: **Phase 4 complete.** Verdicts (LOW/GOOD/HIGH) now run through one shared `classify()`,
+validated at **163/163** against verdicts harvested directly off the BBZ UI — an independent
+check of the boundary logic alone, since the live dataset has since outgrown that snapshot.
+Sample-size gating (§8) is live: on the current 4,403-hand report, **60 of 152 evaluated cells
+(39%) were previously given a confident verdict on fewer than 5 opportunities**; they now render
+`INSUFFICIENT` rather than a color. Next: Phase 5 (filters + per-tournament caching)._
 _Owner: Caio · Consulting engineer: Claude_
 
 ## 1. Goal
@@ -239,7 +240,7 @@ What the harvest established:
 | **1 — Preflop ✅** | All preflop flags (RFI, limp family, 3-bet/opp, fold-to-steal, call-2bet, 4-bet, squeeze, BB-v-SB); `aggregate_stats()`; `records_to_ps_text()` runtime adapter | **`/leaks` page**: by-position preflop report with BBZ targets + provisional verdicts | Preflop columns match PT4 CSV — **PASSED** (2 accepted-deviation cells, Appendix C) |
 | **2 — Postflop ✅** | Flop/turn/river flags (c-bet/float/probe/donk/check-raise/fold-to; HU & 3-bet variants); `report` position scheme | **`/leaks` grouped by street**, postflop rows added | Postflop columns match PT4 CSV — **PASSED** |
 | **3 — Headline winrate ⚠️** | `equity.py` — exact enumeration, side-pot layers, persistent cache | **"Winrate: X bb"** on each position card + overall | Reported, **not gated** — PT4's column not reproducible cell-exact (§11) |
-| **4 — Verdicts** | Seed `/config/leak_ranges` from `data/bbz_leak_ranges.json`; `classify()`; sample-size gating | **All / Good / Bad pills** + expandable per-stat detail (Hero / Result / Target / Rec. action) | Good/Bad counts reproduce the BBZ screenshots (BTN 4/17, CO 2/25, MP 3/26, EP 1/25, BB 2/27, SB 2/29) |
+| **4 — Verdicts ✅** | `classify()` in `leak_engine.py`; sample-size gating (`MIN_SAMPLE=5`); local-JSON target loader (no Firestore move — see §12) | **All / Good / Bad / Low-sample pills**, `INSUFFICIENT` badge in the stat table | Classifier boundary logic matches **163/163** harvested BBZ verdicts — **PASSED** |
 | **5 — Cut the cord** | Filter bar (tournament / buy-in value / date range); count-vector caching; remove "export→PT4→BBZ" guidance; nav entry | **Filters + polished standalone Leak Finder**; single-click flow | End-to-end: saved tournaments → report with no external tools |
 
 Estimate: **~2 weeks to a solid v1** (Phases 0–4) that matches PT4 numbers on the validation set;
@@ -316,6 +317,38 @@ computation is far too slow for a request. Equity depends only on the card layou
 change, so results are cached as pot-size-independent share *fractions* in
 `data/equity_cache.json`, warmed offline and committed. The per-tournament aggregate cache in §3
 (Phase 5) remains the durable fix for the rest of the report's cost.
+
+## 12. Phase 4: verdicts and why the gate changed shape
+
+**The BBZ-screenshot gate as originally written couldn't survive.** It compared our engine's
+Good/Bad *counts* against the specific 163-cell snapshot harvested from BBZ's UI on 2026-07-30.
+But `/leaks` now aggregates a live, growing dataset (4,403 hands vs. the snapshot's 3,454) — the
+counts were never going to match again after the first new hand landed, through no fault of the
+engine. The real, durable thing worth gating is the **classifier's boundary logic**, not a
+snapshot's arithmetic. `run_classifier_check()` does exactly that: it re-applies `classify()` to
+each of the 163 harvested (hero%, target, result) triples with sample-size gating switched off
+(`opp=None`) — pure boundary math, decoupled from any dataset — and requires all 163 to reproduce
+BBZ's rendered verdict. This is the new Phase 4 gate, run from `/leaks/validate` and the CLI.
+
+**One real, useful finding from the check.** The single exact-boundary case in the harvest —
+"F to T Pr (HU)" at hero%=30 against target `[30, 40]` (a global stat, so it repeats identically
+across all 5 positions carrying it, not five independent trials) — is verdicted `LOW` by BBZ, not
+`GOOD`. That means the boundary is **closed on both sides**: `pct <= min → LOW`, `pct >= max →
+HIGH`, strictly-between → `GOOD`. `classify()` was corrected accordingly. Only the low end was
+observed at an exact value; the high end is assumed symmetric, flagged as such in the docstring.
+
+**Sample-size gating.** BBZ itself renders a confident verdict on samples as thin as n=1 — 43 of
+its own 163 harvested cells (26%) sit under 5 opportunities. We gate at **`MIN_SAMPLE = 5`**:
+below that, `classify()` returns `INSUFFICIENT` rather than a color, and the UI shows a grey
+"low n" badge with the raw pct/count still visible (never hidden, just not overclaimed). Chosen
+as a conservative floor — enough to suppress a coin-flip-sized sample without hiding most of
+BBZ's own coverage. On the live report this reclassifies 60 of 152 evaluated cells (39%).
+
+**No Firestore move for `/config/leak_ranges`.** The original plan (§3) proposed seeding a
+Firestore doc so "updating ranges is a data edit, not a code change." Loading directly from
+`data/bbz_leak_ranges.json` already satisfies that — editing the file and redeploying is a data
+edit, no code change, and Caio is the only user, so there is no live-multi-tenant editing need
+that would justify the added moving part. Revisit only if that changes.
 
 ## Appendix A — Stat → formula map (from the `.pt4rpt`)
 
@@ -457,5 +490,10 @@ labelling.
       enumerate runouts ourselves with `eval7.evaluate`.
 - [x] Phase-3 winrate — shipped, **reported but not gated**; PT4's column not reproducible (§11).
 - [ ] Re-open the winrate reconciliation if PT4 per-hand `amt_expected_won` values become available.
+- [x] Phase-4 gate — **PASSED**: `classify()` matches all 163 harvested BBZ verdicts exactly.
+- [x] Boundary inclusivity resolved: closed on both ends (`<=`/`>=`), confirmed at one exact
+      hit (low end); high end assumed symmetric pending a confirming data point.
+- [x] Sample-size gating shipped at `MIN_SAMPLE = 5` (`leak_engine.classify`); 60/152 live cells
+      reclassified from a confident verdict to `INSUFFICIENT`.
 - [ ] Phase 5: per-tournament aggregate cache (makes the whole report instant, supersedes the
-      equity-only cache file).
+      equity-only cache file); filter bar (tournament / buy-in / date range).

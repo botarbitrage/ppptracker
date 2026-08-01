@@ -1110,7 +1110,7 @@ def leaks_page():
 def leaks_api():
     from hand_exporter import records_to_ps_text
     from leak_engine import (parse_ps_text, aggregate_stats, validate_pot,
-                             POSITION_BUCKETS, ALL_STATS, STAT_STREET)
+                             POSITION_BUCKETS, ALL_STATS, STAT_STREET, classify)
 
     uid = _verify_bearer(request)   # inits the Admin SDK internally
     if not uid:
@@ -1178,10 +1178,7 @@ def leaks_api():
             t = targets.get((bucket, label)) or {}
             pct = round(made / opp * 100, 2) if opp else None
             target = t.get('target')
-            result = None
-            if pct is not None and target:
-                result = ('LOW' if pct < target[0]
-                          else 'HIGH' if pct > target[1] else 'GOOD')
+            result = classify(pct, target, opp)
             rows.append({'key': key, 'label': label, 'pct': pct,
                          'made': made, 'opp': opp, 'street': STAT_STREET[key],
                          'target': target, 'rec': t.get('rec'), 'result': result})
@@ -1215,9 +1212,9 @@ def leaks_validate_page():
 
 @app.route('/api/leaks/validate')
 def leaks_validate_api():
-    from leak_validation import run_validation
+    from leak_validation import run_all
     try:
-        return jsonify(run_validation())
+        return jsonify(run_all())
     except Exception as exc:
         return jsonify({'error': str(exc)}), 500
 

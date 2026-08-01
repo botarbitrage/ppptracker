@@ -61,14 +61,16 @@
 
   <div id="vld-error" class="alert alert-danger py-2 d-none"></div>
   <div id="vld-suites"></div>
+  <div id="vld-classifier"></div>
   <div id="vld-corpus"></div>
 
 </main>
 <script>
 (async () => {
-  const suitesEl = document.getElementById('vld-suites');
-  const corpusEl = document.getElementById('vld-corpus');
-  const errEl    = document.getElementById('vld-error');
+  const suitesEl     = document.getElementById('vld-suites');
+  const classifierEl = document.getElementById('vld-classifier');
+  const corpusEl     = document.getElementById('vld-corpus');
+  const errEl        = document.getElementById('vld-error');
   try {
     const res  = await fetch('/api/leaks/validate');
     const data = await res.json();
@@ -125,6 +127,45 @@
           </table>
         </div>
       </div>`).join('');
+
+    if (data.classifier) {
+      const clf = data.classifier;
+      const bad = clf.cells.filter(c => !c.match);
+      classifierEl.innerHTML = `
+      <div class="section-card mb-4">
+        <div class="section-card-header p-3 pb-2">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <h2 class="mb-0">Classifier fidelity <span class="vld-meta">(vs 163 harvested BBZ verdicts — design doc §7)</span></h2>
+            <span class="vld-badge ${clf.all_match ? 'pass' : 'fail'}">
+              ${clf.all_match ? 'ALL MATCH' : bad.length + ' MISMATCH'}</span>
+          </div>
+          <div class="vld-meta mt-1">
+            Tests the LOW/GOOD/HIGH boundary logic alone (sample-size gating off) against
+            (hero%, target, verdict) triples read directly off the BBZ UI — independent of
+            the live dataset, which has since grown past the harvested snapshot.
+          </div>
+        </div>
+        ${bad.length ? `
+        <div class="table-responsive">
+          <table class="table table-dark table-striped table-hover mb-0">
+            <thead><tr>
+              <th>Position</th><th>Stat</th><th class="text-end">Hero %</th>
+              <th class="text-end">Target</th><th>BBZ</th><th>Ours</th>
+            </tr></thead>
+            <tbody>
+              ${bad.map(c => `
+                <tr>
+                  <td>${c.position}</td><td>${c.stat}</td>
+                  <td class="text-end">${c.hero_pct}</td>
+                  <td class="text-end">${c.target[0]}% – ${c.target[1]}%</td>
+                  <td class="vld-bad">${c.bbz_result}</td>
+                  <td class="vld-bad">${c.ours_result}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>` : ''}
+      </div>`;
+    }
 
     corpusEl.innerHTML = data.corpus.map(c => `
       <div class="section-card mb-4">
