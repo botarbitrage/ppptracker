@@ -288,7 +288,8 @@ function rowHtml(s, showStreet) {
 
 function renderRows(position) {
   const dir = SORT_STATE[position];
-  const rows = REPORT_DATA[position];
+  let rows = REPORT_DATA[position];
+  if (HIDE_NEH) rows = rows.filter(s => tierOf(s) !== 'neh');
   // Unsorted keeps the street grouping; sorting is a global ranking, so the
   // street moves inline onto each row instead of being a section header.
   if (!dir) {
@@ -332,17 +333,11 @@ let AUTH_USER = null;
 let COMPARE_MODE = false;
 let COMPARE_SEEDED = false;
 let COMPARE_DATA = {};         // {position: combinedRowsArray} — parallel to REPORT_DATA
+let HIDE_NEH = false;
 
 function barId(ns, suffix) { return ns ? `lk-${ns}-${suffix}` : `lk-${suffix}`; }
 
 function filterBarSkeleton(ns) {
-  const extra = ns === ''
-    ? `<button class="lk-apply" onclick="applyFilters()">Apply</button>
-       <button class="lk-reset" onclick="resetFilters()">Reset</button>
-       <label class="lk-compare-toggle">
-         <input type="checkbox" id="lk-compare-toggle" onchange="onCompareToggle(this.checked)"> Compare
-       </label>`
-    : '';
   const heading = ns === 'b' ? `<div class="lk-compare-label">Compare against</div>` : '';
   return `${heading}
     <div class="lk-filter-row">
@@ -351,7 +346,6 @@ function filterBarSkeleton(ns) {
       </button>
       <label class="lk-date-lbl">From <input type="date" id="${barId(ns, 'from')}" class="lk-date"></label>
       <label class="lk-date-lbl">To <input type="date" id="${barId(ns, 'to')}" class="lk-date"></label>
-      ${extra}
     </div>
     <div id="${barId(ns, 'room-panel')}" class="lk-room-panel d-none">
       <div class="lk-room-actions">
@@ -364,6 +358,29 @@ function filterBarSkeleton(ns) {
         <div id="${barId(ns, 'room-list-cash')}" class="lk-room-list"></div>
       </div>
     </div>`;
+}
+
+function createActionButtons() {
+  const div = document.createElement('div');
+  div.id = 'lk-actions';
+  div.className = 'lk-filter-row';
+  div.style.borderTop = '1px solid #ffffff14';
+  div.innerHTML = `
+    <button class="lk-apply" onclick="applyFilters()">Apply</button>
+    <button class="lk-reset" onclick="resetFilters()">Reset</button>
+    <label class="lk-compare-toggle">
+      <input type="checkbox" id="lk-compare-toggle" onchange="onCompareToggle(this.checked)"> Compare
+    </label>
+    <label class="lk-compare-toggle">
+      <input type="checkbox" id="lk-hide-neh" onchange="onHideNehToggle(this.checked)"> Hide neh
+    </label>`;
+  return div;
+}
+
+function placeActionButtons(barNs) {
+  let el = document.getElementById('lk-actions');
+  if (!el) el = createActionButtons();
+  document.getElementById(barId(barNs, 'filterbar')).appendChild(el);
 }
 
 function roomItemHtml(ns, r, disabled) {
@@ -420,6 +437,7 @@ function ensureFilterBar(ns) {
   document.getElementById(barId(ns, 'filterbar')).innerHTML = filterBarSkeleton(ns);
   populateFilterBar(ns, LAST_FILTERS);
   FILTERS_BUILT[ns] = true;
+  if (ns === '') placeActionButtons('');
 }
 
 function copyFilterState(fromNs, toNs) {
@@ -436,10 +454,22 @@ function onCompareToggle(checked) {
   COMPARE_MODE = checked;
   ensureFilterBar('b');
   document.getElementById(barId('b', 'filterbar')).classList.toggle('d-none', !checked);
+  placeActionButtons(checked ? 'b' : '');
   if (checked && !COMPARE_SEEDED) {
     copyFilterState('', 'b');
     COMPARE_SEEDED = true;
   }
+}
+
+function onHideNehToggle(checked) {
+  HIDE_NEH = checked;
+  const data = COMPARE_MODE ? COMPARE_DATA : REPORT_DATA;
+  if (!data) return;
+  const renderer = COMPARE_MODE ? renderRowsCompare : renderRows;
+  Object.keys(data).forEach(pos => {
+    const tbody = document.querySelector(`tbody[data-position="${pos}"]`);
+    if (tbody) tbody.innerHTML = renderer(pos);
+  });
 }
 
 function currentQuery(ns) {
@@ -698,7 +728,8 @@ function rowHtmlCompare(row, showStreet) {
 
 function renderRowsCompare(position) {
   const dir = SORT_STATE[position];
-  const rows = COMPARE_DATA[position];
+  let rows = COMPARE_DATA[position];
+  if (HIDE_NEH) rows = rows.filter(s => progressOf(s).kind !== 'neh');
   if (!dir) {
     return STREETS.map(street => {
       const group = rows.filter(s => s.street === street);
