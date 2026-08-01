@@ -1,10 +1,11 @@
 # Leak Finder — Design & Delivery Plan
 
-_Status: **Phase 4 complete, plus a UX review pass** (§13): every stat always lists for every
-position (39 rows each, not just ones with samples); the All pill now counts low-sample stats;
-sample-count notation redesigned away from BBZ's subscript style; Result/Rec. Action columns are
-sortable by distance-from-target with a new colour-graded Δ column; the report position scheme
-was tuned further (§12/§13). Next: Phase 5 (filters + per-tournament caching)._
+_Status: **Phase 4 complete, plus two UX review passes** (§13, §14). Every stat lists for every
+position (39 rows each); the report table is Name · Hero · Target · Result · Rec. Action, with
+the sample count beside the name, street separator rows, per-stat hover descriptions, and a
+Result pill that grades severity (good / low / mid / high / neh) and sorts best-first or
+worst-first. Report position bucketing tuned in §13. Next: Phase 5 (filters + per-tournament
+caching)._
 _Owner: Caio · Consulting engineer: Claude_
 
 ## 1. Goal
