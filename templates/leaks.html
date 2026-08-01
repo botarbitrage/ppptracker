@@ -49,40 +49,34 @@
     .lk-pill.bad  { background:#ff547018; color:#ff5470;      border:1px solid #ff547050; }
     .lk-pill.thin { background:#ffffff0a; color:var(--muted); border:1px solid #ffffff20; }
     .lk-caret { color:var(--muted); font-size:.8rem; width:14px; }
-    .lk-street-tag {
-      font-family:var(--font-head); font-size:.63rem; font-weight:700;
+    .lk-stat-name { border-bottom:1px dotted #ffffff38; cursor:help; }
+    .lk-count { color:var(--muted); font-size:.82rem; }
+    .lk-street-inline {
+      font-family:var(--font-head); font-size:.6rem; font-weight:700;
       letter-spacing:.5px; text-transform:uppercase; color:var(--muted);
-      background:#ffffff0d; border-radius:4px; padding:2px 6px; white-space:nowrap;
+      background:#ffffff0d; border-radius:4px; padding:1px 5px; margin-left:7px;
     }
-    .lk-n { color:var(--muted); font-size:.85rem; }
     .lk-badge {
+      display:inline-block; min-width:52px; text-align:center;
       font-family:var(--font-head); font-size:.68rem; font-weight:700;
       border-radius:14px; padding:1px 10px; letter-spacing:.5px;
     }
-    .lk-badge.LOW  { background:#ff547018; color:#ff5470;      border:1px solid #ff547055; }
-    .lk-badge.HIGH { background:#ff547018; color:#ff5470;      border:1px solid #ff547055; }
-    .lk-badge.GOOD { background:#00e67618; color:var(--green); border:1px solid #00e67655; }
-    .lk-badge.THIN { background:#ffffff0a; color:var(--muted); border:1px solid #ffffff20; font-style:italic; }
-    .lk-name-dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:7px; flex:none; }
-    .lk-dot-bad  { background:#ff5470; }
-    .lk-dot-good { background:var(--green); }
-    .lk-dot-na   { background:#ffffff33; }
+    .lk-badge.neh { background:#ffffff0a; color:var(--muted); border:1px solid #ffffff20; font-style:italic; }
     td.lk-rec-bad  { color:#ff5470; }
     td.lk-rec-good { color:var(--green); }
     td.lk-rec-thin { color:var(--muted); font-style:italic; }
-    .lk-delta-chip {
-      display:inline-block; min-width:44px; text-align:center;
-      font-family:var(--font-head); font-size:.72rem; font-weight:700;
-      border-radius:10px; padding:2px 7px;
+    tr.lk-street-row td {
+      font-family:var(--font-head); font-size:.7rem; font-weight:700;
+      letter-spacing:1px; text-transform:uppercase; color:var(--muted);
+      background:#ffffff0a; padding-top:9px; padding-bottom:5px;
     }
-    .lk-delta-na { color:var(--muted); }
     th.lk-sortable { cursor:pointer; user-select:none; white-space:nowrap; }
     th.lk-sortable:hover { color:var(--text); }
     .lk-sort-arrow { display:inline-block; width:10px; color:var(--green); font-size:.65rem; }
   </style>
 </head>
 <body>
-<main class="container-fluid py-4 px-3 px-md-5" style="max-width:1080px;margin:0 auto">
+<main class="container-fluid py-4 px-3 px-md-5" style="max-width:1020px;margin:0 auto">
 
   <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
     <a href="/" class="page-back">
@@ -95,10 +89,11 @@
 
   <div class="lk-note mb-3">
     <b>Phase 4 — verdicts &amp; sample-size gating</b> over all your saved tournaments, by
-    position. Targets are BBZ's coaching ranges. Every stat is always listed, even with zero
-    samples; stats under <span id="lk-min-sample-note">5</span> opportunities show
-    "low n" rather than a color verdict — BBZ verdicts samples as small as 1. Click
-    <b>Result</b> or <b>Rec. Action</b> to sort by how far each stat sits from its target.
+    position. Targets are BBZ's coaching ranges; hover a stat name for what it measures.
+    The <b>Result</b> pill grades how far off target you are — <b>good</b>, then
+    <b>low</b> / <b>mid</b> / <b>high</b> as the gap widens in either direction. Stats with
+    fewer than <span id="lk-min-sample-note">5</span> opportunities show <b>neh</b> (not enough
+    hands) instead of a verdict. Click <b>Result</b> to sort best-first or worst-first.
   </div>
 
   <div id="lk-status" class="lk-meta mb-3">Signing in…</div>
@@ -110,71 +105,152 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script>
 const POS_ORDER = ['BTN', 'CO', 'MP', 'EP', 'BB', 'SB'];
+const STREETS = ['Preflop', 'Flop', 'Turn', 'River'];
 let MIN_SAMPLE = 5;           // overwritten from data.meta.min_sample once loaded
 let REPORT_DATA = null;       // {position: rowsArray} kept so sorting never re-fetches
 const SORT_STATE = {};        // {position: 'asc'|'desc'|null}
 
+// What each stat measures, keyed by the report label. Written from the engine's
+// own validated definitions (leak_engine.preflop/postflop_stat_flags).
+const STAT_HELP = {
+  'Raise First': 'Raised when first to enter the pot — no limpers or raises ahead.',
+  'Limp Open': 'Just called the big blind when first to enter the pot.',
+  'Limp/Raise': 'Limped in first, then raised when someone raised behind you.',
+  'Limp/Call': 'Limped in first, then called a raise behind you.',
+  'Limp/Fold': 'Limped in first, then folded to a raise behind you.',
+  'Raise SB Open Limp': 'In the big blind, raised when only the small blind limped in.',
+  'Fold BB v SB': 'In the big blind, folded to a small-blind open raise.',
+  'Fold to Steal': 'In the blinds, folded to a steal attempt from CO, button or small blind.',
+  'Call PF 2Bet': 'Called a single preflop raise.',
+  '3Bet PF': 'Re-raised (3-bet) when facing a single preflop raise.',
+  '3Bet Steal': 'In the blinds, 3-bet a steal attempt rather than folding or calling.',
+  '3Bet NAI <35': '3-bet preflop without shoving, holding 35 big blinds or fewer.',
+  '2Bet PF & Fold': 'Opened the pot, then folded when facing a 3-bet.',
+  'Raise & 4Bet+ PF': 'Opened the pot, then 4-bet when facing a 3-bet.',
+  '3Bet PF & Fold': '3-bet preflop, then folded when facing a 4-bet.',
+  'Fold to PF 4Bet After 3Bet <30': '3-bet then folded to a 4-bet, holding 30 big blinds or fewer.',
+  'PF Squeeze': 'Re-raised facing a raise plus at least one caller.',
+  'CBet F OOP (HU)': 'As preflop raiser out of position, bet the flop heads-up.',
+  'CBet F IP (HU)': 'As preflop raiser in position, bet the flop heads-up.',
+  'Float F HU': 'Called one preflop raise in position, then bet the flop when checked to.',
+  'Fold to F Cbet (HU)': "Folded to the preflop raiser's flop bet, heads-up.",
+  'Fold to F CBet (3B)': 'Folded to a flop continuation bet in a 3-bet or bigger pot.',
+  'Fold to F Float HU': 'As uncontested preflop raiser, checked the flop then folded to a bet.',
+  'CBet F & Fold (HU)': 'Continuation bet the flop, then folded to a raise, heads-up.',
+  'Raise F CBet (HU)': "Raised the preflop raiser's flop continuation bet, heads-up.",
+  'XR Flop HU': 'Checked and then raised on the flop, heads-up.',
+  'Raise F CBet (3B)': 'Raised a flop continuation bet in a 3-bet or bigger pot.',
+  'Donk T (HU)': 'Bet the turn before the flop aggressor got to act, heads-up.',
+  'CBet T (HU)': 'Kept betting the turn after continuation betting the flop, heads-up.',
+  'Float T': 'Called a flop bet in position, then bet the turn when checked to.',
+  'Probe T (HU)': 'Bet the turn out of position after the preflop raiser checked back the flop.',
+  'Probe T HU & Bet R': 'After probing the turn heads-up, also bet the river.',
+  'Fold to T CBet': "Folded to the flop continuation bettor's turn bet.",
+  'F to T Pr (HU)': 'Had the flop c-bet chance, checked, then folded to a turn probe bet.',
+  'Raise T CBet': "Raised the flop continuation bettor's turn bet.",
+  'Raise T Probe (HU)': 'Raised a turn probe bet, heads-up.',
+  'Donk R': 'Bet the river before the turn aggressor got to act.',
+  'CBet R': 'Kept betting the river after continuation betting the turn.',
+  'Fold to R CBet': "Folded to the turn continuation bettor's river bet.",
+};
+
 function fmtPct(v) { return v == null ? '—' : v.toFixed(2).replace(/\.?0+$/, '') + '%'; }
 function fmtBB(v)  { return v == null ? '—' : (v >= 0 ? '+' : '') + Math.round(v) + 'bb'; }
+function esc(s) { return String(s).replace(/"/g, '&quot;'); }
 
-// Green -> amber -> red, by |delta| in band-widths (0 = on target, capped at 1.5).
-function deltaColor(delta) {
-  const CAP = 1.5;
-  const t = Math.min(Math.abs(delta), CAP) / CAP;
-  const stops = t <= 0.5
-    ? [[0,230,118], [224,185,92], t / 0.5]
-    : [[224,185,92], [255,84,112], (t - 0.5) / 0.5];
-  const [[r1,g1,b1],[r2,g2,b2],f] = stops;
-  const r = Math.round(r1 + (r2-r1)*f), g = Math.round(g1 + (g2-g1)*f), b = Math.round(b1 + (b2-b1)*f);
-  return `rgb(${r},${g},${b})`;
+// Severity tiers by |delta| (distance from the target band, in band-widths).
+// 'good' is inside the band; beyond it the gap grades low -> mid -> high the
+// same way whether you're under or over target.
+const TIERS = {
+  good: { label: 'good', color: '#00e676' },
+  low:  { label: 'low',  color: '#9ccc3c' },
+  mid:  { label: 'mid',  color: '#f0c33c' },
+  high: { label: 'high', color: '#ff5470' },
+};
+
+function tierOf(s) {
+  if (s.result === 'INSUFFICIENT') return 'neh';
+  if (!s.result) return null;
+  if (s.result === 'GOOD') return 'good';
+  const d = Math.abs(s.delta ?? 0);
+  return d <= 0.5 ? 'low' : d <= 1.5 ? 'mid' : 'high';
 }
 
-function deltaChip(delta) {
-  if (delta == null) return '<span class="lk-delta-na">—</span>';
-  const color = deltaColor(delta);
-  const label = delta === 0 ? '0.0' : (delta > 0 ? '+' : '') + delta.toFixed(1);
-  const title = delta === 0 ? 'On target'
-    : `${Math.abs(delta).toFixed(2)} target-band widths ${delta < 0 ? 'below the floor' : 'above the ceiling'}`;
-  return `<span class="lk-delta-chip" style="background:${color}22;color:${color};border:1px solid ${color}66" title="${title}">${label}</span>`;
+// Ranks drive both display and sorting: good(0) low(1) mid(2) high(3), then
+// the "nothing to say" tail — neh(4), no target(5), no samples(6) — which is
+// pinned to the bottom in BOTH sort directions.
+function rankOf(s) {
+  const tier = tierOf(s);
+  if (tier === 'good') return 0;
+  if (tier === 'low')  return 1;
+  if (tier === 'mid')  return 2;
+  if (tier === 'high') return 3;
+  if (tier === 'neh')  return 4;
+  return s.opp ? 5 : 6;
 }
 
-// Rows with no delta (low sample, zero sample, or no target yet) always sort last,
-// in both directions. Default (dir=null) keeps the natural street-grouped order.
+function resultBadge(s) {
+  const tier = tierOf(s);
+  if (tier === 'neh') {
+    return `<span class="lk-badge neh" title="Only ${s.opp} opportunit${s.opp === 1 ? 'y' : 'ies'} — not enough hands for a verdict">neh</span>`;
+  }
+  if (!tier) return '<span class="lk-count">—</span>';
+  const { label, color } = TIERS[tier];
+  const dir = s.result === 'LOW' ? 'below' : s.result === 'HIGH' ? 'above' : null;
+  const title = tier === 'good'
+    ? 'Inside the target range'
+    : `${Math.abs(s.delta).toFixed(2)} target-band widths ${dir} the range`;
+  return `<span class="lk-badge" style="background:${color}1f;color:${color};border:1px solid ${color}66" title="${esc(title)}">${label}</span>`;
+}
+
 function sortedRows(rows, dir) {
   if (!dir) return rows;
-  const withDelta = rows.filter(s => s.delta != null);
-  const withoutDelta = rows.filter(s => s.delta == null);
-  withDelta.sort((a, b) => dir === 'asc'
-    ? Math.abs(a.delta) - Math.abs(b.delta)
-    : Math.abs(b.delta) - Math.abs(a.delta));
-  return withDelta.concat(withoutDelta);
+  return rows.slice().sort((a, b) => {
+    const ra = rankOf(a), rb = rankOf(b);
+    const tailA = ra >= 4, tailB = rb >= 4;
+    if (tailA !== tailB) return tailA ? 1 : -1;   // tail always last
+    if (tailA) return ra - rb;                    // stable order within the tail
+    if (ra !== rb) return dir === 'asc' ? ra - rb : rb - ra;
+    const da = Math.abs(a.delta ?? 0), db = Math.abs(b.delta ?? 0);
+    return dir === 'asc' ? da - db : db - da;
+  });
+}
+
+function rowHtml(s, showStreet) {
+  const isBad = s.result === 'LOW' || s.result === 'HIGH';
+  const isThin = s.result === 'INSUFFICIENT';
+  const rec = isThin ? `Need ${MIN_SAMPLE}+ hands`
+    : !s.result ? (s.opp ? 'No target yet' : '')
+    : s.result === 'GOOD' ? 'Good job' : (s.rec || (s.result === 'LOW' ? 'More' : 'Less'));
+  const help = STAT_HELP[s.label] || '';
+  return `
+    <tr>
+      <td>
+        <span class="lk-stat-name" title="${esc(help)}">${s.label}</span>
+        <span class="lk-count">(${s.opp})</span>
+        ${showStreet ? `<span class="lk-street-inline">${s.street}</span>` : ''}
+      </td>
+      <td class="text-end">${fmtPct(s.pct)}</td>
+      <td class="text-end">${s.target ? s.target[0] + '% – ' + s.target[1] + '%' : '—'}</td>
+      <td class="text-center">${resultBadge(s)}</td>
+      <td class="${isBad ? 'lk-rec-bad' : s.result === 'GOOD' ? 'lk-rec-good' : 'lk-rec-thin'}">${rec}</td>
+    </tr>`;
 }
 
 function renderRows(position) {
-  const rows = sortedRows(REPORT_DATA[position], SORT_STATE[position]);
-  return rows.map(s => {
-    const isBad = s.result === 'LOW' || s.result === 'HIGH';
-    const isThin = s.result === 'INSUFFICIENT';
-    const dot = isBad ? 'lk-dot-bad' : s.result === 'GOOD' ? 'lk-dot-good' : 'lk-dot-na';
-    const rec = isThin ? `Need ${MIN_SAMPLE}+ hands`
-      : !s.result ? (s.opp ? 'No target yet' : '')
-      : s.result === 'GOOD' ? 'Good job' : (s.rec || (s.result === 'LOW' ? 'More' : 'Less'));
-    const badge = isThin
-      ? `<span class="lk-badge THIN" title="Only ${s.opp} opportunit${s.opp===1?'y':'ies'} — too little data for a verdict">low n</span>`
-      : s.result ? `<span class="lk-badge ${s.result}">${s.result}</span>`
-      : `<span class="lk-n">—</span>`;
-    return `
-    <tr>
-      <td><span class="lk-name-dot ${dot}"></span>${s.label}</td>
-      <td><span class="lk-street-tag">${s.street}</span></td>
-      <td class="text-end">${fmtPct(s.pct)}</td>
-      <td class="text-end lk-n">${s.opp}</td>
-      <td class="text-center">${deltaChip(s.delta)}</td>
-      <td class="text-center">${badge}</td>
-      <td class="text-end">${s.target ? s.target[0] + '% – ' + s.target[1] + '%' : '—'}</td>
-      <td class="${isBad ? 'lk-rec-bad' : s.result === 'GOOD' ? 'lk-rec-good' : 'lk-rec-thin'}">${rec}</td>
-    </tr>`;
-  }).join('');
+  const dir = SORT_STATE[position];
+  const rows = REPORT_DATA[position];
+  // Unsorted keeps the street grouping; sorting is a global ranking, so the
+  // street moves inline onto each row instead of being a section header.
+  if (!dir) {
+    return STREETS.map(street => {
+      const group = rows.filter(s => s.street === street);
+      if (!group.length) return '';
+      return `<tr class="lk-street-row"><td colspan="5">${street}</td></tr>`
+        + group.map(s => rowHtml(s, false)).join('');
+    }).join('');
+  }
+  return sortedRows(rows, dir).map(s => rowHtml(s, true)).join('');
 }
 
 function sortArrow(position) {
@@ -185,8 +261,9 @@ function sortArrow(position) {
 function cycleSort(position) {
   const cur = SORT_STATE[position];
   SORT_STATE[position] = cur === null ? 'asc' : cur === 'asc' ? 'desc' : null;
-  document.querySelectorAll(`tbody[data-position="${position}"]`)[0].innerHTML = renderRows(position);
-  document.querySelectorAll(`[data-sort-arrow="${position}"]`).forEach(el => el.textContent = sortArrow(position));
+  document.querySelector(`tbody[data-position="${position}"]`).innerHTML = renderRows(position);
+  const arrow = document.querySelector(`[data-sort-arrow="${position}"]`);
+  if (arrow) arrow.textContent = sortArrow(position);
 }
 
 function renderReport(data) {
@@ -211,7 +288,6 @@ function renderReport(data) {
     const good = p.stats.filter(s => s.result === 'GOOD').length;
     const bad  = p.stats.filter(s => s.result === 'LOW' || s.result === 'HIGH').length;
     const thin = p.stats.filter(s => s.result === 'INSUFFICIENT').length;
-    const evaluated = good + bad + thin;
     return `
     <div class="section-card mb-3 lk-pos-card" onclick="this.querySelector('.lk-body').classList.toggle('d-none')">
       <div class="lk-pos-head">
@@ -221,23 +297,23 @@ function renderReport(data) {
           <b class="${p.winrate_bb100 >= 0 ? 'lk-wr-pos' : 'lk-wr-neg'}">${fmtBB(p.winrate_bb100)}</b></span>
         <span class="lk-pos-kv">Hands: <b>${p.hands}</b></span>
         <div class="lk-pills">
-          <span class="lk-pill all">All (${evaluated})</span>
+          <span class="lk-pill all">All (${good + bad + thin})</span>
           <span class="lk-pill good">Good (${good})</span>
           <span class="lk-pill bad">Bad (${bad})</span>
-          <span class="lk-pill thin" title="Fewer than ${MIN_SAMPLE} opportunities — too little data for a verdict">Low sample (${thin})</span>
+          <span class="lk-pill thin" title="Fewer than ${MIN_SAMPLE} opportunities — not enough hands for a verdict">neh (${thin})</span>
         </div>
       </div>
       <div class="lk-body d-none" onclick="event.stopPropagation()">
         <div class="table-responsive">
           <table class="table table-dark table-striped mb-0">
             <thead><tr>
-              <th>Name</th><th>Street</th><th class="text-end">Hero %</th>
-              <th class="text-end">N</th><th class="text-center">Δ</th>
-              <th class="text-center lk-sortable" onclick="cycleSort('${p.position}')">
-                Result <span class="lk-sort-arrow" data-sort-arrow="${p.position}"></span></th>
+              <th>Name</th>
+              <th class="text-end">Hero</th>
               <th class="text-end">Target</th>
-              <th class="lk-sortable" onclick="cycleSort('${p.position}')">
-                Rec. Action <span class="lk-sort-arrow" data-sort-arrow="${p.position}"></span></th>
+              <th class="text-center lk-sortable" onclick="cycleSort('${p.position}')"
+                  title="Sort by distance from target — ascending shows your best stats first, descending shows what needs the most work">
+                Result <span class="lk-sort-arrow" data-sort-arrow="${p.position}"></span></th>
+              <th>Rec. Action</th>
             </tr></thead>
             <tbody data-position="${p.position}">${renderRows(p.position)}</tbody>
           </table>

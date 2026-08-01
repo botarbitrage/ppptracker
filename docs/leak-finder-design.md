@@ -389,12 +389,33 @@ requires abandoning strict seat-based bucketing, which is a larger change than t
 **7. Sorting and colour grading.** `leak_engine.delta_from_target()` gives every stat a signed
 distance from its target band, normalized by the band's own width (so a 5–8% target and a
 55–65% one are comparable on the same scale) — 0 inside the band, negative below the floor,
-positive above the ceiling. **Result** and **Rec. Action** column headers are both clickable and
-share one sort key: ascending ranks by smallest `|delta|` first (closest to target = best),
-descending ranks largest first (furthest from target = most improvement needed); stats with no
-delta (zero-sample, low-sample, or no target) always sort to the bottom in both directions, per
-spec. A new **Δ** column renders the signed delta as a colour-graded chip (green → amber → red)
-so severity is visible without reading the number.
+positive above the ceiling. It drives the Result pill's grading and the sort order (see §14 for
+the final column layout).
+
+## 14. Second UX review pass (2026-08-01)
+
+Display-only round — no engine, API or gate changes; `delta_from_target()` is unchanged and now
+feeds the Result pill instead of its own column.
+
+- **Columns** are now Name · Hero · Target · Result · Rec. Action. The `N` and `Δ` columns are
+  gone: sample count moved into parentheses after the stat name, and Δ is expressed as the
+  Result pill's colour/label.
+- **Result pill grades severity** rather than just direction: `good` (inside the band, green),
+  then `low` (yellow-green, |Δ| ≤ 0.5 band-widths), `mid` (yellow, ≤ 1.5), `high` (red, beyond)
+  — applied symmetrically whether the stat is under or over target. Direction stays legible via
+  the Rec. Action verb ("Raise more" / "Raise less") and the pill tooltip.
+- **`neh`** ("not enough hands") replaces the earlier "low n" badge for sub-`MIN_SAMPLE` stats,
+  and the header pill matches.
+- **Street grouping restored** as separator rows (the Street column is gone). Because sorting is
+  a *global* ranking that necessarily cuts across streets, sorted mode drops the separators and
+  tags each row with its street inline — so street context survives in both modes.
+- **Sorting is on Result only** (removed from Rec. Action). Ascending: good → low → mid → high →
+  neh. Descending: high → mid → low → good → neh. Rows with nothing to say (neh, then no-target,
+  then zero-sample) are pinned to the bottom in *both* directions; within a tier, `|delta|`
+  breaks ties. Verified against a spec table before shipping.
+- **Stat name tooltips**: all 39 stats carry a one-line description of what they measure, written
+  from the engine's own validated definitions (not the garbled `.pt4rpt` strings). Coverage is
+  asserted in CI-style check — 39/39, no missing or typo'd keys.
 
 ## Appendix A — Stat → formula map (from the `.pt4rpt`)
 
