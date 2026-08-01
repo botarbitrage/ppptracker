@@ -1225,6 +1225,11 @@ def leaks_api():
         return jsonify({'error': 'Pro subscription required'}), 403
 
     # ── Available tournaments (filter options) ──
+    # is_mtt is set at import time from PPPoker's own room.mtt field (hand_parser.py),
+    # so it's a reliable, pre-existing signal — no new detection logic needed. The
+    # scraper is only supposed to import tournaments (yellow cash-game tiles are
+    # skipped), but a handful of cash sessions have made it in via manual/legacy
+    # imports; is_mtt=False marks those so they never enter a leak report.
     tourneys = {}
     for doc in db.collection('users').document(uid).collection('tournaments').get():
         d = doc.to_dict()
@@ -1232,16 +1237,21 @@ def leaks_api():
         tourneys[doc.id] = {
             'room_key': _norm_room_name(room) or '(unnamed)',
             'room_label': room or '(unnamed)',
+            'is_mtt': d.get('is_mtt', True),
             'earliest_ts': d.get('earliest_ts'),
             'updated_at': d.get('updated_at'),
             'hands': d.get('hands', 0),
         }
 
+    # Grouped by (name, is_mtt) rather than name alone, so a cash table that
+    # happens to share a normalized name with a tournament still gets its own
+    # disabled entry instead of merging into the selectable list.
     rooms = {}
     for meta in tourneys.values():
-        r = rooms.setdefault(meta['room_key'],
+        key = (meta['room_key'], meta['is_mtt'])
+        r = rooms.setdefault(key,
                              {'key': meta['room_key'], 'label': meta['room_label'],
-                              'tournaments': 0, 'hands': 0})
+                              'is_mtt': meta['is_mtt'], 'tournaments': 0, 'hands': 0})
         r['tournaments'] += 1
         r['hands'] += meta['hands']
     all_ts = [m['earliest_ts'] for m in tourneys.values() if m['earliest_ts']]
@@ -1264,6 +1274,8 @@ def leaks_api():
 
     selected = {}
     for tid, meta in tourneys.items():
+        if not meta['is_mtt']:
+            continue          # cash games are never selectable, whatever `rooms` asks for
         if want_rooms and meta['room_key'] not in want_rooms:
             continue
         ts = meta['earliest_ts']

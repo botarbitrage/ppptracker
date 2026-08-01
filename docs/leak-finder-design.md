@@ -236,6 +236,7 @@ What the harvest established:
 | **3 — Headline winrate ⚠️** | `equity.py` — exact enumeration, side-pot layers, persistent cache | **"Winrate: X bb"** on each position card + overall | Reported, **not gated** — PT4's column not reproducible cell-exact (§11) |
 | **4 — Verdicts ✅** | `classify()` in `leak_engine.py`; sample-size gating (`MIN_SAMPLE=5`); local-JSON target loader (no Firestore move — see §12) | **All / Good / Bad / Low-sample pills**, `INSUFFICIENT` badge in the stat table | Classifier boundary logic matches **163/163** harvested BBZ verdicts — **PASSED** |
 | **5 — Cut the cord ✅** | Filter bar (tournament + date range; buy-in dropped by decision, §15); per-tournament count-vector cache | **Filters + standalone Leak Finder**, ~1s per filtered report | Cached report equals a fresh computation (`test_leak_cache.py`) — **PASSED** |
+| **6 — Cash split & compare ✅** | `is_mtt` hard-exclusion + disabled cash section; two-range compare mode zipped client-side (§16); `/api/leaks` 500-on-dates fix + JSON error handler | **Tournaments/Cash-games split filter panel**; **Compare** checkbox with a second filter panel and a Hero A / Hero B / Progress / dynamic Rec. Action table | `test_leaks_api.py` (cash-exclusion + full endpoint), `test_leaks_compare.js` (progress/tier/sort logic) — **PASSED** |
 
 Estimate: **~2 weeks to a solid v1** (Phases 0–4) that matches PT4 numbers on the validation set;
 Phase 5 + exact-parity edge cases follow.
@@ -466,6 +467,66 @@ instant, but it would require a JavaScript reimplementation of `classify()` — 
 by a 163-case gate (§12) — and a second copy is how drift starts. A sub-second round-trip is the
 better trade for keeping correctness in one validated place.
 
+## 16. Phase 6: tournament/cash split and compare mode (2026-08-01)
+
+**Bug fix that preceded this phase.** `/api/leaks` passed the `timezone` *class* instead of
+`timezone.utc` when formatting `filters.date_min/date_max`, raising `TypeError` on any account
+with a dated tournament — i.e. everyone. Flask's default 500 page is HTML, and the page's
+`fetch()` tried to `JSON.parse()` it, surfacing as `Unexpected token '<'` with no indication of
+the real cause. Fixed, and paired with two hardening changes: an app-wide `/api/*` error handler
+that always answers JSON with the exception text (so a future crash shows a real message instead
+of a parse error), and `test_leaks_api.py`, which runs the full `/api/leaks` handler — filters,
+cache, auth, date parsing, error paths — against a fake Firestore. That test is what should have
+caught this before it shipped; nothing before it exercised the endpoint end-to-end.
+
+**Tournament / cash-game split.** The scraper only imports tournaments (cash-game tiles are
+skipped by design — see the import skill), but a handful of cash sessions reached Firestore via
+manual/legacy imports: 101 hands across "40-100BB JP", "40-100BB BP", and "(unnamed)" in the live
+data. `hand_parser.py` already tags every tournament doc with `is_mtt` (from PPPoker's own
+`room.mtt` field) — a pre-existing, reliable signal that needed no new detection logic. `/api/leaks`
+now groups the room list by `(name, is_mtt)` and hard-excludes any `is_mtt=False` tournament from
+`selected`, **regardless of what the `rooms=` query asks for** — so the exclusion holds even
+against a hand-crafted URL, not just a disabled checkbox. The filter UI splits the room grid into
+a normal "Tournaments" section and a disabled "Cash games" section with a one-line explanation,
+so the missing hands are visible rather than silently absent.
+
+**Compare mode.** Two ordinary `/api/leaks` reports — independent filters, no new endpoint or
+engine change — fetched in parallel and zipped client-side by stat `key` within each position.
+Every quantity needed for a stat's movement between two ranges (`pct`, `opp`, `result`, `delta`)
+was already in the response; "compare" is pure presentation logic layered on top:
+
+- A **Compare** checkbox reveals a second filter panel ("Compare against"), a clone of the first
+  (own room grid + date pickers, generated from the same `filterBarSkeleton()` template so the two
+  never drift), seeded with Range A's current selection so the user edits it into a real second
+  range rather than starting blank.
+- `Hero` splits into `Hero A` / `Hero B`. `Result` becomes **`Progress`** — improved / same /
+  regressed, computed by comparing `|delta|` in A vs B (closer to 0 is better; a move under
+  `PROGRESS_EPS = 0.15` band-widths reads as noise, not progress) — tail-pinning `neh` (either side
+  under `MIN_SAMPLE`) and "no target" rows last in both sort directions, exactly as the single-range
+  `Result` column already did. `Rec. Action` becomes dynamic ("Fixed — now inside target", "Better,
+  keep pushing — {rec}", "Getting worse — {rec}", "Still good").
+- Non-compare mode is untouched: same columns, same functions (`renderReport`, `rowHtml`,
+  `sortedRows`), same behavior. Compare mode is a fully parallel code path
+  (`renderCompareReport`, `rowHtmlCompare`, `sortedRowsCompare`, …) rather than a shared one with
+  branches, to keep zero regression risk on the already-validated default view.
+- **Found via testing, not requested:** 14 cells in `bbz_leak_ranges.json` have `rec: "Good job"`
+  — BBZ's harvested text for when that cell's verdict *was* good at scrape time. Compare mode only
+  reads `rec` when the live verdict is NOT good (the `tB === 'good'` case returns earlier), so
+  showing that text there would read as nonsense ("Getting worse — Good job"); it now falls back to
+  the generic more/less direction instead. The identical latent quirk exists in the single-range
+  `Rec. Action` column today — if a stat has drifted from good to bad since BBZ's harvest, it can
+  still show "Good job" — left alone since it's out of this phase's scope, but worth a follow-up.
+
+**Validation:** `test_leaks_compare.js` (Node) — the compare functions are pure (no DOM access),
+loaded straight out of the shipped `templates/leaks.html` via `vm`, and exercised against synthetic
+`/api/leaks`-shaped rows: tier classification, all five progress kinds, tail-pinning in both sort
+directions, and zipping two responses that don't cover the same positions. `test_leaks_api.py`
+gained a cash-game fixture tournament deliberately absent from the vector map, so any code path
+that tried to build its vector would `KeyError` — proving the exclusion is enforced, not just
+that the counts happen to add up. Both new tests pass; all four pre-existing gates
+(`leak_validation.py`, `test_leak_cache.py`, `test_hand_exporter.py`, plus a live run of every
+filter combination against production data) are unaffected.
+
 ## Appendix A — Stat → formula map (from the `.pt4rpt`)
 
 All stats are `numerator / denominator × 100`. Grouped by street. Label alignments previously
@@ -617,3 +678,14 @@ labelling.
       newly imported tournament is never the slow path on first view; the lazy backfill already
       covers it, just less promptly.
 - [ ] Harvest the 71 missing BBZ targets — 31 already have live samples (§13).
+- [x] Phase 6 — `/api/leaks` 500-on-dates bug fixed (`timezone` class vs `timezone.utc`), plus an
+      app-wide `/api/*` JSON error handler (§16).
+- [x] Phase 6 — tournament/cash-game split: `is_mtt` hard-exclusion in `/api/leaks`, disabled
+      "Cash games" section in the filter UI (§16).
+- [x] Phase 6 — compare mode: two ranges zipped client-side, `Progress` column, dynamic
+      `Rec. Action`, tail-pinned sorting (§16).
+- [ ] Known quirk (not fixed, out of Phase 6's scope): 14 cells in `bbz_leak_ranges.json` carry
+      `rec: "Good job"` — BBZ's harvested text for when that cell was good at scrape time. The
+      single-range `Rec. Action` column can still show "Good job" for a stat that has since
+      drifted to a bad verdict, since `s.rec` is only ever read there when the *live* result isn't
+      good. Compare mode filters this out (§16); single-range does not.

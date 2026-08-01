@@ -106,6 +106,18 @@
       border:1px solid #b58a2e66; background:#b58a2e14; color:#e0b95c;
       border-radius:8px; padding:8px 14px; font-size:.8rem;
     }
+    .lk-room-item.disabled { opacity:.45; cursor:not-allowed; }
+    .lk-cash-section { border-top:1px dashed #ffffff20; margin-top:10px; padding-top:10px; }
+    .lk-cash-note { color:var(--muted); font-size:.74rem; margin-bottom:6px; }
+    .lk-compare-label {
+      font-family:var(--font-head); font-size:.78rem; font-weight:700;
+      letter-spacing:.4px; color:var(--muted); padding:10px 16px 0;
+    }
+    .lk-compare-toggle {
+      color:var(--muted); font-size:.78rem; display:flex; align-items:center; gap:6px;
+      margin-left:auto; cursor:pointer;
+    }
+    .lk-compare-toggle input { accent-color:var(--green); }
   </style>
 </head>
 <body>
@@ -121,7 +133,7 @@
   </div>
 
   <div class="lk-note mb-3">
-    <b>Phase 4 — verdicts &amp; sample-size gating</b> over all your saved tournaments, by
+    <b>Phase 6 — tournament/cash split &amp; compare</b> over your saved tournaments, by
     position. Targets are BBZ's coaching ranges; hover a stat name for what it measures.
     The <b>Result</b> pill grades how far off target you are — <b>good</b>, then
     <b>low</b> / <b>mid</b> / <b>high</b> as the gap widens in either direction. Stats with
@@ -129,24 +141,8 @@
     hands) instead of a verdict. Click <b>Result</b> to sort best-first or worst-first.
   </div>
 
-  <div id="lk-filterbar" class="section-card mb-3 d-none">
-    <div class="lk-filter-row">
-      <button class="lk-filter-btn" id="lk-rooms-btn" onclick="toggleRoomPanel()">
-        Tournaments: <b id="lk-rooms-label">All</b> <span style="opacity:.6">▾</span>
-      </button>
-      <label class="lk-date-lbl">From <input type="date" id="lk-from" class="lk-date"></label>
-      <label class="lk-date-lbl">To <input type="date" id="lk-to" class="lk-date"></label>
-      <button class="lk-apply" onclick="applyFilters()">Apply</button>
-      <button class="lk-reset" onclick="resetFilters()">Reset</button>
-    </div>
-    <div id="lk-room-panel" class="lk-room-panel d-none">
-      <div class="lk-room-actions">
-        <a href="#" onclick="selectRooms(true);return false">Select all</a> ·
-        <a href="#" onclick="selectRooms(false);return false">Clear</a>
-      </div>
-      <div id="lk-room-list" class="lk-room-list"></div>
-    </div>
-  </div>
+  <div id="lk-filterbar" class="section-card mb-3 d-none"></div>
+  <div id="lk-b-filterbar" class="section-card mb-3 d-none"></div>
 
   <div id="lk-status" class="lk-meta mb-3">Signing in…</div>
   <div id="lk-warn" class="lk-warn mb-3 d-none"></div>
@@ -322,67 +318,160 @@ function cycleSort(position) {
 // ── Filters ────────────────────────────────────────────────────────────────
 // Filters select whole tournaments, never partial ones: a session that runs
 // past midnight stays intact instead of being cut in half by a date bound.
-let ROOMS = [];               // [{key,label,tournaments,hands}]
-let FILTERS_BUILT = false;
+//
+// Two independent filter bars can exist: '' (Range A, always present) and
+// 'b' (Range B, only when Compare is on). Both read the same `filters`
+// payload (the server returns it unconditionally, computed over every saved
+// tournament) — only the DOM checkbox/date state differs between them, so a
+// single `ns` argument threading through these functions is enough; there is
+// no need to fetch or store the room list twice.
+let ROOMS = [];                // [{key,label,is_mtt,tournaments,hands}] — MTT only
+let LAST_FILTERS = null;
+const FILTERS_BUILT = {};      // {ns: true} once that bar's DOM has been built
 let AUTH_USER = null;
+let COMPARE_MODE = false;
+let COMPARE_SEEDED = false;
+let COMPARE_DATA = {};         // {position: combinedRowsArray} — parallel to REPORT_DATA
 
-function toggleRoomPanel() {
-  document.getElementById('lk-room-panel').classList.toggle('d-none');
+function barId(ns, suffix) { return ns ? `lk-${ns}-${suffix}` : `lk-${suffix}`; }
+
+function filterBarSkeleton(ns) {
+  const extra = ns === ''
+    ? `<button class="lk-apply" onclick="applyFilters()">Apply</button>
+       <button class="lk-reset" onclick="resetFilters()">Reset</button>
+       <label class="lk-compare-toggle">
+         <input type="checkbox" id="lk-compare-toggle" onchange="onCompareToggle(this.checked)"> Compare
+       </label>`
+    : '';
+  const heading = ns === 'b' ? `<div class="lk-compare-label">Compare against</div>` : '';
+  return `${heading}
+    <div class="lk-filter-row">
+      <button class="lk-filter-btn" id="${barId(ns, 'rooms-btn')}" onclick="toggleRoomPanel('${ns}')">
+        Tournaments: <b id="${barId(ns, 'rooms-label')}">All</b> <span style="opacity:.6">▾</span>
+      </button>
+      <label class="lk-date-lbl">From <input type="date" id="${barId(ns, 'from')}" class="lk-date"></label>
+      <label class="lk-date-lbl">To <input type="date" id="${barId(ns, 'to')}" class="lk-date"></label>
+      ${extra}
+    </div>
+    <div id="${barId(ns, 'room-panel')}" class="lk-room-panel d-none">
+      <div class="lk-room-actions">
+        <a href="#" onclick="selectRooms('${ns}', true);return false">Select all</a> ·
+        <a href="#" onclick="selectRooms('${ns}', false);return false">Clear</a>
+      </div>
+      <div id="${barId(ns, 'room-list')}" class="lk-room-list"></div>
+      <div id="${barId(ns, 'cash-section')}" class="lk-cash-section d-none">
+        <div class="lk-cash-note">Leak Finder evaluates tournaments only — cash-game hands aren't included.</div>
+        <div id="${barId(ns, 'room-list-cash')}" class="lk-room-list"></div>
+      </div>
+    </div>`;
 }
 
-function selectedRooms() {
-  return Array.from(document.querySelectorAll('#lk-room-list input:checked'))
+function roomItemHtml(ns, r, disabled) {
+  return `
+    <label class="lk-room-item${disabled ? ' disabled' : ''}" title="${esc(r.label)}">
+      <input type="checkbox" value="${esc(r.key)}" ${disabled ? 'disabled' : 'checked'}
+             onchange="updateRoomsLabel('${ns}')">
+      <span>${r.label}</span><span class="n">${r.hands}</span>
+    </label>`;
+}
+
+function toggleRoomPanel(ns) {
+  document.getElementById(barId(ns, 'room-panel')).classList.toggle('d-none');
+}
+
+function selectedRooms(ns) {
+  return Array.from(document.querySelectorAll(`#${barId(ns, 'room-list')} input:checked`))
               .map(el => el.value);
 }
 
-function selectRooms(on) {
-  document.querySelectorAll('#lk-room-list input').forEach(el => { el.checked = on; });
-  updateRoomsLabel();
+function selectRooms(ns, on) {
+  document.querySelectorAll(`#${barId(ns, 'room-list')} input`).forEach(el => { el.checked = on; });
+  updateRoomsLabel(ns);
 }
 
-function updateRoomsLabel() {
-  const sel = selectedRooms();
-  const el = document.getElementById('lk-rooms-label');
+function updateRoomsLabel(ns) {
+  const sel = selectedRooms(ns);
+  const el = document.getElementById(barId(ns, 'rooms-label'));
   el.textContent = (sel.length === 0 || sel.length === ROOMS.length)
     ? `All (${ROOMS.length})` : `${sel.length} of ${ROOMS.length}`;
 }
 
-function buildFilterBar(filters) {
-  if (FILTERS_BUILT) return;
-  ROOMS = filters.rooms || [];
-  document.getElementById('lk-room-list').innerHTML = ROOMS.map(r => `
-    <label class="lk-room-item" title="${esc(r.label)}">
-      <input type="checkbox" value="${esc(r.key)}" checked onchange="updateRoomsLabel()">
-      <span>${r.label}</span><span class="n">${r.hands}</span>
-    </label>`).join('');
-  const from = document.getElementById('lk-from'), to = document.getElementById('lk-to');
+function populateFilterBar(ns, filters) {
+  ROOMS = (filters.rooms || []).filter(r => r.is_mtt);
+  const cash = (filters.rooms || []).filter(r => !r.is_mtt);
+  document.getElementById(barId(ns, 'room-list')).innerHTML =
+    ROOMS.map(r => roomItemHtml(ns, r, false)).join('');
+  const cashSection = document.getElementById(barId(ns, 'cash-section'));
+  if (cash.length) {
+    document.getElementById(barId(ns, 'room-list-cash')).innerHTML =
+      cash.map(r => roomItemHtml(ns, r, true)).join('');
+    cashSection.classList.remove('d-none');
+  } else {
+    cashSection.classList.add('d-none');
+  }
+  const from = document.getElementById(barId(ns, 'from')), to = document.getElementById(barId(ns, 'to'));
   if (filters.date_min) { from.min = to.min = filters.date_min; }
   if (filters.date_max) { from.max = to.max = filters.date_max; }
-  updateRoomsLabel();
-  document.getElementById('lk-filterbar').classList.remove('d-none');
-  FILTERS_BUILT = true;
+  updateRoomsLabel(ns);
 }
 
-function currentQuery() {
+function ensureFilterBar(ns) {
+  if (FILTERS_BUILT[ns] || !LAST_FILTERS) return;
+  document.getElementById(barId(ns, 'filterbar')).innerHTML = filterBarSkeleton(ns);
+  populateFilterBar(ns, LAST_FILTERS);
+  FILTERS_BUILT[ns] = true;
+}
+
+function copyFilterState(fromNs, toNs) {
+  const sel = selectedRooms(fromNs);
+  document.querySelectorAll(`#${barId(toNs, 'room-list')} input`).forEach(el => {
+    el.checked = sel.length === 0 || sel.includes(el.value);
+  });
+  document.getElementById(barId(toNs, 'from')).value = document.getElementById(barId(fromNs, 'from')).value;
+  document.getElementById(barId(toNs, 'to')).value = document.getElementById(barId(fromNs, 'to')).value;
+  updateRoomsLabel(toNs);
+}
+
+function onCompareToggle(checked) {
+  COMPARE_MODE = checked;
+  ensureFilterBar('b');
+  document.getElementById(barId('b', 'filterbar')).classList.toggle('d-none', !checked);
+  if (checked && !COMPARE_SEEDED) {
+    copyFilterState('', 'b');
+    COMPARE_SEEDED = true;
+  }
+}
+
+function currentQuery(ns) {
   const params = new URLSearchParams();
-  const sel = selectedRooms();
+  const sel = selectedRooms(ns);
   // Sending every room is the same as sending none; keep the URL short.
   if (sel.length && sel.length < ROOMS.length) params.set('rooms', sel.join(','));
-  const from = document.getElementById('lk-from').value;
-  const to = document.getElementById('lk-to').value;
+  const from = document.getElementById(barId(ns, 'from')).value;
+  const to = document.getElementById(barId(ns, 'to')).value;
   if (from) params.set('from', from);
   if (to) params.set('to', to);
   const q = params.toString();
   return q ? '?' + q : '';
 }
 
-function applyFilters() { loadReport(currentQuery()); }
+function applyFilters() {
+  if (COMPARE_MODE) loadCompare(currentQuery(''), currentQuery('b'));
+  else loadReport(currentQuery(''));
+}
 
 function resetFilters() {
-  selectRooms(true);
-  document.getElementById('lk-from').value = '';
-  document.getElementById('lk-to').value = '';
-  loadReport('');
+  selectRooms('', true);
+  document.getElementById(barId('', 'from')).value = '';
+  document.getElementById(barId('', 'to')).value = '';
+  if (COMPARE_MODE) {
+    selectRooms('b', true);
+    document.getElementById(barId('b', 'from')).value = '';
+    document.getElementById(barId('b', 'to')).value = '';
+    loadCompare('', '');
+  } else {
+    loadReport('');
+  }
 }
 
 // Warn when a slice is too thin to say much, rather than letting the user
@@ -407,7 +496,11 @@ function sampleWarning(meta) {
 function renderReport(data) {
   MIN_SAMPLE = data.meta.min_sample || MIN_SAMPLE;
   document.getElementById('lk-min-sample-note').textContent = MIN_SAMPLE;
-  if (data.filters) buildFilterBar(data.filters);
+  if (data.filters) {
+    LAST_FILTERS = data.filters;
+    ensureFilterBar('');
+    document.getElementById('lk-filterbar').classList.remove('d-none');
+  }
   sampleWarning(data.meta);
 
   document.getElementById('lk-status').innerHTML =
@@ -463,6 +556,20 @@ function renderReport(data) {
   }).join('');
 }
 
+async function fetchLeaks(query) {
+  const token = await AUTH_USER.getIdToken();
+  const res = await fetch('/api/leaks' + (query || ''),
+                          { headers: { 'Authorization': 'Bearer ' + token } });
+  const body = await res.text();
+  let data;
+  // A proxy timeout or a crash upstream of Flask answers HTML, not JSON.
+  try { data = JSON.parse(body); }
+  catch (_) { throw new Error('Server error ' + res.status + ' — ' +
+                              body.replace(/<[^>]*>/g, ' ').trim().slice(0, 200)); }
+  if (data.error) throw new Error(data.error);
+  return data;
+}
+
 async function loadReport(query) {
   const statusEl = document.getElementById('lk-status');
   const errEl = document.getElementById('lk-error');
@@ -470,17 +577,246 @@ async function loadReport(query) {
   errEl.classList.add('d-none');
   statusEl.textContent = 'Crunching your saved tournaments…';
   try {
-    const token = await AUTH_USER.getIdToken();
-    const res = await fetch('/api/leaks' + (query || ''),
-                            { headers: { 'Authorization': 'Bearer ' + token } });
-    const body = await res.text();
-    let data;
-    // A proxy timeout or a crash upstream of Flask answers HTML, not JSON.
-    try { data = JSON.parse(body); }
-    catch (_) { throw new Error('Server error ' + res.status + ' — ' +
-                                body.replace(/<[^>]*>/g, ' ').trim().slice(0, 200)); }
-    if (data.error) throw new Error(data.error);
-    renderReport(data);
+    renderReport(await fetchLeaks(query));
+  } catch (e) {
+    statusEl.textContent = '';
+    errEl.textContent = e.message;
+    errEl.classList.remove('d-none');
+  }
+}
+
+// ── Compare mode ─────────────────────────────────────────────────────────────
+// Two ordinary /api/leaks reports, fetched with independent filters and
+// zipped client-side. The engine and endpoint don't know "compare" exists —
+// each response already carries everything a single stat row needs (pct,
+// opp, result, delta), so combining two of them is pure presentation logic.
+
+// A move smaller than this (in target-band widths) reads as noise, not progress.
+const PROGRESS_EPS = 0.15;
+
+function tierPairOf(row) {
+  return [
+    tierOf({ result: row.resultA, delta: row.deltaA, opp: row.oppA }),
+    tierOf({ result: row.resultB, delta: row.deltaB, opp: row.oppB }),
+  ];
+}
+
+// {kind: 'none'|'neh'|'improved'|'same'|'regressed', tA, tB, diff}
+// 'none' — no target, or zero opportunities on a side (tierOf returns null).
+// 'neh'  — a side has some opportunities but under MIN_SAMPLE.
+// diff > 0 means the hand moved closer to the target band between A and B.
+function progressOf(row) {
+  const [tA, tB] = tierPairOf(row);
+  if (tA === null || tB === null) return { kind: 'none' };
+  if (tA === 'neh' || tB === 'neh') return { kind: 'neh', tA, tB };
+  const dA = Math.abs(row.deltaA ?? 0), dB = Math.abs(row.deltaB ?? 0);
+  const diff = dA - dB;
+  const kind = diff > PROGRESS_EPS ? 'improved' : diff < -PROGRESS_EPS ? 'regressed' : 'same';
+  return { kind, tA, tB, diff };
+}
+
+function progressBadge(row) {
+  const p = progressOf(row);
+  if (p.kind === 'none') return '<span class="lk-count">—</span>';
+  if (p.kind === 'neh') {
+    return `<span class="lk-badge neh" title="Not enough hands on one side — ${row.oppA} vs ${row.oppB} opportunities">neh</span>`;
+  }
+  const meta = {
+    improved: { label: 'improved',  color: TIERS.good.color },
+    same:     { label: 'same',      color: TIERS.mid.color },
+    regressed:{ label: 'regressed', color: TIERS.high.color },
+  }[p.kind];
+  const title = `${p.tA} → ${p.tB} (${p.diff >= 0 ? '+' : ''}${p.diff.toFixed(2)} band-widths)`;
+  return `<span class="lk-badge" style="background:${meta.color}1f;color:${meta.color};border:1px solid ${meta.color}66" title="${esc(title)}">${meta.label}</span>`;
+}
+
+function recActionCompare(row) {
+  const p = progressOf(row);
+  if (p.kind === 'none') return row.oppA || row.oppB ? 'No target yet' : '';
+  if (p.kind === 'neh') return `Need ${MIN_SAMPLE}+ hands on both sides`;
+  if (p.tB === 'good') return p.tA === 'good' ? 'Still good' : 'Fixed — now inside target';
+  // BBZ's harvested rec text for a handful of cells is literally "Good job" —
+  // written for when that stat's verdict IS good. We only reach here when
+  // it's not (the tB === 'good' branch above already returned), so that text
+  // would be nonsensical; fall back to the generic more/less direction instead.
+  const staticRec = (row.rec && row.rec !== 'Good job') ? row.rec
+    : (row.resultB === 'LOW' ? 'More' : row.resultB === 'HIGH' ? 'Less' : '');
+  if (p.kind === 'improved') return `Better, keep pushing — ${staticRec}`;
+  if (p.kind === 'regressed') return `Getting worse — ${staticRec}`;
+  return staticRec || 'No change';
+}
+
+function recClassCompare(row) {
+  const p = progressOf(row);
+  if (p.kind === 'improved') return 'lk-rec-good';
+  if (p.kind === 'regressed') return 'lk-rec-bad';
+  if (p.kind === 'same') return p.tB === 'good' ? 'lk-rec-good' : 'lk-rec-thin';
+  return 'lk-rec-thin';   // neh / none
+}
+
+// Mirrors rankOf()/sortedRows(): improved(0) same(1) regressed(2), then the
+// "nothing to say" tail — neh(3), no target/no samples(4/5) — pinned last
+// in BOTH sort directions.
+function rankOfProgress(row) {
+  const p = progressOf(row);
+  if (p.kind === 'improved')  return 0;
+  if (p.kind === 'same')      return 1;
+  if (p.kind === 'regressed') return 2;
+  if (p.kind === 'neh')       return 3;
+  return (row.oppA || row.oppB) ? 4 : 5;
+}
+
+function sortedRowsCompare(rows, dir) {
+  if (!dir) return rows;
+  return rows.slice().sort((a, b) => {
+    const ra = rankOfProgress(a), rb = rankOfProgress(b);
+    const tailA = ra >= 3, tailB = rb >= 3;
+    if (tailA !== tailB) return tailA ? 1 : -1;
+    if (tailA) return ra - rb;
+    if (ra !== rb) return dir === 'asc' ? ra - rb : rb - ra;
+    const da = -(progressOf(a).diff ?? 0), db = -(progressOf(b).diff ?? 0);
+    return dir === 'asc' ? da - db : db - da;
+  });
+}
+
+function rowHtmlCompare(row, showStreet) {
+  const help = STAT_HELP[row.label] || '';
+  return `
+    <tr>
+      <td>
+        <span class="lk-stat-name" title="${esc(help)}">${row.label}</span>
+        <span class="lk-count">(${row.oppA}/${row.oppB})</span>
+        ${showStreet ? `<span class="lk-street-inline">${row.street}</span>` : ''}
+      </td>
+      <td class="text-end">${fmtPct(row.pctA)}</td>
+      <td class="text-end">${fmtPct(row.pctB)}</td>
+      <td class="text-end">${row.target ? row.target[0] + '% – ' + row.target[1] + '%' : '—'}</td>
+      <td class="text-center">${progressBadge(row)}</td>
+      <td class="${recClassCompare(row)}">${recActionCompare(row)}</td>
+    </tr>`;
+}
+
+function renderRowsCompare(position) {
+  const dir = SORT_STATE[position];
+  const rows = COMPARE_DATA[position];
+  if (!dir) {
+    return STREETS.map(street => {
+      const group = rows.filter(s => s.street === street);
+      if (!group.length) return '';
+      return `<tr class="lk-street-row"><td colspan="6">${street}</td></tr>`
+        + group.map(s => rowHtmlCompare(s, false)).join('');
+    }).join('');
+  }
+  return sortedRowsCompare(rows, dir).map(s => rowHtmlCompare(s, true)).join('');
+}
+
+function cycleSortCompare(position) {
+  const cur = SORT_STATE[position];
+  SORT_STATE[position] = cur === null ? 'asc' : cur === 'asc' ? 'desc' : null;
+  document.querySelector(`tbody[data-position="${position}"]`).innerHTML = renderRowsCompare(position);
+  const arrow = document.querySelector(`[data-sort-arrow="${position}"]`);
+  if (arrow) arrow.textContent = sortArrow(position);
+}
+
+// Zips two /api/leaks responses into one row per (position, stat). Both list
+// POSITION_BUCKETS/ALL_STATS in the same fixed server-side order, so matching
+// by stat `key` (not index) keeps this correct even if that ever changes.
+function buildPositionsCombined(dataA, dataB) {
+  const byA = Object.fromEntries(dataA.positions.map(p => [p.position, p]));
+  const byB = Object.fromEntries(dataB.positions.map(p => [p.position, p]));
+  return POS_ORDER.map(pos => {
+    const a = byA[pos], b = byB[pos];
+    if (!a && !b) return null;
+    const statsB = Object.fromEntries((b ? b.stats : []).map(s => [s.key, s]));
+    const rows = (a ? a.stats : []).map(sa => {
+      const sb = statsB[sa.key] || { pct: null, opp: 0, result: null, delta: null };
+      return {
+        key: sa.key, label: sa.label, street: sa.street, target: sa.target, rec: sa.rec,
+        pctA: sa.pct, oppA: sa.opp, resultA: sa.result, deltaA: sa.delta,
+        pctB: sb.pct, oppB: sb.opp, resultB: sb.result, deltaB: sb.delta,
+      };
+    });
+    return {
+      position: pos, rows,
+      hands: { a: a ? a.hands : 0, b: b ? b.hands : 0 },
+      winrate: { a: a ? a.winrate_bb100 : null, b: b ? b.winrate_bb100 : null },
+    };
+  }).filter(Boolean);
+}
+
+function renderCompareReport(dataA, dataB) {
+  MIN_SAMPLE = dataA.meta.min_sample || MIN_SAMPLE;
+  document.getElementById('lk-min-sample-note').textContent = MIN_SAMPLE;
+  if (dataA.filters) {
+    LAST_FILTERS = dataA.filters;
+    ensureFilterBar('');
+    document.getElementById('lk-filterbar').classList.remove('d-none');
+  }
+
+  document.getElementById('lk-status').innerHTML =
+    `<b>A</b> ${dataA.meta.hands.toLocaleString()}h / ${dataA.meta.tournaments}t · ` +
+    `${fmtBB(dataA.meta.winrate_bb100)}/100` +
+    (dataA.meta.hands_skipped ? ` (${dataA.meta.hands_skipped} excluded)` : '') +
+    `&nbsp;&nbsp;vs&nbsp;&nbsp;<b>B</b> ${dataB.meta.hands.toLocaleString()}h / ${dataB.meta.tournaments}t · ` +
+    `${fmtBB(dataB.meta.winrate_bb100)}/100` +
+    (dataB.meta.hands_skipped ? ` (${dataB.meta.hands_skipped} excluded)` : '');
+
+  const warnEl = document.getElementById('lk-warn');
+  const msgs = [];
+  if (dataA.meta.hands === 0 || dataB.meta.hands === 0) {
+    msgs.push('One of the two ranges has no matching hands — pick different filters to compare.');
+  }
+  if (dataA.meta.tournaments_pending || dataB.meta.tournaments_pending) {
+    msgs.push('Some tournaments are still being summarised — reload to include them.');
+  }
+  warnEl.innerHTML = msgs.join('<br>');
+  warnEl.classList.toggle('d-none', msgs.length === 0);
+
+  COMPARE_DATA = {};
+  const combined = buildPositionsCombined(dataA, dataB);
+  document.getElementById('lk-cards').innerHTML = combined.map(p => {
+    COMPARE_DATA[p.position] = p.rows;
+    SORT_STATE[p.position] = null;
+    return `
+    <div class="section-card mb-3 lk-pos-card" onclick="this.querySelector('.lk-body').classList.toggle('d-none')">
+      <div class="lk-pos-head">
+        <span class="lk-caret">▸</span>
+        <span class="lk-pos-name">${p.position}</span>
+        <span class="lk-pos-kv" title="All-in adjusted big blinds won per 100 hands, A → B">Winrate:
+          <b class="${p.winrate.a >= 0 ? 'lk-wr-pos' : 'lk-wr-neg'}">${fmtBB(p.winrate.a)}</b> →
+          <b class="${p.winrate.b >= 0 ? 'lk-wr-pos' : 'lk-wr-neg'}">${fmtBB(p.winrate.b)}</b></span>
+        <span class="lk-pos-kv">Hands: <b>${p.hands.a}</b> / <b>${p.hands.b}</b></span>
+      </div>
+      <div class="lk-body d-none" onclick="event.stopPropagation()">
+        <div class="table-responsive">
+          <table class="table table-dark table-striped mb-0">
+            <thead><tr>
+              <th>Name</th>
+              <th class="text-end">Hero A</th>
+              <th class="text-end">Hero B</th>
+              <th class="text-end">Target</th>
+              <th class="text-center lk-sortable" onclick="cycleSortCompare('${p.position}')"
+                  title="Sort by change between the two ranges — ascending shows the biggest improvements first, descending shows the biggest regressions first">
+                Progress <span class="lk-sort-arrow" data-sort-arrow="${p.position}"></span></th>
+              <th>Rec. Action</th>
+            </tr></thead>
+            <tbody data-position="${p.position}">${renderRowsCompare(p.position)}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function loadCompare(queryA, queryB) {
+  const statusEl = document.getElementById('lk-status');
+  const errEl = document.getElementById('lk-error');
+  if (!AUTH_USER) return;
+  errEl.classList.add('d-none');
+  statusEl.textContent = 'Crunching both ranges…';
+  try {
+    const [dataA, dataB] = await Promise.all([fetchLeaks(queryA), fetchLeaks(queryB)]);
+    renderCompareReport(dataA, dataB);
   } catch (e) {
     statusEl.textContent = '';
     errEl.textContent = e.message;
