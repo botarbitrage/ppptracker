@@ -473,7 +473,12 @@ async function loadReport(query) {
     const token = await AUTH_USER.getIdToken();
     const res = await fetch('/api/leaks' + (query || ''),
                             { headers: { 'Authorization': 'Bearer ' + token } });
-    const data = await res.json();
+    const body = await res.text();
+    let data;
+    // A proxy timeout or a crash upstream of Flask answers HTML, not JSON.
+    try { data = JSON.parse(body); }
+    catch (_) { throw new Error('Server error ' + res.status + ' — ' +
+                                body.replace(/<[^>]*>/g, ' ').trim().slice(0, 200)); }
     if (data.error) throw new Error(data.error);
     renderReport(data);
   } catch (e) {

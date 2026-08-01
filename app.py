@@ -1,6 +1,7 @@
 import os
 import threading
 import time
+import traceback
 
 # Load .env file when running locally (no-op if file absent or python-dotenv not installed)
 try:
@@ -29,6 +30,24 @@ def _set_coop_header(response):
     if response.content_type and response.content_type.startswith('text/html'):
         response.headers['Cross-Origin-Opener-Policy'] = 'unsafe-none'
     return response
+
+@app.errorhandler(Exception)
+def _json_errors_for_api(exc):
+    """An unhandled error under /api/ must still answer JSON.
+
+    Flask's default 500 is an HTML page, which a fetch() caller parses as JSON
+    and reports as `Unexpected token '<'` — the real cause never reaches the
+    user or the browser console. Returning the exception text instead means a
+    server-side bug shows up in the UI as what it actually is.
+    """
+    from werkzeug.exceptions import HTTPException
+    code = exc.code if isinstance(exc, HTTPException) else 500
+    if code >= 500:
+        traceback.print_exc()
+    if not request.path.startswith('/api/'):
+        raise exc
+    return jsonify({'error': '%s: %s' % (type(exc).__name__, exc)}), code
+
 
 REQUEST_TIMEOUT = 30
 MAX_WORKERS = 10
@@ -1304,7 +1323,7 @@ def leaks_api():
     total_raw = sum(agg['positions'][b]['bb'] for b in POSITION_BUCKETS)
     from datetime import datetime as _dt2, timezone as _tz2
     def _day(ts):
-        return _dt2.fromtimestamp(ts, tz=_tz2).strftime('%Y-%m-%d') if ts else None
+        return _dt2.fromtimestamp(ts, tz=_tz2.utc).strftime('%Y-%m-%d') if ts else None
 
     return jsonify({
         'meta': {
