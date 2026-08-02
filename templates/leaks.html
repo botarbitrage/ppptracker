@@ -268,9 +268,13 @@ function sortedRows(rows, dir) {
 function rowHtml(s, showStreet) {
   const isBad = s.result === 'LOW' || s.result === 'HIGH';
   const isThin = s.result === 'INSUFFICIENT';
-  const rec = isThin ? `Need ${MIN_SAMPLE}+ hands`
+  const isNA = s.target === null && s.rec === 'Not applicable';
+  const rec = isNA ? 'Not applicable'
+    : isThin ? `Need ${MIN_SAMPLE}+ hands`
     : !s.result ? (s.opp ? 'No target yet' : '')
     : s.result === 'GOOD' ? 'Good job' : (s.rec || (s.result === 'LOW' ? 'More' : 'Less'));
+  const targetCell = isNA ? '<span class="lk-count">n/a</span>'
+    : s.target ? s.target[0] + '% – ' + s.target[1] + '%' : '—';
   const help = STAT_HELP[s.label] || '';
   return `
     <tr>
@@ -280,8 +284,8 @@ function rowHtml(s, showStreet) {
         ${showStreet ? `<span class="lk-street-inline">${s.street}</span>` : ''}
       </td>
       <td class="text-end">${fmtPct(s.pct)}</td>
-      <td class="text-end">${s.target ? s.target[0] + '% – ' + s.target[1] + '%' : '—'}</td>
-      <td class="text-center">${resultBadge(s)}</td>
+      <td class="text-end">${targetCell}</td>
+      <td class="text-center">${isNA ? '<span class="lk-count">—</span>' : resultBadge(s)}</td>
       <td class="${isBad ? 'lk-rec-bad' : s.result === 'GOOD' ? 'lk-rec-good' : 'lk-rec-thin'}">${rec}</td>
     </tr>`;
 }
@@ -711,6 +715,9 @@ function sortedRowsCompare(rows, dir) {
 
 function rowHtmlCompare(row, showStreet) {
   const help = STAT_HELP[row.label] || '';
+  const isNA = row.target === null && row.rec === 'Not applicable';
+  const targetCell = isNA ? '<span class="lk-count">n/a</span>'
+    : row.target ? row.target[0] + '% – ' + row.target[1] + '%' : '—';
   return `
     <tr>
       <td>
@@ -720,9 +727,9 @@ function rowHtmlCompare(row, showStreet) {
       </td>
       <td class="text-end">${fmtPct(row.pctA)}</td>
       <td class="text-end">${fmtPct(row.pctB)}</td>
-      <td class="text-end">${row.target ? row.target[0] + '% – ' + row.target[1] + '%' : '—'}</td>
-      <td class="text-center">${progressBadge(row)}</td>
-      <td class="${recClassCompare(row)}">${recActionCompare(row)}</td>
+      <td class="text-end">${targetCell}</td>
+      <td class="text-center">${isNA ? '<span class="lk-count">—</span>' : progressBadge(row)}</td>
+      <td class="${isNA ? 'lk-rec-thin' : recClassCompare(row)}">${isNA ? 'Not applicable' : recActionCompare(row)}</td>
     </tr>`;
 }
 

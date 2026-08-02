@@ -46,27 +46,45 @@ import re
 # player tables (four DeepFreeze tournaments, 2026-07-31).
 POSITION_BUCKETS = ('BTN', 'CO', 'MP', 'EP', 'BB', 'SB')
 
-# Two schemes:
-#   'pt4'    — reproduces PokerTracker exactly (the validation gate depends on
-#              this and must never drift). PT4 gives EP the two earliest
-#              non-blind seats at 7-9 handed and has NO EP bucket at all for
-#              tables of 6 or fewer, dumping those seats into MP.
-#   'report' — what the Leak Finder shows. Identical to 'pt4' at 7-9 handed;
-#              it only fills PT4's short-table gap so EP always means "the
-#              earliest seat(s) at your table". Without this, 6-max and 5-max
-#              UTG are labelled MP, which (on a field that is ~60% short-
-#              handed) buries early-position hands inside MP and starves EP.
+# Both schemes now resolve to PokerTracker's real EP/MP boundary, recovered by
+# fitting the full 4,412-hand PT4 report export (2026-08-01) on seven
+# independent per-position constraints at once — hands plus the Raise First /
+# Call PF 2Bet / 3Bet PF / 2Bet PF & Fold / PF Squeeze / Limp/Call opportunity
+# counts. The winning rule fits to |dev|=5 across all seven (residuals fully
+# explained by the 8 hands PT4 rejected on import); the runner-up scores 34.
+#
+# The rule: of the EP/MP pool (numeric seats 2..m-1, where m is the number of
+# NON-BLIND players), EP takes the floor(pool/2) earliest seats.
+#   pool 1 -> 0 EP seats   pool 2 -> 1   pool 3 -> 1   pool 4 -> 2   pool 5 -> 2
+#
+# Two earlier assumptions turned out to be wrong and are corrected here:
+#   * The old 'pt4' branch keyed off table size and claimed PT4 has no EP
+#     bucket at 6-handed or shorter. It does — a 6-handed pool of 2 gets one
+#     EP seat. That branch put 386 hands in EP against PT4's 578.
+#   * Both branches derived the pool from the seat count (n-3), which is wrong
+#     on hands with a dead small blind: those deal one extra non-blind seat, so
+#     the pool must be counted from the non-blind players actually dealt in.
+#
+# 'report' is kept as an accepted alias so stored call sites and cached-vector
+# keys stay valid; it no longer diverges. Aligning it matters for correctness,
+# not just tidiness — BBZ's target ranges are calibrated on PT4's own EP/MP
+# membership, so bucketing differently compares hero against targets built from
+# a different population.
 #
 # Caveat worth knowing when reading the report: numeric position equals
 # "players still to act behind you, minus the two blinds" regardless of table
 # size, so a relative scheme necessarily mixes slightly different strategic
 # depths inside one row. Filtering by table size (Phase 5) is the principled
-# way to remove that mixing; the schemes here only decide the labelling.
+# way to remove that mixing; the buckets here only decide the labelling.
 SCHEMES = ('pt4', 'report')
 
 
-def position_bucket(numeric_pos, n_players=9, scheme='pt4'):
-    """PT4 numeric position + table size → SB|BB|EP|MP|CO|BTN (None if unknown)."""
+def position_bucket(numeric_pos, n_nonblind=7, scheme='pt4'):
+    """PT4 numeric position + non-blind seat count → SB|BB|EP|MP|CO|BTN.
+
+    n_nonblind is the number of players dealt in who did NOT post a blind, so
+    the numeric seats run 0..n_nonblind-1. Returns None if position is unknown.
+    """
     if numeric_pos is None:
         return None
     if numeric_pos == 9:
@@ -77,26 +95,10 @@ def position_bucket(numeric_pos, n_players=9, scheme='pt4'):
         return 'BTN'
     if numeric_pos == 1:
         return 'CO'
-    n = n_players or 9
-    if scheme == 'pt4':
-        if n <= 6:
-            return 'MP'
-        return 'EP' if numeric_pos >= max(2, n - 4) else 'MP'
-    # 'report': EP takes the earliest ceil(pool/2) seats, capped at 2 — which
-    # is exactly PT4's mapping for 7/8/9-handed and extends it below that.
-    # Exception: a pool of exactly 1 seat (5-handed) goes to MP, not EP —
-    # empirically the better split. A single seat is a binary either/or
-    # (there's no way to split one seat 50/50), and on a field that is ~60%
-    # short-handed, routing it to EP overshot the correction the other way
-    # (EP 869 vs MP 574, a 399-hand total deviation from the 734 average);
-    # routing it to MP nearly halves the imbalance (227) — still not zero,
-    # because a single discrete seat can't average out an aggregate gap.
-    highest = n - 3                      # highest non-blind numeric seat
-    pool = max(0, highest - 1)           # seats 2..highest are the EP/MP pool
-    if pool <= 0:
-        return 'MP'
-    ep_seats = 0 if pool == 1 else min(2, (pool + 1) // 2)
-    return 'EP' if ep_seats and numeric_pos >= highest - ep_seats + 1 else 'MP'
+    m = n_nonblind or 0
+    pool = max(0, m - 2)                 # numeric seats 2..m-1
+    ep_seats = pool // 2
+    return 'EP' if ep_seats and numeric_pos >= m - ep_seats else 'MP'
 
 
 def pt4_positions(hand):
@@ -147,8 +149,12 @@ def hero_position(hand, scheme='pt4'):
     hero = hand.get('hero')
     if not hero:
         return None
-    return position_bucket(pt4_positions(hand).get(hero),
-                           len(hand['seats']), scheme)
+    positions = pt4_positions(hand)
+    # Count the non-blind seats actually dealt in rather than the table size:
+    # a dead small blind leaves one more non-blind seat than n_players-2, and
+    # that shifts the EP/MP boundary.
+    n_nonblind = sum(1 for p in positions.values() if p not in (8, 9))
+    return position_bucket(positions.get(hero), n_nonblind, scheme)
 
 
 # ── PokerStars-dialect parser ───────────────────────────────────────────────
@@ -581,9 +587,10 @@ def preflop_stat_flags(hand, with_context=False):
     threebet_opp = twobet_def_opp and raise_available(c_2b)
     threebet = threebet_opp and c_2b['verb'] == 'raise'
     put('threebet_pf', threebet, threebet_opp)
+    stack_bb_floor = int(stack_bb)
     put('threebet_nai_u35',
-        threebet and not c_2b['allin'] and stack_bb <= 35,
-        threebet_opp and stack_bb <= 35)
+        threebet and c_2b['allin'] and stack_bb_floor <= 35,
+        threebet_opp and stack_bb_floor <= 35)
 
     # ── Squeeze: facing one raise plus at least one caller of it ──
     sq_opp = twobet_def_opp and c_2b['callers_since_raise'] >= 1
@@ -686,7 +693,7 @@ POSTFLOP_STATS = [
     ('t_fold_cbet',       'Fold to T CBet',         False),
     ('t_fold_probe_hu',   'F to T Pr (HU)',         True),
     ('t_raise_cbet',      'Raise T CBet',           False),
-    ('t_raise_probe_hu',  'Raise T Probe (HU)',     True),
+    ('t_raise_probe_hu',  'Raise T Probe (HU)',     False),
     ('r_donk',            'Donk R',                 False),
     ('r_cbet',            'CBet R',                 False),
     ('r_fold_cbet',       'Fold to R CBet',         False),
@@ -726,7 +733,7 @@ def classify(pct, target, opp=None, min_sample=None):
         return None
     if opp is not None and opp < (MIN_SAMPLE if min_sample is None else min_sample):
         return 'INSUFFICIENT'
-    if pct <= target[0]:
+    if pct <= target[0] and target[0] > 0:
         return 'LOW'
     if pct >= target[1]:
         return 'HIGH'
@@ -1000,7 +1007,7 @@ def hand_stat_flags(hand):
 # Bump whenever a stat definition, the position scheme, or the winrate maths
 # changes — cached per-tournament vectors carrying an older version are
 # recomputed rather than silently serving stale numbers.
-ENGINE_VERSION = 1
+ENGINE_VERSION = 2
 
 
 def hands_to_vector(hands, scheme='report'):

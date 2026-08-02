@@ -8,16 +8,19 @@
       "Rows below are exactly the stats BBZ evaluated per position for this dataset (the membership mask). Stats with zero opportunities in the source data are absent and must be back-filled when observed (~12 cells of BBZ's 175-cell grid).",
       "'observed' blocks are Caio's own values from the 3,454-hand report — kept for validation only; the durable data is label/target/rec.",
       "Every observed value and count cross-checked against the PT4 CSV export (ReportExport.csv) — exact match, confirming BBZ renders the PT4 report values unchanged.",
-      "By Action tab confirmed to be a pure transposition of the same 163 cells (stat-major grouping, same values/targets/verdicts) — no separate data or engine work needed."
+      "By Action tab confirmed to be a pure transposition of the same 163 cells (stat-major grouping, same values/targets/verdicts) — no separate data or engine work needed.",
+      "Observed values updated from the full 4,412-hand PT4 export (2026-08-01). Previous harvest was 3,454 hands.",
+      "Phase 1 GPT integration (2026-08-02): merged researcher-validated targets & recs from bbz_leak_finder_234_validated.json — 14 rec text upgrades, 23 new target cells, 48 N/A markers added. Existing 163 harvested targets preserved unchanged.",
+      "Phase 2 per-position observed refresh (2026-08-02): the 9 stats BBZ flatlines in its export (3Bet NAI <35, CBet F IP/OOP (HU), Donk T (HU), Float F HU, Fold to F Cbet/Float HU, Limp Open, Raise F CBet (HU)) now carry our engine's true per-position observed values, not the collapsed BBZ number stamped on every row. Verdicts + good/bad tallies recomputed from the 4,420-hand PT4 export. Runtime endpoint /api/leaks was already returning per-position values — this only aligns the stored `observed` block with what the app actually renders."
     ]
   },
   "positions": {
     "EP": {
-      "winrate_allin_adj_bb": 53,
-      "hands": 481,
-      "all": 26,
-      "good": 1,
-      "bad": 25,
+      "winrate_allin_adj_bb": 35.23,
+      "hands": 578,
+      "all": 14,
+      "good": 0,
+      "bad": 14,
       "stats": [
         {
           "label": "Raise First",
@@ -27,8 +30,8 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 12.85,
-            "count": 467,
+            "hero": 13.12,
+            "count": 564,
             "result": "LOW"
           }
         },
@@ -40,8 +43,8 @@
           ],
           "rec": "Call less",
           "observed": {
-            "hero": 56.52,
-            "count": 23,
+            "hero": 57.14,
+            "count": 28,
             "result": "HIGH"
           }
         },
@@ -53,8 +56,8 @@
           ],
           "rec": "3-bet more",
           "observed": {
-            "hero": 0,
-            "count": 19,
+            "hero": 4.0,
+            "count": 25,
             "result": "LOW"
           }
         },
@@ -64,11 +67,11 @@
             3,
             6
           ],
-          "rec": "Good job",
+          "rec": "3-bet more under 35bb",
           "observed": {
-            "hero": 4.48,
-            "count": 713,
-            "result": "GOOD"
+            "hero": 11.11,
+            "count": 9,
+            "result": "HIGH"
           }
         },
         {
@@ -79,8 +82,8 @@
           ],
           "rec": "4-bet less",
           "observed": {
-            "hero": 50,
-            "count": 4,
+            "hero": 40.0,
+            "count": 5,
             "result": "HIGH"
           }
         },
@@ -92,8 +95,8 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 22.22,
-            "count": 9,
+            "hero": 20.0,
+            "count": 10,
             "result": "LOW"
           }
         },
@@ -105,9 +108,9 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 0,
-            "count": 4,
-            "result": "LOW"
+            "hero": null,
+            "count": 0,
+            "result": null
           }
         },
         {
@@ -118,9 +121,9 @@
           ],
           "rec": "Bet more",
           "observed": {
-            "hero": 32.08,
-            "count": 53,
-            "result": "LOW"
+            "hero": 50.0,
+            "count": 2,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -131,9 +134,9 @@
           ],
           "rec": "Bet more",
           "observed": {
-            "hero": 60.23,
-            "count": 88,
-            "result": "LOW"
+            "hero": 50.0,
+            "count": 4,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -144,9 +147,9 @@
           ],
           "rec": "Bet more",
           "observed": {
-            "hero": 25,
-            "count": 8,
-            "result": "LOW"
+            "hero": null,
+            "count": 0,
+            "result": null
           }
         },
         {
@@ -157,9 +160,9 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 56.67,
-            "count": 80,
-            "result": "HIGH"
+            "hero": 50.0,
+            "count": 2,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -170,7 +173,7 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 0,
+            "hero": 0.0,
             "count": 1,
             "result": "LOW"
           }
@@ -183,9 +186,9 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 50,
-            "count": 8,
-            "result": "HIGH"
+            "hero": null,
+            "count": 0,
+            "result": null
           }
         },
         {
@@ -196,9 +199,9 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 57.14,
-            "count": 7,
-            "result": "HIGH"
+            "hero": null,
+            "count": 0,
+            "result": null
           }
         },
         {
@@ -209,9 +212,9 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 3.33,
-            "count": 60,
-            "result": "LOW"
+            "hero": 0.0,
+            "count": 2,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -222,9 +225,9 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 2.7,
-            "count": 74,
-            "result": "LOW"
+            "hero": 0.0,
+            "count": 1,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -235,7 +238,7 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 0,
+            "hero": 0.0,
             "count": 1,
             "result": "LOW"
           }
@@ -248,9 +251,9 @@
           ],
           "rec": "Donk less",
           "observed": {
-            "hero": 34.62,
-            "count": 26,
-            "result": "HIGH"
+            "hero": null,
+            "count": 0,
+            "result": null
           }
         },
         {
@@ -261,9 +264,9 @@
           ],
           "rec": "Bet less",
           "observed": {
-            "hero": 72.73,
-            "count": 33,
-            "result": "HIGH"
+            "hero": 50.0,
+            "count": 2,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -274,9 +277,9 @@
           ],
           "rec": "Bet less",
           "observed": {
-            "hero": 57.89,
-            "count": 19,
-            "result": "HIGH"
+            "hero": 33.33,
+            "count": 3,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -287,7 +290,7 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 25,
+            "hero": 25.0,
             "count": 4,
             "result": "LOW"
           }
@@ -300,9 +303,9 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 30,
-            "count": 20,
-            "result": "LOW"
+            "hero": 50.0,
+            "count": 2,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -313,7 +316,7 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 0,
+            "hero": 0.0,
             "count": 4,
             "result": "LOW"
           }
@@ -326,8 +329,8 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 5,
-            "count": 20,
+            "hero": 4.35,
+            "count": 23,
             "result": "LOW"
           }
         },
@@ -339,7 +342,7 @@
           ],
           "rec": "Bet less",
           "observed": {
-            "hero": 100,
+            "hero": 100.0,
             "count": 1,
             "result": "HIGH"
           }
@@ -352,19 +355,112 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 0,
+            "hero": 0.0,
             "count": 1,
             "result": "LOW"
           }
+        },
+        {
+          "label": "Limp Open",
+          "target": [
+            0,
+            2
+          ],
+          "rec": "Avoid open-limping",
+          "observed": {
+            "hero": 8.19,
+            "count": 562,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Limp/Raise",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp/Call",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp/Fold",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Raise SB Open Limp",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold BB v SB",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold to Steal",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "3Bet Steal",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "3Bet PF & Fold",
+          "target": [
+            40,
+            50
+          ],
+          "rec": "Fold less after 3-betting"
+        },
+        {
+          "label": "PF Squeeze",
+          "target": [
+            4,
+            6
+          ],
+          "rec": "Squeeze more selectively"
+        },
+        {
+          "label": "Float T",
+          "target": [
+            45,
+            55
+          ],
+          "rec": "Float turns more often"
+        },
+        {
+          "label": "Probe T HU & Bet R",
+          "target": [
+            55,
+            65
+          ],
+          "rec": "Barrel more probe rivers",
+          "observed": {
+            "hero": null,
+            "count": 0,
+            "result": null
+          }
+        },
+        {
+          "label": "Donk R",
+          "target": [
+            6,
+            9
+          ],
+          "rec": "Use selective river leads"
         }
       ]
     },
     "MP": {
-      "winrate_allin_adj_bb": -18,
-      "hands": 716,
-      "all": 29,
+      "winrate_allin_adj_bb": -1.93,
+      "hands": 884,
+      "all": 24,
       "good": 3,
-      "bad": 26,
+      "bad": 21,
       "stats": [
         {
           "label": "Raise First",
@@ -372,10 +468,10 @@
             24,
             27
           ],
-          "rec": "Good job",
+          "rec": "Open more from middle position",
           "observed": {
-            "hero": 24.74,
-            "count": 485,
+            "hero": 25.0,
+            "count": 612,
             "result": "GOOD"
           }
         },
@@ -387,8 +483,8 @@
           ],
           "rec": "Call less",
           "observed": {
-            "hero": 14.39,
-            "count": 132,
+            "hero": 16.46,
+            "count": 164,
             "result": "HIGH"
           }
         },
@@ -400,8 +496,8 @@
           ],
           "rec": "3-bet more",
           "observed": {
-            "hero": 2.42,
-            "count": 124,
+            "hero": 3.95,
+            "count": 152,
             "result": "LOW"
           }
         },
@@ -411,10 +507,10 @@
             3,
             6
           ],
-          "rec": "Good job",
+          "rec": "3-bet more under 35bb",
           "observed": {
-            "hero": 4.48,
-            "count": 713,
+            "hero": 3.9,
+            "count": 77,
             "result": "GOOD"
           }
         },
@@ -426,8 +522,8 @@
           ],
           "rec": "4-bet more",
           "observed": {
-            "hero": 4.17,
-            "count": 24,
+            "hero": 7.14,
+            "count": 28,
             "result": "LOW"
           }
         },
@@ -439,8 +535,8 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 37.5,
-            "count": 32,
+            "hero": 34.15,
+            "count": 41,
             "result": "LOW"
           }
         },
@@ -452,7 +548,7 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 0,
+            "hero": 0.0,
             "count": 1,
             "result": "LOW"
           }
@@ -465,9 +561,9 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 0,
-            "count": 4,
-            "result": "LOW"
+            "hero": null,
+            "count": 0,
+            "result": null
           }
         },
         {
@@ -478,9 +574,9 @@
           ],
           "rec": "Squeeze more",
           "observed": {
-            "hero": 3.85,
-            "count": 26,
-            "result": "LOW"
+            "hero": 6.45,
+            "count": 31,
+            "result": "GOOD"
           }
         },
         {
@@ -489,11 +585,11 @@
             30,
             40
           ],
-          "rec": "Good job",
+          "rec": "C-bet more out of position",
           "observed": {
-            "hero": 32.08,
-            "count": 53,
-            "result": "GOOD"
+            "hero": 42.86,
+            "count": 14,
+            "result": "HIGH"
           }
         },
         {
@@ -504,8 +600,8 @@
           ],
           "rec": "Bet more",
           "observed": {
-            "hero": 60.23,
-            "count": 88,
+            "hero": 62.07,
+            "count": 29,
             "result": "LOW"
           }
         },
@@ -517,9 +613,9 @@
           ],
           "rec": "Bet more",
           "observed": {
-            "hero": 25,
-            "count": 8,
-            "result": "LOW"
+            "hero": null,
+            "count": 0,
+            "result": null
           }
         },
         {
@@ -530,8 +626,8 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 56.67,
-            "count": 60,
+            "hero": 66.67,
+            "count": 6,
             "result": "HIGH"
           }
         },
@@ -543,7 +639,7 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 50,
+            "hero": 50.0,
             "count": 2,
             "result": "HIGH"
           }
@@ -556,9 +652,9 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 50,
-            "count": 8,
-            "result": "HIGH"
+            "hero": 75.0,
+            "count": 4,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -569,9 +665,9 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 57.14,
-            "count": 7,
-            "result": "HIGH"
+            "hero": 50.0,
+            "count": 2,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -582,8 +678,8 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 3.33,
-            "count": 60,
+            "hero": 0.0,
+            "count": 6,
             "result": "LOW"
           }
         },
@@ -595,8 +691,8 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 2.7,
-            "count": 74,
+            "hero": 0.0,
+            "count": 8,
             "result": "LOW"
           }
         },
@@ -608,7 +704,7 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 0,
+            "hero": 0.0,
             "count": 2,
             "result": "LOW"
           }
@@ -621,9 +717,9 @@
           ],
           "rec": "Donk less",
           "observed": {
-            "hero": 34.62,
-            "count": 26,
-            "result": "HIGH"
+            "hero": 0.0,
+            "count": 2,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -634,8 +730,8 @@
           ],
           "rec": "Bet less",
           "observed": {
-            "hero": 72.73,
-            "count": 33,
+            "hero": 80.0,
+            "count": 10,
             "result": "HIGH"
           }
         },
@@ -647,7 +743,7 @@
           ],
           "rec": "Bet less",
           "observed": {
-            "hero": 100,
+            "hero": 100.0,
             "count": 1,
             "result": "HIGH"
           }
@@ -660,9 +756,9 @@
           ],
           "rec": "Bet less",
           "observed": {
-            "hero": 57.89,
-            "count": 19,
-            "result": "HIGH"
+            "hero": null,
+            "count": 0,
+            "result": null
           }
         },
         {
@@ -673,8 +769,8 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 100,
-            "count": 2,
+            "hero": 66.67,
+            "count": 3,
             "result": "HIGH"
           }
         },
@@ -686,8 +782,8 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 30,
-            "count": 20,
+            "hero": 12.5,
+            "count": 8,
             "result": "LOW"
           }
         },
@@ -699,8 +795,8 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 0,
-            "count": 2,
+            "hero": 0.0,
+            "count": 3,
             "result": "LOW"
           }
         },
@@ -712,8 +808,8 @@
           ],
           "rec": "Raise less",
           "observed": {
-            "hero": 25,
-            "count": 20,
+            "hero": 26.09,
+            "count": 23,
             "result": "HIGH"
           }
         },
@@ -725,7 +821,7 @@
           ],
           "rec": "Donk more",
           "observed": {
-            "hero": 0,
+            "hero": 0.0,
             "count": 1,
             "result": "LOW"
           }
@@ -738,19 +834,88 @@
           ],
           "rec": "Bet more",
           "observed": {
-            "hero": 0,
+            "hero": 0.0,
             "count": 2,
             "result": "LOW"
           }
+        },
+        {
+          "label": "Limp Open",
+          "target": [
+            0,
+            2
+          ],
+          "rec": "Avoid open-limping",
+          "observed": {
+            "hero": 6.03,
+            "count": 614,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Limp/Raise",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp/Call",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp/Fold",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Raise SB Open Limp",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold BB v SB",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold to Steal",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "3Bet Steal",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Probe T HU & Bet R",
+          "target": [
+            55,
+            65
+          ],
+          "rec": "Barrel more probe rivers",
+          "observed": {
+            "hero": null,
+            "count": 0,
+            "result": null
+          }
+        },
+        {
+          "label": "Fold to R CBet",
+          "target": [
+            40,
+            50
+          ],
+          "rec": "Fold less on rivers"
         }
       ]
     },
     "CO": {
-      "winrate_allin_adj_bb": -14,
-      "hands": 554,
-      "all": 27,
-      "good": 2,
-      "bad": 25,
+      "winrate_allin_adj_bb": -13.74,
+      "hands": 709,
+      "all": 21,
+      "good": 4,
+      "bad": 17,
       "stats": [
         {
           "label": "Raise First",
@@ -760,8 +925,8 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 33.93,
-            "count": 280,
+            "hero": 33.25,
+            "count": 379,
             "result": "LOW"
           }
         },
@@ -773,8 +938,8 @@
           ],
           "rec": "Call less",
           "observed": {
-            "hero": 16.76,
-            "count": 173,
+            "hero": 16.28,
+            "count": 215,
             "result": "HIGH"
           }
         },
@@ -786,8 +951,8 @@
           ],
           "rec": "3-bet more",
           "observed": {
-            "hero": 5.42,
-            "count": 166,
+            "hero": 5.29,
+            "count": 208,
             "result": "LOW"
           }
         },
@@ -797,10 +962,10 @@
             3,
             6
           ],
-          "rec": "Good job",
+          "rec": "3-bet more under 35bb",
           "observed": {
-            "hero": 4.48,
-            "count": 713,
+            "hero": 3.94,
+            "count": 127,
             "result": "GOOD"
           }
         },
@@ -812,9 +977,9 @@
           ],
           "rec": "4-bet more",
           "observed": {
-            "hero": 11.11,
-            "count": 9,
-            "result": "LOW"
+            "hero": 13.33,
+            "count": 15,
+            "result": "GOOD"
           }
         },
         {
@@ -825,9 +990,9 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 60,
-            "count": 15,
-            "result": "HIGH"
+            "hero": 50.0,
+            "count": 24,
+            "result": "GOOD"
           }
         },
         {
@@ -838,9 +1003,9 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 0,
-            "count": 4,
-            "result": "LOW"
+            "hero": 0.0,
+            "count": 1,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -849,11 +1014,11 @@
             6,
             9
           ],
-          "rec": "Good job",
+          "rec": "Squeeze more",
           "observed": {
-            "hero": 7.14,
-            "count": 28,
-            "result": "GOOD"
+            "hero": 5.71,
+            "count": 35,
+            "result": "LOW"
           }
         },
         {
@@ -864,8 +1029,8 @@
           ],
           "rec": "Bet less",
           "observed": {
-            "hero": 32.08,
-            "count": 53,
+            "hero": 36.36,
+            "count": 11,
             "result": "HIGH"
           }
         },
@@ -877,8 +1042,8 @@
           ],
           "rec": "Bet more",
           "observed": {
-            "hero": 60.23,
-            "count": 88,
+            "hero": 57.14,
+            "count": 21,
             "result": "LOW"
           }
         },
@@ -890,9 +1055,9 @@
           ],
           "rec": "Bet more",
           "observed": {
-            "hero": 25,
-            "count": 8,
-            "result": "LOW"
+            "hero": 50.0,
+            "count": 2,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -903,8 +1068,8 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 56.67,
-            "count": 60,
+            "hero": 50.0,
+            "count": 6,
             "result": "HIGH"
           }
         },
@@ -916,7 +1081,7 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 0,
+            "hero": 0.0,
             "count": 1,
             "result": "LOW"
           }
@@ -929,9 +1094,9 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 50,
-            "count": 8,
-            "result": "HIGH"
+            "hero": 50.0,
+            "count": 2,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -942,9 +1107,9 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 57.14,
-            "count": 7,
-            "result": "HIGH"
+            "hero": 100.0,
+            "count": 2,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -955,9 +1120,9 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 3.33,
-            "count": 60,
-            "result": "LOW"
+            "hero": 16.67,
+            "count": 6,
+            "result": "GOOD"
           }
         },
         {
@@ -968,9 +1133,9 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 2.7,
-            "count": 74,
-            "result": "LOW"
+            "hero": 0.0,
+            "count": 2,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -981,7 +1146,7 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 0,
+            "hero": 0.0,
             "count": 1,
             "result": "LOW"
           }
@@ -994,9 +1159,9 @@
           ],
           "rec": "Donk less",
           "observed": {
-            "hero": 34.62,
-            "count": 26,
-            "result": "HIGH"
+            "hero": 0.0,
+            "count": 1,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -1007,8 +1172,8 @@
           ],
           "rec": "Bet less",
           "observed": {
-            "hero": 72.73,
-            "count": 33,
+            "hero": 88.89,
+            "count": 9,
             "result": "HIGH"
           }
         },
@@ -1020,7 +1185,7 @@
           ],
           "rec": "Bet more",
           "observed": {
-            "hero": 0,
+            "hero": 0.0,
             "count": 1,
             "result": "LOW"
           }
@@ -1033,9 +1198,9 @@
           ],
           "rec": "Bet less",
           "observed": {
-            "hero": 57.89,
-            "count": 19,
-            "result": "HIGH"
+            "hero": 0.0,
+            "count": 1,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -1046,8 +1211,8 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 50,
-            "count": 2,
+            "hero": 66.67,
+            "count": 3,
             "result": "HIGH"
           }
         },
@@ -1059,9 +1224,9 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 30,
-            "count": 20,
-            "result": "LOW"
+            "hero": 80.0,
+            "count": 5,
+            "result": "HIGH"
           }
         },
         {
@@ -1072,8 +1237,8 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 0,
-            "count": 2,
+            "hero": 0.0,
+            "count": 3,
             "result": "LOW"
           }
         },
@@ -1085,8 +1250,8 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 0,
-            "count": 20,
+            "hero": 0.0,
+            "count": 23,
             "result": "LOW"
           }
         },
@@ -1098,19 +1263,104 @@
           ],
           "rec": "Bet less",
           "observed": {
-            "hero": 75,
+            "hero": 75.0,
             "count": 4,
             "result": "HIGH"
           }
+        },
+        {
+          "label": "Limp Open",
+          "target": [
+            0,
+            2
+          ],
+          "rec": "Avoid open-limping",
+          "observed": {
+            "hero": 6.58,
+            "count": 380,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Limp/Raise",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp/Call",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp/Fold",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Raise SB Open Limp",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold BB v SB",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold to Steal",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "3Bet Steal",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "3Bet PF & Fold",
+          "target": [
+            40,
+            50
+          ],
+          "rec": "Fold less after 3-betting"
+        },
+        {
+          "label": "Probe T HU & Bet R",
+          "target": [
+            55,
+            65
+          ],
+          "rec": "Barrel more probe rivers",
+          "observed": {
+            "hero": null,
+            "count": 0,
+            "result": null
+          }
+        },
+        {
+          "label": "Donk R",
+          "target": [
+            6,
+            9
+          ],
+          "rec": "Use selective river leads"
+        },
+        {
+          "label": "Fold to R CBet",
+          "target": [
+            40,
+            50
+          ],
+          "rec": "Fold less on rivers"
         }
       ]
     },
     "BTN": {
-      "winrate_allin_adj_bb": 68,
-      "hands": 556,
-      "all": 21,
+      "winrate_allin_adj_bb": 48.26,
+      "hands": 726,
+      "all": 17,
       "good": 4,
-      "bad": 17,
+      "bad": 13,
       "stats": [
         {
           "label": "Raise First",
@@ -1118,10 +1368,10 @@
             47,
             55
           ],
-          "rec": "Good job",
+          "rec": "Open more on the button",
           "observed": {
-            "hero": 49.72,
-            "count": 181,
+            "hero": 49.19,
+            "count": 248,
             "result": "GOOD"
           }
         },
@@ -1133,8 +1383,8 @@
           ],
           "rec": "Call less",
           "observed": {
-            "hero": 16.02,
-            "count": 231,
+            "hero": 17.65,
+            "count": 306,
             "result": "HIGH"
           }
         },
@@ -1146,8 +1396,8 @@
           ],
           "rec": "3-bet more",
           "observed": {
-            "hero": 7.76,
-            "count": 219,
+            "hero": 7.24,
+            "count": 290,
             "result": "LOW"
           }
         },
@@ -1157,10 +1407,10 @@
             3,
             6
           ],
-          "rec": "Good job",
+          "rec": "3-bet more under 35bb",
           "observed": {
-            "hero": 4.49,
-            "count": 713,
+            "hero": 3.57,
+            "count": 196,
             "result": "GOOD"
           }
         },
@@ -1172,8 +1422,8 @@
           ],
           "rec": "4-bet more",
           "observed": {
-            "hero": 0,
-            "count": 12,
+            "hero": 0.0,
+            "count": 15,
             "result": "LOW"
           }
         },
@@ -1185,8 +1435,8 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 46.67,
-            "count": 15,
+            "hero": 47.62,
+            "count": 21,
             "result": "LOW"
           }
         },
@@ -1198,9 +1448,9 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 0,
-            "count": 4,
-            "result": "LOW"
+            "hero": 0.0,
+            "count": 1,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -1209,11 +1459,11 @@
             8,
             12
           ],
-          "rec": "Good job",
+          "rec": "Squeeze more",
           "observed": {
-            "hero": 10.26,
-            "count": 39,
-            "result": "GOOD"
+            "hero": 7.02,
+            "count": 57,
+            "result": "LOW"
           }
         },
         {
@@ -1224,8 +1474,8 @@
           ],
           "rec": "Bet more",
           "observed": {
-            "hero": 60.23,
-            "count": 88,
+            "hero": 54.29,
+            "count": 35,
             "result": "LOW"
           }
         },
@@ -1237,9 +1487,9 @@
           ],
           "rec": "Bet more",
           "observed": {
-            "hero": 25,
-            "count": 8,
-            "result": "LOW"
+            "hero": 25.0,
+            "count": 4,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -1250,9 +1500,9 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 56.67,
-            "count": 60,
-            "result": "HIGH"
+            "hero": 0.0,
+            "count": 4,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -1263,9 +1513,9 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 57.14,
-            "count": 7,
-            "result": "HIGH"
+            "hero": 100.0,
+            "count": 1,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -1276,9 +1526,9 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 3.33,
-            "count": 60,
-            "result": "LOW"
+            "hero": 0.0,
+            "count": 4,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -1289,8 +1539,8 @@
           ],
           "rec": "Bet less",
           "observed": {
-            "hero": 72.73,
-            "count": 33,
+            "hero": 70.0,
+            "count": 10,
             "result": "HIGH"
           }
         },
@@ -1300,10 +1550,10 @@
             45,
             55
           ],
-          "rec": "Good job",
+          "rec": "Float turns more often",
           "observed": {
-            "hero": 50,
-            "count": 2,
+            "hero": 50.0,
+            "count": 4,
             "result": "GOOD"
           }
         },
@@ -1315,7 +1565,7 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 25,
+            "hero": 25.0,
             "count": 4,
             "result": "LOW"
           }
@@ -1328,9 +1578,9 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 30,
-            "count": 20,
-            "result": "LOW"
+            "hero": 37.5,
+            "count": 8,
+            "result": "GOOD"
           }
         },
         {
@@ -1341,7 +1591,7 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 0,
+            "hero": 0.0,
             "count": 4,
             "result": "LOW"
           }
@@ -1354,8 +1604,8 @@
           ],
           "rec": "Raise less",
           "observed": {
-            "hero": 20,
-            "count": 20,
+            "hero": 21.74,
+            "count": 23,
             "result": "HIGH"
           }
         },
@@ -1367,8 +1617,8 @@
           ],
           "rec": "Bet less",
           "observed": {
-            "hero": 100,
-            "count": 2,
+            "hero": 100.0,
+            "count": 3,
             "result": "HIGH"
           }
         },
@@ -1380,19 +1630,126 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 100,
+            "hero": 100.0,
             "count": 1,
             "result": "HIGH"
           }
+        },
+        {
+          "label": "Limp Open",
+          "target": [
+            0,
+            2
+          ],
+          "rec": "Avoid open-limping",
+          "observed": {
+            "hero": 10.48,
+            "count": 248,
+            "result": "HIGH"
+          }
+        },
+        {
+          "label": "Limp/Raise",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp/Call",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp/Fold",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Raise SB Open Limp",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold BB v SB",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold to Steal",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "3Bet Steal",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "3Bet PF & Fold",
+          "target": [
+            40,
+            50
+          ],
+          "rec": "Fold less after 3-betting"
+        },
+        {
+          "label": "CBet F OOP (HU)",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold to F CBet (3B)",
+          "target": [
+            25,
+            35
+          ],
+          "rec": "Fold less in 3-bet pots"
+        },
+        {
+          "label": "Fold to F Float HU",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "XR Flop HU",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Raise F CBet (3B)",
+          "target": [
+            7,
+            12
+          ],
+          "rec": "Raise more in 3-bet pots"
+        },
+        {
+          "label": "Donk T (HU)",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Probe T (HU)",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Probe T HU & Bet R",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Donk R",
+          "target": null,
+          "rec": "Not applicable"
         }
       ]
     },
     "SB": {
-      "winrate_allin_adj_bb": -48,
-      "hands": 562,
-      "all": 31,
+      "winrate_allin_adj_bb": -52.32,
+      "hands": 749,
+      "all": 26,
       "good": 2,
-      "bad": 29,
+      "bad": 24,
       "stats": [
         {
           "label": "Raise First",
@@ -1402,8 +1759,8 @@
           ],
           "rec": "Raise less",
           "observed": {
-            "hero": 36.89,
-            "count": 122,
+            "hero": 42.63,
+            "count": 190,
             "result": "HIGH"
           }
         },
@@ -1415,8 +1772,8 @@
           ],
           "rec": "Limp more",
           "observed": {
-            "hero": 9.8,
-            "count": 1653,
+            "hero": 35.79,
+            "count": 190,
             "result": "LOW"
           }
         },
@@ -1428,8 +1785,8 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 0,
-            "count": 21,
+            "hero": 0.0,
+            "count": 27,
             "result": "LOW"
           }
         },
@@ -1441,8 +1798,8 @@
           ],
           "rec": "Call more",
           "observed": {
-            "hero": 23.81,
-            "count": 21,
+            "hero": 25.93,
+            "count": 27,
             "result": "LOW"
           }
         },
@@ -1454,8 +1811,8 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 76.19,
-            "count": 21,
+            "hero": 74.07,
+            "count": 27,
             "result": "HIGH"
           }
         },
@@ -1465,10 +1822,10 @@
             70,
             75
           ],
-          "rec": "Good job",
+          "rec": "Defend the small blind more",
           "observed": {
-            "hero": 71.11,
-            "count": 90,
+            "hero": 73.11,
+            "count": 119,
             "result": "GOOD"
           }
         },
@@ -1480,8 +1837,8 @@
           ],
           "rec": "Call less",
           "observed": {
-            "hero": 21.45,
-            "count": 289,
+            "hero": 22.04,
+            "count": 372,
             "result": "HIGH"
           }
         },
@@ -1493,8 +1850,8 @@
           ],
           "rec": "3-bet more",
           "observed": {
-            "hero": 6.02,
-            "count": 266,
+            "hero": 4.99,
+            "count": 341,
             "result": "LOW"
           }
         },
@@ -1506,8 +1863,8 @@
           ],
           "rec": "3-bet steal more",
           "observed": {
-            "hero": 8.24,
-            "count": 85,
+            "hero": 6.25,
+            "count": 112,
             "result": "LOW"
           }
         },
@@ -1519,8 +1876,8 @@
           ],
           "rec": "3-bet more",
           "observed": {
-            "hero": 4.49,
-            "count": 713,
+            "hero": 3.02,
+            "count": 232,
             "result": "LOW"
           }
         },
@@ -1532,8 +1889,8 @@
           ],
           "rec": "4-bet more",
           "observed": {
-            "hero": 0,
-            "count": 5,
+            "hero": 0.0,
+            "count": 11,
             "result": "LOW"
           }
         },
@@ -1545,8 +1902,8 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 0,
-            "count": 5,
+            "hero": 36.36,
+            "count": 11,
             "result": "LOW"
           }
         },
@@ -1558,7 +1915,7 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 0,
+            "hero": 0.0,
             "count": 3,
             "result": "LOW"
           }
@@ -1571,9 +1928,9 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 0,
-            "count": 4,
-            "result": "LOW"
+            "hero": 0.0,
+            "count": 3,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -1584,8 +1941,8 @@
           ],
           "rec": "Squeeze more",
           "observed": {
-            "hero": 4,
-            "count": 75,
+            "hero": 3.37,
+            "count": 89,
             "result": "LOW"
           }
         },
@@ -1597,8 +1954,8 @@
           ],
           "rec": "Bet more",
           "observed": {
-            "hero": 32.08,
-            "count": 53,
+            "hero": 30.77,
+            "count": 26,
             "result": "LOW"
           }
         },
@@ -1610,8 +1967,8 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 56.67,
-            "count": 60,
+            "hero": 62.5,
+            "count": 16,
             "result": "HIGH"
           }
         },
@@ -1621,7 +1978,7 @@
             30,
             40
           ],
-          "rec": "Good job",
+          "rec": "Fold less in 3-bet pots",
           "observed": {
             "hero": 33.33,
             "count": 3,
@@ -1636,9 +1993,9 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 50,
-            "count": 8,
-            "result": "HIGH"
+            "hero": 75.0,
+            "count": 4,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -1649,9 +2006,9 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 57.14,
-            "count": 7,
-            "result": "HIGH"
+            "hero": 100.0,
+            "count": 1,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -1662,8 +2019,8 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 3.33,
-            "count": 60,
+            "hero": 0.0,
+            "count": 16,
             "result": "LOW"
           }
         },
@@ -1675,8 +2032,8 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 2.7,
-            "count": 74,
+            "hero": 2.94,
+            "count": 34,
             "result": "LOW"
           }
         },
@@ -1688,7 +2045,7 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 0,
+            "hero": 0.0,
             "count": 3,
             "result": "LOW"
           }
@@ -1701,8 +2058,8 @@
           ],
           "rec": "Donk less",
           "observed": {
-            "hero": 34.62,
-            "count": 26,
+            "hero": 33.33,
+            "count": 9,
             "result": "HIGH"
           }
         },
@@ -1714,8 +2071,8 @@
           ],
           "rec": "Bet less",
           "observed": {
-            "hero": 72.73,
-            "count": 33,
+            "hero": 80.0,
+            "count": 5,
             "result": "HIGH"
           }
         },
@@ -1727,9 +2084,9 @@
           ],
           "rec": "Bet less",
           "observed": {
-            "hero": 57.89,
-            "count": 19,
-            "result": "HIGH"
+            "hero": 66.67,
+            "count": 3,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -1740,9 +2097,9 @@
           ],
           "rec": "Bet more",
           "observed": {
-            "hero": 33.33,
-            "count": 3,
-            "result": "LOW"
+            "hero": 0.0,
+            "count": 1,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -1753,8 +2110,8 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 100,
-            "count": 2,
+            "hero": 66.67,
+            "count": 3,
             "result": "HIGH"
           }
         },
@@ -1766,8 +2123,8 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 0,
-            "count": 2,
+            "hero": 0.0,
+            "count": 3,
             "result": "LOW"
           }
         },
@@ -1779,8 +2136,8 @@
           ],
           "rec": "Donk less",
           "observed": {
-            "hero": 33.33,
-            "count": 6,
+            "hero": 30.0,
+            "count": 10,
             "result": "HIGH"
           }
         },
@@ -1792,19 +2149,62 @@
           ],
           "rec": "Bet more",
           "observed": {
-            "hero": 0,
-            "count": 1,
+            "hero": 0.0,
+            "count": 2,
             "result": "LOW"
           }
+        },
+        {
+          "label": "Raise SB Open Limp",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold BB v SB",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "CBet F IP (HU)",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Float F HU",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Float T",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "F to T Pr (HU)",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Raise T Probe (HU)",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold to R CBet",
+          "target": [
+            40,
+            50
+          ],
+          "rec": "Fold less on rivers"
         }
       ]
     },
     "BB": {
-      "winrate_allin_adj_bb": -36,
-      "hands": 585,
-      "all": 29,
+      "winrate_allin_adj_bb": -33.93,
+      "hands": 766,
+      "all": 24,
       "good": 2,
-      "bad": 27,
+      "bad": 22,
       "stats": [
         {
           "label": "Raise SB Open Limp",
@@ -1814,8 +2214,8 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 35.48,
-            "count": 62,
+            "hero": 35.21,
+            "count": 71,
             "result": "LOW"
           }
         },
@@ -1827,8 +2227,8 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 51.16,
-            "count": 43,
+            "hero": 55.56,
+            "count": 63,
             "result": "HIGH"
           }
         },
@@ -1840,8 +2240,8 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 53.64,
-            "count": 110,
+            "hero": 54.67,
+            "count": 150,
             "result": "HIGH"
           }
         },
@@ -1853,8 +2253,8 @@
           ],
           "rec": "Call more",
           "observed": {
-            "hero": 36.1,
-            "count": 313,
+            "hero": 36.82,
+            "count": 402,
             "result": "LOW"
           }
         },
@@ -1866,8 +2266,8 @@
           ],
           "rec": "3-bet more",
           "observed": {
-            "hero": 6.14,
-            "count": 277,
+            "hero": 7.1,
+            "count": 352,
             "result": "LOW"
           }
         },
@@ -1879,8 +2279,8 @@
           ],
           "rec": "3-bet steal more",
           "observed": {
-            "hero": 9.89,
-            "count": 91,
+            "hero": 9.17,
+            "count": 120,
             "result": "LOW"
           }
         },
@@ -1892,9 +2292,9 @@
           ],
           "rec": "3-bet more",
           "observed": {
-            "hero": 4.49,
-            "count": 713,
-            "result": "LOW"
+            "hero": 6.09,
+            "count": 230,
+            "result": "GOOD"
           }
         },
         {
@@ -1905,7 +2305,7 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 0,
+            "hero": 0.0,
             "count": 2,
             "result": "LOW"
           }
@@ -1918,8 +2318,8 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 0,
-            "count": 1,
+            "hero": 0.0,
+            "count": 2,
             "result": "LOW"
           }
         },
@@ -1931,9 +2331,9 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 0,
-            "count": 4,
-            "result": "LOW"
+            "hero": null,
+            "count": 0,
+            "result": null
           }
         },
         {
@@ -1944,8 +2344,8 @@
           ],
           "rec": "Squeeze more",
           "observed": {
-            "hero": 5.94,
-            "count": 101,
+            "hero": 6.61,
+            "count": 121,
             "result": "LOW"
           }
         },
@@ -1957,8 +2357,8 @@
           ],
           "rec": "Bet more",
           "observed": {
-            "hero": 32.08,
-            "count": 53,
+            "hero": 25.0,
+            "count": 16,
             "result": "LOW"
           }
         },
@@ -1968,11 +2368,11 @@
             55,
             65
           ],
-          "rec": "Good job",
+          "rec": "C-bet more in position",
           "observed": {
-            "hero": 60.23,
-            "count": 88,
-            "result": "GOOD"
+            "hero": 75.0,
+            "count": 8,
+            "result": "HIGH"
           }
         },
         {
@@ -1983,9 +2383,9 @@
           ],
           "rec": "Bet more",
           "observed": {
-            "hero": 25,
-            "count": 8,
-            "result": "LOW"
+            "hero": 0.0,
+            "count": 2,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -1996,8 +2396,8 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 56.67,
-            "count": 60,
+            "hero": 56.76,
+            "count": 37,
             "result": "HIGH"
           }
         },
@@ -2009,9 +2409,9 @@
           ],
           "rec": "Fold less",
           "observed": {
-            "hero": 57.14,
-            "count": 7,
-            "result": "HIGH"
+            "hero": 33.33,
+            "count": 3,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -2022,8 +2422,8 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 3.33,
-            "count": 60,
+            "hero": 8.11,
+            "count": 37,
             "result": "LOW"
           }
         },
@@ -2035,8 +2435,8 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 2.7,
-            "count": 74,
+            "hero": 3.85,
+            "count": 52,
             "result": "LOW"
           }
         },
@@ -2048,8 +2448,8 @@
           ],
           "rec": "Donk less",
           "observed": {
-            "hero": 34.62,
-            "count": 26,
+            "hero": 36.36,
+            "count": 22,
             "result": "HIGH"
           }
         },
@@ -2061,9 +2461,9 @@
           ],
           "rec": "Bet less",
           "observed": {
-            "hero": 72.73,
-            "count": 33,
-            "result": "HIGH"
+            "hero": 66.67,
+            "count": 3,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -2074,7 +2474,7 @@
           ],
           "rec": "Bet less",
           "observed": {
-            "hero": 100,
+            "hero": 100.0,
             "count": 1,
             "result": "HIGH"
           }
@@ -2087,8 +2487,8 @@
           ],
           "rec": "Bet less",
           "observed": {
-            "hero": 57.89,
-            "count": 19,
+            "hero": 58.82,
+            "count": 17,
             "result": "HIGH"
           }
         },
@@ -2100,9 +2500,9 @@
           ],
           "rec": "Bet more",
           "observed": {
-            "hero": 33.33,
-            "count": 5,
-            "result": "LOW"
+            "hero": 66.67,
+            "count": 3,
+            "result": "INSUFFICIENT"
           }
         },
         {
@@ -2111,11 +2511,11 @@
             35,
             45
           ],
-          "rec": "Good job",
+          "rec": "Fold less to turn barrels",
           "observed": {
-            "hero": 44.44,
-            "count": 9,
-            "result": "GOOD"
+            "hero": 54.55,
+            "count": 11,
+            "result": "HIGH"
           }
         },
         {
@@ -2126,9 +2526,9 @@
           ],
           "rec": "Fold more",
           "observed": {
-            "hero": 30,
-            "count": 20,
-            "result": "LOW"
+            "hero": 60.0,
+            "count": 5,
+            "result": "HIGH"
           }
         },
         {
@@ -2139,9 +2539,9 @@
           ],
           "rec": "Raise less",
           "observed": {
-            "hero": 11.11,
-            "count": 9,
-            "result": "HIGH"
+            "hero": 9.09,
+            "count": 11,
+            "result": "GOOD"
           }
         },
         {
@@ -2152,8 +2552,8 @@
           ],
           "rec": "Raise more",
           "observed": {
-            "hero": 0,
-            "count": 20,
+            "hero": 0.0,
+            "count": 23,
             "result": "LOW"
           }
         },
@@ -2165,8 +2565,8 @@
           ],
           "rec": "Donk less",
           "observed": {
-            "hero": 37.5,
-            "count": 8,
+            "hero": 45.45,
+            "count": 11,
             "result": "HIGH"
           }
         },
@@ -2178,10 +2578,77 @@
           ],
           "rec": "Bet less",
           "observed": {
-            "hero": 100,
+            "hero": 100.0,
             "count": 1,
             "result": "HIGH"
           }
+        },
+        {
+          "label": "Raise First",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp Open",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp/Raise",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp/Call",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp/Fold",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Raise & 4Bet+ PF",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold to F CBet (3B)",
+          "target": [
+            30,
+            40
+          ],
+          "rec": "Fold less in 3-bet pots"
+        },
+        {
+          "label": "Fold to F Float HU",
+          "target": [
+            30,
+            40
+          ],
+          "rec": "Fold less versus flop stabs",
+          "observed": {
+            "hero": 33.33,
+            "count": 3,
+            "result": "INSUFFICIENT"
+          }
+        },
+        {
+          "label": "Raise F CBet (3B)",
+          "target": [
+            10,
+            16
+          ],
+          "rec": "Raise more in 3-bet pots"
+        },
+        {
+          "label": "Fold to R CBet",
+          "target": [
+            45,
+            55
+          ],
+          "rec": "Fold less on rivers"
         }
       ]
     }
