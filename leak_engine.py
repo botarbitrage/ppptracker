@@ -733,7 +733,7 @@ def classify(pct, target, opp=None, min_sample=None):
         return None
     if opp is not None and opp < (MIN_SAMPLE if min_sample is None else min_sample):
         return 'INSUFFICIENT'
-    if pct <= target[0]:
+    if pct <= target[0] and target[0] > 0:
         return 'LOW'
     if pct >= target[1]:
         return 'HIGH'

@@ -9,7 +9,8 @@
       "'observed' blocks are Caio's own values from the 3,454-hand report — kept for validation only; the durable data is label/target/rec.",
       "Every observed value and count cross-checked against the PT4 CSV export (ReportExport.csv) — exact match, confirming BBZ renders the PT4 report values unchanged.",
       "By Action tab confirmed to be a pure transposition of the same 163 cells (stat-major grouping, same values/targets/verdicts) — no separate data or engine work needed.",
-      "Observed values updated from the full 4,412-hand PT4 export (2026-08-01). Previous harvest was 3,454 hands."
+      "Observed values updated from the full 4,412-hand PT4 export (2026-08-01). Previous harvest was 3,454 hands.",
+      "Phase 1 GPT integration (2026-08-02): merged researcher-validated targets & recs from bbz_leak_finder_234_validated.json — 14 rec text upgrades, 23 new target cells, 48 N/A markers added. Existing 163 harvested targets preserved unchanged."
     ]
   },
   "positions": {
@@ -65,7 +66,7 @@
             3,
             6
           ],
-          "rec": "Good job",
+          "rec": "3-bet more under 35bb",
           "observed": {
             "hero": 4.36,
             "count": 872,
@@ -357,6 +358,89 @@
             "count": 1,
             "result": "LOW"
           }
+        },
+        {
+          "label": "Limp Open",
+          "target": [
+            0,
+            2
+          ],
+          "rec": "Avoid open-limping"
+        },
+        {
+          "label": "Limp/Raise",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp/Call",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp/Fold",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Raise SB Open Limp",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold BB v SB",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold to Steal",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "3Bet Steal",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "3Bet PF & Fold",
+          "target": [
+            40,
+            50
+          ],
+          "rec": "Fold less after 3-betting"
+        },
+        {
+          "label": "PF Squeeze",
+          "target": [
+            4,
+            6
+          ],
+          "rec": "Squeeze more selectively"
+        },
+        {
+          "label": "Float T",
+          "target": [
+            45,
+            55
+          ],
+          "rec": "Float turns more often"
+        },
+        {
+          "label": "Probe T HU & Bet R",
+          "target": [
+            55,
+            65
+          ],
+          "rec": "Barrel more probe rivers"
+        },
+        {
+          "label": "Donk R",
+          "target": [
+            6,
+            9
+          ],
+          "rec": "Use selective river leads"
         }
       ]
     },
@@ -373,7 +457,7 @@
             24,
             27
           ],
-          "rec": "Good job",
+          "rec": "Open more from middle position",
           "observed": {
             "hero": 25.0,
             "count": 612,
@@ -412,7 +496,7 @@
             3,
             6
           ],
-          "rec": "Good job",
+          "rec": "3-bet more under 35bb",
           "observed": {
             "hero": 4.36,
             "count": 872,
@@ -490,7 +574,7 @@
             30,
             40
           ],
-          "rec": "Good job",
+          "rec": "C-bet more out of position",
           "observed": {
             "hero": 33.33,
             "count": 69,
@@ -743,6 +827,65 @@
             "count": 2,
             "result": "LOW"
           }
+        },
+        {
+          "label": "Limp Open",
+          "target": [
+            0,
+            2
+          ],
+          "rec": "Avoid open-limping"
+        },
+        {
+          "label": "Limp/Raise",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp/Call",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp/Fold",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Raise SB Open Limp",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold BB v SB",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold to Steal",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "3Bet Steal",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Probe T HU & Bet R",
+          "target": [
+            55,
+            65
+          ],
+          "rec": "Barrel more probe rivers"
+        },
+        {
+          "label": "Fold to R CBet",
+          "target": [
+            40,
+            50
+          ],
+          "rec": "Fold less on rivers"
         }
       ]
     },
@@ -798,7 +941,7 @@
             3,
             6
           ],
-          "rec": "Good job",
+          "rec": "3-bet more under 35bb",
           "observed": {
             "hero": 4.36,
             "count": 872,
@@ -850,7 +993,7 @@
             6,
             9
           ],
-          "rec": "Good job",
+          "rec": "Squeeze more",
           "observed": {
             "hero": 5.71,
             "count": 35,
@@ -1103,6 +1246,81 @@
             "count": 4,
             "result": "HIGH"
           }
+        },
+        {
+          "label": "Limp Open",
+          "target": [
+            0,
+            2
+          ],
+          "rec": "Avoid open-limping"
+        },
+        {
+          "label": "Limp/Raise",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp/Call",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp/Fold",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Raise SB Open Limp",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold BB v SB",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold to Steal",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "3Bet Steal",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "3Bet PF & Fold",
+          "target": [
+            40,
+            50
+          ],
+          "rec": "Fold less after 3-betting"
+        },
+        {
+          "label": "Probe T HU & Bet R",
+          "target": [
+            55,
+            65
+          ],
+          "rec": "Barrel more probe rivers"
+        },
+        {
+          "label": "Donk R",
+          "target": [
+            6,
+            9
+          ],
+          "rec": "Use selective river leads"
+        },
+        {
+          "label": "Fold to R CBet",
+          "target": [
+            40,
+            50
+          ],
+          "rec": "Fold less on rivers"
         }
       ]
     },
@@ -1119,7 +1337,7 @@
             47,
             55
           ],
-          "rec": "Good job",
+          "rec": "Open more on the button",
           "observed": {
             "hero": 49.19,
             "count": 248,
@@ -1158,7 +1376,7 @@
             3,
             6
           ],
-          "rec": "Good job",
+          "rec": "3-bet more under 35bb",
           "observed": {
             "hero": 4.36,
             "count": 872,
@@ -1210,7 +1428,7 @@
             8,
             12
           ],
-          "rec": "Good job",
+          "rec": "Squeeze more",
           "observed": {
             "hero": 7.02,
             "count": 57,
@@ -1301,7 +1519,7 @@
             45,
             55
           ],
-          "rec": "Good job",
+          "rec": "Float turns more often",
           "observed": {
             "hero": 50.0,
             "count": 4,
@@ -1385,6 +1603,108 @@
             "count": 1,
             "result": "HIGH"
           }
+        },
+        {
+          "label": "Limp Open",
+          "target": [
+            0,
+            2
+          ],
+          "rec": "Avoid open-limping"
+        },
+        {
+          "label": "Limp/Raise",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp/Call",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp/Fold",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Raise SB Open Limp",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold BB v SB",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold to Steal",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "3Bet Steal",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "3Bet PF & Fold",
+          "target": [
+            40,
+            50
+          ],
+          "rec": "Fold less after 3-betting"
+        },
+        {
+          "label": "CBet F OOP (HU)",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold to F CBet (3B)",
+          "target": [
+            25,
+            35
+          ],
+          "rec": "Fold less in 3-bet pots"
+        },
+        {
+          "label": "Fold to F Float HU",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "XR Flop HU",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Raise F CBet (3B)",
+          "target": [
+            7,
+            12
+          ],
+          "rec": "Raise more in 3-bet pots"
+        },
+        {
+          "label": "Donk T (HU)",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Probe T (HU)",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Probe T HU & Bet R",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Donk R",
+          "target": null,
+          "rec": "Not applicable"
         }
       ]
     },
@@ -1466,7 +1786,7 @@
             70,
             75
           ],
-          "rec": "Good job",
+          "rec": "Defend the small blind more",
           "observed": {
             "hero": 73.11,
             "count": 119,
@@ -1622,7 +1942,7 @@
             30,
             40
           ],
-          "rec": "Good job",
+          "rec": "Fold less in 3-bet pots",
           "observed": {
             "hero": 33.33,
             "count": 3,
@@ -1797,6 +2117,49 @@
             "count": 2,
             "result": "LOW"
           }
+        },
+        {
+          "label": "Raise SB Open Limp",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold BB v SB",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "CBet F IP (HU)",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Float F HU",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Float T",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "F to T Pr (HU)",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Raise T Probe (HU)",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold to R CBet",
+          "target": [
+            40,
+            50
+          ],
+          "rec": "Fold less on rivers"
         }
       ]
     },
@@ -1969,7 +2332,7 @@
             55,
             65
           ],
-          "rec": "Good job",
+          "rec": "C-bet more in position",
           "observed": {
             "hero": 59.41,
             "count": 101,
@@ -2112,7 +2475,7 @@
             35,
             45
           ],
-          "rec": "Good job",
+          "rec": "Fold less to turn barrels",
           "observed": {
             "hero": 54.55,
             "count": 11,
@@ -2183,6 +2546,68 @@
             "count": 1,
             "result": "HIGH"
           }
+        },
+        {
+          "label": "Raise First",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp Open",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp/Raise",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp/Call",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Limp/Fold",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Raise & 4Bet+ PF",
+          "target": null,
+          "rec": "Not applicable"
+        },
+        {
+          "label": "Fold to F CBet (3B)",
+          "target": [
+            30,
+            40
+          ],
+          "rec": "Fold less in 3-bet pots"
+        },
+        {
+          "label": "Fold to F Float HU",
+          "target": [
+            30,
+            40
+          ],
+          "rec": "Fold less versus flop stabs"
+        },
+        {
+          "label": "Raise F CBet (3B)",
+          "target": [
+            10,
+            16
+          ],
+          "rec": "Raise more in 3-bet pots"
+        },
+        {
+          "label": "Fold to R CBet",
+          "target": [
+            45,
+            55
+          ],
+          "rec": "Fold less on rivers"
         }
       ]
     }
