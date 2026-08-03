@@ -363,13 +363,27 @@
   };
 
   async function reload() {
-    const res = await authFetch('/api/leak-targets');
-    if (res.status === 403) {
-      document.getElementById('tg-status').textContent = '';
-      showError('This page is admin-only.');
+    let res;
+    try {
+      res = await authFetch('/api/leak-targets');
+    } catch (e) {
+      showError('Could not reach the server: ' + e.message);
       return;
     }
-    if (!res.ok) { showError('Failed to load targets (' + res.status + ').'); return; }
+    if (res.status === 403) {
+      document.getElementById('tg-status').textContent = '';
+      showError('This page is admin-only — your account is not in the admin list.');
+      return;
+    }
+    if (!res.ok) {
+      // Prefer the server's own error text (the endpoint returns JSON), but
+      // fall back to a stripped body if a proxy answered HTML.
+      let msg = 'Failed to load targets (' + res.status + ').';
+      try { const j = await res.json(); if (j && j.error) msg = j.error; }
+      catch (_) { try { const t = await res.text(); if (t) msg += ' ' + t.replace(/<[^>]*>/g, ' ').trim().slice(0, 200); } catch (__) {} }
+      showError(msg);
+      return;
+    }
     GRID = await res.json();
     document.getElementById('tg-status').classList.add('d-none');
     document.getElementById('tg-body').classList.remove('d-none');

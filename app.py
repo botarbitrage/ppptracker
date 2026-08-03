@@ -1248,37 +1248,46 @@ def leak_targets_get():
     uid = _verify_bearer(request)
     if not _is_admin(uid):
         return jsonify({'error': 'Forbidden'}), 403
-    from leak_engine import POSITION_BUCKETS, ALL_STATS, STAT_STREET, STACK_BANDS
-    db = _get_admin_db()
-    merged = _merged_target_cells(db)
-    _overlay, meta = _load_target_overlay(db)
-    label_order = [lbl for _k, lbl, _g in ALL_STATS]
-    positions = []
-    for pos in POSITION_BUCKETS:
-        rows = []
-        for label in label_order:
-            cell = merged.get((pos, label))
-            if not cell:
-                continue
-            rows.append({
-                'label': label, 'street': STAT_STREET.get(
-                    next((k for k, l, _g in ALL_STATS if l == label), ''), ''),
-                'target': cell['target'], 'rec': cell['rec'],
-                'bands': cell['bands'], 'overridden': cell['overridden'],
-                'default_target': cell['default_target'],
-                'default_rec': cell['default_rec'],
-                'default_bands': cell['default_bands'],
-            })
-        positions.append({'position': pos, 'stats': rows})
-    override_count = sum(1 for c in merged.values() if c['overridden'])
-    return jsonify({
-        'positions': positions,
-        'bands': [{'key': k, 'label': l, 'lo': lo, 'hi': hi}
-                  for k, l, lo, hi in STACK_BANDS],
-        'override_count': override_count,
-        'updated_at': meta.get('updated_at'),
-        'updated_by': meta.get('updated_by'),
-    })
+    try:
+        from leak_engine import (POSITION_BUCKETS, ALL_STATS, STAT_STREET,
+                                 STACK_BANDS)
+        db = _get_admin_db()
+        merged = _merged_target_cells(db)
+        _overlay, meta = _load_target_overlay(db)
+        # label -> street, resolved once (a label maps to one stat key).
+        street_by_label = {label: STAT_STREET.get(key, '')
+                           for key, label, _g in ALL_STATS}
+        label_order = [label for _k, label, _g in ALL_STATS]
+        positions = []
+        for pos in POSITION_BUCKETS:
+            rows = []
+            for label in label_order:
+                cell = merged.get((pos, label))
+                if not cell:
+                    continue
+                rows.append({
+                    'label': label, 'street': street_by_label.get(label, ''),
+                    'target': cell['target'], 'rec': cell['rec'],
+                    'bands': cell['bands'], 'overridden': cell['overridden'],
+                    'default_target': cell['default_target'],
+                    'default_rec': cell['default_rec'],
+                    'default_bands': cell['default_bands'],
+                })
+            positions.append({'position': pos, 'stats': rows})
+        override_count = sum(1 for c in merged.values() if c['overridden'])
+        return jsonify({
+            'positions': positions,
+            'bands': [{'key': k, 'label': l, 'lo': lo, 'hi': hi}
+                      for k, l, lo, hi in STACK_BANDS],
+            'override_count': override_count,
+            'updated_at': meta.get('updated_at'),
+            'updated_by': meta.get('updated_by'),
+        })
+    except Exception as e:
+        # Surface the real cause as JSON rather than an opaque 500, so the
+        # editor can show it instead of failing blank.
+        app.logger.exception('leak_targets_get failed')
+        return jsonify({'error': 'leak-targets load failed: %s' % e}), 500
 
 
 @app.route('/api/admin/leak-targets', methods=['POST'])
