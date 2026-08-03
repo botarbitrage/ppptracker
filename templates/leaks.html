@@ -39,22 +39,26 @@
     .lk-pill {
       font-family:var(--font-head); font-size:.72rem; font-weight:700;
       border-radius:20px; padding:2px 10px; letter-spacing:.4px; white-space:nowrap;
+      transition:opacity .15s, background .15s;
     }
     .lk-pill.all  { background:#ffffff14; color:var(--text);  border:1px solid #ffffff2a; }
-    .lk-pill.good { background:#00e67618; color:var(--green); border:1px solid #00e67650; }
-    .lk-pill.bad  { background:#ff547018; color:#ff5470;      border:1px solid #ff547050; }
+    .lk-pill.good { background:#00e67618; color:var(--green); border:1px solid #00e67650; min-width:62px; text-align:center; }
+    .lk-pill.bad  { background:#ff547018; color:#ff5470;      border:1px solid #ff547050; min-width:90px; text-align:center; }
     .lk-pill.thin { background:#ffffff0a; color:var(--muted); border:1px solid #ffffff20; }
+    .lk-pill.all.lk-filter-pill { min-width:68px; text-align:center; }
     .lk-caret { color:var(--muted); font-size:.8rem; width:14px; }
     .lk-stat-name { border-bottom:1px dotted #ffffff38; cursor:help; position:relative; }
-    .lk-stat-name[data-tip]:hover::after,
-    .lk-pill[data-tip]:hover::after {
+    .lk-stat-name[data-tip]:hover::after {
       content:attr(data-tip); position:absolute; bottom:calc(100% + 6px); left:0;
       background:#0d1117ee; color:#d0ddd0; font-size:.76rem; font-weight:400;
       font-family:var(--font-body); padding:6px 10px; border-radius:6px;
       border:1px solid #1e2d1e; white-space:normal; width:max-content;
       max-width:280px; z-index:99; pointer-events:none; line-height:1.4;
     }
-    .lk-pill[data-tip] { position:relative; cursor:help; }
+    .lk-status-row {
+      display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    }
+    .lk-status-right { margin-left:auto; }
     .lk-count { color:var(--muted); font-size:.82rem; }
     .lk-street-inline {
       font-family:var(--font-head); font-size:.6rem; font-weight:700;
@@ -146,6 +150,7 @@
   <div id="lk-warn" class="lk-warn mb-3 d-none"></div>
   <div id="lk-error" class="alert alert-danger py-2 d-none"></div>
   <div id="lk-cards"></div>
+  <div id="lk-excluded" class="lk-meta d-none" style="font-size:.8rem;color:var(--muted);margin-top:4px"></div>
 
 </main>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -483,17 +488,6 @@ function togglePosFilter(pos, cat, evt) {
   card.querySelector('.lk-pill.bad').classList.toggle('inactive', !f.bad);
 }
 
-function togglePosNehPill(pos, evt) {
-  evt.stopPropagation();
-  if (!POS_FILTERS[pos]) POS_FILTERS[pos] = defaultPosFilter();
-  const f = POS_FILTERS[pos];
-  f.neh = !f.neh;
-  const tbody = document.querySelector(`tbody[data-position="${pos}"]`);
-  if (tbody) tbody.innerHTML = renderRows(pos);
-  const pill = document.querySelector(`[data-pos-neh-pill="${pos}"]`);
-  if (pill) pill.classList.toggle('inactive', !f.neh);
-}
-
 function barId(ns, suffix) { return ns ? `lk-${ns}-${suffix}` : `lk-${suffix}`; }
 
 function filterBarSkeleton(ns) {
@@ -619,7 +613,7 @@ function onCompareToggle(checked) {
 
 function onHideNehToggle() {
   HIDE_NEH = !HIDE_NEH;
-  const pill = document.getElementById('lk-hide-neh-pill');
+  const pill = document.getElementById('lk-neh-pill');
   if (pill) { pill.classList.toggle('inactive', !HIDE_NEH); pill.textContent = HIDE_NEH ? 'Show neh' : 'Hide neh'; }
   const data = COMPARE_MODE ? COMPARE_DATA : REPORT_DATA;
   if (!data) return;
@@ -628,11 +622,6 @@ function onHideNehToggle() {
     if (POS_FILTERS[pos]) POS_FILTERS[pos].neh = !HIDE_NEH;
     const tbody = document.querySelector(`tbody[data-position="${pos}"]`);
     if (tbody) tbody.innerHTML = renderer(pos);
-    const card = document.querySelector(`[data-pos-card="${pos}"]`);
-    if (card) {
-      const nehPill = card.querySelector('.lk-pill.thin');
-      if (nehPill) nehPill.classList.toggle('inactive', HIDE_NEH);
-    }
   });
 }
 
@@ -697,6 +686,17 @@ function renderReport(data) {
   }
   sampleWarning(data.meta);
 
+  document.getElementById('lk-status').innerHTML =
+    `<div class="lk-status-row">` +
+    `<span class="lk-pill all">${data.meta.hands.toLocaleString()} hands</span>` +
+    ` <span class="lk-pill all">${data.meta.tournaments} tournaments</span>` +
+    ` <span style="color:var(--muted)">·</span> winrate <b class="${data.meta.winrate_bb100 >= 0 ? 'lk-wr-pos' : 'lk-wr-neg'}">` +
+    `${fmtBB(data.meta.winrate_bb100)}/100</b>` +
+    `<span class="lk-pill thin lk-status-right${HIDE_NEH ? '' : ' inactive'}" id="lk-neh-pill" ` +
+    `onclick="onHideNehToggle()" style="cursor:pointer;user-select:none" ` +
+    `title="Stats with fewer than ${MIN_SAMPLE} opportunities — not enough hands for a verdict">${HIDE_NEH ? 'Show neh' : 'Hide neh'}</span>` +
+    `</div>`;
+
   const excludedNotes = [];
   if (data.meta.hands_skipped) {
     excludedNotes.push(`${data.meta.hands_skipped} hands excluded (pot inconsistencies)`);
@@ -704,12 +704,13 @@ function renderReport(data) {
   if (data.meta.hands_unadjusted) {
     excludedNotes.push(`<span style="color:#e0b95c">${data.meta.hands_unadjusted} all-in hands not yet equity-adjusted — reload to finish</span>`);
   }
-  document.getElementById('lk-status').innerHTML =
-    `<span class="lk-pill all">${data.meta.hands.toLocaleString()} hands</span>` +
-    ` <span class="lk-pill all">${data.meta.tournaments} tournaments</span>` +
-    ` · overall winrate <b class="${data.meta.winrate_bb100 >= 0 ? 'lk-wr-pos' : 'lk-wr-neg'}">` +
-    `${fmtBB(data.meta.winrate_bb100)}/100</b>` +
-    (excludedNotes.length ? `<br><span style="font-size:.8rem;color:var(--muted)">* ${excludedNotes.join(' · ')}</span>` : '');
+  const exEl = document.getElementById('lk-excluded');
+  if (excludedNotes.length) {
+    exEl.innerHTML = '* ' + excludedNotes.join(' · ');
+    exEl.classList.remove('d-none');
+  } else {
+    exEl.classList.add('d-none');
+  }
 
   REPORT_DATA = {};
   const byPos = Object.fromEntries(data.positions.map(p => [p.position, p]));
@@ -732,9 +733,8 @@ function renderReport(data) {
         <span class="lk-pos-kv" title="All-in adjusted big blinds won per 100 hands">Winrate:
           <b class="${p.winrate_bb100 >= 0 ? 'lk-wr-pos' : 'lk-wr-neg'}">${fmtBB(p.winrate_bb100)}</b></span>
         <span class="lk-pos-kv">Hands: <b>${p.hands}</b></span>
-        <span class="lk-pill thin${HIDE_NEH ? ' inactive' : ''} data-pos-neh-pill="${p.position}" onclick="togglePosNehPill('${p.position}', event)" style="margin-left:auto" data-tip="Stats with fewer than ${MIN_SAMPLE} opportunities — not enough hands for a verdict">neh</span>
         <div class="lk-pills" onclick="event.stopPropagation()">
-          <span class="lk-pill all" onclick="togglePosFilter('${p.position}','all',event)">All (${good + bad + thin})</span>
+          <span class="lk-pill all lk-filter-pill" onclick="togglePosFilter('${p.position}','all',event)">All (${good + bad + thin})</span>
           <span class="lk-pill good" onclick="togglePosFilter('${p.position}','good',event)">OK (${good})</span>
           <span class="lk-pill bad" onclick="togglePosFilter('${p.position}','bad',event)">Not OK (${bad})</span>
         </div>
