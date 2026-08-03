@@ -1448,7 +1448,7 @@ def _load_leak_vectors(db, uid, tourney_docs, budget_s=25):
 def leaks_api():
     from leak_engine import (POSITION_BUCKETS, ALL_STATS, STAT_STREET, classify,
                              delta_from_target, MIN_SAMPLE, CONFIDENCE_LEVELS,
-                             merge_vectors)
+                             merge_vectors, STACK_BANDS, STACK_BAND_KEYS)
 
     uid = _verify_bearer(request)   # inits the Admin SDK internally
     if not uid:
@@ -1541,16 +1541,43 @@ def leaks_api():
     total_skipped = sum(v['skipped'] for v in loaded.values())
     targets = _load_bbz_targets(db)
 
+    # Depth band: 'all' (position total) or one STACK_BANDS key. An unknown
+    # value falls back to 'all' rather than erroring.
+    band = (request.args.get('band') or 'all').strip()
+    if band not in STACK_BAND_KEYS:
+        band = 'all'
+
+    # Per-band hand counts (always computed, so the client can render the
+    # selector and disable depths with no data regardless of the current view).
+    band_hands = {bk: sum(agg['positions'][b].get('bands', {}).get(bk, {}).get('hands', 0)
+                          for b in POSITION_BUCKETS)
+                  for bk in STACK_BAND_KEYS}
+
+    def _source(p):
+        """The counts bucket the current band selects: the position total, or
+        its band sub-partition (an empty stand-in when that band has no data)."""
+        if band == 'all':
+            return p
+        return (p.get('bands') or {}).get(band) or {
+            'hands': 0, 'bb': 0.0, 'bb_adj': 0.0,
+            'stats': {k: {'made': 0, 'opp': 0} for k, _l, _g in ALL_STATS}}
+
     positions = []
     for bucket in POSITION_BUCKETS:
         p = agg['positions'][bucket]
+        src = _source(p)
         rows = []
         for key, label, _is_global in ALL_STATS:
-            st = p['stats'][key]
+            st = src['stats'][key]
             made, opp = st['made'], st['opp']
             t = targets.get((bucket, label)) or {}
             pct = round(made / opp * 100, 2) if opp else None
+            # A band-specific target wins when the cell defines one for this
+            # depth; otherwise the depth view inherits the blended target.
             target = t.get('target')
+            cell_bands = t.get('bands') or {}
+            if band != 'all' and band in cell_bands:
+                target = cell_bands[band]
             # min_sample=0 leaves the verdict ungated: the client applies the
             # sample-size gate itself against the Confidence level the reader
             # picked, so changing levels never costs a round trip. A row with
@@ -1561,16 +1588,16 @@ def leaks_api():
                          'made': made, 'opp': opp, 'street': STAT_STREET[key],
                          'target': target, 'rec': t.get('rec'), 'result': result,
                          'delta': round(delta, 3) if delta is not None else None})
-        n = p['hands']
+        n = src['hands']
         positions.append({
             'position': bucket, 'hands': n, 'stats': rows,
-            'winrate_bb100': round(p['bb_adj'] / n * 100, 2) if n else None,
-            'winrate_raw_bb100': round(p['bb'] / n * 100, 2) if n else None,
+            'winrate_bb100': round(src['bb_adj'] / n * 100, 2) if n else None,
+            'winrate_raw_bb100': round(src['bb'] / n * 100, 2) if n else None,
         })
 
     total_hands = sum(p['hands'] for p in positions)
-    total_adj = sum(agg['positions'][b]['bb_adj'] for b in POSITION_BUCKETS)
-    total_raw = sum(agg['positions'][b]['bb'] for b in POSITION_BUCKETS)
+    total_adj = sum(_source(agg['positions'][b])['bb_adj'] for b in POSITION_BUCKETS)
+    total_raw = sum(_source(agg['positions'][b])['bb'] for b in POSITION_BUCKETS)
     from datetime import datetime as _dt2, timezone as _tz2
     def _day(ts):
         return _dt2.fromtimestamp(ts, tz=_tz2.utc).strftime('%Y-%m-%d') if ts else None
@@ -1584,6 +1611,9 @@ def leaks_api():
             'tournaments_pending': pending,
             'winrate_bb100': round(total_adj / total_hands * 100, 2) if total_hands else None,
             'winrate_raw_bb100': round(total_raw / total_hands * 100, 2) if total_hands else None,
+            'band': band,
+            'bands': [{'key': k, 'label': l, 'hands': band_hands.get(k, 0)}
+                      for k, l, _lo, _hi in STACK_BANDS],
         },
         'filters': {
             'rooms': sorted(rooms.values(), key=lambda r: -r['hands']),
