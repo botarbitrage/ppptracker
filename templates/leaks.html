@@ -103,6 +103,8 @@
     .lk-room-item.disabled { opacity:.45; cursor:not-allowed; }
     .lk-pill.inactive { opacity:.3; }
     .lk-pill[onclick] { cursor:pointer; user-select:none; }
+    th[draggable="true"] { cursor:grab; }
+    th.lk-drag-over { background:rgba(0,230,118,.12) !important; }
     .lk-cash-section { border-top:1px dashed #ffffff20; margin-top:10px; padding-top:10px; }
     .lk-cash-note { color:var(--muted); font-size:.74rem; margin-bottom:6px; }
     .lk-compare-label {
@@ -258,31 +260,118 @@ function recColor(s) {
   return TIERS[tier].color;
 }
 
+function directedRec(storedRec, result) {
+  if (!storedRec) return result === 'LOW' ? 'More' : 'Less';
+  if (/^avoid/i.test(storedRec)) return storedRec;
+  if (result === 'HIGH' && /\bmore\b/i.test(storedRec))
+    return storedRec.replace(/\bmore\b/gi, '{{L}}').replace(/\{\{L\}\}/g, 'less');
+  if (result === 'LOW' && /\bless\b/i.test(storedRec))
+    return storedRec.replace(/\bless\b/gi, '{{M}}').replace(/\{\{M\}\}/g, 'more');
+  return storedRec;
+}
+
+let COL_ORDER = [0, 1, 2, 3, 4];
+let COL_ORDER_CMP = [0, 1, 2, 3, 4, 5];
+
+function headerCells(pos) {
+  const h = [
+    '<th data-col="0" draggable="true">Name</th>',
+    '<th data-col="1" draggable="true" class="text-end">Hero</th>',
+    '<th data-col="2" draggable="true" class="text-end">Target</th>',
+    `<th data-col="3" draggable="true" class="text-center lk-sortable" onclick="cycleSort('${pos}')" title="Sort by distance from target">Result <span class="lk-sort-arrow" data-sort-arrow="${pos}"></span></th>`,
+    '<th data-col="4" draggable="true">Action</th>',
+  ];
+  return COL_ORDER.map(i => h[i]).join('');
+}
+
+function headerCellsCmp(pos) {
+  const h = [
+    '<th data-col="0" draggable="true">Name</th>',
+    '<th data-col="1" draggable="true" class="text-end">Hero A</th>',
+    '<th data-col="2" draggable="true" class="text-end">Hero B</th>',
+    '<th data-col="3" draggable="true" class="text-end">Target</th>',
+    `<th data-col="4" draggable="true" class="text-center lk-sortable" onclick="cycleSortCompare('${pos}')" title="Sort by change between the two ranges">Progress <span class="lk-sort-arrow" data-sort-arrow="${pos}"></span></th>`,
+    '<th data-col="5" draggable="true">Action</th>',
+  ];
+  return COL_ORDER_CMP.map(i => h[i]).join('');
+}
+
+let _dragCol = null;
+let _dragMode = null;
+document.addEventListener('DOMContentLoaded', () => {
+  const cards = document.getElementById('lk-cards');
+  cards.addEventListener('dragstart', e => {
+    const th = e.target.closest('th[data-col]');
+    if (!th) return;
+    _dragCol = +th.dataset.col;
+    _dragMode = COMPARE_MODE ? 'cmp' : 'std';
+    th.style.opacity = '.4';
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  cards.addEventListener('dragend', e => {
+    const th = e.target.closest('th[data-col]');
+    if (th) th.style.opacity = '';
+    cards.querySelectorAll('.lk-drag-over').forEach(el => el.classList.remove('lk-drag-over'));
+  });
+  cards.addEventListener('dragover', e => {
+    const th = e.target.closest('th[data-col]');
+    if (th && _dragCol !== null) { e.preventDefault(); th.classList.add('lk-drag-over'); }
+  });
+  cards.addEventListener('dragleave', e => {
+    const th = e.target.closest('th[data-col]');
+    if (th) th.classList.remove('lk-drag-over');
+  });
+  cards.addEventListener('drop', e => {
+    const th = e.target.closest('th[data-col]');
+    if (!th || _dragCol === null) return;
+    e.preventDefault();
+    th.classList.remove('lk-drag-over');
+    const dropCol = +th.dataset.col;
+    if (_dragCol === dropCol) { _dragCol = null; return; }
+    const order = _dragMode === 'cmp' ? COL_ORDER_CMP : COL_ORDER;
+    const from = order.indexOf(_dragCol), to = order.indexOf(dropCol);
+    order.splice(from, 1);
+    order.splice(to, 0, _dragCol);
+    _dragCol = null;
+    reRenderAllTables();
+  });
+});
+
+function reRenderAllTables() {
+  const data = COMPARE_MODE ? COMPARE_DATA : REPORT_DATA;
+  if (!data) return;
+  const renderer = COMPARE_MODE ? renderRowsCompare : renderRows;
+  const hdr = COMPARE_MODE ? headerCellsCmp : headerCells;
+  Object.keys(data).forEach(pos => {
+    const tbody = document.querySelector(`tbody[data-position="${pos}"]`);
+    if (tbody) tbody.innerHTML = renderer(pos);
+    const thead = tbody && tbody.closest('table') && tbody.closest('table').querySelector('thead tr');
+    if (thead) thead.innerHTML = hdr(pos);
+  });
+}
+
 function rowHtml(s, showStreet) {
   const isThin = s.result === 'INSUFFICIENT';
   const isNA = s.target === null && s.rec === 'Not applicable';
   const rec = isNA ? 'Not applicable'
     : isThin ? `Need ${MIN_SAMPLE}+ hands`
     : !s.result ? (s.opp ? 'No target yet' : '')
-    : s.result === 'GOOD' ? 'Good job' : (s.rec || (s.result === 'LOW' ? 'More' : 'Less'));
+    : s.result === 'GOOD' ? 'Good job' : directedRec(s.rec, s.result);
   const targetCell = isNA ? '<span class="lk-count">n/a</span>'
     : s.target ? s.target[0] + '% – ' + s.target[1] + '%' : '—';
   const help = STAT_HELP[s.label] || '';
   const rc = recColor(s);
   const recStyle = rc ? ` style="color:${rc}"` : '';
   const recClass = rc ? '' : 'lk-rec-thin';
-  return `
-    <tr>
-      <td>
-        <span class="lk-stat-name" title="${esc(help)}">${s.label}</span>
-        <span class="lk-count">(${s.opp})</span>
-        ${showStreet ? `<span class="lk-street-inline">${s.street}</span>` : ''}
-      </td>
-      <td class="text-end">${fmtPct(s.pct)}</td>
-      <td class="text-end">${targetCell}</td>
-      <td class="text-center">${isNA ? '<span class="lk-count">—</span>' : resultBadge(s)}</td>
-      <td class="${recClass}"${recStyle}>${rec}</td>
-    </tr>`;
+  const heroStyle = rc ? ` style="color:${rc}"` : '';
+  const cells = [
+    `<td data-col="0"><span class="lk-stat-name" title="${esc(help)}">${s.label}</span> <span class="lk-count">(${s.opp})</span>${showStreet ? ` <span class="lk-street-inline">${s.street}</span>` : ''}</td>`,
+    `<td data-col="1" class="text-end"${heroStyle}>${fmtPct(s.pct)}</td>`,
+    `<td data-col="2" class="text-end">${targetCell}</td>`,
+    `<td data-col="3" class="text-center">${isNA ? '<span class="lk-count">—</span>' : resultBadge(s)}</td>`,
+    `<td data-col="4" class="${recClass}"${recStyle}>${rec}</td>`,
+  ];
+  return `<tr>${COL_ORDER.map(i => cells[i]).join('')}</tr>`;
 }
 
 function renderRows(position) {
@@ -400,7 +489,7 @@ function createActionButtons() {
       <input type="checkbox" id="lk-compare-toggle" onchange="onCompareToggle(this.checked)"> Compare
     </label>
     <span class="lk-pill thin${HIDE_NEH ? '' : ' inactive'}" id="lk-hide-neh-pill"
-          onclick="onHideNehToggle()" style="cursor:pointer;user-select:none">Hide neh</span>`;
+          onclick="onHideNehToggle()" style="cursor:pointer;user-select:none">${HIDE_NEH ? 'Show neh' : 'Hide neh'}</span>`;
   return div;
 }
 
@@ -491,7 +580,7 @@ function onCompareToggle(checked) {
 function onHideNehToggle() {
   HIDE_NEH = !HIDE_NEH;
   const pill = document.getElementById('lk-hide-neh-pill');
-  if (pill) pill.classList.toggle('inactive', !HIDE_NEH);
+  if (pill) { pill.classList.toggle('inactive', !HIDE_NEH); pill.textContent = HIDE_NEH ? 'Show neh' : 'Hide neh'; }
   const data = COMPARE_MODE ? COMPARE_DATA : REPORT_DATA;
   if (!data) return;
   const renderer = COMPARE_MODE ? renderRowsCompare : renderRows;
@@ -606,15 +695,7 @@ function renderReport(data) {
       <div class="lk-body d-none" onclick="event.stopPropagation()">
         <div class="table-responsive">
           <table class="table table-dark table-striped mb-0">
-            <thead><tr>
-              <th>Name</th>
-              <th class="text-end">Hero</th>
-              <th class="text-end">Target</th>
-              <th class="text-center lk-sortable" onclick="cycleSort('${p.position}')"
-                  title="Sort by distance from target — ascending shows your best stats first, descending shows what needs the most work">
-                Result <span class="lk-sort-arrow" data-sort-arrow="${p.position}"></span></th>
-              <th>Action</th>
-            </tr></thead>
+            <thead><tr>${headerCells(p.position)}</tr></thead>
             <tbody data-position="${p.position}">${renderRows(p.position)}</tbody>
           </table>
         </div>
@@ -746,6 +827,13 @@ function sortedRowsCompare(rows, dir) {
   });
 }
 
+function cmpHeroColor(result) {
+  if (result === 'GOOD') return TIERS.good.color;
+  if (result === 'LOW') return TIERS.low.color;
+  if (result === 'HIGH') return TIERS.high.color;
+  return '';
+}
+
 function rowHtmlCompare(row, showStreet) {
   const help = STAT_HELP[row.label] || '';
   const isNA = row.target === null && row.rec === 'Not applicable';
@@ -754,19 +842,16 @@ function rowHtmlCompare(row, showStreet) {
   const rc = isNA ? '' : recColorCompare(row);
   const recStyle = rc ? ` style="color:${rc}"` : '';
   const recClass = rc ? '' : 'lk-rec-thin';
-  return `
-    <tr>
-      <td>
-        <span class="lk-stat-name" title="${esc(help)}">${row.label}</span>
-        <span class="lk-count">(${row.oppA}/${row.oppB})</span>
-        ${showStreet ? `<span class="lk-street-inline">${row.street}</span>` : ''}
-      </td>
-      <td class="text-end">${fmtPct(row.pctA)}</td>
-      <td class="text-end">${fmtPct(row.pctB)}</td>
-      <td class="text-end">${targetCell}</td>
-      <td class="text-center">${isNA ? '<span class="lk-count">—</span>' : progressBadge(row)}</td>
-      <td class="${recClass}"${recStyle}>${isNA ? 'Not applicable' : recActionCompare(row)}</td>
-    </tr>`;
+  const hcA = cmpHeroColor(row.resultA), hcB = cmpHeroColor(row.resultB);
+  const cells = [
+    `<td data-col="0"><span class="lk-stat-name" title="${esc(help)}">${row.label}</span> <span class="lk-count">(${row.oppA}/${row.oppB})</span>${showStreet ? ` <span class="lk-street-inline">${row.street}</span>` : ''}</td>`,
+    `<td data-col="1" class="text-end"${hcA ? ` style="color:${hcA}"` : ''}>${fmtPct(row.pctA)}</td>`,
+    `<td data-col="2" class="text-end"${hcB ? ` style="color:${hcB}"` : ''}>${fmtPct(row.pctB)}</td>`,
+    `<td data-col="3" class="text-end">${targetCell}</td>`,
+    `<td data-col="4" class="text-center">${isNA ? '<span class="lk-count">—</span>' : progressBadge(row)}</td>`,
+    `<td data-col="5" class="${recClass}"${recStyle}>${isNA ? 'Not applicable' : recActionCompare(row)}</td>`,
+  ];
+  return `<tr>${COL_ORDER_CMP.map(i => cells[i]).join('')}</tr>`;
 }
 
 function renderRowsCompare(position) {
@@ -864,16 +949,7 @@ function renderCompareReport(dataA, dataB) {
       <div class="lk-body d-none" onclick="event.stopPropagation()">
         <div class="table-responsive">
           <table class="table table-dark table-striped mb-0">
-            <thead><tr>
-              <th>Name</th>
-              <th class="text-end">Hero A</th>
-              <th class="text-end">Hero B</th>
-              <th class="text-end">Target</th>
-              <th class="text-center lk-sortable" onclick="cycleSortCompare('${p.position}')"
-                  title="Sort by change between the two ranges — ascending shows the biggest improvements first, descending shows the biggest regressions first">
-                Progress <span class="lk-sort-arrow" data-sort-arrow="${p.position}"></span></th>
-              <th>Action</th>
-            </tr></thead>
+            <thead><tr>${headerCellsCmp(p.position)}</tr></thead>
             <tbody data-position="${p.position}">${renderRowsCompare(p.position)}</tbody>
           </table>
         </div>
