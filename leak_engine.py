@@ -157,6 +157,55 @@ def hero_position(hand, scheme='pt4'):
     return position_bucket(positions.get(hero), n_nonblind, scheme)
 
 
+# ── Effective stack depth ───────────────────────────────────────────────────
+# A hand's "depth" is the effective stack in big blinds: min(hero, biggest
+# opponent) / bb. The shorter of the two stacks is the real constraint — a
+# 60bb hero facing a lone 12bb opponent is playing a 12bb game — so we take
+# hero vs the LARGEST other stack (the deepest opponent hero could still be
+# stacked by). Starting chips are pre-ante (the IR records them straight from
+# the seat lines), matching the standard "effective bb" convention where the
+# ante is not folded into the divisor.
+#
+# The bands split BBZ's harvested 15-40bb window in two and add a short and a
+# deep band on either side. Half-open [lo, hi): a stack of exactly 25bb is
+# '25_40', not '15_25'. 'all' is not a band — it is the per-position total the
+# report already computes; bands are an extra, finer partition summed on top.
+STACK_BANDS = (
+    ('lt15',  '<15bb',  0.0,  15.0),
+    ('15_25', '15–25bb', 15.0, 25.0),
+    ('25_40', '25–40bb', 25.0, 40.0),
+    ('gte40', '40bb+',  40.0, None),
+)
+STACK_BAND_KEYS = tuple(k for k, _l, _lo, _hi in STACK_BANDS)
+
+
+def effective_bb(hand):
+    """Hero's effective stack in big blinds, or None when it can't be
+    determined (no hero, no bb, or hero has no opponent with a stack — e.g. a
+    walk with only blinds posted). min(hero, deepest opponent) / bb."""
+    hero = hand.get('hero')
+    bb = hand.get('bb_amt') or 0
+    stacks = hand.get('stacks') or {}
+    if not hero or bb <= 0 or hero not in stacks:
+        return None
+    opp = [chips for name, chips in stacks.items() if name != hero]
+    if not opp:
+        return None
+    return min(stacks[hero], max(opp)) / bb
+
+
+def stack_band(eff_bb):
+    """Map an effective-bb figure to a STACK_BANDS key, or None when eff_bb is
+    None (undeterminable depth is left out of every band, so the per-position
+    total stays the authoritative denominator)."""
+    if eff_bb is None:
+        return None
+    for key, _label, lo, hi in STACK_BANDS:
+        if eff_bb >= lo and (hi is None or eff_bb < hi):
+            return key
+    return None
+
+
 # ── PokerStars-dialect parser ───────────────────────────────────────────────
 # Parses the exact text hand_exporter.py writes (which is what PT4 imported),
 # so the validation harness compares like-for-like.
@@ -1014,7 +1063,24 @@ def hand_stat_flags(hand):
 # Bump whenever a stat definition, the position scheme, or the winrate maths
 # changes — cached per-tournament vectors carrying an older version are
 # recomputed rather than silently serving stale numbers.
-ENGINE_VERSION = 2
+# Bumped 2 -> 3 for the stack-band partition added to the vector; older
+# cached vectors are transparently rebuilt (they carry no 'bands' key).
+ENGINE_VERSION = 3
+
+
+def _counts_to_pairs(p):
+    """The compact stored form of one counts bucket: full-precision winrate
+    floats plus [made, opp] stat pairs (pairs keep the cached JSON small)."""
+    return {
+        'hands': p['hands'],
+        # Full float precision: rounding here would accumulate across summed
+        # tournaments (harmless in magnitude, but it makes a cached report
+        # differ from a freshly computed one, which the equivalence test
+        # rightly flags).
+        'bb': p['bb'],
+        'bb_adj': p['bb_adj'],
+        'stats': {k: [v['made'], v['opp']] for k, v in p['stats'].items()},
+    }
 
 
 def hands_to_vector(hands, scheme='report'):
@@ -1024,49 +1090,62 @@ def hands_to_vector(hands, scheme='report'):
     re-counting the underlying hands, because every stat is a (made,
     opportunity) pair and the winrate is a big-blind total: both are additive.
     Percentages and verdicts are derived after summing, never stored.
+
+    Each bucket carries a 'bands' sub-dict (per effective-stack-depth counts)
+    that is additive in the same way, so a depth-filtered report is one cache
+    read plus arithmetic, exactly like the position total.
     """
-    agg = aggregate_stats(hands, scheme=scheme, winrate=True)
-    return {
-        bucket: {
-            'hands': p['hands'],
-            # Full float precision: rounding here would accumulate across
-            # summed tournaments (harmless in magnitude, but it makes a cached
-            # report differ from a freshly computed one, which the equivalence
-            # test below rightly flags).
-            'bb': p['bb'],
-            'bb_adj': p['bb_adj'],
-            # [made, opp] pairs keep the stored JSON small.
-            'stats': {k: [v['made'], v['opp']] for k, v in p['stats'].items()},
-        }
-        for bucket, p in agg['positions'].items()
-    }
+    agg = aggregate_stats(hands, scheme=scheme, winrate=True, bands=True)
+    out = {}
+    for bucket, p in agg['positions'].items():
+        entry = _counts_to_pairs(p)
+        entry['bands'] = {bk: _counts_to_pairs(bp)
+                          for bk, bp in p.get('bands', {}).items()}
+        out[bucket] = entry
+    return out
 
 
 def merge_vectors(vectors):
     """Sum count-vectors into the shape aggregate_stats() returns, so callers
     can treat a cached multi-tournament report exactly like a freshly
-    computed one."""
+    computed one. Nested per-depth bands are summed alongside the totals."""
     keys = [k for k, _l, _g in ALL_STATS]
-    out = {b: {'hands': 0, 'bb': 0.0, 'bb_adj': 0.0,
-               'stats': {k: {'made': 0, 'opp': 0} for k in keys}}
-           for b in POSITION_BUCKETS}
+
+    def _new_bucket():
+        b = _empty_counts(keys)
+        b['bands'] = {bk: _empty_counts(keys) for bk in STACK_BAND_KEYS}
+        return b
+
+    def _add(dest, src):
+        dest['hands'] += src.get('hands', 0)
+        dest['bb'] += src.get('bb', 0.0)
+        dest['bb_adj'] += src.get('bb_adj', 0.0)
+        for k, pair in (src.get('stats') or {}).items():
+            slot = dest['stats'].get(k)
+            if slot:
+                slot['made'] += pair[0]
+                slot['opp'] += pair[1]
+
+    out = {b: _new_bucket() for b in POSITION_BUCKETS}
     for vec in vectors:
         for bucket, p in (vec or {}).items():
             dest = out.get(bucket)
             if not dest:
                 continue
-            dest['hands'] += p.get('hands', 0)
-            dest['bb'] += p.get('bb', 0.0)
-            dest['bb_adj'] += p.get('bb_adj', 0.0)
-            for k, pair in (p.get('stats') or {}).items():
-                slot = dest['stats'].get(k)
+            _add(dest, p)
+            for bk, bp in (p.get('bands') or {}).items():
+                slot = dest['bands'].get(bk)
                 if slot:
-                    slot['made'] += pair[0]
-                    slot['opp'] += pair[1]
+                    _add(slot, bp)
     return {'positions': out}
 
 
-def aggregate_stats(hands, scheme='pt4', winrate=False):
+def _empty_counts(keys):
+    return {'hands': 0, 'bb': 0.0, 'bb_adj': 0.0,
+            'stats': {k: {'made': 0, 'opp': 0} for k in keys}}
+
+
+def aggregate_stats(hands, scheme='pt4', winrate=False, bands=False):
     """
     Aggregate all stats over IR hands.
     Returns {'positions': {bucket: {'hands': n, 'stats': {key: {made, opp}},
@@ -1075,11 +1154,20 @@ def aggregate_stats(hands, scheme='pt4', winrate=False):
 
     winrate=True also accumulates the big-blind results. That runs the equity
     engine, which is much slower than the flag counting, so it is opt-in.
+
+    bands=True additionally partitions each position's counts by effective
+    stack depth, adding a 'bands' sub-dict {band_key: {hands, bb, bb_adj,
+    stats}} alongside the position total. Every hand with a determinable depth
+    lands in exactly one band, so the bands are a strict sub-partition of the
+    position total (the total remains the authoritative denominator; hands of
+    unknown depth are counted there but in no band).
     """
     keys = [k for k, _l, _g in ALL_STATS]
-    positions = {b: {'hands': 0, 'bb': 0.0, 'bb_adj': 0.0,
-                     'stats': {k: {'made': 0, 'opp': 0} for k in keys}}
-                 for b in POSITION_BUCKETS}
+    positions = {b: _empty_counts(keys) for b in POSITION_BUCKETS}
+    if bands:
+        for b in POSITION_BUCKETS:
+            positions[b]['bands'] = {bk: _empty_counts(keys)
+                                     for bk in STACK_BAND_KEYS}
     glob = {k: {'made': 0, 'opp': 0} for k in keys}
 
     result_bb = None
@@ -1091,14 +1179,22 @@ def aggregate_stats(hands, scheme='pt4', winrate=False):
         flags = hand_stat_flags(h)
         if bucket in positions:
             p = positions[bucket]
-            p['hands'] += 1
-            for k, (made, opp) in flags.items():
-                p['stats'][k]['made'] += made
-                p['stats'][k]['opp'] += opp
+            dests = [p]
+            if bands:
+                bk = stack_band(effective_bb(h))
+                if bk:
+                    dests.append(p['bands'][bk])
+            realised = adjusted = None
             if result_bb is not None:
                 realised, adjusted = result_bb(h)
-                p['bb'] += realised
-                p['bb_adj'] += adjusted
+            for dest in dests:
+                dest['hands'] += 1
+                for k, (made, opp) in flags.items():
+                    dest['stats'][k]['made'] += made
+                    dest['stats'][k]['opp'] += opp
+                if realised is not None:
+                    dest['bb'] += realised
+                    dest['bb_adj'] += adjusted
         for k, (made, opp) in flags.items():
             glob[k]['made'] += made
             glob[k]['opp'] += opp
