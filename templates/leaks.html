@@ -107,6 +107,8 @@
       border-radius:8px; padding:8px 14px; font-size:.8rem;
     }
     .lk-room-item.disabled { opacity:.45; cursor:not-allowed; }
+    .lk-pill.inactive { opacity:.3; }
+    .lk-pill[onclick] { cursor:pointer; user-select:none; }
     .lk-cash-section { border-top:1px dashed #ffffff20; margin-top:10px; padding-top:10px; }
     .lk-cash-note { color:var(--muted); font-size:.74rem; margin-bottom:6px; }
     .lk-compare-label {
@@ -292,8 +294,7 @@ function rowHtml(s, showStreet) {
 
 function renderRows(position) {
   const dir = SORT_STATE[position];
-  let rows = REPORT_DATA[position];
-  if (HIDE_NEH) rows = rows.filter(s => tierOf(s) !== 'neh');
+  let rows = REPORT_DATA[position].filter(s => filterRow(s, position));
   // Unsorted keeps the street grouping; sorting is a global ranking, so the
   // street moves inline onto each row instead of being a section header.
   if (!dir) {
@@ -337,7 +338,37 @@ let AUTH_USER = null;
 let COMPARE_MODE = false;
 let COMPARE_SEEDED = false;
 let COMPARE_DATA = {};         // {position: combinedRowsArray} — parallel to REPORT_DATA
-let HIDE_NEH = false;
+let HIDE_NEH = true;
+const POS_FILTERS = {};
+
+function defaultPosFilter() { return {good: true, bad: true, neh: !HIDE_NEH}; }
+
+function isNA(s) { return s.target === null && s.rec === 'Not applicable'; }
+
+function filterRow(s, pos) {
+  if (isNA(s)) return false;
+  const f = POS_FILTERS[pos] || defaultPosFilter();
+  const tier = tierOf(s);
+  if (tier === 'neh') return f.neh;
+  if (tier === 'good') return f.good;
+  if (tier !== null) return f.bad;
+  return true;
+}
+
+function togglePosFilter(pos, cat, evt) {
+  evt.stopPropagation();
+  if (!POS_FILTERS[pos]) POS_FILTERS[pos] = defaultPosFilter();
+  const f = POS_FILTERS[pos];
+  if (cat === 'all') { f.good = true; f.bad = true; f.neh = true; }
+  else { f[cat] = !f[cat]; }
+  const tbody = document.querySelector(`tbody[data-position="${pos}"]`);
+  if (tbody) tbody.innerHTML = renderRows(pos);
+  const card = document.querySelector(`[data-pos-card="${pos}"]`);
+  if (!card) return;
+  card.querySelector('.lk-pill.good').classList.toggle('inactive', !f.good);
+  card.querySelector('.lk-pill.bad').classList.toggle('inactive', !f.bad);
+  card.querySelector('.lk-pill.thin').classList.toggle('inactive', !f.neh);
+}
 
 function barId(ns, suffix) { return ns ? `lk-${ns}-${suffix}` : `lk-${suffix}`; }
 
@@ -375,9 +406,8 @@ function createActionButtons() {
     <label class="lk-compare-toggle">
       <input type="checkbox" id="lk-compare-toggle" onchange="onCompareToggle(this.checked)"> Compare
     </label>
-    <label class="lk-compare-toggle">
-      <input type="checkbox" id="lk-hide-neh" onchange="onHideNehToggle(this.checked)"> Hide neh
-    </label>`;
+    <span class="lk-pill thin${HIDE_NEH ? '' : ' inactive'}" id="lk-hide-neh-pill"
+          onclick="onHideNehToggle()" style="cursor:pointer;user-select:none">Hide neh</span>`;
   return div;
 }
 
@@ -465,14 +495,22 @@ function onCompareToggle(checked) {
   }
 }
 
-function onHideNehToggle(checked) {
-  HIDE_NEH = checked;
+function onHideNehToggle() {
+  HIDE_NEH = !HIDE_NEH;
+  const pill = document.getElementById('lk-hide-neh-pill');
+  if (pill) pill.classList.toggle('inactive', !HIDE_NEH);
   const data = COMPARE_MODE ? COMPARE_DATA : REPORT_DATA;
   if (!data) return;
   const renderer = COMPARE_MODE ? renderRowsCompare : renderRows;
   Object.keys(data).forEach(pos => {
+    if (POS_FILTERS[pos]) POS_FILTERS[pos].neh = !HIDE_NEH;
     const tbody = document.querySelector(`tbody[data-position="${pos}"]`);
     if (tbody) tbody.innerHTML = renderer(pos);
+    const card = document.querySelector(`[data-pos-card="${pos}"]`);
+    if (card) {
+      const nehPill = card.querySelector('.lk-pill.thin');
+      if (nehPill) nehPill.classList.toggle('inactive', HIDE_NEH);
+    }
   });
 }
 
@@ -552,22 +590,24 @@ function renderReport(data) {
     if (!p) return '';
     REPORT_DATA[posName] = p.stats;
     SORT_STATE[posName] = null;
-    const good = p.stats.filter(s => s.result === 'GOOD').length;
-    const bad  = p.stats.filter(s => s.result === 'LOW' || s.result === 'HIGH').length;
-    const thin = p.stats.filter(s => s.result === 'INSUFFICIENT').length;
+    POS_FILTERS[posName] = defaultPosFilter();
+    const vs = p.stats.filter(s => !isNA(s));
+    const good = vs.filter(s => s.result === 'GOOD').length;
+    const bad  = vs.filter(s => s.result === 'LOW' || s.result === 'HIGH').length;
+    const thin = vs.filter(s => s.result === 'INSUFFICIENT').length;
     return `
-    <div class="section-card mb-3 lk-pos-card" onclick="this.querySelector('.lk-body').classList.toggle('d-none')">
+    <div class="section-card mb-3 lk-pos-card" data-pos-card="${p.position}" onclick="this.querySelector('.lk-body').classList.toggle('d-none')">
       <div class="lk-pos-head">
         <span class="lk-caret">▸</span>
         <span class="lk-pos-name">${p.position}</span>
         <span class="lk-pos-kv" title="All-in adjusted big blinds won per 100 hands">Winrate:
           <b class="${p.winrate_bb100 >= 0 ? 'lk-wr-pos' : 'lk-wr-neg'}">${fmtBB(p.winrate_bb100)}</b></span>
         <span class="lk-pos-kv">Hands: <b>${p.hands}</b></span>
-        <div class="lk-pills">
-          <span class="lk-pill all">All (${good + bad + thin})</span>
-          <span class="lk-pill good">Good (${good})</span>
-          <span class="lk-pill bad">Bad (${bad})</span>
-          <span class="lk-pill thin" title="Fewer than ${MIN_SAMPLE} opportunities — not enough hands for a verdict">neh (${thin})</span>
+        <div class="lk-pills" onclick="event.stopPropagation()">
+          <span class="lk-pill all" onclick="togglePosFilter('${p.position}','all',event)">All (${good + bad + thin})</span>
+          <span class="lk-pill good" onclick="togglePosFilter('${p.position}','good',event)">Good (${good})</span>
+          <span class="lk-pill bad" onclick="togglePosFilter('${p.position}','bad',event)">Bad (${bad})</span>
+          <span class="lk-pill thin${HIDE_NEH ? ' inactive' : ''}" onclick="togglePosFilter('${p.position}','neh',event)" title="Fewer than ${MIN_SAMPLE} opportunities — not enough hands for a verdict">neh (${thin})</span>
         </div>
       </div>
       <div class="lk-body d-none" onclick="event.stopPropagation()">
@@ -735,7 +775,7 @@ function rowHtmlCompare(row, showStreet) {
 
 function renderRowsCompare(position) {
   const dir = SORT_STATE[position];
-  let rows = COMPARE_DATA[position];
+  let rows = COMPARE_DATA[position].filter(s => !(s.target === null && s.rec === 'Not applicable'));
   if (HIDE_NEH) rows = rows.filter(s => progressOf(s).kind !== 'neh');
   if (!dir) {
     return STREETS.map(street => {
