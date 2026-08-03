@@ -39,13 +39,23 @@ def _json_errors_for_api(exc):
     and reports as `Unexpected token '<'` — the real cause never reaches the
     user or the browser console. Returning the exception text instead means a
     server-side bug shows up in the UI as what it actually is.
+
+    For non-/api/ paths we defer to Flask's normal rendering. We must NOT
+    re-raise here: because this handler is registered for the base Exception,
+    a raised exception is re-caught by Flask's handle_exception, wrapped in a
+    fresh InternalServerError, and handed straight back to this same handler —
+    so `raise` turned every ordinary 404 (including the browser's automatic
+    /favicon.ico request) into a 500. Returning the exception lets Flask render
+    its standard page with the real status code; a non-HTTP error becomes a
+    normal 500 page.
     """
-    from werkzeug.exceptions import HTTPException
-    code = exc.code if isinstance(exc, HTTPException) else 500
+    from werkzeug.exceptions import HTTPException, InternalServerError
+    is_http = isinstance(exc, HTTPException)
+    code = exc.code if is_http else 500
     if code >= 500:
         traceback.print_exc()
     if not request.path.startswith('/api/'):
-        raise exc
+        return exc if is_http else InternalServerError()
     return jsonify({'error': '%s: %s' % (type(exc).__name__, exc)}), code
 
 
