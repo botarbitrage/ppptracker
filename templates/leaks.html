@@ -59,6 +59,28 @@
       display:flex; align-items:center; gap:8px; flex-wrap:wrap;
     }
     .lk-status-right { margin-left:auto; }
+    .lk-conf { display:flex; align-items:center; gap:6px; }
+    .lk-conf-lbl {
+      font-family:var(--font-head); font-size:.72rem; font-weight:700;
+      letter-spacing:.4px; color:var(--muted);
+    }
+    .lk-conf-track { display:flex; gap:0; }
+    .lk-conf-step {
+      font-family:var(--font-head); font-size:.72rem; font-weight:700;
+      letter-spacing:.4px; padding:2px 10px; cursor:pointer; user-select:none;
+      background:#ffffff0a; color:var(--muted); border:1px solid #ffffff20;
+      border-right-width:0; transition:opacity .15s, background .15s;
+    }
+    .lk-conf-step:first-child { border-radius:20px 0 0 20px; }
+    .lk-conf-step:last-child  { border-radius:0 20px 20px 0; border-right-width:1px; }
+    .lk-conf-step.active {
+      background:rgba(0,230,118,.15); color:var(--green);
+      border-color:rgba(0,230,118,.5); border-right-width:1px;
+    }
+    /* The neighbour of an active step would otherwise show a doubled border. */
+    .lk-conf-step.active + .lk-conf-step { border-left-width:0; }
+    .lk-conf-step:not(.active) { opacity:.5; }
+    .lk-conf-step:not(.active):hover { opacity:.8; background:#ffffff14; }
     .lk-count { color:var(--muted); font-size:.82rem; }
     .lk-street-inline {
       font-family:var(--font-head); font-size:.6rem; font-weight:700;
@@ -158,7 +180,16 @@
 <script>
 const POS_ORDER = ['BTN', 'CO', 'MP', 'EP', 'BB', 'SB'];
 const STREETS = ['Preflop', 'Flop', 'Turn', 'River'];
-let MIN_SAMPLE = 5;           // overwritten from data.meta.min_sample once loaded
+// How many opportunities a stat needs before its verdict is colored rather
+// than shown as 'neh'. The server sends every row ungated (classify with
+// min_sample=0) and we apply the gate here, so moving the Confidence control
+// re-grades the page instantly — no refetch, no cache rebuild.
+let CONFIDENCE = { low: 3, med: 5, high: 10 };   // overwritten from meta
+const CONF_ORDER = ['low', 'med', 'high'];
+let CONF_LEVEL = 'med';
+try { CONF_LEVEL = localStorage.getItem('lk_confidence') || 'med'; } catch (_) {}
+if (!CONF_ORDER.includes(CONF_LEVEL)) CONF_LEVEL = 'med';
+let MIN_SAMPLE = CONFIDENCE[CONF_LEVEL];
 let REPORT_DATA = null;       // {position: rowsArray} kept so sorting never re-fetches
 const SORT_STATE = {};        // {position: 'asc'|'desc'|null}
 const SORT_HANDS_STATE = {};  // {position: 'asc'|'desc'|null}
@@ -222,8 +253,11 @@ const TIERS = {
 };
 
 function tierOf(s) {
-  if (s.result === 'INSUFFICIENT') return 'neh';
+  if (s.result === 'INSUFFICIENT') return 'neh';   // pre-gated payloads
+  // Order matters: a row with no target has no verdict to suppress, so it
+  // stays null ("No target yet") rather than being mislabelled 'neh'.
   if (!s.result) return null;
+  if (s.opp != null && s.opp < MIN_SAMPLE) return 'neh';
   if (s.result === 'GOOD') return 'good';
   const d = Math.abs(s.delta ?? 0);
   return d <= 0.5 ? 'low' : d <= 1.5 ? 'mid' : 'high';
@@ -366,7 +400,7 @@ function reRenderAllTables() {
 }
 
 function rowHtml(s, showStreet) {
-  const isThin = s.result === 'INSUFFICIENT';
+  const isThin = tierOf(s) === 'neh';
   const isNA = s.target === null && s.rec === 'Not applicable';
   const rec = isNA ? 'Not applicable'
     : isThin ? `Need ${MIN_SAMPLE}+ hands`
@@ -676,8 +710,77 @@ function sampleWarning(meta) {
   el.classList.toggle('d-none', msgs.length === 0);
 }
 
+// Verdict counts for one position's rows, derived through tierOf() so they
+// track the Confidence level rather than the server's raw result strings.
+function posCounts(rows) {
+  const tiers = rows.filter(s => !isNA(s)).map(tierOf);
+  return {
+    good: tiers.filter(t => t === 'good').length,
+    bad:  tiers.filter(t => t && t !== 'good' && t !== 'neh').length,
+    thin: tiers.filter(t => t === 'neh').length,
+  };
+}
+
+function applyMetaLevels(meta) {
+  if (meta && meta.confidence_levels) Object.assign(CONFIDENCE, meta.confidence_levels);
+  MIN_SAMPLE = CONFIDENCE[CONF_LEVEL] || (meta && meta.min_sample) || MIN_SAMPLE;
+}
+
+function confidenceControlHtml() {
+  const steps = CONF_ORDER.map(lv =>
+    `<span class="lk-conf-step${lv === CONF_LEVEL ? ' active' : ''}" ` +
+    `onclick="onConfidenceChange('${lv}')" ` +
+    `title="Colour a verdict only once a stat has ${CONFIDENCE[lv]}+ opportunities">` +
+    `${lv === 'med' ? 'Med' : lv[0].toUpperCase() + lv.slice(1)}</span>`).join('');
+  return `<span class="lk-conf lk-status-right" onclick="event.stopPropagation()">` +
+         `<span class="lk-conf-lbl" title="How many opportunities a stat needs before its verdict is coloured instead of shown as neh">Confidence</span>` +
+         `<span class="lk-conf-track">${steps}</span></span>`;
+}
+
+// Re-grade in place: swapping the level changes which rows read 'neh' and the
+// OK/Not OK tallies, but must not disturb sort order, the per-position filter
+// pills, or which panels the user has expanded — so no full re-render.
+function onConfidenceChange(level) {
+  if (!CONF_ORDER.includes(level) || level === CONF_LEVEL) return;
+  CONF_LEVEL = level;
+  MIN_SAMPLE = CONFIDENCE[level];
+  try { localStorage.setItem('lk_confidence', level); } catch (_) {}
+  document.querySelectorAll('.lk-conf-step').forEach((el, i) => {
+    el.classList.toggle('active', CONF_ORDER[i] === level);
+  });
+  const nehPill = document.getElementById('lk-neh-pill');
+  if (nehPill) nehPill.title = nehTitle();
+  const data = COMPARE_MODE ? COMPARE_DATA : REPORT_DATA;
+  if (!data) return;
+  const renderer = COMPARE_MODE ? renderRowsCompare : renderRows;
+  Object.keys(data).forEach(pos => {
+    const tbody = document.querySelector(`tbody[data-position="${pos}"]`);
+    if (tbody) tbody.innerHTML = renderer(pos);
+  });
+  if (!COMPARE_MODE) refreshPosPillCounts();
+}
+
+function refreshPosPillCounts() {
+  if (!REPORT_DATA) return;
+  Object.keys(REPORT_DATA).forEach(pos => {
+    const card = document.querySelector(`[data-pos-card="${pos}"]`);
+    if (!card) return;
+    const c = posCounts(REPORT_DATA[pos]);
+    const all = card.querySelector('.lk-pill.all');
+    const ok  = card.querySelector('.lk-pill.good');
+    const bad = card.querySelector('.lk-pill.bad');
+    if (all) all.textContent = `All (${c.good + c.bad + c.thin})`;
+    if (ok)  ok.textContent  = `OK (${c.good})`;
+    if (bad) bad.textContent = `Not OK (${c.bad})`;
+  });
+}
+
+function nehTitle() {
+  return `Stats with fewer than ${MIN_SAMPLE} opportunities — not enough hands for a verdict`;
+}
+
 function renderReport(data) {
-  MIN_SAMPLE = data.meta.min_sample || MIN_SAMPLE;
+  applyMetaLevels(data.meta);
 
   if (data.filters) {
     LAST_FILTERS = data.filters;
@@ -692,9 +795,10 @@ function renderReport(data) {
     ` <span class="lk-pill all">${data.meta.tournaments} tournaments</span>` +
     ` <span style="color:var(--muted)">·</span> winrate <b class="${data.meta.winrate_bb100 >= 0 ? 'lk-wr-pos' : 'lk-wr-neg'}">` +
     `${fmtBB(data.meta.winrate_bb100)}/100</b>` +
-    `<span class="lk-pill thin lk-status-right${HIDE_NEH ? '' : ' inactive'}" id="lk-neh-pill" ` +
+    confidenceControlHtml() +
+    `<span class="lk-pill thin${HIDE_NEH ? '' : ' inactive'}" id="lk-neh-pill" ` +
     `onclick="onHideNehToggle()" style="cursor:pointer;user-select:none" ` +
-    `title="Stats with fewer than ${MIN_SAMPLE} opportunities — not enough hands for a verdict">${HIDE_NEH ? 'Show neh' : 'Hide neh'}</span>` +
+    `title="${nehTitle()}">${HIDE_NEH ? 'Show neh' : 'Hide neh'}</span>` +
     `</div>`;
 
   const excludedNotes = [];
@@ -721,10 +825,7 @@ function renderReport(data) {
     SORT_STATE[posName] = null;
     SORT_HANDS_STATE[posName] = null;
     POS_FILTERS[posName] = defaultPosFilter();
-    const vs = p.stats.filter(s => !isNA(s));
-    const good = vs.filter(s => s.result === 'GOOD').length;
-    const bad  = vs.filter(s => s.result === 'LOW' || s.result === 'HIGH').length;
-    const thin = vs.filter(s => s.result === 'INSUFFICIENT').length;
+    const { good, bad, thin } = posCounts(p.stats);
     return `
     <div class="section-card mb-3 lk-pos-card" data-pos-card="${p.position}" onclick="this.querySelector('.lk-body').classList.toggle('d-none')">
       <div class="lk-pos-head">
@@ -959,7 +1060,7 @@ function buildPositionsCombined(dataA, dataB) {
 }
 
 function renderCompareReport(dataA, dataB) {
-  MIN_SAMPLE = dataA.meta.min_sample || MIN_SAMPLE;
+  applyMetaLevels(dataA.meta);
 
   if (dataA.filters) {
     LAST_FILTERS = dataA.filters;
@@ -968,12 +1069,15 @@ function renderCompareReport(dataA, dataB) {
   }
 
   document.getElementById('lk-status').innerHTML =
-    `<b>A</b> ${dataA.meta.hands.toLocaleString()}h / ${dataA.meta.tournaments}t · ` +
+    `<div class="lk-status-row">` +
+    `<span><b>A</b> ${dataA.meta.hands.toLocaleString()}h / ${dataA.meta.tournaments}t · ` +
     `${fmtBB(dataA.meta.winrate_bb100)}/100` +
     (dataA.meta.hands_skipped ? ` (${dataA.meta.hands_skipped} excluded)` : '') +
     `&nbsp;&nbsp;vs&nbsp;&nbsp;<b>B</b> ${dataB.meta.hands.toLocaleString()}h / ${dataB.meta.tournaments}t · ` +
     `${fmtBB(dataB.meta.winrate_bb100)}/100` +
-    (dataB.meta.hands_skipped ? ` (${dataB.meta.hands_skipped} excluded)` : '');
+    (dataB.meta.hands_skipped ? ` (${dataB.meta.hands_skipped} excluded)` : '') + `</span>` +
+    confidenceControlHtml() +
+    `</div>`;
 
   const warnEl = document.getElementById('lk-warn');
   const msgs = [];

@@ -1222,7 +1222,8 @@ def _load_leak_vectors(db, uid, tourney_docs, budget_s=25):
 @app.route('/api/leaks')
 def leaks_api():
     from leak_engine import (POSITION_BUCKETS, ALL_STATS, STAT_STREET, classify,
-                             delta_from_target, MIN_SAMPLE, merge_vectors)
+                             delta_from_target, MIN_SAMPLE, CONFIDENCE_LEVELS,
+                             merge_vectors)
 
     uid = _verify_bearer(request)   # inits the Admin SDK internally
     if not uid:
@@ -1325,7 +1326,11 @@ def leaks_api():
             t = targets.get((bucket, label)) or {}
             pct = round(made / opp * 100, 2) if opp else None
             target = t.get('target')
-            result = classify(pct, target, opp)
+            # min_sample=0 leaves the verdict ungated: the client applies the
+            # sample-size gate itself against the Confidence level the reader
+            # picked, so changing levels never costs a round trip. A row with
+            # no opportunities still lands None here, via pct.
+            result = classify(pct, target, opp, min_sample=0)
             delta = delta_from_target(pct, target)
             rows.append({'key': key, 'label': label, 'pct': pct,
                          'made': made, 'opp': opp, 'street': STAT_STREET[key],
@@ -1349,6 +1354,7 @@ def leaks_api():
         'meta': {
             'tournaments': len(loaded), 'hands': total_hands,
             'hands_skipped': total_skipped, 'phase': 5, 'min_sample': MIN_SAMPLE,
+            'confidence_levels': CONFIDENCE_LEVELS,
             'hands_unadjusted': unadjusted,
             'tournaments_pending': pending,
             'winrate_bb100': round(total_adj / total_hands * 100, 2) if total_hands else None,

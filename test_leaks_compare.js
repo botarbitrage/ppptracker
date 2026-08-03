@@ -39,15 +39,23 @@ function loadFunctions() {
   const m = /<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/.exec(html);
   if (!m) throw new Error('no inline <script> found in templates/leaks.html');
   const sandbox = {
-    document: { getElementById: () => fakeEl(), querySelectorAll: () => [], querySelector: () => fakeEl() },
+    document: { getElementById: () => fakeEl(), querySelectorAll: () => [],
+                querySelector: () => fakeEl(), addEventListener: () => {} },
     fetch: () => Promise.reject(new Error('no network in test')),
     firebase: { initializeApp: () => {}, auth: () => ({ onAuthStateChanged: () => {} }) },
     console,
   };
   vm.createContext(sandbox);
+  // Appended to the SAME script so these close over the template's top-level
+  // `let` bindings (MIN_SAMPLE, CONFIDENCE) — a second runInContext call would
+  // be a separate lexical scope and could not reach them.
   vm.runInContext(m[1] + `
     this.__exported = { tierOf, progressOf, buildPositionsCombined, sortedRowsCompare,
-                        recActionCompare, recClassCompare, rankOfProgress, progressBadge };
+                        recActionCompare, recColorCompare, rankOfProgress, progressBadge,
+                        posCounts, onConfidenceChange, TIERS,
+                        setMinSample: n => { MIN_SAMPLE = n; },
+                        getMinSample: () => MIN_SAMPLE,
+                        levels: () => CONFIDENCE };
   `, sandbox);
   return sandbox.__exported;
 }
@@ -92,16 +100,19 @@ function main() {
   row = { resultA: 'HIGH', deltaA: 2.0, oppA: 50, resultB: 'GOOD', deltaB: 0, oppB: 50, rec: 'Bet less' };
   check('rec: fixed message', T.recActionCompare(row) === 'Fixed — now inside target',
         T.recActionCompare(row));
-  check('rec class: fixed is green', T.recClassCompare(row) === 'lk-rec-good');
+  check('rec colour: fixed is green', T.recColorCompare(row) === T.TIERS.good.color,
+        T.recColorCompare(row));
 
   row = { resultA: 'GOOD', deltaA: 0, oppA: 50, resultB: 'HIGH', deltaB: 2.0, oppB: 50, rec: 'Bet less' };
   check('rec: regressed message mentions static rec',
         T.recActionCompare(row) === 'Getting worse — Bet less', T.recActionCompare(row));
-  check('rec class: regressed is red', T.recClassCompare(row) === 'lk-rec-bad');
+  check('rec colour: regressed is red', T.recColorCompare(row) === T.TIERS.high.color,
+        T.recColorCompare(row));
 
   row = { resultA: 'GOOD', deltaA: 0, oppA: 50, resultB: 'GOOD', deltaB: 0, oppB: 50, rec: null };
   check('rec: still good', T.recActionCompare(row) === 'Still good');
-  check('rec class: still good is green', T.recClassCompare(row) === 'lk-rec-good');
+  check('rec colour: still good is green', T.recColorCompare(row) === T.TIERS.good.color,
+        T.recColorCompare(row));
 
   const rows = [
     { key: 'a', resultA: 'GOOD', deltaA: 0, oppA: 50, resultB: 'HIGH', deltaB: 2.0, oppB: 50 },
@@ -151,6 +162,63 @@ function main() {
   check('progressBadge: improved label', T.progressBadge(row).includes('improved'), T.progressBadge(row));
   row = { resultA: 'GOOD', deltaA: 0, oppA: 50, resultB: 'INSUFFICIENT', deltaB: null, oppB: 2 };
   check('progressBadge: neh label', T.progressBadge(row).includes('neh'), T.progressBadge(row));
+
+  // ── Confidence level (client-side sample gate) ──
+  // The server now sends verdicts ungated (classify(..., min_sample=0)); the
+  // gate lives in tierOf() and moves with the reader's Confidence setting.
+  const L = T.levels();
+  check('levels: low/med/high defined',
+        L.low === 3 && L.med === 5 && L.high === 10, JSON.stringify(L));
+
+  const thin4 = { result: 'GOOD', delta: 0, opp: 4 };
+  T.setMinSample(L.low);
+  check('conf low: 4 opps clears a 3-hand bar', T.tierOf(thin4) === 'good', T.tierOf(thin4));
+  T.setMinSample(L.med);
+  check('conf med: 4 opps falls under a 5-hand bar', T.tierOf(thin4) === 'neh', T.tierOf(thin4));
+  T.setMinSample(L.high);
+  check('conf high: 4 opps falls under a 10-hand bar', T.tierOf(thin4) === 'neh', T.tierOf(thin4));
+
+  const thin7 = { result: 'HIGH', delta: 2.0, opp: 7 };
+  T.setMinSample(L.med);
+  check('conf med: 7 opps keeps its verdict', T.tierOf(thin7) === 'high', T.tierOf(thin7));
+  T.setMinSample(L.high);
+  check('conf high: 7 opps drops to neh', T.tierOf(thin7) === 'neh', T.tierOf(thin7));
+
+  // A row with no target has no verdict to suppress at any level.
+  [L.low, L.med, L.high].forEach(n => {
+    T.setMinSample(n);
+    check(`no-target row stays null at min_sample=${n}`,
+          T.tierOf({ result: null, delta: null, opp: 0 }) === null);
+  });
+
+  // Compare mode reads oppA/oppB through the same gate.
+  T.setMinSample(L.high);
+  row = { resultA: 'GOOD', deltaA: 0, oppA: 50, resultB: 'GOOD', deltaB: 0, oppB: 7 };
+  check('conf high: compare side under the bar reads neh',
+        T.progressOf(row).kind === 'neh', JSON.stringify(T.progressOf(row)));
+  T.setMinSample(L.med);
+  check('conf med: same compare row is a real verdict',
+        T.progressOf(row).kind === 'same', JSON.stringify(T.progressOf(row)));
+
+  // Pill tallies are derived through tierOf, so they follow the level.
+  const statRows = [
+    { result: 'GOOD', delta: 0,   opp: 50, target: [10, 20] },
+    { result: 'HIGH', delta: 2.0, opp: 7,  target: [10, 20] },
+    { result: 'LOW',  delta: -2,  opp: 4,  target: [10, 20] },
+    { result: null,   delta: null, opp: 0, target: null, rec: 'Not applicable' },
+  ];
+  T.setMinSample(L.low);
+  let c = T.posCounts(statRows);
+  check('posCounts at low: 1 good / 2 bad / 0 neh',
+        c.good === 1 && c.bad === 2 && c.thin === 0, JSON.stringify(c));
+  T.setMinSample(L.high);
+  c = T.posCounts(statRows);
+  check('posCounts at high: 1 good / 0 bad / 2 neh',
+        c.good === 1 && c.bad === 0 && c.thin === 2, JSON.stringify(c));
+  check('posCounts: n/a row never counted',
+        c.good + c.bad + c.thin === 3, JSON.stringify(c));
+
+  T.setMinSample(L.med);   // leave the module at its default
 
   console.log(failures === 0 ? 'compare logic: PASS' : `compare logic: FAIL (${failures})`);
   process.exit(failures === 0 ? 0 : 1);

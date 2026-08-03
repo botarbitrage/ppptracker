@@ -713,6 +713,13 @@ STREETS_ORDER = ('Preflop', 'Flop', 'Turn', 'River')
 # This only affects verdict color, never the raw pct/count shown.
 MIN_SAMPLE = 5
 
+# How much evidence to demand before a verdict is colored is a judgement call,
+# not a constant, so /leaks exposes it as a reader-selectable "Confidence"
+# level. MIN_SAMPLE is the medium (default) rung. The gate is applied in the
+# browser — the cache stores raw [made, opp] pairs and derives verdicts after
+# summing (see hands_to_vector), so switching levels needs no rebuild.
+CONFIDENCE_LEVELS = {'low': 3, 'med': MIN_SAMPLE, 'high': 10}
+
 
 def classify(pct, target, opp=None, min_sample=None):
     """

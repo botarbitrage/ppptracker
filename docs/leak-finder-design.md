@@ -334,10 +334,13 @@ observed at an exact value; the high end is assumed symmetric, flagged as such i
 
 **Sample-size gating.** BBZ itself renders a confident verdict on samples as thin as n=1 — 43 of
 its own 163 harvested cells (26%) sit under 5 opportunities. We gate at **`MIN_SAMPLE = 5`**:
-below that, `classify()` returns `INSUFFICIENT` rather than a color, and the UI shows a grey
-"low n" badge with the raw pct/count still visible (never hidden, just not overclaimed). Chosen
-as a conservative floor — enough to suppress a coin-flip-sized sample without hiding most of
-BBZ's own coverage. On the live report this reclassifies 60 of 152 evaluated cells (39%).
+below that the verdict is rendered as a grey `neh` badge rather than a color, with the raw
+pct/count still visible (never hidden, just not overclaimed). Chosen as a conservative floor —
+enough to suppress a coin-flip-sized sample without hiding most of BBZ's own coverage. On the
+live report this reclassifies 60 of 152 evaluated cells (39%). *(Since 2026-08-03 the 5 is the
+middle rung of a reader-selectable Confidence control and the gate is applied client-side; see
+the superseding note in §15. `classify()`'s own `min_sample` default is unchanged, so the Python
+callers that still rely on gating — `leak_validation.py`, the harvest checks — are unaffected.)*
 
 **No Firestore move for `/config/leak_ranges`.** The original plan (§3) proposed seeding a
 Firestore doc so "updating ranges is a data edit, not a code change." Loading directly from
@@ -432,11 +435,27 @@ hands because TEXAS is 6.08. Picking rooms already determines the stakes, so the
 removed rather than shipped with a confusing empty-intersection failure mode. This also retired
 the "(no buy-in set)" special case for the 8 tournaments whose room has no config doc.
 
-**Sample dilution is surfaced, not hidden.** `MIN_SAMPLE` stays at 5 regardless of filter
-(decision 2026-08-01) so verdicts stay comparable between views. Because a narrow filter shrinks
-samples fast — LUCKY DAY 1,756 hands (~293/position) but MINI only 154 (~26/position) — the page
-warns above the report when a slice falls under ~60 hands/position that most stats will read
-`neh`, instead of letting the user discover a wall of grey.
+**Sample dilution is surfaced, not hidden.** `MIN_SAMPLE` does not move with the filter, so
+verdicts stay comparable between views. Because a narrow filter shrinks samples fast — LUCKY DAY
+1,756 hands (~293/position) but MINI only 154 (~26/position) — the page warns above the report
+when a slice falls under ~60 hands/position that most stats will read `neh`, instead of letting
+the user discover a wall of grey.
+
+> **Superseded 2026-08-03 — the threshold is now reader-selectable.** The original decision
+> (2026-08-01) also froze `MIN_SAMPLE` at 5 outright. How much evidence to demand before trusting
+> a verdict is a judgement call, not a constant: on a wide filter you may want 10+, on a thin
+> slice 3 is better than a wall of grey. `/leaks` now carries a three-rung **Confidence** control
+> — Low 3 / Med 5 / High 10 (`leak_engine.CONFIDENCE_LEVELS`, Med is `MIN_SAMPLE`, so the default
+> view is unchanged). Comparability is preserved because the level is *global* — one setting
+> across every position and both Compare ranges — rather than varying per view, which is what the
+> original decision was actually protecting against.
+>
+> It is free because verdicts are derived, never stored: the cache holds `[made, opp]` pairs
+> (§15), so no level change invalidates it or bumps `ENGINE_VERSION`. `/api/leaks` therefore calls
+> `classify(..., min_sample=0)` and ships every row ungated; `tierOf()` in `templates/leaks.html`
+> applies the gate client-side, making the control instant with no refetch. A row with no target
+> stays "No target yet" at every level — only rows that *have* a verdict can be suppressed to
+> `neh`.
 
 ### The cache
 
@@ -672,6 +691,8 @@ labelling.
       hit (low end); high end assumed symmetric pending a confirming data point.
 - [x] Sample-size gating shipped at `MIN_SAMPLE = 5` (`leak_engine.classify`); 60/152 live cells
       reclassified from a confident verdict to `INSUFFICIENT`.
+- [x] Gate made reader-selectable (2026-08-03): **Confidence** Low 3 / Med 5 / High 10, applied
+      client-side in `tierOf()` so switching is instant and cache-free (§15).
 - [x] Phase 5 — per-tournament count-vector cache (~10s → ~1s) and the tournament + date filter
       bar, with a cache-equivalence test (§15).
 - [ ] Optional follow-up: build a tournament's vector at import time (in `_merge_tournament`) so a

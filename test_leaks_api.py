@@ -188,6 +188,28 @@ def main():
     check('every stat present in every position',
           all(len(p['stats']) == len(ALL_STATS) for p in data['positions']))
 
+    # The sample-size gate moved to the client (it follows the reader's
+    # Confidence level), so the payload must carry the level map and must NOT
+    # pre-collapse thin samples to INSUFFICIENT — doing so would pin the page
+    # to one threshold again.
+    from leak_engine import CONFIDENCE_LEVELS
+    check('confidence levels published',
+          data['meta']['confidence_levels'] == CONFIDENCE_LEVELS,
+          repr(data['meta'].get('confidence_levels')))
+    check('min_sample still published as the default',
+          data['meta']['min_sample'] == CONFIDENCE_LEVELS['med'])
+    all_rows = [s for p in data['positions'] for s in p['stats']]
+    check('no pre-gated INSUFFICIENT verdicts',
+          not any(s['result'] == 'INSUFFICIENT' for s in all_rows))
+    # Thin rows must still carry a real verdict for the client to grade.
+    thin = [s for s in all_rows
+            if 0 < s['opp'] < CONFIDENCE_LEVELS['med'] and s['target']]
+    check('thin rows keep a real verdict',
+          bool(thin) and all(s['result'] in ('LOW', 'GOOD', 'HIGH') for s in thin),
+          '%d thin rows, results=%s' % (len(thin), {s['result'] for s in thin}))
+    check('zero-opportunity rows stay unverdicted',
+          all(s['result'] is None for s in all_rows if s['opp'] == 0))
+
     # The cash-game tournament must never be counted, and never rebuilt —
     # if the handler tried, _build_leak_vector's stub would KeyError on
     # CASH_TID since it's deliberately absent from `vectors`.
