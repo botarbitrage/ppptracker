@@ -1692,6 +1692,28 @@ tr.row-flash > td {
   font-weight: 600;
 }
 
+.tg-pill {
+  font-family: var(--font-head);
+  font-size: .72rem;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 2px 10px;
+  letter-spacing: .4px;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  background: #ffffff0a;
+  color: var(--muted);
+  border: 1px solid #ffffff20;
+  transition: opacity .15s, background .15s;
+}
+.tg-pill.active {
+  background: rgba(0,230,118,.15);
+  color: var(--green);
+  border-color: rgba(0,230,118,.5);
+}
+.tg-pill:not(.active) { opacity: .4; }
+
 .tourney-graph-canvas-wrap {
   position: relative;
   height: 260px;

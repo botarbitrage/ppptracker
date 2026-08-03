@@ -192,4 +192,5 @@ def analyze_tournament(records, cfg):
         'addons':         addons,
         'spots':          spots,
         'resolved_cfg':   cfg,
+        'scale':          scale,
     }

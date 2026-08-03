@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Leak Finder — PPPoker Hand Analyser</title>
+  <title>Hand Analyser and Leak Finder — PPPoker Hand Tracker</title>
   <link rel="icon" type="image/svg+xml" href="/static/icons/icon.svg"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -45,7 +45,14 @@
     .lk-pill.bad  { background:#ff547018; color:#ff5470;      border:1px solid #ff547050; }
     .lk-pill.thin { background:#ffffff0a; color:var(--muted); border:1px solid #ffffff20; }
     .lk-caret { color:var(--muted); font-size:.8rem; width:14px; }
-    .lk-stat-name { border-bottom:1px dotted #ffffff38; cursor:help; }
+    .lk-stat-name { border-bottom:1px dotted #ffffff38; cursor:help; position:relative; }
+    .lk-stat-name[data-tip]:hover::after {
+      content:attr(data-tip); position:absolute; bottom:calc(100% + 6px); left:0;
+      background:#0d1117ee; color:#d0ddd0; font-size:.76rem; font-weight:400;
+      font-family:var(--font-body); padding:6px 10px; border-radius:6px;
+      border:1px solid #1e2d1e; white-space:normal; width:max-content;
+      max-width:280px; z-index:99; pointer-events:none; line-height:1.4;
+    }
     .lk-count { color:var(--muted); font-size:.82rem; }
     .lk-street-inline {
       font-family:var(--font-head); font-size:.6rem; font-weight:700;
@@ -126,7 +133,7 @@
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       Back to Analyser
     </a>
-    <span class="page-title">Leak Finder</span>
+    <span class="page-title">Hand Analyser and Leak Finder</span>
     <div style="width:110px"></div>
   </div>
 
@@ -147,6 +154,7 @@ const STREETS = ['Preflop', 'Flop', 'Turn', 'River'];
 let MIN_SAMPLE = 5;           // overwritten from data.meta.min_sample once loaded
 let REPORT_DATA = null;       // {position: rowsArray} kept so sorting never re-fetches
 const SORT_STATE = {};        // {position: 'asc'|'desc'|null}
+const SORT_HANDS_STATE = {};  // {position: 'asc'|'desc'|null}
 
 // What each stat measures, keyed by the report label. Written from the engine's
 // own validated definitions (leak_engine.preflop/postflop_stat_flags).
@@ -275,7 +283,7 @@ let COL_ORDER_CMP = [0, 1, 2, 3, 4, 5];
 
 function headerCells(pos) {
   const h = [
-    '<th data-col="0" draggable="true">Name</th>',
+    `<th data-col="0" draggable="true" class="lk-sortable" onclick="cycleSortHands('${pos}')" title="Sort by number of hands">Name (hands) <span class="lk-sort-arrow" data-sort-arrow-hands="${pos}"></span></th>`,
     '<th data-col="1" draggable="true" class="text-end">Hero</th>',
     '<th data-col="2" draggable="true" class="text-end">Target</th>',
     `<th data-col="3" draggable="true" class="text-center lk-sortable" onclick="cycleSort('${pos}')" title="Sort by distance from target">Result <span class="lk-sort-arrow" data-sort-arrow="${pos}"></span></th>`,
@@ -286,7 +294,7 @@ function headerCells(pos) {
 
 function headerCellsCmp(pos) {
   const h = [
-    '<th data-col="0" draggable="true">Name</th>',
+    `<th data-col="0" draggable="true" class="lk-sortable" onclick="cycleSortHands('${pos}')" title="Sort by number of hands">Name (hands) <span class="lk-sort-arrow" data-sort-arrow-hands="${pos}"></span></th>`,
     '<th data-col="1" draggable="true" class="text-end">Hero A</th>',
     '<th data-col="2" draggable="true" class="text-end">Hero B</th>',
     '<th data-col="3" draggable="true" class="text-end">Target</th>',
@@ -365,7 +373,7 @@ function rowHtml(s, showStreet) {
   const recClass = rc ? '' : 'lk-rec-thin';
   const heroStyle = rc ? ` style="color:${rc}"` : '';
   const cells = [
-    `<td data-col="0"><span class="lk-stat-name" title="${esc(help)}">${s.label}</span> <span class="lk-count">(${s.opp})</span>${showStreet ? ` <span class="lk-street-inline">${s.street}</span>` : ''}</td>`,
+    `<td data-col="0"><span class="lk-stat-name" data-tip="${esc(help)}">${s.label}</span> <span class="lk-count">(${s.opp})</span>${showStreet ? ` <span class="lk-street-inline">${s.street}</span>` : ''}</td>`,
     `<td data-col="1" class="text-end"${heroStyle}>${fmtPct(s.pct)}</td>`,
     `<td data-col="2" class="text-end">${targetCell}</td>`,
     `<td data-col="3" class="text-center">${isNA ? '<span class="lk-count">—</span>' : resultBadge(s)}</td>`,
@@ -376,9 +384,9 @@ function rowHtml(s, showStreet) {
 
 function renderRows(position) {
   const dir = SORT_STATE[position];
+  const hdir = SORT_HANDS_STATE[position];
   let rows = REPORT_DATA[position].filter(s => filterRow(s, position));
-  // Unsorted keeps the street grouping; sorting is a global ranking, so the
-  // street moves inline onto each row instead of being a section header.
+  if (hdir) return sortedByHands(rows, hdir).map(s => rowHtml(s, true)).join('');
   if (!dir) {
     return STREETS.map(street => {
       const group = rows.filter(s => s.street === street);
@@ -398,9 +406,31 @@ function sortArrow(position) {
 function cycleSort(position) {
   const cur = SORT_STATE[position];
   SORT_STATE[position] = cur === null ? 'asc' : cur === 'asc' ? 'desc' : null;
+  SORT_HANDS_STATE[position] = null;
   document.querySelector(`tbody[data-position="${position}"]`).innerHTML = renderRows(position);
   const arrow = document.querySelector(`[data-sort-arrow="${position}"]`);
   if (arrow) arrow.textContent = sortArrow(position);
+  const harrow = document.querySelector(`[data-sort-arrow-hands="${position}"]`);
+  if (harrow) harrow.textContent = '';
+}
+
+function sortedByHands(rows, dir) {
+  if (!dir) return rows;
+  return rows.slice().sort((a, b) => {
+    return dir === 'asc' ? (a.opp || 0) - (b.opp || 0) : (b.opp || 0) - (a.opp || 0);
+  });
+}
+
+function cycleSortHands(position) {
+  const cur = SORT_HANDS_STATE[position];
+  SORT_HANDS_STATE[position] = cur === null ? 'desc' : cur === 'desc' ? 'asc' : null;
+  SORT_STATE[position] = null;
+  const renderer = COMPARE_MODE ? renderRowsCompare : renderRows;
+  document.querySelector(`tbody[data-position="${position}"]`).innerHTML = renderer(position);
+  const harrow = document.querySelector(`[data-sort-arrow-hands="${position}"]`);
+  if (harrow) harrow.textContent = SORT_HANDS_STATE[position] === 'asc' ? '▲' : SORT_HANDS_STATE[position] === 'desc' ? '▼' : '';
+  const arrow = document.querySelector(`[data-sort-arrow="${position}"]`);
+  if (arrow) arrow.textContent = '';
 }
 
 // ── Filters ────────────────────────────────────────────────────────────────
@@ -672,6 +702,7 @@ function renderReport(data) {
     if (!p) return '';
     REPORT_DATA[posName] = p.stats;
     SORT_STATE[posName] = null;
+    SORT_HANDS_STATE[posName] = null;
     POS_FILTERS[posName] = defaultPosFilter();
     const vs = p.stats.filter(s => !isNA(s));
     const good = vs.filter(s => s.result === 'GOOD').length;
@@ -844,7 +875,7 @@ function rowHtmlCompare(row, showStreet) {
   const recClass = rc ? '' : 'lk-rec-thin';
   const hcA = cmpHeroColor(row.resultA), hcB = cmpHeroColor(row.resultB);
   const cells = [
-    `<td data-col="0"><span class="lk-stat-name" title="${esc(help)}">${row.label}</span> <span class="lk-count">(${row.oppA}/${row.oppB})</span>${showStreet ? ` <span class="lk-street-inline">${row.street}</span>` : ''}</td>`,
+    `<td data-col="0"><span class="lk-stat-name" data-tip="${esc(help)}">${row.label}</span> <span class="lk-count">(${row.oppA}/${row.oppB})</span>${showStreet ? ` <span class="lk-street-inline">${row.street}</span>` : ''}</td>`,
     `<td data-col="1" class="text-end"${hcA ? ` style="color:${hcA}"` : ''}>${fmtPct(row.pctA)}</td>`,
     `<td data-col="2" class="text-end"${hcB ? ` style="color:${hcB}"` : ''}>${fmtPct(row.pctB)}</td>`,
     `<td data-col="3" class="text-end">${targetCell}</td>`,
@@ -856,8 +887,16 @@ function rowHtmlCompare(row, showStreet) {
 
 function renderRowsCompare(position) {
   const dir = SORT_STATE[position];
+  const hdir = SORT_HANDS_STATE[position];
   let rows = COMPARE_DATA[position].filter(s => !(s.target === null && s.rec === 'Not applicable'));
   if (HIDE_NEH) rows = rows.filter(s => progressOf(s).kind !== 'neh');
+  if (hdir) {
+    const sorted = rows.slice().sort((a, b) => {
+      const va = (a.oppA || 0) + (a.oppB || 0), vb = (b.oppA || 0) + (b.oppB || 0);
+      return hdir === 'asc' ? va - vb : vb - va;
+    });
+    return sorted.map(s => rowHtmlCompare(s, true)).join('');
+  }
   if (!dir) {
     return STREETS.map(street => {
       const group = rows.filter(s => s.street === street);
@@ -936,6 +975,7 @@ function renderCompareReport(dataA, dataB) {
   document.getElementById('lk-cards').innerHTML = combined.map(p => {
     COMPARE_DATA[p.position] = p.rows;
     SORT_STATE[p.position] = null;
+    SORT_HANDS_STATE[p.position] = null;
     return `
     <div class="section-card mb-3 lk-pos-card" onclick="this.querySelector('.lk-body').classList.toggle('d-none')">
       <div class="lk-pos-head">

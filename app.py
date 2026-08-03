@@ -958,8 +958,16 @@ def tournament_hands(tourney_id):
 
     rows = build_hand_rows(records)
     hand_levels = analysis['hand_levels']
+    chip_scale = analysis.get('scale', 1)
     for row in rows:
         row['level'] = hand_levels.get(row.get('hand_num'))
+        if chip_scale != 1:
+            if row.get('chip_stack') is not None:
+                row['chip_stack'] = round(row['chip_stack'] / chip_scale)
+            if row.get('profit') is not None:
+                row['profit'] = round(row['profit'] / chip_scale)
+            if row.get('big_blind') is not None:
+                row['big_blind'] = round(row['big_blind'] / chip_scale)
 
     return jsonify({'hands': rows, 'meta': meta})
 

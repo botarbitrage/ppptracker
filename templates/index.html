@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PPPoker Hand Analyser</title>
+  <title>PPPoker Hand Tracker</title>
 
   <!-- PWA / TWA -->
   <link rel="manifest" href="/static/manifest.json"/>
@@ -57,7 +57,7 @@
   <!-- ── Header ───────────────────────────────────────────── -->
   <div class="text-center mb-3">
     <!-- Decorative emoji hidden from screen readers (Fix 12) -->
-    <h1 class="app-title"><span aria-hidden="true">♠</span> PPPoker Hand Analyser <span aria-hidden="true">♣</span></h1>
+    <h1 class="app-title"><span aria-hidden="true">♠</span> PPPoker Hand Tracker <span aria-hidden="true">♣</span></h1>
     <p class="app-tagline">ANALYSE &nbsp;·&nbsp; STUDY &nbsp;·&nbsp; WIN</p>
   </div>
 
@@ -365,7 +365,7 @@
               <th scope="col" class="d-none d-sm-table-cell">Room</th>
               <th scope="col" class="d-none d-lg-table-cell" data-tz-label="Sit Down Time">Sit Down Time</th>
               <th scope="col" class="d-none d-lg-table-cell">Time Played</th>
-              <th scope="col" class="d-none d-md-table-cell">Type</th>
+              <th scope="col" class="d-none">Type</th>
               <th scope="col" class="text-center">Hands</th>
               <th scope="col" class="text-center export-col">Export Format</th>
             </tr>
@@ -404,8 +404,8 @@
             <tr>
               <th scope="col" class="sort-th" onclick="_sortTs('name')" data-col="name">Tournament <span class="sort-icon"></span></th>
               <th scope="col" class="text-center sort-th" onclick="_sortTs('events')" data-col="events">Events <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center d-none d-md-table-cell sort-th" onclick="_sortTs('type')" data-col="type">Type <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center d-none d-md-table-cell">Players</th>
+              <th scope="col" class="text-center d-none sort-th" onclick="_sortTs('type')" data-col="type">Type <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center d-none d-md-table-cell">Seats</th>
               <th scope="col" class="text-center d-none d-md-table-cell sort-th" onclick="_sortTs('avgHands')" data-col="avgHands">Avg Hands <span class="sort-icon"></span></th>
               <th scope="col" class="text-center d-none d-md-table-cell sort-th" onclick="_sortTs('avgDur')" data-col="avgDur">Avg Duration <span class="sort-icon"></span></th>
               <th scope="col" class="text-center d-none d-lg-table-cell sort-th" onclick="_sortTs('handsHr')" data-col="handsHr">Hands/hr <span class="sort-icon"></span></th>
@@ -437,20 +437,15 @@
         <div class="tourney-graph-controls">
           <div class="tg-group">
             <span class="tg-label">Stack</span>
-            <button class="tg-btn"        id="tg-y-chips" onclick="_tgSetY('chips')">Chips</button>
-            <button class="tg-btn"        id="tg-y-bb"    onclick="_tgSetY('bb')">BBs</button>
-            <button class="tg-btn active" id="tg-y-both"  onclick="_tgSetY('both')">Both</button>
+            <span class="tg-pill active" id="tg-y-chips" onclick="_tgToggleY('chips')">Chips</span>
+            <span class="tg-pill active" id="tg-y-bb"    onclick="_tgToggleY('bb')">BBs</span>
           </div>
           <div id="tourney-graph-title" class="tourney-graph-title"></div>
           <div class="tg-controls-right">
-            <label class="tg-played-label">
-              <input type="checkbox" id="tg-played-only" onchange="_tgSetPlayedOnly(this.checked)">
-              <span>Show played hands only</span>
-            </label>
+            <span class="tg-pill" id="tg-played-only-pill" onclick="_tgTogglePlayed()" title="Show played hands only">PH</span>
             <div class="tg-group tg-group-xaxis">
-              <span class="tg-label">X-Axis</span>
-              <button class="tg-btn active" id="tg-x-time"  onclick="_tgSetX('time')">Time</button>
-              <button class="tg-btn"        id="tg-x-level" onclick="_tgSetX('level')">Level</button>
+              <span class="tg-label">Duration</span>
+              <span class="tg-pill active" id="tg-x-pill" onclick="_tgToggleX()">Time</span>
             </div>
           </div>
         </div>
@@ -507,7 +502,7 @@
             <tr>
               <th scope="col" class="sort-th" onclick="_sortCgs('name')" data-col="name">Session <span class="sort-icon"></span></th>
               <th scope="col" class="text-center sort-th" onclick="_sortCgs('events')" data-col="events">Sessions <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center d-none d-md-table-cell">Players</th>
+              <th scope="col" class="text-center d-none d-md-table-cell">Seats</th>
               <th scope="col" class="text-center d-none d-md-table-cell sort-th" onclick="_sortCgs('avgHands')" data-col="avgHands">Avg Hands <span class="sort-icon"></span></th>
               <th scope="col" class="text-center d-none d-md-table-cell sort-th" onclick="_sortCgs('avgDur')" data-col="avgDur">Avg Duration <span class="sort-icon"></span></th>
               <th scope="col" class="text-center d-none d-lg-table-cell sort-th" onclick="_sortCgs('handsHr')" data-col="handsHr">Hands/hr <span class="sort-icon"></span></th>
@@ -648,7 +643,7 @@
 
     <!-- Always-visible bar -->
     <div class="footer-bottom">
-      <span>© 2026 PPPoker Hand Analyser — Built by a punter, for punters</span>
+      <span>© 2026 PPPoker Hand Tracker — Built by a punter, for punters</span>
       <span class="footer-sep">·</span>
       <span>Not affiliated with PPPoker</span>
       <span class="footer-sep">·</span>
@@ -665,7 +660,7 @@
 
         <div class="footer-col">
           <div class="footer-heading">Legal &amp; Compliance</div>
-          <p>PPPoker Hand Analyser is an independent tool for educational and study purposes only. It is not affiliated with, endorsed by, or connected to PPPoker or its parent company in any way. Use of this tool is entirely at your own discretion.</p>
+          <p>PPPoker Hand Tracker is an independent tool for educational and study purposes only. It is not affiliated with, endorsed by, or connected to PPPoker or its parent company in any way. Use of this tool is entirely at your own discretion.</p>
           <p>This tool does not facilitate gambling, accept wagers, or process any financial transactions. It is a hand history converter intended to assist players in reviewing their own gameplay.</p>
         </div>
 
@@ -708,7 +703,7 @@
       <div class="modal-body info-modal-body">
         <p>Hey everyone! Just a regular Aussie poker player here who got hooked on PPPoker a while back. The games are good, the action is decent, and the community is there. But there's one thing that's always driven me mad: <strong>you can't study your hands.</strong></p>
         <p>PokerTracker, DriveHUD, GTO Wizard — all the serious training tools need a hand history file. PPPoker doesn't give you one. Their replay system is locked inside the app, and there's no export button in sight. So if you want to actually improve your game, you're stuck replaying hands one by one in a clunky mobile viewer.</p>
-        <p>I got frustrated enough to do something about it. With the help of AI tools, I built <strong>PPPoker Hand Analyser</strong> — a web app that pulls your hand history straight from PPPoker's API and converts it into a format that actually works with your training software.</p>
+        <p>I got frustrated enough to do something about it. With the help of AI tools, I built <strong>PPPoker Hand Tracker</strong> — a web app that pulls your hand history straight from PPPoker's API and converts it into a format that actually works with your training software.</p>
         <p>No poker background in software development. No team. Just a player who wanted better tools and figured out how to build them. If it helps your game even a little, it was worth it. ♠</p>
       </div>
     </div>
@@ -727,7 +722,7 @@
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body info-modal-body">
-        <p><strong>PPPoker Hand Analyser</strong> bridges the gap between PPPoker and your training software. Here's what it does:</p>
+        <p><strong>PPPoker Hand Tracker</strong> bridges the gap between PPPoker and your training software. Here's what it does:</p>
         <ul>
           <li><strong>Fetches your hands</strong> directly from PPPoker's API using your hand review link — no installs, no file uploads, no screen scraping.</li>
           <li><strong>Converts to PokerStars format</strong> — the industry-standard hand history format accepted by PokerTracker 4, DriveHUD, and GTO Wizard.</li>
@@ -805,7 +800,7 @@
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body info-modal-body">
-        <p>PPPoker Hand Analyser is free to use with sensible limits. Pro removes those limits and unlocks everything.</p>
+        <p>PPPoker Hand Tracker is free to use with sensible limits. Pro removes those limits and unlocks everything.</p>
         <table class="tier-table">
           <thead>
             <tr><th scope="col">Feature</th><th scope="col">Free</th><th scope="col" style="color:var(--yellow)">Pro</th></tr>

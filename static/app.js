@@ -655,7 +655,7 @@ function renderTournaments(tournaments) {
       <td class="d-none d-sm-table-cell"><small>${t.room_name || '—'}</small></td>
       <td class="d-none d-lg-table-cell"><small class="text-muted">${fmtTime(t.earliest_ts, tz)}</small></td>
       <td class="d-none d-lg-table-cell"><small class="text-muted">${t.time_played || '—'}</small></td>
-      <td class="d-none d-md-table-cell">${typeBadge}</td>
+      <td class="d-none">${typeBadge}</td>
       <td class="text-center">${t.hands}</td>
       <td class="text-center export-col" style="vertical-align:middle">
         ${isPro()
@@ -1302,7 +1302,7 @@ function _renderTournamentSummary(tournaments) {
         <small>${name}</small>
       </td>
       <td class="text-center">${count}</td>
-      <td class="text-center d-none d-md-table-cell">${isMtt ? '<span class="badge bg-primary">MTT</span>' : '<span class="badge bg-secondary">MTT</span>'}</td>
+      <td class="text-center d-none">${isMtt ? '<span class="badge bg-primary">MTT</span>' : '<span class="badge bg-secondary">MTT</span>'}</td>
       <td class="text-center d-none d-md-table-cell">${Math.max(...entries.map(t => t.max_players || 0)) || '—'}</td>
       <td class="text-center d-none d-md-table-cell">${avgHands}</td>
       <td class="text-center d-none d-md-table-cell">${_fmtDuration(avgDurSecs)}</td>
@@ -1842,6 +1842,8 @@ function _tgBuildChart() {
           displayColors: true,
           boxWidth: 8,
           boxHeight: 8,
+          caretPadding: 14,
+          yAlign: 'bottom',
           filter: item => !item.dataset.hidden,
           callbacks: {
             title(items) {
@@ -1931,32 +1933,41 @@ function _tgBuildChart() {
   });
 }
 
-function _tgSetY(mode) {
-  _tgYMode = mode;
-  document.querySelectorAll('[id^="tg-y-"]').forEach(b => b.classList.remove('active'));
-  document.getElementById(`tg-y-${mode}`)?.classList.add('active');
+let _tgShowChips = true;
+let _tgShowBB = true;
+
+function _tgToggleY(which) {
+  if (which === 'chips') _tgShowChips = !_tgShowChips;
+  else _tgShowBB = !_tgShowBB;
+  if (!_tgShowChips && !_tgShowBB) {
+    if (which === 'chips') _tgShowBB = true; else _tgShowChips = true;
+  }
+  document.getElementById('tg-y-chips')?.classList.toggle('active', _tgShowChips);
+  document.getElementById('tg-y-bb')?.classList.toggle('active', _tgShowBB);
+  _tgYMode = _tgShowChips && _tgShowBB ? 'both' : _tgShowChips ? 'chips' : 'bb';
   if (!_tgChart) return;
-  _tgChart.data.datasets[0].hidden = (mode === 'bb');
-  _tgChart.data.datasets[1].hidden = (mode === 'chips');
-  _tgChart.options.scales.yLeft.display  = (mode !== 'bb');
-  _tgChart.options.scales.yRight.display = (mode !== 'chips');
+  _tgChart.data.datasets[0].hidden = !_tgShowChips;
+  _tgChart.data.datasets[1].hidden = !_tgShowBB;
+  _tgChart.options.scales.yLeft.display  = _tgShowChips;
+  _tgChart.options.scales.yRight.display = _tgShowBB;
   _tgChart.update();
 }
 
-function _tgSetX(mode) {
-  _tgXMode = mode;
-  document.querySelectorAll('[id^="tg-x-"]').forEach(b => b.classList.remove('active'));
-  document.getElementById(`tg-x-${mode}`)?.classList.add('active');
+function _tgToggleX() {
+  _tgXMode = _tgXMode === 'time' ? 'level' : 'time';
+  const pill = document.getElementById('tg-x-pill');
+  if (pill) { pill.textContent = _tgXMode === 'time' ? 'Time' : 'Level'; pill.classList.toggle('active', _tgXMode === 'time'); }
   if (!_tgChart || !_tgState) return;
-  // Tick callback reads _tgXMode at call time — just update the chart
   _tgChart.update();
 }
 
-function _tgSetPlayedOnly(checked) {
-  _tgPlayedOnly = checked;
+function _tgTogglePlayed() {
+  _tgPlayedOnly = !_tgPlayedOnly;
+  const pill = document.getElementById('tg-played-only-pill');
+  if (pill) pill.classList.toggle('active', _tgPlayedOnly);
   if (!_tgChart || !_tgState) return;
   const s = _tgState;
-  if (checked) {
+  if (_tgPlayedOnly) {
     _tgChart.options.scales.x.min = Math.max(0, s.playedMinSecs - 60);
     _tgChart.options.scales.x.max = s.playedMaxSecs + 120;
   } else {
@@ -1970,8 +1981,18 @@ function _tgDestroy() {
   if (_tgChart) { _tgChart.destroy(); _tgChart = null; }
   _tgState = null;
   _tgPlayedOnly = false;
-  const cb = document.getElementById('tg-played-only');
-  if (cb) cb.checked = false;
+  _tgShowChips = true;
+  _tgShowBB = true;
+  _tgYMode = 'both';
+  _tgXMode = 'time';
+  const chipPill = document.getElementById('tg-y-chips');
+  const bbPill = document.getElementById('tg-y-bb');
+  const xPill = document.getElementById('tg-x-pill');
+  const phPill = document.getElementById('tg-played-only-pill');
+  if (chipPill) chipPill.classList.add('active');
+  if (bbPill) bbPill.classList.add('active');
+  if (xPill) { xPill.textContent = 'Time'; xPill.classList.add('active'); }
+  if (phPill) phPill.classList.remove('active');
   _tgSetGraphWarning('');
   const wrap = document.getElementById('tourney-graph-wrap');
   if (wrap) wrap.classList.add('d-none');
