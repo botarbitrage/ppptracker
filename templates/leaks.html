@@ -1178,6 +1178,7 @@ function renderCompareReport(dataA, dataB) {
     `${fmtBB(dataB.meta.winrate_bb100)}/100` +
     (dataB.meta.hands_skipped ? ` (${dataB.meta.hands_skipped} excluded)` : '') + `</span>` +
     confidenceControlHtml() +
+    nehPillHtml() +
     `</div>`;
 
   const warnEl = document.getElementById('lk-warn');

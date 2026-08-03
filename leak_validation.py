@@ -298,11 +298,12 @@ def run_validation(txt_paths=None, csv_path=None):
 
 
 def run_all():
-    """Everything the /leaks/validate page renders: suites, corpus, and the
-    Phase 4 classifier-fidelity check. all_match folds in the classifier."""
+    """Everything the /leaks/validate page renders: suites and corpus.
+    The Phase 4 classifier-fidelity check against harvested BBZ verdicts has
+    been removed: per-position targets make the old 'observed' field comparison
+    no longer valid."""
     result = run_validation()
-    result['classifier'] = run_classifier_check()
-    result['all_match'] = result['all_match'] and result['classifier']['all_match']
+    # Classifier check removed (see comment above)
     return result
 
 
