@@ -2,7 +2,7 @@
   "_meta": {
     "source": "BBZ Leak Finder UI (dashboard.bbzpoker.com/mtt-leak-finder/report/2245), harvested from screenshots 2026-07-30",
     "status": "all 6 positions harvested and cross-validated against the By Action tab (163 cells; per-stat transposition sums to 163 All / 14 Good / 149 Bad)",
-    "verdict_model": "result = LOW if hero < min, GOOD if min <= hero <= max, HIGH if hero > max; Bad = LOW or HIGH",
+    "verdict_model": "result = LOW if hero <= min (and min>0), HIGH if hero >= max, GOOD strictly between; Bad = LOW or HIGH. Boundaries are CLOSED on both ends, matching leak_engine.classify() and the one observed exact hit ('F to T Pr (HU)' hero=30 vs [30,40] renders LOW).",
     "rec_action_model": "per-stat verb pair chosen by direction: LOW -> '<verb> more', HIGH -> '<verb> less' (verb varies per stat, see rows); GOOD -> 'Good job'",
     "notes": [
       "Rows below are exactly the stats BBZ evaluated per position for this dataset (the membership mask). Stats with zero opportunities in the source data are absent and must be back-filled when observed (~12 cells of BBZ's 175-cell grid).",
@@ -12,7 +12,128 @@
       "Observed values updated from the full 4,412-hand PT4 export (2026-08-01). Previous harvest was 3,454 hands.",
       "Phase 1 GPT integration (2026-08-02): merged researcher-validated targets & recs from bbz_leak_finder_234_validated.json — 14 rec text upgrades, 23 new target cells, 48 N/A markers added. Existing 163 harvested targets preserved unchanged.",
       "Phase 2 per-position observed refresh (2026-08-02): the 9 stats BBZ flatlines in its export (3Bet NAI <35, CBet F IP/OOP (HU), Donk T (HU), Float F HU, Fold to F Cbet/Float HU, Limp Open, Raise F CBet (HU)) now carry our engine's true per-position observed values, not the collapsed BBZ number stamped on every row. Verdicts + good/bad tallies recomputed from the 4,420-hand PT4 export. Runtime endpoint /api/leaks was already returning per-position values — this only aligns the stored `observed` block with what the app actually renders."
-    ]
+    ],
+    "corrections": {
+      "applied": "2026-08-03 (Phase 0 target corrections)",
+      "note": "Discrepancy fixes over the harvested BBZ baseline. Each entry logs the pre-fix value so the original harvest stays reconstructable.",
+      "audit_pending": [
+        {
+          "stat": "CBet F OOP (HU)",
+          "positions": [
+            "SB",
+            "BB"
+          ],
+          "target": "[60,85]/[70,85]",
+          "question": "Confirm which pot types PT4 folds into this flag (postflop_stat_flags); only defensible if 3-bet-pot-dominated. No value change yet."
+        }
+      ],
+      "items": [
+        {
+          "position": "BB",
+          "stat": "Fold BB v SB",
+          "from": [
+            35,
+            45
+          ],
+          "to": [
+            25,
+            35
+          ],
+          "reason": "Was [35,45] > Fold to Steal [30,35], coaching over-folding in the widest defend spot. BB closes action IP vs the widest (SB) opener; solver BBvSB fold ~20-30%."
+        },
+        {
+          "position": "CO",
+          "stat": "Raise First",
+          "from": [
+            35,
+            38
+          ],
+          "to": [
+            30,
+            36
+          ],
+          "reason": "Was [35,38]; ~6pts above solver CO RFI (~28-32% at 25bb ante) and a 3-pt band implied precision the sample can't support."
+        },
+        {
+          "position": "EP",
+          "stat": "Fold to PF 4Bet After 3Bet <30",
+          "from": [
+            35,
+            45
+          ],
+          "to": [
+            45,
+            55
+          ],
+          "reason": "Was flat [35,45] across all positions (placeholder); a sub-30bb 4-bet is usually a jam, so realistic fold is higher and position-dependent."
+        },
+        {
+          "position": "MP",
+          "stat": "Fold to PF 4Bet After 3Bet <30",
+          "from": [
+            35,
+            45
+          ],
+          "to": [
+            45,
+            55
+          ],
+          "reason": "Was flat [35,45] across all positions (placeholder); a sub-30bb 4-bet is usually a jam, so realistic fold is higher and position-dependent."
+        },
+        {
+          "position": "CO",
+          "stat": "Fold to PF 4Bet After 3Bet <30",
+          "from": [
+            35,
+            45
+          ],
+          "to": [
+            42,
+            52
+          ],
+          "reason": "Was flat [35,45] across all positions (placeholder); a sub-30bb 4-bet is usually a jam, so realistic fold is higher and position-dependent."
+        },
+        {
+          "position": "BTN",
+          "stat": "Fold to PF 4Bet After 3Bet <30",
+          "from": [
+            35,
+            45
+          ],
+          "to": [
+            42,
+            52
+          ],
+          "reason": "Was flat [35,45] across all positions (placeholder); a sub-30bb 4-bet is usually a jam, so realistic fold is higher and position-dependent."
+        },
+        {
+          "position": "SB",
+          "stat": "Fold to PF 4Bet After 3Bet <30",
+          "from": [
+            35,
+            45
+          ],
+          "to": [
+            40,
+            50
+          ],
+          "reason": "Was flat [35,45] across all positions (placeholder); a sub-30bb 4-bet is usually a jam, so realistic fold is higher and position-dependent."
+        },
+        {
+          "position": "BB",
+          "stat": "Fold to PF 4Bet After 3Bet <30",
+          "from": [
+            35,
+            45
+          ],
+          "to": [
+            40,
+            50
+          ],
+          "reason": "Was flat [35,45] across all positions (placeholder); a sub-30bb 4-bet is usually a jam, so realistic fold is higher and position-dependent."
+        }
+      ]
+    }
   },
   "positions": {
     "EP": {
@@ -103,8 +224,8 @@
         {
           "label": "Fold to PF 4Bet After 3Bet <30",
           "target": [
-            35,
-            45
+            45,
+            55
           ],
           "rec": "Fold more",
           "observed": {
@@ -556,8 +677,8 @@
         {
           "label": "Fold to PF 4Bet After 3Bet <30",
           "target": [
-            35,
-            45
+            45,
+            55
           ],
           "rec": "Fold more",
           "observed": {
@@ -920,8 +1041,8 @@
         {
           "label": "Raise First",
           "target": [
-            35,
-            38
+            30,
+            36
           ],
           "rec": "Raise more",
           "observed": {
@@ -998,8 +1119,8 @@
         {
           "label": "Fold to PF 4Bet After 3Bet <30",
           "target": [
-            35,
-            45
+            42,
+            52
           ],
           "rec": "Fold more",
           "observed": {
@@ -1443,8 +1564,8 @@
         {
           "label": "Fold to PF 4Bet After 3Bet <30",
           "target": [
-            35,
-            45
+            42,
+            52
           ],
           "rec": "Fold more",
           "observed": {
@@ -1923,8 +2044,8 @@
         {
           "label": "Fold to PF 4Bet After 3Bet <30",
           "target": [
-            35,
-            45
+            40,
+            50
           ],
           "rec": "Fold more",
           "observed": {
@@ -2222,8 +2343,8 @@
         {
           "label": "Fold BB v SB",
           "target": [
-            35,
-            45
+            25,
+            35
           ],
           "rec": "Fold less",
           "observed": {
@@ -2326,8 +2447,8 @@
         {
           "label": "Fold to PF 4Bet After 3Bet <30",
           "target": [
-            35,
-            45
+            40,
+            50
           ],
           "rec": "Fold more",
           "observed": {
