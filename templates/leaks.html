@@ -22,10 +22,6 @@
       font-weight:800; color:var(--green);
     }
     .lk-meta  { color:var(--muted); font-size:.85rem; }
-    .lk-note  {
-      border:1px solid #3d5a80aa; background:#3d5a801e; color:#9ec3e6;
-      border-radius:8px; padding:8px 14px; font-size:.8rem;
-    }
     .lk-pos-card { cursor:pointer; }
     .lk-pos-head {
       display:flex; align-items:center; gap:14px; flex-wrap:wrap;
@@ -62,8 +58,6 @@
       border-radius:14px; padding:1px 10px; letter-spacing:.5px;
     }
     .lk-badge.neh { background:#ffffff0a; color:var(--muted); border:1px solid #ffffff20; font-style:italic; }
-    td.lk-rec-bad  { color:#ff5470; }
-    td.lk-rec-good { color:var(--green); }
     td.lk-rec-thin { color:var(--muted); font-style:italic; }
     tr.lk-street-row td {
       font-family:var(--font-head); font-size:.7rem; font-weight:700;
@@ -130,17 +124,8 @@
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       Back to Analyser
     </a>
-    <span class="page-title">🔎 Leak Finder</span>
+    <span class="page-title">Leak Finder</span>
     <div style="width:110px"></div>
-  </div>
-
-  <div class="lk-note mb-3">
-    <b>Phase 6 — tournament/cash split &amp; compare</b> over your saved tournaments, by
-    position. Targets are BBZ's coaching ranges; hover a stat name for what it measures.
-    The <b>Result</b> pill grades how far off target you are — <b>good</b>, then
-    <b>low</b> / <b>mid</b> / <b>high</b> as the gap widens in either direction. Stats with
-    fewer than <span id="lk-min-sample-note">5</span> opportunities show <b>neh</b> (not enough
-    hands) instead of a verdict. Click <b>Result</b> to sort best-first or worst-first.
   </div>
 
   <div id="lk-filterbar" class="section-card mb-3 d-none"></div>
@@ -267,8 +252,13 @@ function sortedRows(rows, dir) {
   });
 }
 
+function recColor(s) {
+  const tier = tierOf(s);
+  if (!tier || tier === 'neh') return '';
+  return TIERS[tier].color;
+}
+
 function rowHtml(s, showStreet) {
-  const isBad = s.result === 'LOW' || s.result === 'HIGH';
   const isThin = s.result === 'INSUFFICIENT';
   const isNA = s.target === null && s.rec === 'Not applicable';
   const rec = isNA ? 'Not applicable'
@@ -278,6 +268,9 @@ function rowHtml(s, showStreet) {
   const targetCell = isNA ? '<span class="lk-count">n/a</span>'
     : s.target ? s.target[0] + '% – ' + s.target[1] + '%' : '—';
   const help = STAT_HELP[s.label] || '';
+  const rc = recColor(s);
+  const recStyle = rc ? ` style="color:${rc}"` : '';
+  const recClass = rc ? '' : 'lk-rec-thin';
   return `
     <tr>
       <td>
@@ -288,7 +281,7 @@ function rowHtml(s, showStreet) {
       <td class="text-end">${fmtPct(s.pct)}</td>
       <td class="text-end">${targetCell}</td>
       <td class="text-center">${isNA ? '<span class="lk-count">—</span>' : resultBadge(s)}</td>
-      <td class="${isBad ? 'lk-rec-bad' : s.result === 'GOOD' ? 'lk-rec-good' : 'lk-rec-thin'}">${rec}</td>
+      <td class="${recClass}"${recStyle}>${rec}</td>
     </tr>`;
 }
 
@@ -567,7 +560,7 @@ function sampleWarning(meta) {
 
 function renderReport(data) {
   MIN_SAMPLE = data.meta.min_sample || MIN_SAMPLE;
-  document.getElementById('lk-min-sample-note').textContent = MIN_SAMPLE;
+
   if (data.filters) {
     LAST_FILTERS = data.filters;
     ensureFilterBar('');
@@ -605,8 +598,8 @@ function renderReport(data) {
         <span class="lk-pos-kv">Hands: <b>${p.hands}</b></span>
         <div class="lk-pills" onclick="event.stopPropagation()">
           <span class="lk-pill all" onclick="togglePosFilter('${p.position}','all',event)">All (${good + bad + thin})</span>
-          <span class="lk-pill good" onclick="togglePosFilter('${p.position}','good',event)">Good (${good})</span>
-          <span class="lk-pill bad" onclick="togglePosFilter('${p.position}','bad',event)">Bad (${bad})</span>
+          <span class="lk-pill good" onclick="togglePosFilter('${p.position}','good',event)">OK (${good})</span>
+          <span class="lk-pill bad" onclick="togglePosFilter('${p.position}','bad',event)">Not OK (${bad})</span>
           <span class="lk-pill thin${HIDE_NEH ? ' inactive' : ''}" onclick="togglePosFilter('${p.position}','neh',event)" title="Fewer than ${MIN_SAMPLE} opportunities — not enough hands for a verdict">neh (${thin})</span>
         </div>
       </div>
@@ -620,7 +613,7 @@ function renderReport(data) {
               <th class="text-center lk-sortable" onclick="cycleSort('${p.position}')"
                   title="Sort by distance from target — ascending shows your best stats first, descending shows what needs the most work">
                 Result <span class="lk-sort-arrow" data-sort-arrow="${p.position}"></span></th>
-              <th>Rec. Action</th>
+              <th>Action</th>
             </tr></thead>
             <tbody data-position="${p.position}">${renderRows(p.position)}</tbody>
           </table>
@@ -709,7 +702,7 @@ function recActionCompare(row) {
   if (p.kind === 'none') return row.oppA || row.oppB ? 'No target yet' : '';
   if (p.kind === 'neh') return `Need ${MIN_SAMPLE}+ hands on both sides`;
   if (p.tB === 'good') return p.tA === 'good' ? 'Still good' : 'Fixed — now inside target';
-  // BBZ's harvested rec text for a handful of cells is literally "Good job" —
+  // The harvested rec text for a handful of cells is literally "Good job" —
   // written for when that stat's verdict IS good. We only reach here when
   // it's not (the tB === 'good' branch above already returned), so that text
   // would be nonsensical; fall back to the generic more/less direction instead.
@@ -720,12 +713,12 @@ function recActionCompare(row) {
   return staticRec || 'No change';
 }
 
-function recClassCompare(row) {
+function recColorCompare(row) {
   const p = progressOf(row);
-  if (p.kind === 'improved') return 'lk-rec-good';
-  if (p.kind === 'regressed') return 'lk-rec-bad';
-  if (p.kind === 'same') return p.tB === 'good' ? 'lk-rec-good' : 'lk-rec-thin';
-  return 'lk-rec-thin';   // neh / none
+  if (p.kind === 'improved') return TIERS.good.color;
+  if (p.kind === 'regressed') return TIERS.high.color;
+  if (p.kind === 'same') return p.tB === 'good' ? TIERS.good.color : TIERS.mid.color;
+  return '';
 }
 
 // Mirrors rankOf()/sortedRows(): improved(0) same(1) regressed(2), then the
@@ -758,6 +751,9 @@ function rowHtmlCompare(row, showStreet) {
   const isNA = row.target === null && row.rec === 'Not applicable';
   const targetCell = isNA ? '<span class="lk-count">n/a</span>'
     : row.target ? row.target[0] + '% – ' + row.target[1] + '%' : '—';
+  const rc = isNA ? '' : recColorCompare(row);
+  const recStyle = rc ? ` style="color:${rc}"` : '';
+  const recClass = rc ? '' : 'lk-rec-thin';
   return `
     <tr>
       <td>
@@ -769,7 +765,7 @@ function rowHtmlCompare(row, showStreet) {
       <td class="text-end">${fmtPct(row.pctB)}</td>
       <td class="text-end">${targetCell}</td>
       <td class="text-center">${isNA ? '<span class="lk-count">—</span>' : progressBadge(row)}</td>
-      <td class="${isNA ? 'lk-rec-thin' : recClassCompare(row)}">${isNA ? 'Not applicable' : recActionCompare(row)}</td>
+      <td class="${recClass}"${recStyle}>${isNA ? 'Not applicable' : recActionCompare(row)}</td>
     </tr>`;
 }
 
@@ -824,7 +820,7 @@ function buildPositionsCombined(dataA, dataB) {
 
 function renderCompareReport(dataA, dataB) {
   MIN_SAMPLE = dataA.meta.min_sample || MIN_SAMPLE;
-  document.getElementById('lk-min-sample-note').textContent = MIN_SAMPLE;
+
   if (dataA.filters) {
     LAST_FILTERS = dataA.filters;
     ensureFilterBar('');
@@ -876,7 +872,7 @@ function renderCompareReport(dataA, dataB) {
               <th class="text-center lk-sortable" onclick="cycleSortCompare('${p.position}')"
                   title="Sort by change between the two ranges — ascending shows the biggest improvements first, descending shows the biggest regressions first">
                 Progress <span class="lk-sort-arrow" data-sort-arrow="${p.position}"></span></th>
-              <th>Rec. Action</th>
+              <th>Action</th>
             </tr></thead>
             <tbody data-position="${p.position}">${renderRowsCompare(p.position)}</tbody>
           </table>
