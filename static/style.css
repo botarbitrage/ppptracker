@@ -498,25 +498,13 @@ body {
 }
 
 /* ── Loaded Hands pills (inside player badge) ─────────────── */
+/* The pills themselves are .val-pill, shared with the tournament-summary
+   strip; only the row layout is specific to the player badge. */
 .loaded-hands-row {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
   margin-top: 6px;
-}
-
-.hstat-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: .2rem;
-  padding: .18rem .55rem;
-  border-radius: 20px;
-  font-size: .72rem;
-  font-family: var(--font-head);
-  letter-spacing: .04em;
-  color: var(--green);
-  background: rgba(0,230,118,.1);
-  border: 1px solid rgba(0,230,118,.3);
 }
 
 /* ── Playing card chips ───────────────────────────────────── */

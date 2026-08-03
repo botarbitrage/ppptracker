@@ -45,10 +45,10 @@
     .lk-pill.good { background:#00e67618; color:var(--green); border:1px solid #00e67650; min-width:62px; text-align:center; }
     .lk-pill.bad  { background:#ff547018; color:#ff5470;      border:1px solid #ff547050; min-width:90px; text-align:center; }
     .lk-pill.thin { background:#ffffff0a; color:var(--muted); border:1px solid #ffffff20; }
-    .lk-pill.wr   { background:#ffffff0a; border:1px solid #ffffff20; color:var(--text); }
-    .lk-pill.wr.lk-wr-pos { border-color:#00e67650; }
-    .lk-pill.wr.lk-wr-neg { border-color:#ff547050; }
-    .lk-wr-lbl { color:var(--muted); font-weight:600; }
+    /* .val-pill comes from static/style.css (tournament-summary strip); only
+       the losing-winrate colour is specific to this page. */
+    .val-pill.val-neg strong { color:#ff5470; }
+    .lk-status-row .val-pill { align-items:center; }
     .lk-pill.all.lk-filter-pill { min-width:68px; text-align:center; }
     /* Wide enough for both labels, so toggling never reflows the row. */
     .lk-pill.lk-neh-toggle { min-width:74px; text-align:center; }
@@ -829,11 +829,18 @@ function nehPillHtml() {
          `title="${nehTitle()}">${HIDE_NEH ? 'Show neh' : 'Hide neh'}</span>`;
 }
 
+// Matches the tournament-summary strip on the main page (.val-pill in
+// static/style.css): bold value, muted label.
+function valPill(value, label, help) {
+  return `<span class="val-pill" title="${esc(help)}">` +
+         `<strong>${value}</strong><span class="val-pill-label">${label}</span></span>`;
+}
+
 function winratePill(v, label, help) {
-  const cls = v == null ? '' : v >= 0 ? ' lk-wr-pos' : ' lk-wr-neg';
+  const cls = v == null ? '' : v >= 0 ? ' val-pos' : ' val-neg';
   const val = v == null ? '—' : `${fmtBB(v)}/100`;
-  return `<span class="lk-pill wr${cls}" title="${esc(help)}">` +
-         `<span class="lk-wr-lbl">${label}</span> ${val}</span>`;
+  return `<span class="val-pill${cls}" title="${esc(help)}">` +
+         `<strong>${val}</strong><span class="val-pill-label">${label}</span></span>`;
 }
 
 function renderReport(data) {
@@ -848,12 +855,14 @@ function renderReport(data) {
 
   document.getElementById('lk-status').innerHTML =
     `<div class="lk-status-row">` +
-    `<span class="lk-pill all">${data.meta.hands.toLocaleString()} hands</span>` +
-    ` <span class="lk-pill all">${data.meta.tournaments} tournaments</span>` +
-    ` ${winratePill(data.meta.winrate_bb100, 'overall',
-                    'All-in adjusted big blinds won per 100 hands')}` +
-    ` ${winratePill(data.meta.winrate_raw_bb100, 'raw',
-                    'Realised result before all-in equity adjustment')}` +
+    valPill(data.meta.hands.toLocaleString(), 'Hands',
+            'Hands in the current filter') +
+    valPill(data.meta.tournaments, 'Tourneys',
+            'Tournaments in the current filter') +
+    winratePill(data.meta.winrate_bb100, 'Overall',
+                'All-in adjusted big blinds won per 100 hands') +
+    winratePill(data.meta.winrate_raw_bb100, 'Raw',
+                'Realised result before all-in equity adjustment') +
     confidenceControlHtml() +
     nehPillHtml() +
     `</div>`;
@@ -955,18 +964,30 @@ function tierPairOf(row) {
   ];
 }
 
-// {kind: 'none'|'neh'|'improved'|'same'|'regressed', tA, tB, diff}
+// {kind: 'none'|'neh'|'improved'|'same'|'flipped'|'regressed', tA, tB, diff, crossed}
 // 'none' — no target, or zero opportunities on a side (tierOf returns null).
 // 'neh'  — a side has some opportunities but under MIN_SAMPLE.
 // diff > 0 means the hand moved closer to the target band between A and B.
+//
+// `crossed` marks the case delta's magnitude alone cannot see: B sits on the
+// OPPOSITE side of the target band from A (below the floor in one range, above
+// the ceiling in the other). Distance is symmetric, so overshooting from 1.2
+// band-widths under to 1.2 over nets diff = 0 and would otherwise be reported
+// as "same" / "No change" — when in fact the player reversed the leak and the
+// advice must now point the other way.
 function progressOf(row) {
   const [tA, tB] = tierPairOf(row);
   if (tA === null || tB === null) return { kind: 'none' };
   if (tA === 'neh' || tB === 'neh') return { kind: 'neh', tA, tB };
   const dA = Math.abs(row.deltaA ?? 0), dB = Math.abs(row.deltaB ?? 0);
   const diff = dA - dB;
-  const kind = diff > PROGRESS_EPS ? 'improved' : diff < -PROGRESS_EPS ? 'regressed' : 'same';
-  return { kind, tA, tB, diff };
+  // Sign of delta is the side of the band: <0 under the floor, >0 over the
+  // ceiling, 0 inside it. Two non-zero opposite signs means B crossed over.
+  const sA = Math.sign(row.deltaA ?? 0), sB = Math.sign(row.deltaB ?? 0);
+  const crossed = sA !== 0 && sB !== 0 && sA !== sB;
+  let kind = diff > PROGRESS_EPS ? 'improved' : diff < -PROGRESS_EPS ? 'regressed' : 'same';
+  if (crossed && kind === 'same') kind = 'flipped';
+  return { kind, tA, tB, diff, crossed };
 }
 
 function progressBadge(row) {
@@ -978,9 +999,11 @@ function progressBadge(row) {
   const meta = {
     improved: { label: 'improved',  color: TIERS.good.color },
     same:     { label: 'same',      color: TIERS.mid.color },
+    flipped:  { label: 'flipped',   color: TIERS.mid.color },
     regressed:{ label: 'regressed', color: TIERS.high.color },
   }[p.kind];
-  const title = `${p.tA} → ${p.tB} (${p.diff >= 0 ? '+' : ''}${p.diff.toFixed(2)} band-widths)`;
+  const title = `${p.tA} → ${p.tB} (${p.diff >= 0 ? '+' : ''}${p.diff.toFixed(2)} band-widths)`
+    + (p.crossed ? ' — crossed to the other side of the target' : '');
   return `<span class="lk-badge" style="background:${meta.color}1f;color:${meta.color};border:1px solid ${meta.color}66" title="${esc(title)}">${meta.label}</span>`;
 }
 
@@ -993,8 +1016,20 @@ function recActionCompare(row) {
   // written for when that stat's verdict IS good. We only reach here when
   // it's not (the tB === 'good' branch above already returned), so that text
   // would be nonsensical; fall back to the generic more/less direction instead.
-  const staticRec = (row.rec && row.rec !== 'Good job') ? row.rec
+  //
+  // directedRec() flips the stored "more"/"less" wording to match the side B
+  // actually landed on. Using row.rec verbatim (as this did) meant a stat that
+  // crossed the band kept the advice written for the OTHER side — telling the
+  // player to do more of exactly what they were now overdoing.
+  const staticRec = (row.rec && row.rec !== 'Good job')
+    ? directedRec(row.rec, row.resultB)
     : (row.resultB === 'LOW' ? 'More' : row.resultB === 'HIGH' ? 'Less' : '');
+  if (p.crossed) {
+    const side = row.resultB === 'LOW' ? 'too low' : 'too high';
+    if (p.kind === 'improved')  return `Overshot the target but closer — now ${side}; ${staticRec}`;
+    if (p.kind === 'regressed') return `Overcorrected past the target, further out — ${staticRec}`;
+    return `Overcorrected — ${side} now instead; ${staticRec}`;
+  }
   if (p.kind === 'improved') return `Better, keep pushing — ${staticRec}`;
   if (p.kind === 'regressed') return `Getting worse — ${staticRec}`;
   return staticRec || 'No change';
@@ -1002,29 +1037,37 @@ function recActionCompare(row) {
 
 function recColorCompare(row) {
   const p = progressOf(row);
+  // A crossing is never a clean win, however much the magnitude shrank — the
+  // leak reversed rather than closed, so it reads amber either way. (crossed
+  // implies B is outside the band, so this can't swallow a 'good' verdict.)
+  if (p.crossed) return TIERS.mid.color;
   if (p.kind === 'improved') return TIERS.good.color;
   if (p.kind === 'regressed') return TIERS.high.color;
   if (p.kind === 'same') return p.tB === 'good' ? TIERS.good.color : TIERS.mid.color;
   return '';
 }
 
-// Mirrors rankOf()/sortedRows(): improved(0) same(1) regressed(2), then the
-// "nothing to say" tail — neh(3), no target/no samples(4/5) — pinned last
-// in BOTH sort directions.
+// Mirrors rankOf()/sortedRows(): improved(0) same(1) flipped(2) regressed(3),
+// then the "nothing to say" tail — neh(4), no target/no samples(5/6) — pinned
+// last in BOTH sort directions. 'flipped' ranks below 'same' because reversing
+// a leak is worse than holding steady, but above an outright regression.
+const PROGRESS_TAIL_RANK = 4;
+
 function rankOfProgress(row) {
   const p = progressOf(row);
   if (p.kind === 'improved')  return 0;
   if (p.kind === 'same')      return 1;
-  if (p.kind === 'regressed') return 2;
-  if (p.kind === 'neh')       return 3;
-  return (row.oppA || row.oppB) ? 4 : 5;
+  if (p.kind === 'flipped')   return 2;
+  if (p.kind === 'regressed') return 3;
+  if (p.kind === 'neh')       return PROGRESS_TAIL_RANK;
+  return (row.oppA || row.oppB) ? 5 : 6;
 }
 
 function sortedRowsCompare(rows, dir) {
   if (!dir) return rows;
   return rows.slice().sort((a, b) => {
     const ra = rankOfProgress(a), rb = rankOfProgress(b);
-    const tailA = ra >= 3, tailB = rb >= 3;
+    const tailA = ra >= PROGRESS_TAIL_RANK, tailB = rb >= PROGRESS_TAIL_RANK;
     if (tailA !== tailB) return tailA ? 1 : -1;
     if (tailA) return ra - rb;
     if (ra !== rb) return dir === 'asc' ? ra - rb : rb - ra;

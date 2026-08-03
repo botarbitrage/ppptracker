@@ -255,12 +255,12 @@
           <div class="d-flex align-items-center flex-wrap gap-2">
             <span id="player-info"></span>
             <div id="loaded-hands-row" class="loaded-hands-row d-none">
-              <span class="hstat-pill"><span id="hs-hands">—</span>&thinsp;HANDS</span>
-              <span class="hstat-pill"><span id="hs-flop">—</span>&thinsp;FLOP</span>
-              <span class="hstat-pill"><span id="hs-turn">—</span>&thinsp;TURN</span>
-              <span class="hstat-pill"><span id="hs-river">—</span>&thinsp;RIVER</span>
-              <span class="hstat-pill"><span id="hs-sd">—</span>&thinsp;SD</span>
-              <span class="hstat-pill"><span id="hs-won">—</span>&thinsp;WON</span>
+              <span class="val-pill"><strong id="hs-hands">—</strong><span class="val-pill-label">Hands</span></span>
+              <span class="val-pill"><strong id="hs-flop">—</strong><span class="val-pill-label">Flop</span></span>
+              <span class="val-pill"><strong id="hs-turn">—</strong><span class="val-pill-label">Turn</span></span>
+              <span class="val-pill"><strong id="hs-river">—</strong><span class="val-pill-label">River</span></span>
+              <span class="val-pill"><strong id="hs-sd">—</strong><span class="val-pill-label">SD</span></span>
+              <span class="val-pill"><strong id="hs-won">—</strong><span class="val-pill-label">Won</span></span>
             </div>
           </div>
         </div>
@@ -304,13 +304,16 @@
         <table class="table table-dark table-striped table-hover hand-table">
           <thead>
             <tr>
-              <th scope="col" data-tz-label="When">When</th>
+              <!-- Narrow-screen priority (highest first): cards, net p/l,
+                   position, street, when, export, replay. Columns drop from
+                   the bottom of that list up as the viewport shrinks. -->
+              <th scope="col" data-tz-label="When" class="d-none d-md-table-cell">When</th>
               <th scope="col">Hole Cards</th>
-              <th scope="col" class="d-none d-md-table-cell">Position</th>
+              <th scope="col">Position</th>
               <th scope="col">Street</th>
-              <th scope="col" class="d-none d-lg-table-cell">Net P/L (BB)</th>
-              <th scope="col" class="text-center">Export</th>
-              <th scope="col">Replay</th>
+              <th scope="col">Net P/L (BB)</th>
+              <th scope="col" class="text-center d-none d-lg-table-cell">Export</th>
+              <th scope="col" class="d-none d-xl-table-cell">Replay</th>
             </tr>
           </thead>
           <tbody id="recent-hands-tbody"></tbody>
@@ -330,13 +333,16 @@
         <table class="table table-dark table-striped table-hover hand-table">
           <thead>
             <tr>
-              <th scope="col" data-tz-label="When">When</th>
+              <!-- Narrow-screen priority (highest first): cards, net p/l,
+                   position, street, when, export, replay. Columns drop from
+                   the bottom of that list up as the viewport shrinks. -->
+              <th scope="col" data-tz-label="When" class="d-none d-md-table-cell">When</th>
               <th scope="col">Hole Cards</th>
-              <th scope="col" class="d-none d-md-table-cell">Position</th>
+              <th scope="col">Position</th>
               <th scope="col">Street</th>
-              <th scope="col" class="d-none d-lg-table-cell">Net P/L (BB)</th>
-              <th scope="col" class="text-center">Export</th>
-              <th scope="col">Replay</th>
+              <th scope="col">Net P/L (BB)</th>
+              <th scope="col" class="text-center d-none d-lg-table-cell">Export</th>
+              <th scope="col" class="d-none d-xl-table-cell">Replay</th>
             </tr>
           </thead>
           <tbody id="recent-won-tbody"></tbody>
@@ -458,13 +464,16 @@
         <table class="table table-dark table-striped table-hover hand-table">
           <thead>
             <tr>
-              <th scope="col" data-tz-label="When">When</th>
+              <!-- Narrow-screen priority (highest first): cards, net p/l,
+                   position, street, when, export, replay. Columns drop from
+                   the bottom of that list up as the viewport shrinks. -->
+              <th scope="col" data-tz-label="When" class="d-none d-md-table-cell">When</th>
               <th scope="col">Hole Cards</th>
-              <th scope="col" class="d-none d-md-table-cell">Position</th>
+              <th scope="col">Position</th>
               <th scope="col">Street</th>
-              <th scope="col" class="d-none d-lg-table-cell">Net P/L (BB)</th>
-              <th scope="col" class="text-center">Export</th>
-              <th scope="col">Replay</th>
+              <th scope="col">Net P/L (BB)</th>
+              <th scope="col" class="text-center d-none d-lg-table-cell">Export</th>
+              <th scope="col" class="d-none d-xl-table-cell">Replay</th>
             </tr>
           </thead>
           <tbody id="tourney-detail-tbody">
@@ -531,13 +540,16 @@
         <table class="table table-dark table-striped table-hover hand-table">
           <thead>
             <tr>
-              <th scope="col" data-tz-label="When">When</th>
+              <!-- Narrow-screen priority (highest first): cards, net p/l,
+                   position, street, when, export, replay. Columns drop from
+                   the bottom of that list up as the viewport shrinks. -->
+              <th scope="col" data-tz-label="When" class="d-none d-md-table-cell">When</th>
               <th scope="col">Hole Cards</th>
-              <th scope="col" class="d-none d-md-table-cell">Position</th>
+              <th scope="col">Position</th>
               <th scope="col">Street</th>
-              <th scope="col" class="d-none d-lg-table-cell">Net P/L (BB)</th>
-              <th scope="col" class="text-center">Export</th>
-              <th scope="col">Replay</th>
+              <th scope="col">Net P/L (BB)</th>
+              <th scope="col" class="text-center d-none d-lg-table-cell">Export</th>
+              <th scope="col" class="d-none d-xl-table-cell">Replay</th>
             </tr>
           </thead>
           <tbody id="cgsd-tbody">
@@ -886,7 +898,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="/static/app.js?v=41"></script>
+<script src="/static/app.js?v=42"></script>
 <script>
   if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
     navigator.serviceWorker.register('/static/sw.js', { scope: '/' })

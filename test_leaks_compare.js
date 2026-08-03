@@ -220,6 +220,81 @@ function main() {
 
   T.setMinSample(L.med);   // leave the module at its default
 
+  // ── Crossing the target band (LOW <-> HIGH) ──
+  // |delta| is symmetric, so overshooting from equally far under to equally
+  // far over used to net diff = 0 and report "same" / "No change" — while the
+  // stored rec (written for the old side) told the player to keep going that
+  // way. Both halves of that are asserted here.
+  const crossUp = {                        // under the floor -> over the ceiling
+    resultA: 'LOW',  deltaA: -1.2, oppA: 50, pctA: 5,
+    resultB: 'HIGH', deltaB:  1.2, oppB: 50, pctB: 40,
+    target: [10, 20], rec: 'Raise more',
+  };
+  let cp = T.progressOf(crossUp);
+  check('cross LOW->HIGH is flagged crossed', cp.crossed === true, JSON.stringify(cp));
+  check('cross with equal magnitude is flipped, not same',
+        cp.kind === 'flipped', cp.kind);
+  let msg = T.recActionCompare(crossUp);
+  check('cross message names the overcorrection', /Overcorrect/i.test(msg), msg);
+  check('cross message reverses "more" to "less"',
+        /less/i.test(msg) && !/\bmore\b/i.test(msg), msg);
+  check('cross renders amber, not green',
+        T.recColorCompare(crossUp) === T.TIERS.mid.color, T.recColorCompare(crossUp));
+
+  const crossDown = {                      // over the ceiling -> under the floor
+    resultA: 'HIGH', deltaA:  1.5, oppA: 50,
+    resultB: 'LOW',  deltaB: -1.5, oppB: 50,
+    target: [10, 20], rec: 'Fold less often',
+  };
+  msg = T.recActionCompare(crossDown);
+  check('cross HIGH->LOW flips "less" to "more"',
+        /more/i.test(msg) && !/\bless\b/i.test(msg), msg);
+
+  // Crossing while genuinely closing the gap is still a crossing.
+  const crossCloser = {
+    resultA: 'LOW',  deltaA: -2.0, oppA: 50,
+    resultB: 'HIGH', deltaB:  0.4, oppB: 50,
+    target: [10, 20], rec: 'Raise more',
+  };
+  cp = T.progressOf(crossCloser);
+  check('cross that shrinks the gap still reads improved',
+        cp.kind === 'improved' && cp.crossed === true, JSON.stringify(cp));
+  check('improved-but-crossed says overshot',
+        /Overshot/i.test(T.recActionCompare(crossCloser)), T.recActionCompare(crossCloser));
+  check('improved-but-crossed is still amber',
+        T.recColorCompare(crossCloser) === T.TIERS.mid.color);
+
+  // Landing inside the band is a fix, never a crossing (deltaB === 0).
+  const fixed = {
+    resultA: 'LOW', deltaA: -2.0, oppA: 50,
+    resultB: 'GOOD', deltaB: 0, oppB: 50, target: [10, 20], rec: 'Raise more',
+  };
+  check('landing in the band is not crossed', T.progressOf(fixed).crossed === false);
+  check('landing in the band still says fixed',
+        T.recActionCompare(fixed) === 'Fixed — now inside target', T.recActionCompare(fixed));
+
+  // Same-side movement must keep the stored wording untouched.
+  const sameSide = {
+    resultA: 'LOW', deltaA: -2.0, oppA: 50,
+    resultB: 'LOW', deltaB: -1.0, oppB: 50, target: [10, 20], rec: 'Raise more',
+  };
+  check('same-side move is not crossed', T.progressOf(sameSide).crossed === false);
+  check('same-side keeps the stored direction',
+        /more/i.test(T.recActionCompare(sameSide)), T.recActionCompare(sameSide));
+
+  // 'flipped' sorts between 'same' and 'regressed', and never into the tail.
+  check('flipped ranks below same', T.rankOfProgress(crossUp) > T.rankOfProgress(
+        { resultA: 'HIGH', deltaA: 1.0, oppA: 50, resultB: 'HIGH', deltaB: 0.95, oppB: 50 }));
+  check('flipped ranks above regressed', T.rankOfProgress(crossUp) < T.rankOfProgress(
+        { resultA: 'GOOD', deltaA: 0, oppA: 50, resultB: 'HIGH', deltaB: 2.0, oppB: 50 }));
+  const flippedSorted = T.sortedRowsCompare([
+    { key: 'flip', ...crossUp },
+    { key: 'neh',  resultA: 'GOOD', deltaA: 0, oppA: 50, resultB: 'GOOD', deltaB: 0, oppB: 2 },
+  ], 'asc').map(r => r.key);
+  check('flipped stays out of the tail', flippedSorted[0] === 'flip', flippedSorted.join(','));
+  check('flipped badge is labelled', T.progressBadge(crossUp).includes('flipped'),
+        T.progressBadge(crossUp));
+
   console.log(failures === 0 ? 'compare logic: PASS' : `compare logic: FAIL (${failures})`);
   process.exit(failures === 0 ? 0 : 1);
 }

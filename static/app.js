@@ -559,21 +559,24 @@ function renderHandsTable(hands, tbodyId, options = {}) {
           </div>`
         : '<span class="text-muted">—</span>';
       // Export mode: Net P/L (BB) | Export
-      cols56 = `<td class="d-none d-lg-table-cell">${fmtProfitBB(h.profit, h.big_blind)}</td>
-      <td class="text-center">${exportBtns}</td>`;
+      cols56 = `<td>${fmtProfitBB(h.profit, h.big_blind)}</td>
+      <td class="text-center d-none d-lg-table-cell">${exportBtns}</td>`;
     } else {
       // Normal mode: Result | Net P/L (BB)
-      cols56 = `<td class="d-none d-md-table-cell">${resultBadge(h.result)}</td>
-      <td class="d-none d-lg-table-cell">${fmtProfitBB(h.profit, h.big_blind)}</td>`;
+      cols56 = `<td class="d-none d-lg-table-cell">${resultBadge(h.result)}</td>
+      <td>${fmtProfitBB(h.profit, h.big_blind)}</td>`;
     }
 
+    // Column visibility mirrors the header priority in index.html: cards and
+    // net p/l always survive, then position and street, and when/export/replay
+    // drop off as the viewport narrows.
     return `<tr>
-      <td><span class="hand-when-cell">${fmtHandDateTime(h.ts, tz)}${copyBtn}</span></td>
+      <td class="d-none d-md-table-cell"><span class="hand-when-cell">${fmtHandDateTime(h.ts, tz)}${copyBtn}</span></td>
       <td class="no-wrap">${cards || '—'}</td>
-      <td class="d-none d-md-table-cell">${posBadge(h.position)}</td>
+      <td>${posBadge(h.position)}</td>
       <td>${streetBadge(h.last_street)}</td>
       ${cols56}
-      <td>
+      <td class="d-none d-xl-table-cell">
         ${h.replay_url && h.replay_url !== '#'
           ? `<a class="replay-link" href="${h.replay_url}" target="_blank" rel="noopener" title="Watch replay">▶</a>`
           : '<span class="text-muted">—</span>'}
