@@ -133,6 +133,11 @@
           "reason": "Was flat [35,45] across all positions (placeholder); a sub-30bb 4-bet is usually a jam, so realistic fold is higher and position-dependent."
         }
       ]
+    },
+    "bands": {
+      "scheme": "effective-stack depth: lt15 / 15_25 / 25_40 / gte40 (half-open bb)",
+      "applied": "2026-08-03 (Phase 4 preflop band targets)",
+      "method": "Solver-derived, preflop only. Seeded for stats with a clear, defensible monotonic depth trend: Raise First (opens widen as stacks shorten), Fold to Steal and Fold BB v SB (blinds fold more when deeper). 25_40 tracks the harvested 15-40bb blended value; 15_25 is a step off it; lt15 and gte40 are extrapolated and carry NO BBZ anchor — treat as starting points and tune from results. Every other preflop stat inherits the blended target until banded (editable in the /leaks/targets UI)."
     }
   },
   "positions": {
@@ -154,6 +159,24 @@
             "hero": 13.12,
             "count": 564,
             "result": "LOW"
+          },
+          "bands": {
+            "lt15": [
+              19,
+              24
+            ],
+            "15_25": [
+              17,
+              21
+            ],
+            "25_40": [
+              15,
+              19
+            ],
+            "gte40": [
+              13,
+              17
+            ]
           }
         },
         {
@@ -594,6 +617,24 @@
             "hero": 25.0,
             "count": 612,
             "result": "GOOD"
+          },
+          "bands": {
+            "lt15": [
+              27,
+              31
+            ],
+            "15_25": [
+              25,
+              29
+            ],
+            "25_40": [
+              23,
+              27
+            ],
+            "gte40": [
+              20,
+              24
+            ]
           }
         },
         {
@@ -1049,6 +1090,24 @@
             "hero": 33.25,
             "count": 379,
             "result": "LOW"
+          },
+          "bands": {
+            "lt15": [
+              34,
+              40
+            ],
+            "15_25": [
+              31,
+              37
+            ],
+            "25_40": [
+              29,
+              35
+            ],
+            "gte40": [
+              26,
+              32
+            ]
           }
         },
         {
@@ -1494,6 +1553,24 @@
             "hero": 49.19,
             "count": 248,
             "result": "GOOD"
+          },
+          "bands": {
+            "lt15": [
+              52,
+              60
+            ],
+            "15_25": [
+              49,
+              57
+            ],
+            "25_40": [
+              46,
+              54
+            ],
+            "gte40": [
+              42,
+              50
+            ]
           }
         },
         {
@@ -1883,6 +1960,24 @@
             "hero": 42.63,
             "count": 190,
             "result": "HIGH"
+          },
+          "bands": {
+            "lt15": [
+              28,
+              34
+            ],
+            "15_25": [
+              26,
+              31
+            ],
+            "25_40": [
+              24,
+              29
+            ],
+            "gte40": [
+              22,
+              27
+            ]
           }
         },
         {
@@ -1948,6 +2043,24 @@
             "hero": 73.11,
             "count": 119,
             "result": "GOOD"
+          },
+          "bands": {
+            "lt15": [
+              64,
+              70
+            ],
+            "15_25": [
+              68,
+              73
+            ],
+            "25_40": [
+              72,
+              77
+            ],
+            "gte40": [
+              75,
+              80
+            ]
           }
         },
         {
@@ -2351,6 +2464,24 @@
             "hero": 55.56,
             "count": 63,
             "result": "HIGH"
+          },
+          "bands": {
+            "lt15": [
+              18,
+              26
+            ],
+            "15_25": [
+              22,
+              30
+            ],
+            "25_40": [
+              26,
+              34
+            ],
+            "gte40": [
+              30,
+              38
+            ]
           }
         },
         {
@@ -2364,6 +2495,24 @@
             "hero": 54.67,
             "count": 150,
             "result": "HIGH"
+          },
+          "bands": {
+            "lt15": [
+              24,
+              29
+            ],
+            "15_25": [
+              28,
+              33
+            ],
+            "25_40": [
+              32,
+              37
+            ],
+            "gte40": [
+              36,
+              42
+            ]
           }
         },
         {
