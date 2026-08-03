@@ -303,7 +303,13 @@ def run_all():
     been removed: per-position targets make the old 'observed' field comparison
     no longer valid."""
     result = run_validation()
-    # Classifier check removed (see comment above)
+    # Classifier check removed (see comment above). Structural target-grid
+    # invariants replace it: they need no ground-truth CSV.
+    try:
+        result['target_invariants'] = run_target_invariants()
+    except Exception as e:
+        result['target_invariants'] = {'checks': [], 'all_ok': False,
+                                        'error': str(e)}
     return result
 
 
@@ -359,6 +365,98 @@ def run_classifier_check(path=None):
                 'match': ours == obs['result'],
             })
     return {'cells': cells, 'all_match': all(c['match'] for c in cells)}
+
+
+# ── Target-grid invariants ──────────────────────────────────────────────────
+# Structural checks on the seed target file itself — no hands, no ground truth,
+# runnable anywhere. They guard the classes of error that slipped in before:
+# a target that coaches the wrong way (Fold BB v SB), a limp complex whose
+# branches can't partition to 100%, and depth bands that trend the wrong way.
+
+def _mid(t):
+    return None if not t else (t[0] + t[1]) / 2.0
+
+
+def run_target_invariants(path=None):
+    """Validate data/bbz_leak_ranges.json structurally. Returns
+    {'checks': [{'name', 'ok', 'detail'}], 'all_ok': bool}."""
+    from leak_engine import STACK_BAND_KEYS
+    path = path or _BBZ_RANGES_PATH
+    with open(path, encoding='utf-8') as fh:
+        data = json.load(fh)
+    positions = data.get('positions', {})
+
+    def cell(pos, label):
+        for s in positions.get(pos, {}).get('stats', []):
+            if s['label'] == label:
+                return s
+        return None
+
+    checks = []
+
+    def add(name, ok, detail=''):
+        checks.append({'name': name, 'ok': bool(ok), 'detail': detail})
+
+    # 1. Every target is null or a well-formed [lo, hi] in [0, 100].
+    bad = []
+    for pos, pdata in positions.items():
+        for s in pdata.get('stats', []):
+            t = s.get('target')
+            if t is not None and not (isinstance(t, list) and len(t) == 2
+                                      and 0 <= t[0] < t[1] <= 100):
+                bad.append(f'{pos}/{s["label"]}={t}')
+    add('all targets well-formed', not bad, '; '.join(bad))
+
+    # 2. Depth bands: valid keys, well-formed values, preflop stats only.
+    band_bad = []
+    for pos, pdata in positions.items():
+        for s in pdata.get('stats', []):
+            bands = s.get('bands')
+            if not bands:
+                continue
+            for k, v in bands.items():
+                if k not in STACK_BAND_KEYS:
+                    band_bad.append(f'{pos}/{s["label"]}: bad band key {k}')
+                if v is not None and not (isinstance(v, list) and len(v) == 2
+                                          and 0 <= v[0] < v[1] <= 100):
+                    band_bad.append(f'{pos}/{s["label"]}[{k}]={v}')
+    add('all band targets well-formed', not band_bad, '; '.join(band_bad))
+
+    # 3. BB must not fold MORE vs a lone SB open than vs a general steal — the
+    #    inversion that shipped once (Fold BB v SB used to sit above Fold to
+    #    Steal, coaching over-folding in the widest defend spot).
+    fbvsb, fsteal = cell('BB', 'Fold BB v SB'), cell('BB', 'Fold to Steal')
+    if fbvsb and fsteal and fbvsb.get('target') and fsteal.get('target'):
+        ok = fbvsb['target'][0] < fsteal['target'][0]
+        add('BB Fold-BB-v-SB below Fold-to-Steal', ok,
+            f'{fbvsb["target"]} vs {fsteal["target"]}')
+
+    # 4. Limp complex partitions: raise/call/fold of a limp-open sum to ~100%.
+    for pos in positions:
+        parts = [cell(pos, f'Limp/{b}') for b in ('Raise', 'Call', 'Fold')]
+        mids = [_mid(p['target']) for p in parts if p and p.get('target')]
+        if len(mids) == 3:
+            total = sum(mids)
+            add(f'{pos} limp complex sums ~100%', 97 <= total <= 103,
+                f'midpoints sum to {total:.0f}%')
+
+    # 5. Raise-First depth bands trend down as stacks deepen (shorter stacks
+    #    open wider). Checked on both edges when the cell carries bands.
+    for pos in positions:
+        rf = cell(pos, 'Raise First')
+        bands = (rf or {}).get('bands') or {}
+        seq = [bands.get(k) for k in STACK_BAND_KEYS if bands.get(k)]
+        ordered = [bands.get(k) for k in STACK_BAND_KEYS]
+        present = [(k, ordered[i]) for i, k in enumerate(STACK_BAND_KEYS) if ordered[i]]
+        if len(present) >= 2:
+            los = [v[0] for _k, v in present]
+            his = [v[1] for _k, v in present]
+            mono = all(los[i] >= los[i + 1] for i in range(len(los) - 1)) and \
+                   all(his[i] >= his[i + 1] for i in range(len(his) - 1))
+            add(f'{pos} RFI bands trend down with depth', mono,
+                ' '.join(f'{k}{v}' for k, v in present))
+
+    return {'checks': checks, 'all_ok': all(c['ok'] for c in checks)}
 
 
 # ── CLI ─────────────────────────────────────────────────────────────────────
@@ -421,4 +519,15 @@ if __name__ == '__main__':
                   f"hero={c['hero_pct']} target={c['target']} "
                   f"bbz={c['bbz_result']} ours={c['ours_result']}")
         print(f"   → {'ALL MATCH' if clf['all_match'] else f'{len(bad)} MISMATCH'}")
+
+    if 'target_invariants' in result:
+        ti = result['target_invariants']
+        print(f"== target-grid invariants  ({len(ti['checks'])} checks)")
+        if ti.get('error'):
+            print(f"   ERROR: {ti['error']}")
+        for c in ti['checks']:
+            if not c['ok']:
+                print(f"   FAIL {c['name']}"
+                      + (f" — {c['detail']}" if c['detail'] else ''))
+        print(f"   → {'ALL OK' if ti['all_ok'] else 'INVARIANT VIOLATIONS'}")
     raise SystemExit(0 if result['all_match'] else 1)
