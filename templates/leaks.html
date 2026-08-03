@@ -35,7 +35,7 @@
     .lk-pos-kv b { color:var(--text); font-weight:600; }
     .lk-wr-pos   { color:var(--green) !important; }
     .lk-wr-neg   { color:#ff5470 !important; }
-    .lk-pills { margin-left:auto; display:flex; gap:6px; flex-wrap:wrap; }
+    .lk-pills { margin-left:auto; display:flex; gap:6px; flex-wrap:nowrap; align-items:center; }
     .lk-pill {
       font-family:var(--font-head); font-size:.72rem; font-weight:700;
       border-radius:20px; padding:2px 10px; letter-spacing:.4px; white-space:nowrap;
@@ -46,13 +46,15 @@
     .lk-pill.thin { background:#ffffff0a; color:var(--muted); border:1px solid #ffffff20; }
     .lk-caret { color:var(--muted); font-size:.8rem; width:14px; }
     .lk-stat-name { border-bottom:1px dotted #ffffff38; cursor:help; position:relative; }
-    .lk-stat-name[data-tip]:hover::after {
+    .lk-stat-name[data-tip]:hover::after,
+    .lk-pill[data-tip]:hover::after {
       content:attr(data-tip); position:absolute; bottom:calc(100% + 6px); left:0;
       background:#0d1117ee; color:#d0ddd0; font-size:.76rem; font-weight:400;
       font-family:var(--font-body); padding:6px 10px; border-radius:6px;
       border:1px solid #1e2d1e; white-space:normal; width:max-content;
       max-width:280px; z-index:99; pointer-events:none; line-height:1.4;
     }
+    .lk-pill[data-tip] { position:relative; cursor:help; }
     .lk-count { color:var(--muted); font-size:.82rem; }
     .lk-street-inline {
       font-family:var(--font-head); font-size:.6rem; font-weight:700;
@@ -479,7 +481,17 @@ function togglePosFilter(pos, cat, evt) {
   if (!card) return;
   card.querySelector('.lk-pill.good').classList.toggle('inactive', !f.good);
   card.querySelector('.lk-pill.bad').classList.toggle('inactive', !f.bad);
-  card.querySelector('.lk-pill.thin').classList.toggle('inactive', !f.neh);
+}
+
+function togglePosNehPill(pos, evt) {
+  evt.stopPropagation();
+  if (!POS_FILTERS[pos]) POS_FILTERS[pos] = defaultPosFilter();
+  const f = POS_FILTERS[pos];
+  f.neh = !f.neh;
+  const tbody = document.querySelector(`tbody[data-position="${pos}"]`);
+  if (tbody) tbody.innerHTML = renderRows(pos);
+  const pill = document.querySelector(`[data-pos-neh-pill="${pos}"]`);
+  if (pill) pill.classList.toggle('inactive', !f.neh);
 }
 
 function barId(ns, suffix) { return ns ? `lk-${ns}-${suffix}` : `lk-${suffix}`; }
@@ -517,9 +529,7 @@ function createActionButtons() {
     <button class="lk-reset" onclick="resetFilters()">Reset</button>
     <label class="lk-compare-toggle">
       <input type="checkbox" id="lk-compare-toggle" onchange="onCompareToggle(this.checked)"> Compare
-    </label>
-    <span class="lk-pill thin${HIDE_NEH ? '' : ' inactive'}" id="lk-hide-neh-pill"
-          onclick="onHideNehToggle()" style="cursor:pointer;user-select:none">${HIDE_NEH ? 'Show neh' : 'Hide neh'}</span>`;
+    </label>`;
   return div;
 }
 
@@ -687,13 +697,19 @@ function renderReport(data) {
   }
   sampleWarning(data.meta);
 
+  const excludedNotes = [];
+  if (data.meta.hands_skipped) {
+    excludedNotes.push(`${data.meta.hands_skipped} hands excluded (pot inconsistencies)`);
+  }
+  if (data.meta.hands_unadjusted) {
+    excludedNotes.push(`<span style="color:#e0b95c">${data.meta.hands_unadjusted} all-in hands not yet equity-adjusted — reload to finish</span>`);
+  }
   document.getElementById('lk-status').innerHTML =
-    `${data.meta.hands.toLocaleString()} hands · ${data.meta.tournaments} tournaments` +
+    `<span class="lk-pill all">${data.meta.hands.toLocaleString()} hands</span>` +
+    ` <span class="lk-pill all">${data.meta.tournaments} tournaments</span>` +
     ` · overall winrate <b class="${data.meta.winrate_bb100 >= 0 ? 'lk-wr-pos' : 'lk-wr-neg'}">` +
     `${fmtBB(data.meta.winrate_bb100)}/100</b>` +
-    ` <span title="Before all-in equity adjustment">(raw ${fmtBB(data.meta.winrate_raw_bb100)}/100)</span>` +
-    (data.meta.hands_skipped ? ` · ${data.meta.hands_skipped} hands excluded (pot inconsistencies)` : '') +
-    (data.meta.hands_unadjusted ? ` · <span style="color:#e0b95c">${data.meta.hands_unadjusted} all-in hands not yet equity-adjusted — reload to finish</span>` : '');
+    (excludedNotes.length ? `<br><span style="font-size:.8rem;color:var(--muted)">* ${excludedNotes.join(' · ')}</span>` : '');
 
   REPORT_DATA = {};
   const byPos = Object.fromEntries(data.positions.map(p => [p.position, p]));
@@ -716,11 +732,11 @@ function renderReport(data) {
         <span class="lk-pos-kv" title="All-in adjusted big blinds won per 100 hands">Winrate:
           <b class="${p.winrate_bb100 >= 0 ? 'lk-wr-pos' : 'lk-wr-neg'}">${fmtBB(p.winrate_bb100)}</b></span>
         <span class="lk-pos-kv">Hands: <b>${p.hands}</b></span>
+        <span class="lk-pill thin${HIDE_NEH ? ' inactive' : ''} data-pos-neh-pill="${p.position}" onclick="togglePosNehPill('${p.position}', event)" style="margin-left:auto" data-tip="Stats with fewer than ${MIN_SAMPLE} opportunities — not enough hands for a verdict">neh</span>
         <div class="lk-pills" onclick="event.stopPropagation()">
           <span class="lk-pill all" onclick="togglePosFilter('${p.position}','all',event)">All (${good + bad + thin})</span>
           <span class="lk-pill good" onclick="togglePosFilter('${p.position}','good',event)">OK (${good})</span>
           <span class="lk-pill bad" onclick="togglePosFilter('${p.position}','bad',event)">Not OK (${bad})</span>
-          <span class="lk-pill thin${HIDE_NEH ? ' inactive' : ''}" onclick="togglePosFilter('${p.position}','neh',event)" title="Fewer than ${MIN_SAMPLE} opportunities — not enough hands for a verdict">neh (${thin})</span>
         </div>
       </div>
       <div class="lk-body d-none" onclick="event.stopPropagation()">
