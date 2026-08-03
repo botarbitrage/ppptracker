@@ -1112,25 +1112,250 @@ _BBZ_RANGES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                 'data', 'bbz_leak_ranges.json')
 
 
-def _load_bbz_targets():
-    """{(position, stat_label): {'target': [lo, hi], 'rec': str}} from the
-    harvested BBZ range table (design doc §7)."""
+# The seed file ships the BBZ baseline + corrections in git. Admin edits live
+# in a single Firestore doc (config/leak_targets) as a sparse overlay, so a
+# runtime — ephemeral filesystem, two gunicorn workers — never writes the file
+# and every worker sees the same edits. Seed + overlay are merged on read here;
+# both the /leaks report and the target editor go through this path.
+_TARGET_OVERLAY_COLL = 'config'
+_TARGET_OVERLAY_DOC = 'leak_targets'
+
+
+def _seed_grid():
+    """Ordered [(position, [cell, ...]), ...] straight from the seed file, or
+    [] if it can't be read. Cells are the raw dicts (label, target, rec, ...)."""
     import json as _jj
     try:
         with open(_BBZ_RANGES_PATH, encoding='utf-8') as fh:
             data = _jj.load(fh)
     except Exception:
-        return {}
+        return []
+    return [(pos, pdata.get('stats') or [])
+            for pos, pdata in (data.get('positions') or {}).items()]
+
+
+def _load_target_overlay(db=None):
+    """{(position, label): overlay_cell} from Firestore config/leak_targets,
+    plus the doc's ('updated_at', 'updated_by'). Read fresh each call (one
+    small doc) so edits appear immediately across workers; any failure yields
+    an empty overlay and the report falls back to the seed."""
+    meta = {'updated_at': None, 'updated_by': None}
+    try:
+        db = db or _get_admin_db()
+        snap = db.collection(_TARGET_OVERLAY_COLL).document(_TARGET_OVERLAY_DOC).get()
+        if not snap.exists:
+            return {}, meta
+        doc = snap.to_dict() or {}
+        meta['updated_at'] = doc.get('updated_at')
+        meta['updated_by'] = doc.get('updated_by')
+        out = {}
+        for c in (doc.get('cells') or []):
+            pos, label = c.get('position'), c.get('label')
+            if pos and label:
+                out[(pos, label)] = c
+        return out, meta
+    except Exception:
+        return {}, meta
+
+
+def _merged_target_cells(db=None):
+    """(position, label) -> {'target', 'rec', 'bands', 'overridden',
+    'default_target', 'default_rec', 'default_bands'} — the seed grid with the
+    Firestore overlay applied. Preserves seed order via the returned dict's
+    insertion order."""
+    overlay, _meta = _load_target_overlay(db)
     out = {}
-    for pos, pdata in (data.get('positions') or {}).items():
-        for s in pdata.get('stats') or []:
-            out[(pos, s['label'])] = {'target': s.get('target'), 'rec': s.get('rec')}
+    for pos, cells in _seed_grid():
+        for s in cells:
+            key = (pos, s['label'])
+            cell = {
+                'target': s.get('target'), 'rec': s.get('rec'),
+                'bands': s.get('bands'),
+                'default_target': s.get('target'), 'default_rec': s.get('rec'),
+                'default_bands': s.get('bands'), 'overridden': False,
+            }
+            ov = overlay.get(key)
+            if ov:
+                if 'target' in ov:
+                    cell['target'] = ov['target']
+                if 'rec' in ov:
+                    cell['rec'] = ov['rec']
+                if 'bands' in ov:
+                    cell['bands'] = ov['bands']
+                cell['overridden'] = True
+            out[key] = cell
     return out
+
+
+def _load_bbz_targets(db=None):
+    """{(position, stat_label): {'target': [lo, hi], 'rec': str, 'bands': {}}}
+    — the seed BBZ ranges with any admin overlay merged in (design doc §7)."""
+    return {k: {'target': v['target'], 'rec': v['rec'], 'bands': v.get('bands')}
+            for k, v in _merged_target_cells(db).items()}
 
 
 @app.route('/leaks')
 def leaks_page():
     return render_template('leaks.html')
+
+
+# ── Target editor (admin) ────────────────────────────────────────────────────
+# View/edit the leak targets visually. Reads go through the same seed+overlay
+# merge the report uses; writes land in the Firestore overlay only, keyed by
+# (position, label), so the seed file stays the reconstructable baseline and
+# "reset" is just deleting the overlay cell.
+
+def _valid_target(v):
+    """True if v is a valid target value: null (N/A) or [lo, hi] with
+    0 <= lo < hi <= 100."""
+    if v is None:
+        return True
+    if not (isinstance(v, (list, tuple)) and len(v) == 2):
+        return False
+    lo, hi = v
+    return (isinstance(lo, (int, float)) and isinstance(hi, (int, float))
+            and 0 <= lo < hi <= 100)
+
+
+def _clean_bands(bands):
+    """Validate a bands dict {band_key: target}; returns (cleaned, error).
+    Unknown keys or malformed targets are rejected."""
+    from leak_engine import STACK_BAND_KEYS
+    if bands is None:
+        return None, None
+    if not isinstance(bands, dict):
+        return None, 'bands must be an object'
+    out = {}
+    for k, v in bands.items():
+        if k not in STACK_BAND_KEYS:
+            return None, f'unknown band "{k}"'
+        if not _valid_target(v):
+            return None, f'invalid target for band "{k}"'
+        out[k] = list(v) if v else None
+    return out, None
+
+
+@app.route('/leaks/targets')
+def leaks_targets_page():
+    return render_template('leaks_targets.html')
+
+
+@app.route('/api/leak-targets', methods=['GET'])
+def leak_targets_get():
+    """The full merged target grid for the editor: every (position, label)
+    cell with its current + default target/rec/bands and an `overridden` flag.
+    Admin-gated — this is a management view, not user-facing."""
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+    from leak_engine import POSITION_BUCKETS, ALL_STATS, STAT_STREET, STACK_BANDS
+    db = _get_admin_db()
+    merged = _merged_target_cells(db)
+    _overlay, meta = _load_target_overlay(db)
+    label_order = [lbl for _k, lbl, _g in ALL_STATS]
+    positions = []
+    for pos in POSITION_BUCKETS:
+        rows = []
+        for label in label_order:
+            cell = merged.get((pos, label))
+            if not cell:
+                continue
+            rows.append({
+                'label': label, 'street': STAT_STREET.get(
+                    next((k for k, l, _g in ALL_STATS if l == label), ''), ''),
+                'target': cell['target'], 'rec': cell['rec'],
+                'bands': cell['bands'], 'overridden': cell['overridden'],
+                'default_target': cell['default_target'],
+                'default_rec': cell['default_rec'],
+                'default_bands': cell['default_bands'],
+            })
+        positions.append({'position': pos, 'stats': rows})
+    override_count = sum(1 for c in merged.values() if c['overridden'])
+    return jsonify({
+        'positions': positions,
+        'bands': [{'key': k, 'label': l, 'lo': lo, 'hi': hi}
+                  for k, l, lo, hi in STACK_BANDS],
+        'override_count': override_count,
+        'updated_at': meta.get('updated_at'),
+        'updated_by': meta.get('updated_by'),
+    })
+
+
+@app.route('/api/admin/leak-targets', methods=['POST'])
+def leak_targets_upsert():
+    """Upsert one target cell into the Firestore overlay. Body:
+    {position, label, target: [lo,hi]|null, rec?, bands?: {band_key: target}}.
+    The prior merged value is stored on the cell for audit."""
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+    body = request.get_json(silent=True) or {}
+    pos = (body.get('position') or '').strip()
+    label = (body.get('label') or '').strip()
+    if not pos or not label:
+        return jsonify({'error': 'position and label are required'}), 400
+
+    db = _get_admin_db()
+    merged = _merged_target_cells(db)
+    if (pos, label) not in merged:
+        return jsonify({'error': f'unknown cell {pos}/{label}'}), 404
+
+    cell = {'position': pos, 'label': label}
+    if 'target' in body:
+        if not _valid_target(body['target']):
+            return jsonify({'error': 'target must be null or [lo, hi] with 0 <= lo < hi <= 100'}), 400
+        cell['target'] = list(body['target']) if body['target'] else None
+    if 'rec' in body:
+        cell['rec'] = str(body['rec']).strip() if body['rec'] is not None else None
+    if 'bands' in body:
+        bands, err = _clean_bands(body['bands'])
+        if err:
+            return jsonify({'error': err}), 400
+        cell['bands'] = bands
+    if len(cell) == 2:
+        return jsonify({'error': 'nothing to update'}), 400
+
+    prev = merged[(pos, label)]
+    cell['prev'] = {'target': prev['target'], 'rec': prev['rec'], 'bands': prev['bands']}
+    cell['by'] = uid
+    cell['at'] = int(time.time())
+
+    ref = db.collection(_TARGET_OVERLAY_COLL).document(_TARGET_OVERLAY_DOC)
+    snap = ref.get()
+    doc = (snap.to_dict() or {}) if snap.exists else {}
+    cells = [c for c in (doc.get('cells') or [])
+             if not (c.get('position') == pos and c.get('label') == label)]
+    cells.append(cell)
+    ref.set({'cells': cells, 'updated_at': int(time.time()), 'updated_by': uid})
+    return jsonify({'ok': True, 'position': pos, 'label': label,
+                    'overrides': len(cells)})
+
+
+@app.route('/api/admin/leak-targets', methods=['DELETE'])
+def leak_targets_reset():
+    """Remove a cell from the overlay (revert to seed default). Query:
+    ?position=&label=  — or ?all=1 to clear every override."""
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+    db = _get_admin_db()
+    ref = db.collection(_TARGET_OVERLAY_COLL).document(_TARGET_OVERLAY_DOC)
+    snap = ref.get()
+    if not snap.exists:
+        return jsonify({'ok': True, 'overrides': 0})
+    doc = snap.to_dict() or {}
+    if request.args.get('all'):
+        ref.set({'cells': [], 'updated_at': int(time.time()), 'updated_by': uid})
+        return jsonify({'ok': True, 'overrides': 0})
+    pos = (request.args.get('position') or '').strip()
+    label = (request.args.get('label') or '').strip()
+    if not pos or not label:
+        return jsonify({'error': 'position and label (or all=1) required'}), 400
+    cells = [c for c in (doc.get('cells') or [])
+             if not (c.get('position') == pos and c.get('label') == label)]
+    ref.set({'cells': cells, 'updated_at': int(time.time()), 'updated_by': uid})
+    return jsonify({'ok': True, 'position': pos, 'label': label,
+                    'overrides': len(cells)})
 
 
 # ── Per-tournament leak cache ────────────────────────────────────────────────
@@ -1314,7 +1539,7 @@ def leaks_api():
 
     agg = merge_vectors(v['vector'] for v in loaded.values())
     total_skipped = sum(v['skipped'] for v in loaded.values())
-    targets = _load_bbz_targets()
+    targets = _load_bbz_targets(db)
 
     positions = []
     for bucket in POSITION_BUCKETS:
