@@ -45,7 +45,13 @@
     .lk-pill.good { background:#00e67618; color:var(--green); border:1px solid #00e67650; min-width:62px; text-align:center; }
     .lk-pill.bad  { background:#ff547018; color:#ff5470;      border:1px solid #ff547050; min-width:90px; text-align:center; }
     .lk-pill.thin { background:#ffffff0a; color:var(--muted); border:1px solid #ffffff20; }
+    .lk-pill.wr   { background:#ffffff0a; border:1px solid #ffffff20; color:var(--text); }
+    .lk-pill.wr.lk-wr-pos { border-color:#00e67650; }
+    .lk-pill.wr.lk-wr-neg { border-color:#ff547050; }
+    .lk-wr-lbl { color:var(--muted); font-weight:600; }
     .lk-pill.all.lk-filter-pill { min-width:68px; text-align:center; }
+    /* Wide enough for both labels, so toggling never reflows the row. */
+    .lk-pill.lk-neh-toggle { min-width:74px; text-align:center; }
     .lk-caret { color:var(--muted); font-size:.8rem; width:14px; }
     .lk-stat-name { border-bottom:1px dotted #ffffff38; cursor:help; position:relative; }
     .lk-stat-name[data-tip]:hover::after {
@@ -102,6 +108,26 @@
     th.lk-sortable { cursor:pointer; user-select:none; white-space:nowrap; }
     th.lk-sortable:hover { color:var(--text); }
     .lk-sort-arrow { display:inline-block; width:10px; color:var(--green); font-size:.65rem; }
+    /* Column widths are pinned so filtering rows in/out (neh, OK, Not OK)
+       never reflows the table: with `auto` layout the widest visible stat
+       name drives column 1, so hiding a long-named row visibly resized every
+       column. Fixed layout sizes from the header row alone, which is
+       constant, and long names wrap instead of stretching. */
+    .lk-table { table-layout:fixed; width:100%; }
+    .lk-table th, .lk-table td { overflow-wrap:break-word; word-break:normal; }
+    /* Keyed on data-col, not nth-child: columns are drag-reorderable, so the
+       wrapping must follow the name column wherever the user drops it. */
+    .lk-table td[data-col="0"], .lk-table th[data-col="0"] { white-space:normal; }
+    .lk-col-name   { width:34%; }
+    .lk-col-num    { width:11%; }
+    .lk-col-target { width:15%; }
+    .lk-col-result { width:12%; }
+    .lk-col-action { width:28%; }
+    .lk-table.lk-table-cmp .lk-col-name   { width:28%; }
+    .lk-table.lk-table-cmp .lk-col-num    { width:10%; }
+    .lk-table.lk-table-cmp .lk-col-target { width:14%; }
+    .lk-table.lk-table-cmp .lk-col-result { width:13%; }
+    .lk-table.lk-table-cmp .lk-col-action { width:25%; }
     .lk-filter-row {
       display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:12px 16px;
     }
@@ -148,9 +174,11 @@
     }
     .lk-compare-toggle {
       color:var(--muted); font-size:.78rem; display:flex; align-items:center; gap:6px;
-      margin-left:auto; cursor:pointer;
+      cursor:pointer;
     }
     .lk-compare-toggle input { accent-color:var(--green); }
+    /* Dates sit opposite the tournaments dropdown, hard right. */
+    .lk-dates { margin-left:auto; display:flex; align-items:center; gap:10px; }
   </style>
 </head>
 <body>
@@ -324,23 +352,23 @@ let COL_ORDER_CMP = [0, 1, 2, 3, 4, 5];
 
 function headerCells(pos) {
   const h = [
-    `<th data-col="0" draggable="true" class="lk-sortable" onclick="cycleSortHands('${pos}')" title="Sort by number of hands">Name (hands) <span class="lk-sort-arrow" data-sort-arrow-hands="${pos}"></span></th>`,
-    '<th data-col="1" draggable="true" class="text-end">Hero</th>',
-    '<th data-col="2" draggable="true" class="text-end">Target</th>',
-    `<th data-col="3" draggable="true" class="text-center lk-sortable" onclick="cycleSort('${pos}')" title="Sort by distance from target">Result <span class="lk-sort-arrow" data-sort-arrow="${pos}"></span></th>`,
-    '<th data-col="4" draggable="true">Action</th>',
+    `<th data-col="0" draggable="true" class="lk-sortable lk-col-name" onclick="cycleSortHands('${pos}')" title="Sort by number of hands">Name (hands) <span class="lk-sort-arrow" data-sort-arrow-hands="${pos}"></span></th>`,
+    '<th data-col="1" draggable="true" class="text-end lk-col-num">Hero</th>',
+    '<th data-col="2" draggable="true" class="text-end lk-col-target">Target</th>',
+    `<th data-col="3" draggable="true" class="text-center lk-sortable lk-col-result" onclick="cycleSort('${pos}')" title="Sort by distance from target">Result <span class="lk-sort-arrow" data-sort-arrow="${pos}"></span></th>`,
+    '<th data-col="4" draggable="true" class="lk-col-action">Action</th>',
   ];
   return COL_ORDER.map(i => h[i]).join('');
 }
 
 function headerCellsCmp(pos) {
   const h = [
-    `<th data-col="0" draggable="true" class="lk-sortable" onclick="cycleSortHands('${pos}')" title="Sort by number of hands">Name (hands) <span class="lk-sort-arrow" data-sort-arrow-hands="${pos}"></span></th>`,
-    '<th data-col="1" draggable="true" class="text-end">Hero A</th>',
-    '<th data-col="2" draggable="true" class="text-end">Hero B</th>',
-    '<th data-col="3" draggable="true" class="text-end">Target</th>',
-    `<th data-col="4" draggable="true" class="text-center lk-sortable" onclick="cycleSortCompare('${pos}')" title="Sort by change between the two ranges">Progress <span class="lk-sort-arrow" data-sort-arrow="${pos}"></span></th>`,
-    '<th data-col="5" draggable="true">Action</th>',
+    `<th data-col="0" draggable="true" class="lk-sortable lk-col-name" onclick="cycleSortHands('${pos}')" title="Sort by number of hands">Name (hands) <span class="lk-sort-arrow" data-sort-arrow-hands="${pos}"></span></th>`,
+    '<th data-col="1" draggable="true" class="text-end lk-col-num">Hero A</th>',
+    '<th data-col="2" draggable="true" class="text-end lk-col-num">Hero B</th>',
+    '<th data-col="3" draggable="true" class="text-end lk-col-target">Target</th>',
+    `<th data-col="4" draggable="true" class="text-center lk-sortable lk-col-result" onclick="cycleSortCompare('${pos}')" title="Sort by change between the two ranges">Progress <span class="lk-sort-arrow" data-sort-arrow="${pos}"></span></th>`,
+    '<th data-col="5" draggable="true" class="lk-col-action">Action</th>',
   ];
   return COL_ORDER_CMP.map(i => h[i]).join('');
 }
@@ -508,12 +536,13 @@ function filterRow(s, pos) {
   return true;
 }
 
+// Only 'good' and 'bad' reach here — the "All" pill is the global neh toggle
+// (onHideNehToggle), not a per-position reset.
 function togglePosFilter(pos, cat, evt) {
   evt.stopPropagation();
   if (!POS_FILTERS[pos]) POS_FILTERS[pos] = defaultPosFilter();
   const f = POS_FILTERS[pos];
-  if (cat === 'all') { f.good = true; f.bad = true; f.neh = true; }
-  else { f[cat] = !f[cat]; }
+  f[cat] = !f[cat];
   const tbody = document.querySelector(`tbody[data-position="${pos}"]`);
   if (tbody) tbody.innerHTML = renderRows(pos);
   const card = document.querySelector(`[data-pos-card="${pos}"]`);
@@ -531,8 +560,10 @@ function filterBarSkeleton(ns) {
       <button class="lk-filter-btn" id="${barId(ns, 'rooms-btn')}" onclick="toggleRoomPanel('${ns}')">
         Tournaments: <b id="${barId(ns, 'rooms-label')}">All</b> <span style="opacity:.6">▾</span>
       </button>
-      <label class="lk-date-lbl">From <input type="date" id="${barId(ns, 'from')}" class="lk-date"></label>
-      <label class="lk-date-lbl">To <input type="date" id="${barId(ns, 'to')}" class="lk-date"></label>
+      <span class="lk-dates">
+        <label class="lk-date-lbl">From <input type="date" id="${barId(ns, 'from')}" class="lk-date"></label>
+        <label class="lk-date-lbl">To <input type="date" id="${barId(ns, 'to')}" class="lk-date"></label>
+      </span>
     </div>
     <div id="${barId(ns, 'room-panel')}" class="lk-room-panel d-none">
       <div class="lk-room-actions">
@@ -645,6 +676,9 @@ function onCompareToggle(checked) {
   }
 }
 
+// Driven from two places — the status-row pill and every position's "All"
+// pill — so it owns re-syncing both, plus the tallies that count only what
+// is on screen.
 function onHideNehToggle() {
   HIDE_NEH = !HIDE_NEH;
   const pill = document.getElementById('lk-neh-pill');
@@ -657,6 +691,7 @@ function onHideNehToggle() {
     const tbody = document.querySelector(`tbody[data-position="${pos}"]`);
     if (tbody) tbody.innerHTML = renderer(pos);
   });
+  if (!COMPARE_MODE) refreshPosPillCounts();
 }
 
 function currentQuery(ns) {
@@ -760,6 +795,12 @@ function onConfidenceChange(level) {
   if (!COMPARE_MODE) refreshPosPillCounts();
 }
 
+// "All" counts what is actually on screen, so it drops the neh rows while
+// they are hidden — that is what makes the pill's own toggle legible.
+function allCount(good, bad, thin) {
+  return good + bad + (HIDE_NEH ? 0 : thin);
+}
+
 function refreshPosPillCounts() {
   if (!REPORT_DATA) return;
   Object.keys(REPORT_DATA).forEach(pos => {
@@ -769,7 +810,10 @@ function refreshPosPillCounts() {
     const all = card.querySelector('.lk-pill.all');
     const ok  = card.querySelector('.lk-pill.good');
     const bad = card.querySelector('.lk-pill.bad');
-    if (all) all.textContent = `All (${c.good + c.bad + c.thin})`;
+    if (all) {
+      all.textContent = `All (${allCount(c.good, c.bad, c.thin)})`;
+      all.classList.toggle('inactive', HIDE_NEH);
+    }
     if (ok)  ok.textContent  = `OK (${c.good})`;
     if (bad) bad.textContent = `Not OK (${c.bad})`;
   });
@@ -777,6 +821,19 @@ function refreshPosPillCounts() {
 
 function nehTitle() {
   return `Stats with fewer than ${MIN_SAMPLE} opportunities — not enough hands for a verdict`;
+}
+
+function nehPillHtml() {
+  return `<span class="lk-pill thin lk-neh-toggle${HIDE_NEH ? '' : ' inactive'}" id="lk-neh-pill" ` +
+         `onclick="onHideNehToggle()" style="cursor:pointer;user-select:none" ` +
+         `title="${nehTitle()}">${HIDE_NEH ? 'Show neh' : 'Hide neh'}</span>`;
+}
+
+function winratePill(v, label, help) {
+  const cls = v == null ? '' : v >= 0 ? ' lk-wr-pos' : ' lk-wr-neg';
+  const val = v == null ? '—' : `${fmtBB(v)}/100`;
+  return `<span class="lk-pill wr${cls}" title="${esc(help)}">` +
+         `<span class="lk-wr-lbl">${label}</span> ${val}</span>`;
 }
 
 function renderReport(data) {
@@ -793,12 +850,12 @@ function renderReport(data) {
     `<div class="lk-status-row">` +
     `<span class="lk-pill all">${data.meta.hands.toLocaleString()} hands</span>` +
     ` <span class="lk-pill all">${data.meta.tournaments} tournaments</span>` +
-    ` <span style="color:var(--muted)">·</span> winrate <b class="${data.meta.winrate_bb100 >= 0 ? 'lk-wr-pos' : 'lk-wr-neg'}">` +
-    `${fmtBB(data.meta.winrate_bb100)}/100</b>` +
+    ` ${winratePill(data.meta.winrate_bb100, 'overall',
+                    'All-in adjusted big blinds won per 100 hands')}` +
+    ` ${winratePill(data.meta.winrate_raw_bb100, 'raw',
+                    'Realised result before all-in equity adjustment')}` +
     confidenceControlHtml() +
-    `<span class="lk-pill thin${HIDE_NEH ? '' : ' inactive'}" id="lk-neh-pill" ` +
-    `onclick="onHideNehToggle()" style="cursor:pointer;user-select:none" ` +
-    `title="${nehTitle()}">${HIDE_NEH ? 'Show neh' : 'Hide neh'}</span>` +
+    nehPillHtml() +
     `</div>`;
 
   const excludedNotes = [];
@@ -835,14 +892,15 @@ function renderReport(data) {
           <b class="${p.winrate_bb100 >= 0 ? 'lk-wr-pos' : 'lk-wr-neg'}">${fmtBB(p.winrate_bb100)}</b></span>
         <span class="lk-pos-kv">Hands: <b>${p.hands}</b></span>
         <div class="lk-pills" onclick="event.stopPropagation()">
-          <span class="lk-pill all lk-filter-pill" onclick="togglePosFilter('${p.position}','all',event)">All (${good + bad + thin})</span>
+          <span class="lk-pill all lk-filter-pill${HIDE_NEH ? ' inactive' : ''}" onclick="onHideNehToggle()"
+                title="Show or hide neh stats — counts every position at once">All (${allCount(good, bad, thin)})</span>
           <span class="lk-pill good" onclick="togglePosFilter('${p.position}','good',event)">OK (${good})</span>
           <span class="lk-pill bad" onclick="togglePosFilter('${p.position}','bad',event)">Not OK (${bad})</span>
         </div>
       </div>
       <div class="lk-body d-none" onclick="event.stopPropagation()">
         <div class="table-responsive">
-          <table class="table table-dark table-striped mb-0">
+          <table class="table table-dark table-striped mb-0 lk-table">
             <thead><tr>${headerCells(p.position)}</tr></thead>
             <tbody data-position="${p.position}">${renderRows(p.position)}</tbody>
           </table>
@@ -1108,7 +1166,7 @@ function renderCompareReport(dataA, dataB) {
       </div>
       <div class="lk-body d-none" onclick="event.stopPropagation()">
         <div class="table-responsive">
-          <table class="table table-dark table-striped mb-0">
+          <table class="table table-dark table-striped mb-0 lk-table lk-table-cmp">
             <thead><tr>${headerCellsCmp(p.position)}</tr></thead>
             <tbody data-position="${p.position}">${renderRowsCompare(p.position)}</tbody>
           </table>
