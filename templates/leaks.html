@@ -775,6 +775,7 @@ function applyMetaLevels(meta) {
 function confidenceControlHtml() {
   const steps = CONF_ORDER.map(lv =>
     `<span class="lk-conf-step${lv === CONF_LEVEL ? ' active' : ''}" ` +
+    `data-level="${lv}" ` +
     `onclick="onConfidenceChange('${lv}')" ` +
     `title="Colour a verdict only once a stat has ${CONFIDENCE[lv]}+ opportunities">` +
     `${lv === 'med' ? 'Med' : lv[0].toUpperCase() + lv.slice(1)}</span>`).join('');
@@ -823,8 +824,12 @@ function onConfidenceChange(level) {
   CONF_LEVEL = level;
   MIN_SAMPLE = CONFIDENCE[level];
   try { localStorage.setItem('lk_confidence', level); } catch (_) {}
-  document.querySelectorAll('.lk-conf-step').forEach((el, i) => {
-    el.classList.toggle('active', CONF_ORDER[i] === level);
+  // Scope to the Confidence control's own segments: the Depth selector shares
+  // the .lk-conf-step class, so an unscoped select would also toggle its
+  // highlight. Match by data-level, not index, so the two controls never
+  // interfere regardless of render order.
+  document.querySelectorAll('.lk-conf-step[data-level]').forEach(el => {
+    el.classList.toggle('active', el.dataset.level === level);
   });
   const nehPill = document.getElementById('lk-neh-pill');
   if (nehPill) nehPill.title = nehTitle();
