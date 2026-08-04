@@ -1,6 +1,9 @@
 # Environment
 .env
 *.env
+# Firebase service-account private key — local admin use only, never commit
+serviceAccountKey.json
+*serviceAccount*.json
 
 # Python
 __pycache__/
