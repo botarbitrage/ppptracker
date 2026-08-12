@@ -99,52 +99,64 @@ the PR description for the findings summary and env var checklist.
 
 ## 2. Railway
 
-### 2.1 CLI install
+### 2.1 CLI install — done
 ```bash
 npm install -g @railway/cli
 ```
 Node/npm were already present in this environment (`node v24.14.0`,
-`npm 11.9.0`) — no separate Node install needed.
+`npm 11.9.0`) — no separate Node install needed. Installed `railway v5.37.7`.
 
-### 2.2 Login — **requires you, interactively**
+### 2.2 Login — done (you)
 ```bash
 railway login
 ```
-This opens a browser OAuth flow. It cannot be done non-interactively, and
-per the ground rules for this task nothing here should be entering
-credentials on your behalf — **run this yourself**, logged into
-`handtrackerpppoker@gmail.com` in whichever browser session is signed into
-that account.
+This is a browser OAuth flow that has to be run by a human — done by you,
+confirmed via `railway whoami` → `Logged in as PPPoker Hand Tracker
+(handtrackerpppoker@gmail.com)`.
 
-### 2.3 Create the project (after you've logged in)
+### 2.3 Create the project — done
 ```bash
-railway init
+railway init --name pppokerht
 ```
-Run from the repo root. This creates a new Railway project under whichever
-account `railway login` authenticated. Name it something recognizable (e.g.
-`pppokerht`).
+Created project **`pppokerht`** under workspace "PPPoker Hand Tracker's
+Projects" (i.e. `handtrackerpppoker@gmail.com`).
+Dashboard: https://railway.com/project/75fb9e1e-38a3-4baf-94c5-864f8306a201
 
-### 2.4 Connect to GitHub, `main` branch, auto-deploy on push
-Railway's GitHub connection is an OAuth/App-installation step. In practice
-this reliably works from the dashboard (Railway needs you to grant its
-GitHub App access to the specific repo, which is a consent screen, not a
-scriptable API call): **Project → Settings → Service → Source → Connect
-Repo** → select `handtrackerpppoker/pppokerht` → branch `main` → the
-"Deploy on push" toggle is on by default once connected.
+### 2.4 Connect to GitHub, `main` branch — done
+```bash
+railway add --service pppokerht --repo handtrackerpppoker/pppokerht --branch main
+```
+Service `pppokerht` is connected to `handtrackerpppoker/pppokerht` on
+`main`, auto-deploy on push (Railway's default once a repo is connected).
 
-If you'd rather try the CLI path first: `railway link` inside a repo
-directory that already has `origin` pointed at the GitHub repo can pick it
-up automatically in some Railway CLI versions — worth a try, but the
-dashboard step above is the reliable fallback if it doesn't.
+**⚠️ Important — this step immediately triggered a real build+deploy.**
+Connecting a GitHub repo to a Railway service isn't just a config change —
+Railway kicks off a build right away. That first deploy built and started
+running (no env vars set, so `firebase_admin.initialize_app()` would only
+have failed once something actually tried to touch Firestore — Flask itself
+booted fine). It's been stopped and removed (`railway down`) so nothing is
+running right now — confirmed via `railway status` showing
+`activeDeployments: []`.
 
-### 2.5 Public domain
-Target: `ppptracker.up.railway.app`. Once the service exists (after §2.3),
-generate a domain from **Project → Service → Settings → Networking →
-Generate Domain**, then edit the subdomain to `ppptracker`. Railway
-subdomains are first-come-first-served across all Railway users — **if
-`ppptracker` is taken, this step will fail visibly in the dashboard; there's
-no way to reserve it in advance from here.** Flag back to whoever's driving
-this if that happens so you can agree on a fallback name.
+**This means the "don't deploy until I approve env vars" instruction has one
+real consequence going forward: merging PR #1 (or any future push to
+`main`) will trigger another automatic deploy**, the same way this one
+fired. There's no CLI toggle to disable that while keeping the GitHub
+connection — the practical mitigation is: **don't merge PR #1 until the env
+vars in §2.6 are set on the Railway service first.** If you want an extra
+safety margin, Railway's dashboard has a per-service "Automatic deploys"
+toggle under **Service → Settings → Source** you can switch off until
+you're ready, then back on.
+
+### 2.5 Public domain — done
+Target `ppptracker.up.railway.app` was available and is now live:
+```bash
+railway domain --service pppokerht                                    # generated pppokerht-production.up.railway.app
+railway domain update pppokerht-production.up.railway.app \
+  --domain ppptracker --service pppokerht                             # renamed to ppptracker.up.railway.app
+```
+Confirmed `syncStatus: ACTIVE` via `railway domain list --service pppokerht --json`.
+No fallback name was needed.
 
 ### 2.6 Environment variables — checklist (names only)
 Fill these in on the new Railway project from the old project's values —
@@ -249,8 +261,11 @@ be a manual check on your end:
 ## 5. What this task did NOT do (explicitly deferred)
 
 - Did not fill in any Railway environment variable values.
-- Did not trigger a Railway deploy.
+- Did not leave a running deploy — one fired automatically the moment the
+  GitHub repo was connected (§2.4, Railway's default behavior, not something
+  requested here); it was stopped and removed immediately, confirmed via
+  `railway status` → `activeDeployments: []`. **The residual risk is that
+  merging PR #1 will trigger a new one the same way** — see §2.4's warning.
 - Did not touch the old Railway project or old GitHub repo in any way.
-- Did not run `railway login` (requires your interactive browser session).
 - Did not verify Firebase project ownership (no local credentials to do so
   programmatically — see §3).
