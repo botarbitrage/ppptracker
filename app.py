@@ -19,8 +19,11 @@ from hand_parser import process_hands, build_hand_rows
 from hand_exporter import validate_hands, export_pokerstars
 from tournament_analyzer import analyze_tournament
 
-# In-memory store for the most recently imported hand records (used by export endpoints)
-_session_records = None
+# In-memory store of imported hand records, keyed by the client's per-browser
+# session_id (see static/app.js getSessionId()) so concurrent/anonymous callers
+# can't read each other's imported hands through the export endpoints.
+_session_records = {}
+_SESSION_RECORDS_MAX = 200
 
 app = Flask(__name__)
 
@@ -164,15 +167,23 @@ def index():
     return render_template("index.html")
 
 
+@app.route("/health")
+def health():
+    return jsonify({"status": "ok"})
+
+
 @app.route("/api/analyze", methods=["POST"])
 def analyze():
-    body     = request.get_json(force=True, silent=True) or {}
-    url      = body.get("url", "").strip()
-    auth_hdr = request.headers.get('Authorization', '')
-    id_token = auth_hdr[7:] if auth_hdr.startswith('Bearer ') else None
+    body       = request.get_json(force=True, silent=True) or {}
+    url        = body.get("url", "").strip()
+    session_id = (body.get("session_id") or "").strip()
+    auth_hdr   = request.headers.get('Authorization', '')
+    id_token   = auth_hdr[7:] if auth_hdr.startswith('Bearer ') else None
 
     if not url:
         return jsonify({"error": "URL is required."}), 400
+    if not session_id:
+        return jsonify({"error": "Missing session_id."}), 400
 
     uid   = _extract(url, "uid")
     rdkey = _extract(url, "rdkey")
@@ -222,8 +233,9 @@ def analyze():
         if player_name != "Hero":
             break
 
-    global _session_records
-    _session_records = records  # persist for export endpoints
+    _session_records[session_id] = records  # persist for export endpoints
+    if len(_session_records) > _SESSION_RECORDS_MAX:
+        _session_records.pop(next(iter(_session_records)))  # evict oldest
 
     recent_hands, recent_won, stats, tournaments = process_hands(records)
     validation = validate_hands(records)
@@ -270,9 +282,10 @@ def analyze():
 
 @app.route("/api/export/hand", methods=["POST"])
 def export_hand():
-    if not _session_records:
-        return jsonify({"error": "No hand data available. Please import first."}), 400
     body    = request.get_json(force=True, silent=True) or {}
+    records = _session_records.get((body.get("session_id") or "").strip())
+    if not records:
+        return jsonify({"error": "No hand data available. Please import first."}), 400
     hand_id  = (body.get("hand_id") or "").strip().replace("-", "")
     platform = (body.get("platform") or "").strip()
     if not hand_id:
@@ -280,7 +293,7 @@ def export_hand():
 
     # Match against the gameid stored in summary["D"], ignoring dashes
     match = next(
-        (r for r in _session_records
+        (r for r in records
          if r.get("summary", {}).get("D", "").replace("-", "") == hand_id),
         None,
     )
@@ -302,16 +315,17 @@ def export_hand():
 
 @app.route("/api/export/tournament", methods=["POST"])
 def export_tournament():
-    if not _session_records:
-        return jsonify({"error": "No hand data available. Please import first."}), 400
     body = request.get_json(force=True, silent=True) or {}
+    session_records = _session_records.get((body.get("session_id") or "").strip())
+    if not session_records:
+        return jsonify({"error": "No hand data available. Please import first."}), 400
     tid      = str(body.get("tourney_id", "")).strip()
     platform = (body.get("platform") or "").strip()
     if not tid:
         return jsonify({"error": "Please provide a tourney_id."}), 400
 
     from hand_parser import extract_tourney_id
-    records = [r for r in _session_records
+    records = [r for r in session_records
                if extract_tourney_id(r.get("summary", {}).get("D", "")) == tid]
     if not records:
         return jsonify({"error": f"No hands found for tournament '{tid}'."}), 404
@@ -331,13 +345,14 @@ def export_tournament():
 
 @app.route("/api/export/pokerstars", methods=["POST"])
 def export_ps():
-    if not _session_records:
-        return jsonify({"error": "No hand data available. Please import first."}), 400
     try:
         body    = request.get_json(force=True, silent=True) or {}
+        session_records = _session_records.get((body.get("session_id") or "").strip())
+        if not session_records:
+            return jsonify({"error": "No hand data available. Please import first."}), 400
         limit    = body.get("limit")          # None = all hands
         platform = (body.get("platform") or "").strip()
-        records  = _session_records[:limit] if limit else _session_records
+        records  = session_records[:limit] if limit else session_records
         filepath, log = export_pokerstars(records, platform=platform,
                                            blind_levels_by_room=_blind_levels_by_room(records))
         return send_file(
@@ -369,27 +384,30 @@ def _room_slug(records):
 
 @app.route("/api/export/json/all", methods=["POST"])
 def export_json_all():
-    if not _session_records:
+    body = request.get_json(force=True, silent=True) or {}
+    session_records = _session_records.get((body.get("session_id") or "").strip())
+    if not session_records:
         return jsonify({"error": "No hand data available. Please import first."}), 400
     import json as _json
     ts    = _dt.now().strftime("%Y%m%d_%H%M%S")
     filename = f"pppoker_full_export_{ts}.json"
-    data = _json.dumps(_session_records, indent=2)
+    data = _json.dumps(session_records, indent=2)
     return Response(data, mimetype="application/json",
                     headers={"Content-Disposition": f"attachment; filename={filename}"})
 
 
 @app.route("/api/export/json/tournament", methods=["POST"])
 def export_json_tournament():
-    if not _session_records:
-        return jsonify({"error": "No hand data available. Please import first."}), 400
     body = request.get_json(force=True, silent=True) or {}
+    session_records = _session_records.get((body.get("session_id") or "").strip())
+    if not session_records:
+        return jsonify({"error": "No hand data available. Please import first."}), 400
     tid  = str(body.get("tourney_id", "")).strip()
     if not tid:
         return jsonify({"error": "Please provide a tourney_id."}), 400
     from hand_parser import extract_tourney_id
     import json as _json
-    records = [r for r in _session_records
+    records = [r for r in session_records
                if extract_tourney_id(r.get("summary", {}).get("D", "")) == tid]
     if not records:
         return jsonify({"error": f"No hands found for tournament '{tid}'."}), 404
@@ -403,15 +421,16 @@ def export_json_tournament():
 
 @app.route("/api/export/json/hand", methods=["POST"])
 def export_json_hand():
-    if not _session_records:
-        return jsonify({"error": "No hand data available. Please import first."}), 400
     body         = request.get_json(force=True, silent=True) or {}
+    session_records = _session_records.get((body.get("session_id") or "").strip())
+    if not session_records:
+        return jsonify({"error": "No hand data available. Please import first."}), 400
     raw_hand_id  = (body.get("hand_id") or "").strip()
     hand_id      = raw_hand_id.replace("-", "")
     if not hand_id:
         return jsonify({"error": "Please provide a hand ID."}), 400
     match = next(
-        (r for r in _session_records
+        (r for r in session_records
          if r.get("summary", {}).get("D", "").replace("-", "") == hand_id),
         None,
     )
@@ -595,7 +614,7 @@ def create_checkout_session():
         return jsonify({'error': 'Stripe not configured'}), 503
     uid       = data.get('uid', '')
     email     = data.get('email', '')
-    origin    = request.headers.get('Origin', os.getenv('APP_URL', 'https://pppokerha.up.railway.app'))
+    origin    = request.headers.get('Origin') or os.getenv('APP_URL') or request.host_url.rstrip('/')
     try:
         session = stripe.checkout.Session.create(
             mode               = 'subscription',
