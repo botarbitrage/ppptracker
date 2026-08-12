@@ -337,6 +337,45 @@ your request, ahead of merging the PR):
 - Deployed and smoke-tested: boots clean, `/` and `/health` both 200,
   sign-in works, tournaments page loads real data correctly (including the
   legacy multi-time `starting_time` rows).
+- **PR #1 merged to `main`** (squash, commit `146a9e5`), and the second-pass
+  fixes from `launch_review.md` are deployed and verified live in prod:
+  unauthenticated checkout returns `401` and ignores a body-supplied uid,
+  export endpoints require a `session_id`, the MKO badge class is served,
+  the Pro-bypass dev buttons are gone from the served HTML/JS, and
+  `/tournaments` + `/leaks` both return `200`.
+- Branch protection on `main` adjusted: required approvals dropped from 1 to
+  **0**, because GitHub does not allow approving your own PR and this is a
+  single-owner repo — the rule was unsatisfiable and could only ever be
+  cleared with an admin bypass. The protections that actually catch mistakes
+  are unchanged: the `test` CI check is still required, and force-pushes and
+  branch deletion are still blocked. If a second maintainer ever joins, raise
+  this back to 1.
+
+**⚠️ Known broken: Railway auto-deploy from GitHub.**
+Every GitHub-source build now fails during the Python install step:
+```
+mise ERROR Failed to install core:python@3.12.10: error sending request:
+  client error (SendRequest): http2 error: stream error received:
+  refused stream before processing any application logic
+Build Failed: process "mise install" did not complete successfully
+```
+This is Railway's builder failing to download the CPython tarball pinned by
+`runtime.txt` — nothing to do with this repo's code. It failed 4 consecutive
+times (once on a variable change, then 3× on the PR-merge auto-deploy and its
+retries), while `railway up` builds of the *identical* tree succeeded every
+time. The successful builds landed on a different builder node than the
+failing ones, which points at a bad node / broken egress on Railway's side
+rather than anything reproducible locally.
+
+Consequence: **pushing to `main` does not currently deploy.** Production is
+running the correct merged code, deployed manually with:
+```bash
+railway up --service pppokerht --environment production --ci
+```
+(run from a checkout of `main` — verified byte-identical to `origin/main`
+before uploading). Until GitHub-source builds recover, deploys need that
+command. Worth retrying auto-deploy in a day or so, and raising with Railway
+support if it persists — quote the `mise install` error above.
 
 **Still open:**
 - **Stripe** — no webhook endpoint registered yet against the new domain,
@@ -346,11 +385,18 @@ your request, ahead of merging the PR):
   `https://ppptracker.up.railway.app/api/stripe-webhook` in the Stripe
   dashboard, put its secret in `STRIPE_WEBHOOK_SECRET`, then test a
   checkout end-to-end.
-- **Merge PR #1** — the live deployment right now is running this
-  branch's snapshot via manual `railway up`, not the merged `main` branch.
-  Until the PR merges, any auto-redeploy (a var change, or a future push to
-  `main`) will pull whatever's on `main` at that moment — which is why
-  merging matters here, not just as housekeeping.
+- **Deploy the hardened Firestore rules** — `firestore.rules` now blocks
+  clients from writing their own `is_pro`/`stripe_customer_id`, closing a
+  bypass that let any signed-in user grant themselves Pro for free (see
+  `launch_review.md` §1.6). **The repo change does nothing until the rules
+  are published to Firebase** — `firebase deploy --only firestore:rules`, or
+  paste the file into Firebase Console → Firestore → Rules → Publish. Until
+  then the bypass is live. The rules could not be syntax-checked from this
+  environment (no Firebase CLI/emulator), so watch for validation errors at
+  publish time — the Console validates before it lets you publish. After
+  publishing, confirm both halves: a signed-in user can no longer write
+  `is_pro`, *and* a brand-new account's first-visit doc still gets created
+  (the `create` rule deliberately allows `is_pro: false` for exactly that).
 - **Old Railway project / old GitHub repo** — untouched throughout, as
   required. The old prod (`pppokerha.up.railway.app`) should stay up until
   you're ready to actually cut users over to the new domain.
