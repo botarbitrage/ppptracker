@@ -215,32 +215,68 @@ procedure, not executed as part of this PR):
 
 ## 3. Firebase
 
-No local credentials exist in this environment to check Firebase project
-ownership programmatically — there's no `serviceAccountKey.json`, no `.env`,
-and neither `gcloud` nor the `firebase` CLI is installed here. This has to
-be a manual check on your end:
+**Decision made during launch testing:** reuse the **existing** Firebase
+project (the one with real tournament/config/user data already in it) as
+the single Firebase backend for the new site, rather than standing up the
+brand-new empty `ppptracker` project created earlier in this process. That
+avoids a data-migration step entirely — same project, same data, just a
+second Owner and a repointed deployment.
 
-1. Go to [Firebase Console](https://console.firebase.google.com/), signed in
-   as whichever account currently owns the project the app's
-   `FIREBASE_SERVICE_ACCOUNT_JSON` / `FIREBASE_PROJECT_ID` point at (the old
-   Railway project's env vars will tell you which project ID that is).
+No local credentials exist in this environment to do any of this
+programmatically — there's no `serviceAccountKey.json`, no `.env`, and
+neither `gcloud` nor the `firebase` CLI is installed here. All of the
+following is manual, on your end, in the Firebase Console:
+
+1. Sign in to [Firebase Console](https://console.firebase.google.com/) as
+   whichever account currently owns the **existing** project (the one the
+   old Railway deployment's `FIREBASE_PROJECT_ID` points at).
 2. Open that project → **Project Settings (gear icon) → Users and
-   permissions**.
-3. Check whether `handtrackerpppoker@gmail.com` is already listed as an
-   Owner.
-   - **If yes** — nothing to do here, you can generate a fresh service
-     account key from **Project Settings → Service Accounts → Generate new
-     private key** while signed in as `handtrackerpppoker@gmail.com`, and
-     use that for the new Railway project's `FIREBASE_SERVICE_ACCOUNT_JSON`.
-   - **If no** — from an account that currently has Owner access: **Users
-     and permissions → Add member** → enter `handtrackerpppoker@gmail.com`
-     → role **Owner** → Add. Once that's accepted, sign in as
-     `handtrackerpppoker@gmail.com` and generate the new service account key
-     as above.
-4. The task notes the **old key was already revoked** — so until a new key
-   is generated and set as `FIREBASE_SERVICE_ACCOUNT_JSON` on the new
-   Railway project, the new deployment won't be able to reach Firestore.
-   This is expected to happen as part of you filling in §2.6, not before.
+   permissions** → **Add member** → `handtrackerpppoker@gmail.com` → role
+   **Owner** → Add.
+3. **Authentication → Settings → Authorized domains → Add domain** →
+   `ppptracker.up.railway.app` (this has to be added to *this* project
+   specifically — the earlier attempt to sign in failed with
+   `auth/unauthorized-domain` because the domain was only ever a candidate
+   for the new, now-unused `ppptracker` project, never for this one).
+4. Once accepted, sign in as `handtrackerpppoker@gmail.com` and generate a
+   fresh key: **Project Settings → Service Accounts → Generate new private
+   key**.
+5. Grab this project's public Web SDK config values from **Project
+   Settings → General → Your apps → SDK setup and configuration** (the
+   `firebaseConfig` object) — these map directly to the
+   `FIREBASE_API_KEY` / `FIREBASE_AUTH_DOMAIN` / `FIREBASE_PROJECT_ID` /
+   `FIREBASE_MESSAGING_SENDER_ID` / `FIREBASE_APP_ID` /
+   `FIREBASE_MEASUREMENT_ID` / `FIREBASE_STORAGE_BUCKET` Railway variables.
+6. **Update the Railway service's variables** (`pppokerht` service,
+   `production` environment) to the existing project's values from steps 4
+   and 5 — this **overwrites** what's currently set (those currently point
+   at the new, now-unused `ppptracker` project). Same rule as before: enter
+   these yourself in the Railway dashboard or via `railway variables --set`
+   run from your own terminal — not something to paste here for me to
+   enter.
+7. The task notes the **old key was already revoked** — so until step 4's
+   fresh key lands in `FIREBASE_SERVICE_ACCOUNT_JSON`, the deployment can't
+   reach Firestore. Expected until you do step 6, not before.
+8. **Confirm the existing project's `firestore.rules` matches (or is at
+   least compatible with) [`firestore.rules`](../firestore.rules) in this
+   repo** — if that project's deployed rules differ from what's in the repo
+   (e.g. an older ruleset from before some of the fields/collections this
+   app now uses), reads/writes could still fail even with everything else
+   correct. Re-deploy the repo's rules to it if unsure
+   (`firebase deploy --only firestore:rules`, or paste into the Console's
+   Rules tab and publish).
+9. **The newly-created empty `ppptracker` Firebase project is now unused.**
+   Nothing here deletes it — leaving it alone is harmless (an empty,
+   inactive project costs nothing), or delete it yourself later if you'd
+   rather not have a stray project around. Not something to delete
+   automatically as part of this task.
+
+Once steps 1-8 are done, tell me and I'll re-verify: the public
+`/api/firebase-config` endpoint will show the new project ID, a direct
+Firestore REST query (no credentials needed for this diagnostic, same
+approach used to find this issue) should stop returning
+`PERMISSION_DENIED` / `CONSUMER_INVALID`, and I'll re-test sign-in and the
+tournaments page in the browser.
 
 ---
 
