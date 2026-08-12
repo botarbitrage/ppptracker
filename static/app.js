@@ -110,48 +110,31 @@ function handleUpgradeClick(tier = 'pro') {
   _trackEvent('pro_upgrade_clicked');
   const btn = document.getElementById('pro-upgrade-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Redirecting…'; }
-  const uid   = _currentUser ? _currentUser.uid   : '';
-  const email = _currentUser ? _currentUser.email : '';
-  fetch('/api/create-checkout-session', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ uid, email, tier }),
-  })
+  const fail = (msg) => {
+    if (btn) { btn.disabled = false; btn.textContent = 'Upgrade to Pro'; }
+    const cs = document.getElementById('pro-coming-soon');
+    if (cs) { cs.textContent = msg; cs.classList.remove('d-none'); }
+  };
+  // uid/email are derived server-side from this token and are no longer sent in
+  // the body — the server refuses the call without it.
+  if (!_currentUser) { fail('Please sign in before upgrading.'); return; }
+  _currentUser.getIdToken()
+    .then(token => fetch('/api/create-checkout-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ tier }),
+    }))
     .then(r => r.json())
     .then(d => {
       if (d.url) { window.location.href = d.url; }
       else throw new Error(d.error || 'Could not start checkout');
     })
-    .catch(err => {
-      if (btn) { btn.disabled = false; btn.textContent = 'Upgrade to Pro'; }
-      const cs = document.getElementById('pro-coming-soon');
-      if (cs) { cs.textContent = err.message; cs.classList.remove('d-none'); }
-    });
+    .catch(err => fail(err.message));
 }
 
-function activateProDev() {
-  const ref = _getUserDocRef();
-  if (ref) {
-    ref.set({ is_pro: true }, { merge: true })
-      .then(() => location.reload())
-      .catch(() => location.reload());
-  } else {
-    _userState.is_pro = true;
-    location.reload();
-  }
-}
-
-function deactivateProDev() {
-  const ref = _getUserDocRef();
-  if (ref) {
-    ref.set({ is_pro: false }, { merge: true })
-      .then(() => location.reload())
-      .catch(() => location.reload());
-  } else {
-    _userState.is_pro = false;
-    location.reload();
-  }
-}
+// activateProDev()/deactivateProDev() removed: they wrote is_pro straight from
+// the client, which the Firestore rules now reject (see firestore.rules — a
+// client-writable is_pro meant any signed-in user could self-grant Pro).
 
 /* ── Helpers ─────────────────────────────────────────────── */
 

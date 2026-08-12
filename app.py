@@ -612,8 +612,14 @@ def create_checkout_session():
     price = _STRIPE_PROTEST_PRICE_ID if tier == 'protest' else _STRIPE_PRICE_ID
     if not stripe.api_key or not price:
         return jsonify({'error': 'Stripe not configured'}), 503
-    uid       = data.get('uid', '')
-    email     = data.get('email', '')
+    # uid/email come from the verified token, never the request body: the webhook
+    # grants is_pro to whatever uid it finds in this session's metadata, so a
+    # client-supplied uid would let a caller pay once and upgrade someone else.
+    claims = _verify_bearer_claims(request)
+    if not claims:
+        return jsonify({'error': 'Sign in required'}), 401
+    uid       = claims.get('uid', '')
+    email     = claims.get('email', '')
     origin    = request.headers.get('Origin') or os.getenv('APP_URL') or request.host_url.rstrip('/')
     try:
         session = stripe.checkout.Session.create(
@@ -638,8 +644,12 @@ def _uid_for_customer(db, customer_id):
         docs = db.collection('users').where('stripe_customer_id', '==', customer_id).limit(1).get()
         for doc in docs:
             return doc.id
-    except Exception:
-        pass
+    except Exception as exc:
+        # Swallowed on purpose (the webhook has other ways to find the uid), but
+        # log it — a silent failure here means a paid subscription silently
+        # fails to grant is_pro.
+        print(f"[_uid_for_customer] lookup failed for customer={customer_id}: "
+              f"{type(exc).__name__}: {exc}")
     return None
 
 
@@ -683,17 +693,26 @@ def stripe_webhook():
     return jsonify({'received': True})
 
 
-def _verify_bearer(req):
-    """Verify the Authorization: Bearer <token> header. Returns uid or None."""
+def _verify_bearer_claims(req):
+    """Verify the Authorization: Bearer <token> header. Returns decoded claims or None."""
     auth_hdr = req.headers.get('Authorization', '')
     if not auth_hdr.startswith('Bearer '):
         return None
     try:
         _get_admin_db()  # ensure Firebase Admin SDK is initialized before token verification
-        decoded = admin_auth.verify_id_token(auth_hdr[7:])
-        return decoded['uid']
-    except Exception:
+        return admin_auth.verify_id_token(auth_hdr[7:])
+    except Exception as exc:
+        # Log before swallowing: a Firestore/network outage and a genuinely bad
+        # token both return None here, and without this line the outage looks
+        # identical to "everyone is signed out" with nothing in the logs.
+        print(f"[_verify_bearer] token verification failed: {type(exc).__name__}: {exc}")
         return None
+
+
+def _verify_bearer(req):
+    """Verify the Authorization: Bearer <token> header. Returns uid or None."""
+    claims = _verify_bearer_claims(req)
+    return claims.get('uid') if claims else None
 
 
 def _is_admin(uid):
@@ -703,7 +722,10 @@ def _is_admin(uid):
     try:
         snap = _get_admin_db().collection('config').document('admins').get()
         return snap.exists and uid in (snap.to_dict().get('uids') or [])
-    except Exception:
+    except Exception as exc:
+        # Same reasoning as _verify_bearer_claims: a Firestore outage would
+        # otherwise silently 403 every admin action with no trace.
+        print(f"[_is_admin] admin lookup failed for uid={uid}: {type(exc).__name__}: {exc}")
         return False
 
 
@@ -741,11 +763,23 @@ _TOURNEY_FIELDS = {
     'active': bool,
 }
 
+# Numeric config fields that are meaningless (and downstream-corrupting) if negative.
+_TOURNEY_NON_NEGATIVE = {
+    'buy_in_total', 'buy_in_prize', 'buy_in_rake', 'starting_chips',
+    'level_duration_min', 'level_duration_rebuy_min', 'level_duration_ft_min',
+    'late_reg_level', 'rebuy_cost_multiplier', 'rebuy_period_end_level',
+    'addon_cost_multiplier', 'addon_max_units', 'player_min', 'player_max',
+    'break_every_min', 'break_duration_min', 'itm_h', 'end_h', 'ft_h',
+    'max_blinds',
+}
+
 
 def _coerce_tourney_payload(body):
     """Coerce a client JSON body to typed, whitelisted tournament-config fields.
-    Empty string / None -> None; unparseable values fall back to None."""
-    data = {}
+    Empty string / None -> None; unparseable values fall back to None.
+    Returns (data, errors); errors is a list of human-readable validation
+    messages for values that parsed but are out of range."""
+    data, errors = {}, []
     for key, typ in _TOURNEY_FIELDS.items():
         if key not in body:
             continue
@@ -770,7 +804,12 @@ def _coerce_tourney_payload(body):
                 data[key] = str(v).strip()
         except (ValueError, TypeError):
             data[key] = None
-    return data
+        # A negative buy-in or chip count parses fine as a number but is never a
+        # real tournament, and these values feed ROI/bankroll maths downstream.
+        if key in _TOURNEY_NON_NEGATIVE and isinstance(data.get(key), (int, float)) \
+                and not isinstance(data[key], bool) and data[key] < 0:
+            errors.append(f'{key} must be >= 0')
+    return data, errors
 
 
 @app.route('/api/admin/tournaments', methods=['POST'])
@@ -779,7 +818,9 @@ def admin_create_tournament():
     if not _is_admin(uid):
         return jsonify({'error': 'Forbidden'}), 403
     body = request.get_json(silent=True) or {}
-    data = _coerce_tourney_payload(body)
+    data, errors = _coerce_tourney_payload(body)
+    if errors:
+        return jsonify({'error': '; '.join(errors)}), 400
     if not data.get('name'):
         return jsonify({'error': 'Name is required'}), 400
     raw_id = (body.get('id') or data['name'] or '').strip().lower()
@@ -803,7 +844,9 @@ def admin_update_tournament(tid):
     if not _is_admin(uid):
         return jsonify({'error': 'Forbidden'}), 403
     body = request.get_json(silent=True) or {}
-    data = _coerce_tourney_payload(body)
+    data, errors = _coerce_tourney_payload(body)
+    if errors:
+        return jsonify({'error': '; '.join(errors)}), 400
     if not data:
         return jsonify({'error': 'No valid fields to update'}), 400
     db = _get_admin_db()
@@ -1157,7 +1200,9 @@ def _seed_grid():
     try:
         with open(_BBZ_RANGES_PATH, encoding='utf-8') as fh:
             data = _jj.load(fh)
-    except Exception:
+    except Exception as exc:
+        print(f"[_seed_grid] could not read {_BBZ_RANGES_PATH}: "
+              f"{type(exc).__name__}: {exc}")
         return []
     return [(pos, pdata.get('stats') or [])
             for pos, pdata in (data.get('positions') or {}).items()]
@@ -1183,7 +1228,10 @@ def _load_target_overlay(db=None):
             if pos and label:
                 out[(pos, label)] = c
         return out, meta
-    except Exception:
+    except Exception as exc:
+        # Falls back to the seed grid, so the report still renders — but log it,
+        # otherwise admin target edits silently stop taking effect.
+        print(f"[_load_target_overlay] overlay read failed: {type(exc).__name__}: {exc}")
         return {}, meta
 
 
@@ -1358,15 +1406,26 @@ def leak_targets_upsert():
     cell['by'] = uid
     cell['at'] = int(time.time())
 
+    # Read-modify-write of the whole cells array, so it must be transactional:
+    # two admins editing different cells at once would otherwise both read the
+    # same array and the second .set() would silently drop the first's edit.
+    from google.cloud import firestore as gcf
     ref = db.collection(_TARGET_OVERLAY_COLL).document(_TARGET_OVERLAY_DOC)
-    snap = ref.get()
-    doc = (snap.to_dict() or {}) if snap.exists else {}
-    cells = [c for c in (doc.get('cells') or [])
-             if not (c.get('position') == pos and c.get('label') == label)]
-    cells.append(cell)
-    ref.set({'cells': cells, 'updated_at': int(time.time()), 'updated_by': uid})
+
+    @gcf.transactional
+    def _upsert_cell(transaction):
+        snap = ref.get(transaction=transaction)
+        doc = (snap.to_dict() or {}) if snap.exists else {}
+        cells = [c for c in (doc.get('cells') or [])
+                 if not (c.get('position') == pos and c.get('label') == label)]
+        cells.append(cell)
+        transaction.set(ref, {'cells': cells, 'updated_at': int(time.time()),
+                              'updated_by': uid})
+        return len(cells)
+
+    overrides = _upsert_cell(db.transaction())
     return jsonify({'ok': True, 'position': pos, 'label': label,
-                    'overrides': len(cells)})
+                    'overrides': overrides})
 
 
 @app.route('/api/admin/leak-targets', methods=['DELETE'])
@@ -1378,22 +1437,34 @@ def leak_targets_reset():
         return jsonify({'error': 'Forbidden'}), 403
     db = _get_admin_db()
     ref = db.collection(_TARGET_OVERLAY_COLL).document(_TARGET_OVERLAY_DOC)
-    snap = ref.get()
-    if not snap.exists:
+    if not ref.get().exists:
         return jsonify({'ok': True, 'overrides': 0})
-    doc = snap.to_dict() or {}
-    if request.args.get('all'):
-        ref.set({'cells': [], 'updated_at': int(time.time()), 'updated_by': uid})
-        return jsonify({'ok': True, 'overrides': 0})
+    clear_all = bool(request.args.get('all'))
     pos = (request.args.get('position') or '').strip()
     label = (request.args.get('label') or '').strip()
-    if not pos or not label:
+    if not clear_all and (not pos or not label):
         return jsonify({'error': 'position and label (or all=1) required'}), 400
-    cells = [c for c in (doc.get('cells') or [])
-             if not (c.get('position') == pos and c.get('label') == label)]
-    ref.set({'cells': cells, 'updated_at': int(time.time()), 'updated_by': uid})
+
+    # Transactional for the same reason as the upsert above — the single-cell
+    # delete is a read-modify-write of the shared cells array.
+    from google.cloud import firestore as gcf
+
+    @gcf.transactional
+    def _apply_delete(transaction):
+        snap = ref.get(transaction=transaction)
+        prev = ((snap.to_dict() or {}).get('cells') or []) if snap.exists else []
+        cells = [] if clear_all else [
+            c for c in prev
+            if not (c.get('position') == pos and c.get('label') == label)]
+        transaction.set(ref, {'cells': cells, 'updated_at': int(time.time()),
+                              'updated_by': uid})
+        return len(cells)
+
+    overrides = _apply_delete(db.transaction())
+    if clear_all:
+        return jsonify({'ok': True, 'overrides': 0})
     return jsonify({'ok': True, 'position': pos, 'label': label,
-                    'overrides': len(cells)})
+                    'overrides': overrides})
 
 
 # ── Per-tournament leak cache ────────────────────────────────────────────────
@@ -1477,8 +1548,11 @@ def _load_leak_vectors(db, uid, tourney_docs, budget_s=25):
                 'hands': n_hands, 'skipped': n_skipped,
                 'built_at': int(_tt.time()),
             })
-        except Exception:
-            pass                  # cache write is best-effort, never fatal
+        except Exception as exc:
+            # Best-effort, never fatal — but log it, because a persistently
+            # failing cache write turns every leak report into a full rebuild.
+            print(f"[_load_leak_vectors] cache write failed for tid={tid}: "
+                  f"{type(exc).__name__}: {exc}")
     return out, pending
 
 
@@ -1562,7 +1636,9 @@ def leaks_api():
     try:
         from equity import set_budget, skipped_count, save_cache
         set_budget(20)
-    except Exception:
+    except Exception as exc:
+        print(f"[leaks_api] equity module unavailable, continuing without "
+              f"all-in adjustment: {type(exc).__name__}: {exc}")
         set_budget = skipped_count = save_cache = None
 
     loaded, pending = _load_leak_vectors(db, uid, selected)
@@ -1571,8 +1647,8 @@ def leaks_api():
         try:
             save_cache()          # persist any newly enumerated all-in equities
             unadjusted = skipped_count()
-        except Exception:
-            pass
+        except Exception as exc:
+            print(f"[leaks_api] equity cache save failed: {type(exc).__name__}: {exc}")
         set_budget(None)
 
     agg = merge_vectors(v['vector'] for v in loaded.values())
@@ -1727,4 +1803,8 @@ def asset_links():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    # Local dev only (prod runs under gunicorn via the Procfile). Bound to
+    # localhost and debug off by default: the Werkzeug debugger is an RCE vector
+    # on any reachable interface. Opt in with FLASK_DEBUG=1 when you need it.
+    app.run(host="127.0.0.1", port=5000,
+            debug=os.getenv("FLASK_DEBUG") == "1")
