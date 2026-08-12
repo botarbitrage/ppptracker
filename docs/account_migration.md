@@ -180,47 +180,76 @@ or via `railway variables --set KEY=value` run by you locally.
 
 Not needed — Railway injects `PORT` automatically; nothing to set for it.
 
-### 2.7 Do NOT deploy yet
-Per your acceptance criteria: the project is created and connected, but the
-first deploy should wait for you to review and confirm the env var list
-above is fully populated with correct values from the old project (and a
-fresh `STRIPE_WEBHOOK_SECRET`, per the note in §2.6). Once you've confirmed
-that, the following becomes the actual deploy step (documented here as a
-procedure, not executed as part of this PR):
+### 2.7 First deploy + smoke test — done
+Deployed and tested at your explicit request, ahead of merging the PR (via
+`railway up`, deploying this branch's snapshot directly rather than
+merging to `main` first — the PR is still open and unmerged as of this
+writing).
 
-1. **Trigger deploy** — either push to `main` (now that CI + branch
-   protection are live, this means merging this PR, or any subsequent PR)
-   or `railway up` for a manual one-off deploy.
-2. **Tail logs**: `railway logs` (or the dashboard's Deployments → Logs
-   view) — watch for the gunicorn boot line and confirm no import-time
-   crash (e.g. a missing env var would typically surface here first).
-3. **Smoke test checklist** (run after a successful boot):
-   - `GET https://ppptracker.up.railway.app/` → expect `200`
-   - `GET https://ppptracker.up.railway.app/health` → expect `200`,
-     `{"status": "ok"}` (route added in this PR, `app.py`)
-   - Submit a real hand import through the UI, confirm the write lands in
-     the **correct** Firestore project (check the project ID in the
-     Firebase console against `FIREBASE_PROJECT_ID`, not just that a write
-     happened somewhere)
-   - Confirm `serviceAccountKey.json` is **not** present in the running
-     container filesystem — it shouldn't be, since the app only ever reads
-     credentials from the `FIREBASE_SERVICE_ACCOUNT_JSON` env var
-     (`_get_admin_db()` in `app.py`) with `credentials.ApplicationDefault()`
-     as the only fallback, never a hardcoded file path. You can confirm via
-     `railway run ls` (or the Railway shell) if you want to double check —
-     there should be no such file in the deploy image, since it was never
-     committed and nothing in the build copies one in.
+1. **Trigger deploy** — `railway up --service pppokerht --environment
+   production`. Note: changing Railway variables also auto-triggers a
+   redeploy, but that redeploy rebuilds from whatever the connected GitHub
+   source (`main`) currently is — since `main` doesn't have this PR's fixes
+   yet, a var-change-triggered redeploy will silently serve the **old,
+   unfixed** code until the PR is merged. Hit this exact thing once during
+   testing (`/health` 404'd because a var change redeployed `main`) and had
+   to re-run `railway up` to restore the fixed snapshot. **Merge the PR
+   before relying on auto-deploy-on-var-change or auto-deploy-on-push.**
+   One build attempt also hit a transient Railway build-infra error (`mise`
+   HTTP/2 "refused stream" downloading the Python runtime) — unrelated to
+   this app, resolved by simply retrying `railway up`.
+2. **Tail logs**: `railway logs --service pppokerht --deployment` —
+   confirmed clean gunicorn boot, no import-time crash.
+3. **Smoke test checklist:**
+   - [x] `GET https://ppptracker.up.railway.app/` → `200`
+   - [x] `GET https://ppptracker.up.railway.app/health` → `200`,
+     `{"status": "ok"}`
+   - [x] Signed in through the UI, tournaments list loads real data from
+     the correct Firestore project (`pppoker-analyser`, confirmed via
+     `/api/firebase-config` and a direct Firestore REST probe), leaks page
+     opens. Legacy multi-time `starting_time` rows (e.g. `23:30, 05:30,
+     07:30, 11:30`) render correctly, no crash.
+   - [ ] Hit an `auth/unauthorized-domain` error and then a broken OAuth
+     popup along the way — both were config issues (domain not yet
+     authorized, then `FIREBASE_AUTH_DOMAIN` set to the storage-bucket
+     domain instead of the auth domain), not code bugs. See §3 for the
+     full story. Both fixed now.
+   - [ ] Stripe flow — **not yet tested**, deferred (see §5, no webhook
+     endpoint registered against the new domain yet).
+   - [ ] `serviceAccountKey.json` absent from the running container —
+     attempted via `railway ssh` but hit host-key verification issues in
+     this environment and didn't chase it further, since it's already
+     guaranteed by code (`_get_admin_db()` only ever reads
+     `FIREBASE_SERVICE_ACCOUNT_JSON` from env, `ApplicationDefault()` as
+     the only fallback, never a file path) and by the build logs (`copy
+     /app` mirrors the repo, which has never contained that file). If you
+     want to double-check directly: `railway ssh --service pppokerht`,
+     register your SSH key first if prompted (`railway ssh keys add`).
 
 ---
 
 ## 3. Firebase
 
-**Decision made during launch testing:** reuse the **existing** Firebase
-project (the one with real tournament/config/user data already in it) as
-the single Firebase backend for the new site, rather than standing up the
-brand-new empty `ppptracker` project created earlier in this process. That
-avoids a data-migration step entirely — same project, same data, just a
-second Owner and a repointed deployment.
+**Status: done, verified working end-to-end.** Reused the **existing**
+Firebase project `pppoker-analyser` (the one with real tournament/config/
+user data already in it) as the single Firebase backend for the new site,
+rather than standing up the brand-new empty `ppptracker` project created
+earlier in this process. That avoided a data-migration step entirely — same
+project, same data, just a second Owner and a repointed deployment.
+Confirmed live: signed in successfully, tournaments list loads real data
+(including the six legacy `starting_time` docs displaying correctly, e.g.
+multi-time rows like `23:30, 05:30, 07:30, 11:30`), leaks page opens.
+
+**Gotcha hit during setup, for next time:** `FIREBASE_AUTH_DOMAIN` was
+initially set to `pppoker-analyser.firebasestorage.app` (the storage
+bucket's domain) instead of the actual auth domain
+`pppoker-analyser.firebaseapp.com`. Sign-in failed with a browser-level
+`ERR_NAME_NOT_RESOLVED` on the OAuth popup because that storage-bucket host
+doesn't serve the Firebase Auth handler. Both values live right next to
+each other in the Console's SDK config object (`storageBucket` vs
+`authDomain`) and are easy to swap by mistake — worth double-checking
+against the Console directly rather than pattern-guessing the value if this
+ever needs to be re-entered.
 
 No local credentials exist in this environment to do any of this
 programmatically — there's no `serviceAccountKey.json`, no `.env`, and
@@ -294,14 +323,36 @@ tournaments page in the browser.
 
 ---
 
-## 5. What this task did NOT do (explicitly deferred)
+## 5. Current status / what's still open
 
-- Did not fill in any Railway environment variable values.
-- Did not leave a running deploy — one fired automatically the moment the
-  GitHub repo was connected (§2.4, Railway's default behavior, not something
-  requested here); it was stopped and removed immediately, confirmed via
-  `railway status` → `activeDeployments: []`. **The residual risk is that
-  merging PR #1 will trigger a new one the same way** — see §2.4's warning.
-- Did not touch the old Railway project or old GitHub repo in any way.
-- Did not verify Firebase project ownership (no local credentials to do so
-  programmatically — see §3).
+Updated after live testing (deployed and verified working end-to-end at
+your request, ahead of merging the PR):
+
+**Done:**
+- All 13 Railway env vars filled in, pointing at the existing
+  `pppoker-analyser` Firebase project.
+- `handtrackerpppoker@gmail.com` added as Owner on that Firebase project.
+- `ppptracker.up.railway.app` authorized in Firebase Auth's domain
+  allowlist.
+- Deployed and smoke-tested: boots clean, `/` and `/health` both 200,
+  sign-in works, tournaments page loads real data correctly (including the
+  legacy multi-time `starting_time` rows).
+
+**Still open:**
+- **Stripe** — no webhook endpoint registered yet against the new domain,
+  so `STRIPE_WEBHOOK_SECRET` is still whatever was carried over (or a
+  placeholder) rather than a secret tied to a real endpoint. Checkout/
+  upgrade-to-Pro flow hasn't been tested. Register a webhook at
+  `https://ppptracker.up.railway.app/api/stripe-webhook` in the Stripe
+  dashboard, put its secret in `STRIPE_WEBHOOK_SECRET`, then test a
+  checkout end-to-end.
+- **Merge PR #1** — the live deployment right now is running this
+  branch's snapshot via manual `railway up`, not the merged `main` branch.
+  Until the PR merges, any auto-redeploy (a var change, or a future push to
+  `main`) will pull whatever's on `main` at that moment — which is why
+  merging matters here, not just as housekeeping.
+- **Old Railway project / old GitHub repo** — untouched throughout, as
+  required. The old prod (`pppokerha.up.railway.app`) should stay up until
+  you're ready to actually cut users over to the new domain.
+- **The now-unused empty `ppptracker` Firebase project** — still exists,
+  harmless, delete at your convenience or leave it.
