@@ -14,8 +14,35 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Per-user bankroll data — only the owner can read/write
-    match /users/{uid}/{document=**} {
+    // Per-user data — only the owner can read/write, EXCEPT the paid-tier
+    // fields. is_pro/stripe_customer_id gate every Pro feature and are written
+    // by the Stripe webhook through the Admin SDK (which bypasses these rules);
+    // if the client could write them, any signed-in user could grant themselves
+    // Pro from the browser console and skip payment entirely.
+    function paidFields() {
+      return ['is_pro', 'stripe_customer_id'];
+    }
+    match /users/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      // The app seeds a new user doc with is_pro:false on first visit, so
+      // create must permit that exact shape — but not a self-granted true,
+      // and not a delete-then-recreate to wash away a cancelled subscription.
+      allow create: if request.auth != null && request.auth.uid == uid
+                    && (!('is_pro' in request.resource.data)
+                        || request.resource.data.is_pro == false)
+                    && !('stripe_customer_id' in request.resource.data);
+      allow update: if request.auth != null && request.auth.uid == uid
+                    && !request.resource.data.diff(resource.data)
+                          .affectedKeys().hasAny(paidFields());
+      allow delete: if false;
+    }
+
+    // Subcollections under a user (leak caches, per-tournament docs) — owner
+    // only. Deliberately NOT /users/{uid}/{document=**}: under rules_version 2
+    // a recursive wildcard also matches zero segments, i.e. the user doc
+    // itself, and because rule matches are OR'd that permissive block would
+    // silently re-open the paid-field hole closed above.
+    match /users/{uid}/{sub}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
     }
 

@@ -110,48 +110,31 @@ function handleUpgradeClick(tier = 'pro') {
   _trackEvent('pro_upgrade_clicked');
   const btn = document.getElementById('pro-upgrade-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Redirecting…'; }
-  const uid   = _currentUser ? _currentUser.uid   : '';
-  const email = _currentUser ? _currentUser.email : '';
-  fetch('/api/create-checkout-session', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ uid, email, tier }),
-  })
+  const fail = (msg) => {
+    if (btn) { btn.disabled = false; btn.textContent = 'Upgrade to Pro'; }
+    const cs = document.getElementById('pro-coming-soon');
+    if (cs) { cs.textContent = msg; cs.classList.remove('d-none'); }
+  };
+  // uid/email are derived server-side from this token and are no longer sent in
+  // the body — the server refuses the call without it.
+  if (!_currentUser) { fail('Please sign in before upgrading.'); return; }
+  _currentUser.getIdToken()
+    .then(token => fetch('/api/create-checkout-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ tier }),
+    }))
     .then(r => r.json())
     .then(d => {
       if (d.url) { window.location.href = d.url; }
       else throw new Error(d.error || 'Could not start checkout');
     })
-    .catch(err => {
-      if (btn) { btn.disabled = false; btn.textContent = 'Upgrade to Pro'; }
-      const cs = document.getElementById('pro-coming-soon');
-      if (cs) { cs.textContent = err.message; cs.classList.remove('d-none'); }
-    });
+    .catch(err => fail(err.message));
 }
 
-function activateProDev() {
-  const ref = _getUserDocRef();
-  if (ref) {
-    ref.set({ is_pro: true }, { merge: true })
-      .then(() => location.reload())
-      .catch(() => location.reload());
-  } else {
-    _userState.is_pro = true;
-    location.reload();
-  }
-}
-
-function deactivateProDev() {
-  const ref = _getUserDocRef();
-  if (ref) {
-    ref.set({ is_pro: false }, { merge: true })
-      .then(() => location.reload())
-      .catch(() => location.reload());
-  } else {
-    _userState.is_pro = false;
-    location.reload();
-  }
-}
+// activateProDev()/deactivateProDev() removed: they wrote is_pro straight from
+// the client, which the Firestore rules now reject (see firestore.rules — a
+// client-writable is_pro meant any signed-in user could self-grant Pro).
 
 /* ── Helpers ─────────────────────────────────────────────── */
 
@@ -436,7 +419,7 @@ function handleImport() {
     fetch('/api/analyze', {
       method: 'POST',
       headers,
-      body: JSON.stringify({ url }),
+      body: JSON.stringify({ url, session_id: getSessionId() }),
     })
       .then(r => r.json())
       .then(data => {
@@ -1098,7 +1081,7 @@ async function exportHandFromRow(handNum, platform, btn, tid) {
     const r = await fetch(endpoint, {
       method:  'POST',
       headers,
-      body: JSON.stringify({ hand_id: handNum, platform }),
+      body: JSON.stringify({ hand_id: handNum, platform, session_id: getSessionId() }),
     });
     if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error || 'Export failed'); }
     const cd = r.headers.get('Content-Disposition') || '';
@@ -1241,7 +1224,7 @@ function _renderTournamentSummary(tournaments) {
   const strip = document.getElementById('tourney-strip-pro');
   if (strip) {
     const satCount = filtered.filter(t => (t.room_name || '').toLowerCase().includes('sat')).length;
-    const pkoCount = filtered.filter(t => { const r = (t.room_name || '').toLowerCase(); return r.includes('pko') && !r.includes('sat'); }).length;
+    const pkoCount = filtered.filter(t => { const r = (t.room_name || '').toLowerCase(); return (r.includes('pko') || r.includes('mko')) && !r.includes('sat'); }).length;
     const items = [['Tourneys', filtered.length], ['Satellite', satCount], ['PKO', pkoCount]];
     strip.innerHTML = items.map(([label, value]) =>
       `<span class="val-pill"><strong>${value}</strong><span class="val-pill-label">${label}</span></span>`
@@ -2180,7 +2163,7 @@ function exportSpecificHandJson(btn) {
     return fetch('/api/export/json/hand', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ hand_id: handId }),
+      body: JSON.stringify({ hand_id: handId, session_id: getSessionId() }),
     })
       .then(r => {
         if (!r.ok) return r.json().then(d => { throw new Error(d.error || 'Export failed'); });
@@ -2200,7 +2183,11 @@ function exportSpecificHandJson(btn) {
 function exportAllHandsJson(btn) {
   if (!isPro()) { showUpgradeModal('export'); return; }
   _rowExportStatus(btn, 'loading', 'Building JSON…');
-  fetch('/api/export/json/all', { method: 'POST' })
+  fetch('/api/export/json/all', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_id: getSessionId() }),
+  })
     .then(r => {
       if (!r.ok) return r.json().then(d => { throw new Error(d.error || 'Export failed'); });
       const cd = r.headers.get('Content-Disposition') || '';
@@ -2222,7 +2209,7 @@ function exportTournamentJson(tourneyId, btn) {
   fetch('/api/export/json/tournament', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ tourney_id: tourneyId }),
+    body: JSON.stringify({ tourney_id: tourneyId, session_id: getSessionId() }),
   })
     .then(r => {
       if (!r.ok) return r.json().then(d => { throw new Error(d.error || 'Export failed'); });
@@ -2247,7 +2234,7 @@ function exportSpecificHand(btn) {
     return fetch('/api/export/hand', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ hand_id: handId, platform }),
+      body: JSON.stringify({ hand_id: handId, platform, session_id: getSessionId() }),
     })
       .then(r => {
         if (!r.ok) return r.json().then(d => { throw new Error(d.error || 'Export failed'); });
@@ -2272,7 +2259,7 @@ function exportAllHands(btn) {
   fetch('/api/export/pokerstars', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ platform }),
+    body: JSON.stringify({ platform, session_id: getSessionId() }),
   })
     .then(r => {
       if (!r.ok) return r.json().then(d => { throw new Error(d.error || 'Export failed'); });
@@ -2316,7 +2303,7 @@ function _doExportTournament(tourneyId, btn) {
   fetch('/api/export/tournament', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ tourney_id: tourneyId, platform }),
+    body: JSON.stringify({ tourney_id: tourneyId, platform, session_id: getSessionId() }),
   })
     .then(r => {
       if (!r.ok) return r.json().then(d => { throw new Error(d.error || 'Export failed'); });

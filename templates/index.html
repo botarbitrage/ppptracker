@@ -235,8 +235,11 @@
           </button>
           <button type="button" class="btn btn-outline-secondary btn-sm w-100" data-bs-dismiss="modal">Maybe later</button>
           <div id="pro-dev-hatch" class="d-none text-center mt-1">
-            <button type="button" class="btn btn-link btn-sm" style="color:var(--muted);font-size:.75rem" onclick="activateProDev()">Activate Pro (dev)</button>
-            <button type="button" class="btn btn-link btn-sm d-block mx-auto" style="color:var(--muted);font-size:.75rem" onclick="deactivateProDev()">Downgrade to Free (dev)</button>
+            <!-- The "Activate/Downgrade Pro (dev)" buttons were removed: they set
+                 is_pro directly from the client, which only worked because the
+                 Firestore rules let a user write their own paid-tier fields —
+                 i.e. they were a free-Pro bypass, not just a dev shortcut. Use
+                 the real test subscription below, or set is_pro server-side. -->
             <button type="button" class="btn btn-link btn-sm d-block mx-auto" style="color:var(--muted);font-size:.75rem" onclick="handleUpgradeClick('protest')">Pro-test — $0.99/year (test sub)</button>
           </div>
         </div>

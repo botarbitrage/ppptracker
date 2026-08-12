@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Compile check
+        run: python -m py_compile app.py hand_parser.py hand_exporter.py leak_engine.py leak_validation.py tournament_analyzer.py equity.py
+
+      - name: Run test suite
+        run: |
+          python test_hand_exporter.py
+          python test_leak_cache.py
+          python test_leak_targets.py
+          python test_leaks_api.py
