@@ -2407,6 +2407,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /* ── Auth helpers ────────────────────────────────────────── */
 
+// UI hint only — mirrors _PERMANENT_ADMIN_EMAILS in app.py so the Admin button
+// shows for a permanent admin even before their uid lands in /config/admins.uids.
+// Every admin API re-checks server-side; this list grants nothing on its own.
+const _PERMANENT_ADMIN_EMAILS = ['caiohn@gmail.com'];
+
+/**
+ * Reveal the Admin button for admins. Reads /config/admins (world-readable) the
+ * same way the tournaments page does; the server is the actual authority.
+ */
+async function _checkAdmin(user) {
+  const btn = document.getElementById('admin-nav-btn');
+  if (!btn) return;
+  let isAdmin = false;
+  try {
+    if (user && _db) {
+      if (_PERMANENT_ADMIN_EMAILS.includes((user.email || '').toLowerCase())) {
+        isAdmin = true;
+      } else {
+        const snap = await _db.collection('config').doc('admins').get();
+        const uids = (snap.exists && snap.data().uids) || [];
+        isAdmin = uids.includes(user.uid);
+      }
+    }
+  } catch (e) {
+    console.warn('admin check failed', e);
+  }
+  btn.classList.toggle('d-none', !isAdmin);
+}
+
 /** Returns the Firestore doc ref for the current user (auth) or guest (session). */
 function _getUserDocRef() {
   if (!_db) return null;
@@ -2621,6 +2650,7 @@ async function _initFirebase() {
         _currentUser = user;
         await _loadUserState();
         _renderAuthBar(user ? user.email : null);
+        _checkAdmin(user);  // hides the button again on sign-out
         if (user) {
           _getUserDocRef().set({
             email:     user.email,

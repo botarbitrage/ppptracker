@@ -715,10 +715,52 @@ def _verify_bearer(req):
     return claims.get('uid') if claims else None
 
 
+# Accounts that are admin no matter what /config/admins.uids says, so the admin
+# page can never lock everyone out of itself. The promote/demote endpoint refuses
+# to strip these, and the admin page renders them as a ticked, disabled checkbox.
+_PERMANENT_ADMIN_EMAILS = frozenset(
+    e.strip().lower()
+    for e in os.getenv('PERMANENT_ADMIN_EMAILS', 'caiohn@gmail.com').split(',')
+    if e.strip()
+)
+_PERM_ADMIN_UID_CACHE = None
+
+
+def _permanent_admin_uids():
+    """Resolve _PERMANENT_ADMIN_EMAILS to uids via Firebase Auth (memoised).
+
+    A permanent admin who has never signed in has no account yet, so an
+    unresolved email is simply skipped — it starts working the moment they do.
+    """
+    global _PERM_ADMIN_UID_CACHE
+    if _PERM_ADMIN_UID_CACHE is not None:
+        return _PERM_ADMIN_UID_CACHE
+    uids, complete = set(), True
+    for email in _PERMANENT_ADMIN_EMAILS:
+        try:
+            _get_admin_db()  # ensure Firebase Admin SDK is initialized
+            uids.add(admin_auth.get_user_by_email(email).uid)
+        except admin_auth.UserNotFoundError:
+            complete = False  # not registered yet — look again next time
+        except Exception as exc:
+            print(f"[_permanent_admin_uids] lookup failed for {email}: "
+                  f"{type(exc).__name__}: {exc}")
+            complete = False
+            break
+    # Only a full resolution is cached, so an account created after boot (or an
+    # Auth outage) can't strand this process with a permanently empty set.
+    if complete:
+        _PERM_ADMIN_UID_CACHE = uids
+    return uids
+
+
 def _is_admin(uid):
-    """True if uid is listed in /config/admins.uids (publicly readable doc)."""
+    """True if uid is listed in /config/admins.uids (publicly readable doc)
+    or belongs to a permanent admin."""
     if not uid:
         return False
+    if uid in _permanent_admin_uids():
+        return True
     try:
         snap = _get_admin_db().collection('config').document('admins').get()
         return snap.exists and uid in (snap.to_dict().get('uids') or [])
@@ -878,6 +920,93 @@ def admin_stamp_new_tournaments():
             doc.reference.update({'created_at': now})
             stamped.append(doc.id)
     return jsonify({'ok': True, 'stamped': stamped})
+
+
+def _ms_to_secs(ms):
+    """Firebase Auth metadata timestamps are epoch ms; the UI wants secs."""
+    try:
+        return int(ms) // 1000 if ms else None
+    except (TypeError, ValueError):
+        return None
+
+
+@app.route('/api/admin/users', methods=['GET'])
+def admin_list_users():
+    """Every registered Firebase Auth account, flagged with its admin status.
+
+    Firebase Auth is the authoritative user list — the Firestore `users`
+    collection only gets a doc once someone loads the home page, so it silently
+    misses anyone who has only ever used /tournaments or /leaks.
+    """
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+
+    db = _get_admin_db()
+    snap = db.collection('config').document('admins').get()
+    allowlist = set(snap.to_dict().get('uids') or []) if snap.exists else set()
+    permanent = _permanent_admin_uids()
+
+    users = []
+    try:
+        page = admin_auth.list_users()
+        while page:
+            for u in page.users:
+                meta = getattr(u, 'user_metadata', None)
+                is_perm = u.uid in permanent
+                users.append({
+                    'uid':          u.uid,
+                    'email':        u.email or '',
+                    'is_admin':     is_perm or u.uid in allowlist,
+                    'is_permanent': is_perm,
+                    'disabled':     bool(getattr(u, 'disabled', False)),
+                    'created_at':   _ms_to_secs(getattr(meta, 'creation_timestamp', None)),
+                    'last_sign_in': _ms_to_secs(getattr(meta, 'last_sign_in_timestamp', None)),
+                })
+            page = page.get_next_page()
+    except Exception as exc:
+        print(f"[admin_list_users] list_users failed: {type(exc).__name__}: {exc}")
+        return jsonify({'error': f'Could not list users: {exc}'}), 500
+
+    # Admins first, then alphabetical — the people you manage sit at the top.
+    users.sort(key=lambda u: (not u['is_admin'], (u['email'] or '~').lower()))
+    return jsonify({'users': users})
+
+
+@app.route('/api/admin/users/<target_uid>/admin', methods=['POST'])
+def admin_set_user_admin(target_uid):
+    """Add or remove target_uid from /config/admins.uids."""
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+
+    body = request.get_json(silent=True) or {}
+    make_admin = body.get('is_admin')
+    if not isinstance(make_admin, bool):
+        return jsonify({'error': 'is_admin must be true or false'}), 400
+
+    try:
+        target = admin_auth.get_user(target_uid)
+    except admin_auth.UserNotFoundError:
+        return jsonify({'error': 'No such user'}), 404
+    except Exception as exc:
+        print(f"[admin_set_user_admin] get_user failed for {target_uid}: "
+              f"{type(exc).__name__}: {exc}")
+        return jsonify({'error': f'Could not look up user: {exc}'}), 500
+
+    if not make_admin and target_uid in _permanent_admin_uids():
+        return jsonify({
+            'error': f'{target.email or target_uid} is a permanent admin '
+                     f'and cannot be removed.'
+        }), 400
+
+    from google.cloud import firestore as gcf
+    ref = _get_admin_db().collection('config').document('admins')
+    # ArrayUnion/ArrayRemove are applied server-side, so two admins editing the
+    # list at once can't clobber each other — no transaction needed.
+    op = gcf.ArrayUnion([target_uid]) if make_admin else gcf.ArrayRemove([target_uid])
+    ref.set({'uids': op}, merge=True)  # merge=True also creates the doc if absent
+    return jsonify({'ok': True, 'uid': target_uid, 'is_admin': make_admin})
 
 
 def _fetch_tournament_records(uid, tourney_id):
@@ -1760,6 +1889,11 @@ def leaks_validate_api():
 @app.route('/tournaments')
 def tournaments_page():
     return render_template('tournaments.html')
+
+@app.route('/admin')
+def admin_page():
+    """Admin console. Unlisted for non-admins — the APIs it calls are the gate."""
+    return render_template('admin.html')
 
 @app.route('/offline')
 def offline():
