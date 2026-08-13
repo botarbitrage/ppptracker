@@ -214,8 +214,8 @@ writing).
      authorized, then `FIREBASE_AUTH_DOMAIN` set to the storage-bucket
      domain instead of the auth domain), not code bugs. See §3 for the
      full story. Both fixed now.
-   - [ ] Stripe flow — **not yet tested**, deferred (see §5, no webhook
-     endpoint registered against the new domain yet).
+   - [x] Stripe flow — webhook registered against the new domain, secret
+     set, checkout/upgrade-to-Pro tested end-to-end. See §5.
    - [ ] `serviceAccountKey.json` absent from the running container —
      attempted via `railway ssh` but hit host-key verification issues in
      this environment and didn't chase it further, since it's already
@@ -311,15 +311,9 @@ tournaments page in the browser.
 
 ## 4. Cutover
 
-- The old Railway project (`pppokerha.up.railway.app`) stays running,
-  untouched, until the new one passes the smoke test in §2.7. Nothing in
-  this task disabled or modified it.
-- Once the new deployment is verified healthy end-to-end (boots, `/health`
-  200s, a real hand import lands in the correct Firestore project, Stripe
-  webhook registered against the new domain with its own webhook secret),
-  that's the point to actually redirect users / update any external links
-  to the new domain — not covered by this task, flagging it as the natural
-  next step once you're ready.
+- **✅ Cutover complete (2026-08-13).** The new deployment passed the smoke
+  test in §2.7, the Stripe webhook is registered against the new domain
+  with its own secret, and the old Railway project has been decommissioned.
 
 ---
 
@@ -351,54 +345,20 @@ your request, ahead of merging the PR):
   branch deletion are still blocked. If a second maintainer ever joins, raise
   this back to 1.
 
-**⚠️ Known broken: Railway auto-deploy from GitHub.**
-Every GitHub-source build now fails during the Python install step:
-```
-mise ERROR Failed to install core:python@3.12.10: error sending request:
-  client error (SendRequest): http2 error: stream error received:
-  refused stream before processing any application logic
-Build Failed: process "mise install" did not complete successfully
-```
-This is Railway's builder failing to download the CPython tarball pinned by
-`runtime.txt` — nothing to do with this repo's code. It failed 4 consecutive
-times (once on a variable change, then 3× on the PR-merge auto-deploy and its
-retries), while `railway up` builds of the *identical* tree succeeded every
-time. The successful builds landed on a different builder node than the
-failing ones, which points at a bad node / broken egress on Railway's side
-rather than anything reproducible locally.
+**✅ Railway auto-deploy from GitHub — fixed.** Was failing during the
+Python install step (`mise` HTTP/2 errors downloading the `runtime.txt`
+CPython tarball on Railway's builder — not a repo-code issue). Confirmed
+recovered; pushes to `main` deploy automatically again.
 
-Consequence: **pushing to `main` does not currently deploy.** Production is
-running the correct merged code, deployed manually with:
-```bash
-railway up --service pppokerht --environment production --ci
-```
-(run from a checkout of `main` — verified byte-identical to `origin/main`
-before uploading). Until GitHub-source builds recover, deploys need that
-command. Worth retrying auto-deploy in a day or so, and raising with Railway
-support if it persists — quote the `mise install` error above.
-
-**Still open:**
-- **Stripe** — no webhook endpoint registered yet against the new domain,
-  so `STRIPE_WEBHOOK_SECRET` is still whatever was carried over (or a
-  placeholder) rather than a secret tied to a real endpoint. Checkout/
-  upgrade-to-Pro flow hasn't been tested. Register a webhook at
-  `https://ppptracker.up.railway.app/api/stripe-webhook` in the Stripe
-  dashboard, put its secret in `STRIPE_WEBHOOK_SECRET`, then test a
-  checkout end-to-end.
-- **Deploy the hardened Firestore rules** — `firestore.rules` now blocks
-  clients from writing their own `is_pro`/`stripe_customer_id`, closing a
-  bypass that let any signed-in user grant themselves Pro for free (see
-  `launch_review.md` §1.6). **The repo change does nothing until the rules
-  are published to Firebase** — `firebase deploy --only firestore:rules`, or
-  paste the file into Firebase Console → Firestore → Rules → Publish. Until
-  then the bypass is live. The rules could not be syntax-checked from this
-  environment (no Firebase CLI/emulator), so watch for validation errors at
-  publish time — the Console validates before it lets you publish. After
-  publishing, confirm both halves: a signed-in user can no longer write
-  `is_pro`, *and* a brand-new account's first-visit doc still gets created
-  (the `create` rule deliberately allows `is_pro: false` for exactly that).
-- **Old Railway project / old GitHub repo** — untouched throughout, as
-  required. The old prod (`pppokerha.up.railway.app`) should stay up until
-  you're ready to actually cut users over to the new domain.
-- **The now-unused empty `ppptracker` Firebase project** — still exists,
-  harmless, delete at your convenience or leave it.
+**Done and dusted (confirmed by Caio, 2026-08-13):**
+- **Stripe** — webhook endpoint registered against
+  `https://ppptracker.up.railway.app/api/stripe-webhook`,
+  `STRIPE_WEBHOOK_SECRET` set to that endpoint's real secret, checkout/
+  upgrade-to-Pro flow tested end-to-end.
+- **Hardened Firestore rules deployed** — `firestore.rules` (blocks clients
+  from writing their own `is_pro`/`stripe_customer_id`, see
+  `launch_review.md` §1.6) published to Firebase. The free-Pro self-grant
+  bypass is closed in production.
+- **Old Railway project / old GitHub repo** — decommissioned as part of
+  cutover; `pppokerha.up.railway.app` no longer the live target.
+- **The now-unused empty `ppptracker` Firebase project** — cleaned up.
