@@ -18,6 +18,7 @@ from flask import Flask, jsonify, redirect, render_template, request, send_file,
 from hand_parser import process_hands, build_hand_rows
 from hand_exporter import validate_hands, export_pokerstars
 from tournament_analyzer import analyze_tournament
+import gamification
 
 # In-memory store of imported hand records, keyed by the client's per-browser
 # session_id (see static/app.js getSessionId()) so concurrent/anonymous callers
@@ -240,8 +241,10 @@ def analyze():
     recent_hands, recent_won, stats, tournaments = process_hands(records)
     validation = validate_hands(records)
 
-    saved, new_ids = _try_save_tournaments(id_token, records, tournaments)
+    saved, new_ids, claims = _try_save_tournaments(id_token, records, tournaments)
     new_hands = len(new_ids)
+
+    gamification_result = _score_import(claims, new_hands)
 
     # Compute stats/validation for only the truly-new records so the UI can
     # show "X new hands loaded" with accurate breakdown counts.
@@ -277,6 +280,7 @@ def analyze():
         "tournaments": tournaments,
         "validation": validation,
         "saved": saved,
+        "gamification": gamification_result,
     })
 
 
@@ -567,21 +571,23 @@ def _try_save_tournaments(id_token, records, tournaments):
     Merge each tournament from this import into per-tournament persisted storage.
     On a re-import of the same tourney_id, hands are merged (de-duped by gameid)
     with any previously stored hands for that tournament and stats recomputed
-    from the merged set. Returns (saved, new_game_ids): saved is True when any
-    tournament was written, new_game_ids is the set of game IDs not previously stored.
+    from the merged set. Returns (saved, new_game_ids, claims): saved is True when
+    any tournament was written, new_game_ids is the set of game IDs not previously
+    stored, and claims are the verified token claims (or None).
+
+    Persistence is deliberately NOT gated on is_pro. Every signed-in player's hands
+    are stored so the gamification economy can count genuinely-new hands for them;
+    the Free/Pro split is enforced at display and export time instead
+    (static/app.js `_loadHistory` and the export quota), not at write time.
     """
     if not id_token or not tournaments:
-        return False, set()
+        return False, set(), None
     try:
         from hand_parser import extract_tourney_id
 
         db = _get_admin_db()  # ensures firebase_admin.initialize_app() has run
         decoded = admin_auth.verify_id_token(id_token)
         uid = decoded['uid']
-
-        user_snap = db.collection('users').document(uid).get()
-        if not user_snap.exists or not user_snap.to_dict().get('is_pro'):
-            return False, set()
 
         bucket = _get_admin_bucket()
 
@@ -597,12 +603,102 @@ def _try_save_tournaments(id_token, records, tournaments):
             ids = _merge_tournament(db, bucket, uid, tid, new_records)
             if ids:
                 all_new_ids.update(ids)
-        return True, all_new_ids
+        return True, all_new_ids, decoded
     except Exception as exc:
         import traceback
         print(f"[_try_save_tournaments] FAILED: {type(exc).__name__}: {exc}")
         traceback.print_exc()
-        return False, set()
+        return False, set(), None
+
+
+def _score_import(claims, new_hands):
+    """Award gamification points for one import. Returns the award payload, or None.
+
+    Deliberately refuses to credit in two cases:
+
+      * no verified token — anonymous imports persist nothing, so there is no
+        trustworthy new-hand count to score, and
+      * no Storage bucket configured — _merge_tournament treats every incoming game
+        ID as new when it cannot read the previously-stored blob, so without the
+        bucket the same replay link could be re-imported for points indefinitely.
+        That is currently only a cosmetic counter; once points ride on it, it is a
+        farming hole, so scoring stays off rather than paying out numbers we cannot
+        stand behind.
+    """
+    if not claims or not claims.get('uid') or new_hands <= 0:
+        return None
+    try:
+        if not _get_admin_bucket():
+            print('[gamification] scoring skipped: FIREBASE_STORAGE_BUCKET is unset, '
+                  'so new-hand counts cannot be trusted')
+            return None
+        return gamification.on_import(_get_admin_db(), claims['uid'], new_hands,
+                                      claims=claims)
+    except Exception as exc:
+        # Scoring must never turn a successful hand import into a failed request.
+        print(f"[_score_import] FAILED: {type(exc).__name__}: {exc}")
+        return None
+
+
+@app.route('/api/gamification', methods=['GET'])
+def get_gamification():
+    """Points / streak / rank for the signed-in player — drives the header banner."""
+    uid = _verify_bearer(request)
+    if not uid:
+        return jsonify({'error': 'Unauthorized'}), 401
+    return jsonify(gamification.snapshot(_get_admin_db(), uid))
+
+
+@app.route('/api/admin/gamification', methods=['GET'])
+def admin_get_gamification():
+    uid = _verify_bearer(request)
+    if not uid or not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+    db = _get_admin_db()
+    status = gamification.week_status(db)
+    status['timezones'] = list(gamification.ALLOWED_TIMEZONES)
+    return jsonify(status)
+
+
+@app.route('/api/admin/gamification', methods=['POST'])
+def admin_set_gamification():
+    """Set the zone every day/week boundary and time-window rule is evaluated in."""
+    uid = _verify_bearer(request)
+    if not uid or not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+
+    tz = ((request.get_json(silent=True) or {}).get('timezone') or '').strip()
+    if tz not in gamification.ALLOWED_TIMEZONES:
+        return jsonify({'error': f'Unknown timezone: {tz or "(empty)"}'}), 400
+
+    _get_admin_db().collection('config').document('gamification').set({
+        'timezone':   tz,
+        'updated_at': int(time.time()),
+        'updated_by': uid,
+    }, merge=True)
+    # The resolver memoises for a minute; drop it so the change is visible immediately.
+    gamification.invalidate_tz_cache()
+    return jsonify({'timezone': tz})
+
+
+@app.route('/api/admin/gamification/settle', methods=['POST'])
+def admin_settle_gamification():
+    """Force-settle a closed week's podium. Idempotent — settling twice pays once."""
+    uid = _verify_bearer(request)
+    if not uid or not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+
+    db   = _get_admin_db()
+    week = ((request.get_json(silent=True) or {}).get('week_key') or '').strip()
+    if not week:
+        return jsonify({'error': 'week_key is required'}), 400
+    if week == gamification.week_key(int(time.time()), gamification.resolve_tz(db)):
+        return jsonify({'error': 'That week is still open.'}), 400
+
+    result = gamification.settle_week(db, week)
+    if result is None:
+        return jsonify({'week_key': week, 'already_settled': True})
+    return jsonify(result)
 
 
 @app.route('/api/create-checkout-session', methods=['POST'])
