@@ -46,6 +46,30 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == uid;
     }
 
+    // Gamification state — owner-readable, never client-writable. This deliberately
+    // lives at the top level instead of under /users/{uid}: the update rule above lets
+    // the owner write any non-paid field on their own user doc, and the subcollection
+    // rule grants blanket write beneath it, so points stored in either place could be
+    // edited from the browser console and the leaderboard would mean nothing. Every
+    // write here goes through the Admin SDK in gamification.py.
+    match /gamification/{uid} {
+      allow read:  if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // Weekly leaderboards — any signed-in player can read the standings (entries carry
+    // a display name only, never an email; see gamification.display_name), but scores
+    // are written by the Admin SDK alone.
+    match /leaderboards/{weekId} {
+      allow read:  if request.auth != null;
+      allow write: if false;
+
+      match /entries/{uid} {
+        allow read:  if request.auth != null;
+        allow write: if false;
+      }
+    }
+
     // Everything else: deny
     match /{document=**} {
       allow read, write: if false;

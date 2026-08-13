@@ -401,6 +401,83 @@ function showImportSuccess(data) {
   box.classList.remove('d-none');
 }
 
+/* ── Gamification ────────────────────────────────────────── */
+
+// This file interpolates values straight into template literals everywhere else, which is
+// fine for numbers and server-generated labels. Badge names and leaderboard display names
+// are the first strings here that originate from user-controlled data, so they get escaped.
+function _esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  ));
+}
+
+function _fmtNum(n) {
+  return Number(n || 0).toLocaleString('en-AU');
+}
+
+/** Refresh the header banner. No-op when signed out — the banner stays hidden. */
+function _loadGamification() {
+  const banner = document.getElementById('gam-banner');
+  if (!banner) return;
+  if (!_currentUser) { banner.classList.add('d-none'); return; }
+
+  _currentUser.getIdToken()
+    .then(token => fetch('/api/gamification', { headers: { Authorization: `Bearer ${token}` } }))
+    .then(r => (r.ok ? r.json() : null))
+    .then(g => {
+      if (!g) return;
+      document.getElementById('gam-points').textContent = _fmtNum(g.points_total);
+      document.getElementById('gam-streak').textContent =
+        g.streak_days ? `${g.streak_days}` : '—';
+      document.getElementById('gam-rank').textContent =
+        g.rank ? `#${g.rank}` : '—';
+
+      // Newest badges first — the most recent unlock is the interesting one.
+      const badges = (g.badges || []).slice().sort((a, b) => (b.ts || 0) - (a.ts || 0));
+      const shown  = badges.slice(0, 4);
+      let html = shown.map(b =>
+        `<span class="gam-badge" title="${_esc(b.name)} — ${_esc(b.title)}">${_esc(b.title)}</span>`
+      ).join('');
+      if (badges.length > shown.length) {
+        html += `<span class="gam-badge gam-badge-more">+${badges.length - shown.length}</span>`;
+      }
+      document.getElementById('gam-badges').innerHTML = html;
+
+      const next = g.next_badge;
+      document.getElementById('gam-next').innerHTML = next
+        ? `<strong>${_fmtNum(next.remaining)}</strong> hands to ${_esc(next.title)}`
+        : '';
+
+      banner.classList.remove('d-none');
+    })
+    .catch(() => { /* the banner is decoration — never surface a failure here */ });
+}
+
+/** Floating summary of what an import just earned. */
+function showGamificationToast(g) {
+  const toast = document.getElementById('gam-toast');
+  if (!toast || !g || (!g.points && !(g.badges || []).length)) return;
+  clearTimeout(toast._hideTimer);
+
+  const rows = (g.awards || [])
+    .map(a => `<div class="gam-toast-row"><span>${_esc(a.label)}</span><span>+${_fmtNum(a.points)}</span></div>`)
+    .join('');
+  const unlocked = (g.badges || [])
+    .map(b => `<span class="gam-toast-unlock" title="${_esc(b.name)}">🏅 ${_esc(b.title)}</span>`)
+    .join('');
+
+  toast.innerHTML =
+    `<div class="gam-toast-head">+${_fmtNum(g.points)} points</div>` +
+    (rows ? `<div class="gam-toast-rows">${rows}</div>` : '') +
+    (unlocked ? `<div class="gam-toast-badges">${unlocked}</div>` : '');
+
+  toast.classList.add('gam-visible');
+  // Badge unlocks are worth reading, so they linger a little longer.
+  toast._hideTimer = setTimeout(() => toast.classList.remove('gam-visible'),
+                                unlocked ? 9000 : 6000);
+}
+
 /* ── Import handler ──────────────────────────────────────── */
 
 function handleImport() {
@@ -429,6 +506,10 @@ function handleImport() {
         if (data.error) { showError(data.error); return; }
         renderResults(data);
         showImportSuccess(data);
+        if (data.gamification) {
+          showGamificationToast(data.gamification);
+          _loadGamification();
+        }
         if (data.saved) {
           _startImportHighlights((data.tournaments || []).map(t => t.tourney_id).filter(Boolean));
           _loadHistory();
@@ -2705,6 +2786,7 @@ async function _initFirebase() {
         await _loadUserState();
         _renderAuthBar(user ? user.email : null);
         _checkAdmin(user);  // hides the button again on sign-out
+        _loadGamification();  // hides the banner again on sign-out
         if (user) {
           _getUserDocRef().set({
             email:     user.email,

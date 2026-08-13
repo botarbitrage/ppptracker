@@ -1389,6 +1389,125 @@ button.auth-chip { background: none; }
 }
 
 
+/* ── Gamification ───────────────────────────────────────────── */
+.gam-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  max-width: 1400px;
+  margin: 0 auto .75rem;
+  padding: .6rem 1rem;
+  background: rgba(0,230,118,.07);
+  border: 1px solid rgba(0,230,118,.22);
+  border-radius: 10px;
+}
+.gam-stats { display: flex; align-items: center; gap: 1.5rem; }
+.gam-stat  { display: flex; flex-direction: column; line-height: 1.15; }
+.gam-stat-value {
+  font-family: var(--font-head);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--green);
+  letter-spacing: .5px;
+}
+.gam-stat-label {
+  font-family: var(--font-head);
+  font-size: .58rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .8px;
+}
+.gam-side {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.gam-badges { display: flex; flex-wrap: wrap; gap: .3rem; }
+.gam-badge {
+  font-family: var(--font-head);
+  font-size: .6rem;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: var(--green);
+  background: rgba(0,230,118,.12);
+  border: 1px solid rgba(0,230,118,.3);
+  border-radius: 20px;
+  padding: .16rem .55rem;
+  white-space: nowrap;
+}
+.gam-badge-more { color: var(--muted); background: none; border-color: var(--border); }
+.gam-next, .gam-signin { font-size: .74rem; color: var(--muted); }
+.gam-next strong { color: var(--text); font-weight: 600; }
+
+/* Toast — same mechanics as #export-toast, but allowed to wrap onto several lines. */
+#gam-toast {
+  position: fixed;
+  bottom: 1.75rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  z-index: 1075;
+  background: var(--panel);
+  border: 1px solid rgba(0,230,118,.35);
+  border-radius: 10px;
+  padding: .7rem 1.1rem;
+  font-size: .8rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,.5);
+  opacity: 0;
+  transition: opacity .18s ease, transform .18s ease;
+  pointer-events: none;
+  max-width: min(92vw, 30rem);
+}
+#gam-toast.gam-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+.gam-toast-head {
+  font-family: var(--font-head);
+  font-size: .95rem;
+  font-weight: 800;
+  color: var(--green);
+  letter-spacing: .5px;
+  margin-bottom: .3rem;
+}
+.gam-toast-rows { display: flex; flex-direction: column; gap: .1rem; margin-bottom: .1rem; }
+.gam-toast-row  { display: flex; justify-content: space-between; gap: 1.5rem; color: var(--text); }
+.gam-toast-row span:last-child { color: var(--green); font-weight: 600; }
+.gam-toast-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .3rem;
+  margin-top: .45rem;
+  padding-top: .45rem;
+  border-top: 1px solid var(--border);
+}
+.gam-toast-unlock {
+  font-family: var(--font-head);
+  font-size: .6rem;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: var(--yellow);
+  background: rgba(204,204,0,.1);
+  border: 1px solid rgba(204,204,0,.3);
+  border-radius: 20px;
+  padding: .16rem .55rem;
+}
+
+@media (max-width: 575.98px) {
+  .gam-banner { justify-content: center; }
+  .gam-stats  { gap: 1.1rem; }
+  .gam-side   { justify-content: center; }
+  .gam-next   { display: none; }
+}
+
+
 /* ── Tournament Summary drill-down ───────────────────────────── */
 
 .tsum-summary-row {
