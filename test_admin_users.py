@@ -281,6 +281,58 @@ def main():
     check('resolved lookup is cached', A._PERM_ADMIN_UID_CACHE == {PERM_UID},
           str(A._PERM_ADMIN_UID_CACHE))
 
+    # ── 8. Pricing plan ──────────────────────────────────────────────────────
+    caller['uid'] = ADMIN_UID
+    db.put(('config', 'admins'), {'uids': [ADMIN_UID]})
+    os.environ['STRIPE_PRICE_ID'] = 'price_early'
+    os.environ.pop('STRIPE_PRO_PRICE_ID', None)
+
+    def active_plan():
+        return (db.get(('config', 'pricing')) or {}).get('active_plan')
+
+    status, data = _json(client.get('/api/pricing'))
+    check('public pricing 200', status == 200, str(status))
+    check('defaults to early access', data.get('plan') == 'early_access', str(data))
+    check('public pricing carries a label', data.get('label') == 'Early Access', str(data))
+
+    status, data = _json(client.get('/api/admin/pricing'))
+    check('admin pricing 200', status == 200, str(status))
+    by_key = {p['key']: p for p in data.get('plans', [])}
+    check('early access is stripe-configured', by_key['early_access']['stripe_configured'] is True)
+    check('pro is not stripe-configured', by_key['pro']['stripe_configured'] is False)
+
+    # Switching to a plan with no Stripe price would 503 every checkout.
+    status, body = _json(client.post('/api/admin/pricing',
+                                     data=json.dumps({'plan': 'pro'}),
+                                     content_type='application/json'))
+    check('unconfigured plan rejected', status == 400, str(status))
+    check('rejection names the env var', 'STRIPE_PRO_PRICE_ID' in body.get('error', ''), str(body))
+    check('rejected switch did not write', active_plan() is None, str(active_plan()))
+
+    os.environ['STRIPE_PRO_PRICE_ID'] = 'price_pro'
+    status, _ = _json(client.post('/api/admin/pricing',
+                                  data=json.dumps({'plan': 'pro'}),
+                                  content_type='application/json'))
+    check('configured plan accepted', status == 200, str(status))
+    check('active plan persisted', active_plan() == 'pro', str(active_plan()))
+    status, data = _json(client.get('/api/pricing'))
+    check('public pricing follows the switch', data.get('plan') == 'pro', str(data))
+
+    status, _ = _json(client.post('/api/admin/pricing',
+                                  data=json.dumps({'plan': 'nope'}),
+                                  content_type='application/json'))
+    check('unknown plan rejected', status == 400, str(status))
+
+    caller['uid'] = PLAIN_UID
+    status, _ = _json(client.get('/api/admin/pricing'))
+    check('non-admin cannot read pricing config', status == 403, str(status))
+    status, _ = _json(client.post('/api/admin/pricing',
+                                  data=json.dumps({'plan': 'early_access'}),
+                                  content_type='application/json'))
+    check('non-admin cannot switch plan', status == 403, str(status))
+    check('non-admin switch did not write', active_plan() == 'pro', str(active_plan()))
+    caller['uid'] = ADMIN_UID
+
     for p in problems:
         print('  FAIL', p)
     print('admin users API: ' + ('PASS' if not problems else 'FAIL'))

@@ -609,7 +609,10 @@ def _try_save_tournaments(id_token, records, tournaments):
 def create_checkout_session():
     data  = request.get_json(silent=True) or {}
     tier  = data.get('tier', 'pro')
-    price = _STRIPE_PROTEST_PRICE_ID if tier == 'protest' else _STRIPE_PRICE_ID
+    # The normal path bills whichever plan the admin console has active; the
+    # 'protest' tier stays a fixed test price.
+    price = (_STRIPE_PROTEST_PRICE_ID if tier == 'protest'
+             else _pricing_plans()[_active_plan()]['price_id'])
     if not stripe.api_key or not price:
         return jsonify({'error': 'Stripe not configured'}), 503
     # uid/email come from the verified token, never the request body: the webhook
@@ -1007,6 +1010,101 @@ def admin_set_user_admin(target_uid):
     op = gcf.ArrayUnion([target_uid]) if make_admin else gcf.ArrayRemove([target_uid])
     ref.set({'uids': op}, merge=True)  # merge=True also creates the doc if absent
     return jsonify({'ok': True, 'uid': target_uid, 'is_admin': make_admin})
+
+
+# ── Pricing plan ─────────────────────────────────────────────────────────────
+# Which plan is on sale lives in /config/pricing.active_plan so it can be flipped
+# from the admin console at launch without a deploy. Each plan's Stripe price and
+# display price come from its own env vars, read per call so a Railway variable
+# change lands on restart rather than needing a code edit.
+
+_DEFAULT_PLAN = 'early_access'
+
+
+def _pricing_plans():
+    """Plan key -> {label, price_label, price_id, price_env}."""
+    return {
+        'early_access': {
+            'label':       'Early Access',
+            'price_label': os.getenv('EARLY_ACCESS_PRICE_LABEL', 'A$7.99/mo'),
+            'price_id':    os.getenv('STRIPE_PRICE_ID', ''),
+            'price_env':   'STRIPE_PRICE_ID',
+        },
+        'pro': {
+            'label':       'Pro',
+            'price_label': os.getenv('PRO_PRICE_LABEL', 'Price not set'),
+            'price_id':    os.getenv('STRIPE_PRO_PRICE_ID', ''),
+            'price_env':   'STRIPE_PRO_PRICE_ID',
+        },
+    }
+
+
+def _active_plan():
+    """Current plan key, falling back to the default on any read failure.
+
+    Pricing copy renders on every page load, so a Firestore blip must degrade to
+    the default plan rather than break the page.
+    """
+    try:
+        snap = _get_admin_db().collection('config').document('pricing').get()
+        key = (snap.to_dict() or {}).get('active_plan') if snap.exists else None
+        if key in _pricing_plans():
+            return key
+    except Exception as exc:
+        print(f"[_active_plan] pricing lookup failed: {type(exc).__name__}: {exc}")
+    return _DEFAULT_PLAN
+
+
+@app.route('/api/pricing', methods=['GET'])
+def pricing_get():
+    """Public: the plan the site is currently selling, for the pricing copy."""
+    key  = _active_plan()
+    plan = _pricing_plans()[key]
+    return jsonify({
+        'plan':        key,
+        'label':       plan['label'],
+        'price_label': plan['price_label'],
+    })
+
+
+@app.route('/api/admin/pricing', methods=['GET'])
+def admin_pricing_get():
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+    plans = _pricing_plans()
+    return jsonify({
+        'active_plan': _active_plan(),
+        'plans': [{
+            'key':               key,
+            'label':             p['label'],
+            'price_label':       p['price_label'],
+            'stripe_configured': bool(p['price_id']),
+        } for key, p in plans.items()],
+    })
+
+
+@app.route('/api/admin/pricing', methods=['POST'])
+def admin_pricing_set():
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+    key   = (request.get_json(silent=True) or {}).get('plan')
+    plans = _pricing_plans()
+    if key not in plans:
+        return jsonify({'error': f'Unknown plan "{key}"'}), 400
+    # Activating a plan with no Stripe price would 503 every checkout, so refuse.
+    if not plans[key]['price_id']:
+        return jsonify({
+            'error': f'{plans[key]["label"]} has no Stripe price — '
+                     f'set {plans[key]["price_env"]} before activating it.'
+        }), 400
+    _get_admin_db().collection('config').document('pricing').set({
+        'active_plan': key,
+        'updated_at':  int(time.time()),
+        'updated_by':  uid,
+    }, merge=True)
+    return jsonify({'ok': True, 'active_plan': key})
 
 
 def _fetch_tournament_records(uid, tourney_id):
@@ -1694,10 +1792,13 @@ def leaks_api():
     uid = _verify_bearer(request)   # inits the Admin SDK internally
     if not uid:
         return jsonify({'error': 'Unauthorized'}), 401
+    # Admin-only while the Leak Finder is still being built out — it lives under
+    # /admin now rather than being offered to Pro users. The message surfaces
+    # directly in the page's error banner, so it reads for a human.
+    if not _is_admin(uid):
+        return jsonify({'error': 'This page is admin-only — your account is '
+                                 'not in the admin list.'}), 403
     db = _get_admin_db()
-    user_snap = db.collection('users').document(uid).get()
-    if not user_snap.exists or not user_snap.to_dict().get('is_pro'):
-        return jsonify({'error': 'Pro subscription required'}), 403
 
     # ── Available tournaments (filter options) ──
     # is_mtt is set at import time from PPPoker's own room.mtt field (hand_parser.py),
