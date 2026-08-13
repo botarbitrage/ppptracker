@@ -25,7 +25,7 @@
     rel="stylesheet"
     crossorigin="anonymous"
   />
-  <link rel="stylesheet" href="/static/style.css?v=56"/>
+  <link rel="stylesheet" href="/static/style.css?v=57"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" crossorigin="anonymous" defer></script>
 </head>
 <body>
@@ -120,9 +120,9 @@
       <div class="tier-card tier-pro">
         <div class="tier-name">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          PRO — <span data-pricing-price>A$7.99/mo</span>
+          PRO — <s class="tier-price-was" data-pricing-regular>A$13.99/mo</s> <span data-pricing-price>A$7.99/mo</span>
         </div>
-        <div class="tier-early-note"><span data-pricing-plan>Early Access</span> price — locked in until global launch</div>
+        <div class="tier-early-note" data-pricing-discount-only><span data-pricing-plan>Early Access</span> <span data-pricing-price>A$7.99/mo</span> — locked in until global launch</div>
         <ul class="tier-list">
           <li><span class="tier-check">✓</span> All hands history (200)</li>
           <li><span class="tier-check">✓</span> Full session stats</li>
@@ -826,8 +826,8 @@
             <tr><td>Priority new features</td><td>—</td><td>✓</td></tr>
           </tbody>
         </table>
-        <p style="margin-top:14px;font-size:.88rem">Pro is <strong style="color:var(--yellow)">A$7.99/month</strong> during Early Access — that price is locked in until we launch globally. Cancel any time.</p>
-        <button class="tier-cta mt-2" onclick="bootstrap.Modal.getInstance(document.getElementById('modal-tiers')).hide(); showUpgradeModal('banner');">Get Early Access — A$7.99/month</button>
+        <p style="margin-top:14px;font-size:.88rem">Pro is <strong style="color:var(--yellow)" data-pricing-price>A$7.99/mo</strong>. <span data-pricing-discount-only><span data-pricing-plan>Early Access</span> pricing is locked in until we launch globally.</span> Cancel any time.</p>
+        <button class="tier-cta mt-2" data-pricing-cta onclick="bootstrap.Modal.getInstance(document.getElementById('modal-tiers')).hide(); showUpgradeModal('banner');">Get Early Access — A$7.99/month</button>
       </div>
     </div>
   </div>
@@ -897,7 +897,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="/static/app.js?v=45"></script>
+<script src="/static/app.js?v=46"></script>
 <script>
   if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
     navigator.serviceWorker.register('/static/sw.js', { scope: '/' })

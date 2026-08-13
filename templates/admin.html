@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous"/>
-  <link rel="stylesheet" href="/static/style.css?v=56"/>
+  <link rel="stylesheet" href="/static/style.css?v=57"/>
   <style>
     .page-back {
       display:inline-flex; align-items:center; gap:6px; color:var(--muted);
@@ -97,6 +97,95 @@
     }
     .adm-plan-note { font-family:var(--font-body); font-size:.75rem; color:var(--muted); margin-top:6px; }
 
+    /* ── Leak Targets panel (ported from the old /leaks/targets page) ─── */
+    .adm-subcard {
+      background:var(--panel-alt); border:1px solid var(--border); border-radius:10px;
+    }
+    .tg-meta { color:var(--muted); font-size:.85rem; }
+    .tg-toolbar {
+      display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+      padding:12px 16px;
+    }
+    .tg-band { display:flex; align-items:center; gap:6px; }
+    .tg-band-lbl {
+      font-family:var(--font-head); font-size:.72rem; font-weight:700;
+      letter-spacing:.4px; color:var(--muted); text-transform:uppercase;
+    }
+    .tg-band-track { display:flex; gap:0; }
+    .tg-band-step {
+      font-family:var(--font-head); font-size:.74rem; font-weight:700;
+      padding:4px 11px; border:1px solid #ffffff2a; border-right-width:0;
+      background:#ffffff0a; color:var(--text); cursor:pointer; white-space:nowrap;
+    }
+    .tg-band-step:first-child { border-radius:20px 0 0 20px; }
+    .tg-band-step:last-child  { border-radius:0 20px 20px 0; border-right-width:1px; }
+    .tg-band-step.active { background:#00e67622; color:var(--green); border-color:#00e67650; }
+    .tg-band-step:not(.active):hover { background:#ffffff14; }
+
+    .tg-grid-wrap { overflow-x:auto; }
+    table.tg-grid { border-collapse:separate; border-spacing:0; width:100%; min-width:720px; }
+    .tg-grid th, .tg-grid td { padding:5px 8px; font-size:.82rem; }
+    .tg-grid thead th {
+      position:sticky; top:0; z-index:2; background:var(--card, #12181f);
+      font-family:var(--font-head); font-weight:800; color:var(--text);
+      text-align:center; border-bottom:1px solid #ffffff1f;
+    }
+    .tg-grid thead th.tg-statcol { text-align:left; }
+    .tg-street-row td {
+      font-family:var(--font-head); font-size:.7rem; font-weight:700;
+      letter-spacing:.6px; text-transform:uppercase; color:var(--muted);
+      background:#ffffff08; padding-top:8px; padding-bottom:4px;
+    }
+    .tg-statname {
+      font-family:var(--font-body); color:var(--text); white-space:nowrap;
+      position:sticky; left:0; background:var(--card, #12181f); z-index:1;
+    }
+    td.tg-cell {
+      text-align:center; cursor:pointer; border-bottom:1px solid #ffffff10;
+      font-variant-numeric:tabular-nums; transition:background .12s;
+    }
+    td.tg-cell:hover { background:#ffffff12; }
+    .tg-cell.na  { color:#4a5560; cursor:default; }
+    .tg-cell.na:hover { background:transparent; }
+    .tg-cell.override { color:var(--green); font-weight:600; }
+    .tg-cell.override::after {
+      content:"•"; color:var(--green); font-size:1.1em; margin-left:3px; vertical-align:middle;
+    }
+    .tg-cell.band-inherit { color:var(--muted); font-style:italic; }
+
+    /* Editor popover */
+    .tg-pop {
+      position:fixed; z-index:50; width:250px; background:#0d1117f2;
+      border:1px solid #ffffff24; border-radius:12px; padding:14px;
+      box-shadow:0 12px 40px #000a; backdrop-filter:blur(6px);
+    }
+    .tg-pop h6 {
+      font-family:var(--font-head); font-weight:800; color:var(--green);
+      font-size:.9rem; margin:0 0 2px;
+    }
+    .tg-pop .sub { color:var(--muted); font-size:.72rem; margin-bottom:10px; }
+    .tg-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+    .tg-row label { font-size:.74rem; color:var(--muted); width:64px; flex:none; }
+    .tg-pop input[type=number], .tg-pop input[type=text] {
+      background:#ffffff0d; border:1px solid #ffffff24; border-radius:7px;
+      color:var(--text); padding:4px 8px; font-size:.82rem; width:100%;
+    }
+    .tg-pop input[type=number] { width:66px; }
+    .tg-na-row { display:flex; align-items:center; gap:6px; margin-bottom:8px; font-size:.76rem; color:var(--muted); }
+    .tg-warn { color:#ffb454; font-size:.72rem; margin:4px 0 8px; min-height:1em; }
+    .tg-pop-actions { display:flex; gap:8px; margin-top:4px; }
+    .tg-btn {
+      font-family:var(--font-head); font-size:.74rem; font-weight:700;
+      border-radius:7px; padding:5px 12px; border:1px solid transparent; cursor:pointer;
+    }
+    .tg-btn.save  { background:#00e67622; color:var(--green); border-color:#00e67650; }
+    .tg-btn.save:hover { background:#00e67635; }
+    .tg-btn.reset { background:#ffffff0a; color:var(--muted); border-color:#ffffff24; }
+    .tg-btn.reset:hover { color:var(--text); }
+    .tg-btn.cancel { background:transparent; color:var(--muted); margin-left:auto; }
+    .tg-btn[disabled] { opacity:.4; cursor:not-allowed; }
+    .tg-def { font-size:.7rem; color:var(--muted); margin-top:2px; }
+
     .adm-check { width:1.05rem; height:1.05rem; cursor:pointer; }
     .adm-check:disabled { cursor:default; opacity:.75; }
     .adm-row-busy { opacity:.5; }
@@ -147,8 +236,16 @@
             Users
           </button>
 
-          <!-- These three are their own pages, so they navigate rather than
-               switch panels. All three are admin-only. -->
+          <button type="button" class="adm-nav-item" data-section="subscription" onclick="switchSection('subscription')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Active Plan Price
+          </button>
+          <button type="button" class="adm-nav-item" data-section="leaktargets" onclick="switchSection('leaktargets')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            Leak Targets
+          </button>
+
+          <!-- Their own pages, so these navigate rather than switch panels. -->
           <a class="adm-nav-item" href="/tournaments">
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
             Tournaments
@@ -157,15 +254,6 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             Leak Finder
           </a>
-          <a class="adm-nav-item" href="/leaks/targets">
-            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-            Leak Targets
-          </a>
-
-          <button type="button" class="adm-nav-item" data-section="subscription" onclick="switchSection('subscription')">
-            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-            Subscription
-          </button>
         </nav>
 
         <!-- ── Panels ──────────────────────────────────────── -->
@@ -194,6 +282,45 @@
                 </thead>
                 <tbody id="adm-users-body"></tbody>
               </table>
+            </div>
+          </section>
+
+          <section class="section-card adm-panel d-none" id="panel-leaktargets">
+            <div class="section-header">
+              <h2>Leak Targets</h2>
+            </div>
+            <div class="p-3">
+    <div id="tg-summary" class="tg-meta mb-2"></div>
+    <p class="tg-meta mb-2">
+      Click any cell to edit its target band and coaching tip. Edits are saved as an
+      overlay over the shipped BBZ baseline — <b class="text-white">Reset</b> reverts a
+      cell to default. Preflop stats also carry per-depth bands.
+    </p>
+
+    <div id="tg-status" class="tg-meta py-4"></div>
+    <div id="tg-error" class="alert alert-danger d-none"></div>
+
+    <div id="tg-body" class="d-none">
+      <div class="adm-subcard mb-3">
+        <div class="tg-toolbar">
+          <div class="tg-band">
+            <span class="tg-band-lbl">Depth</span>
+            <div class="tg-band-track" id="tg-band-track"></div>
+          </div>
+          <span class="tg-meta" id="tg-band-note" style="flex:1 1 auto;"></span>
+          <button class="tg-btn reset" id="tg-reset-all">Reset all overrides</button>
+        </div>
+      </div>
+
+      <div class="adm-subcard">
+        <div class="tg-grid-wrap">
+          <table class="tg-grid">
+            <thead><tr id="tg-head"></tr></thead>
+            <tbody id="tg-grid-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
             </div>
           </section>
 
@@ -266,6 +393,7 @@
     document.querySelectorAll('.adm-panel').forEach(p =>
       p.classList.toggle('d-none', p.id !== 'panel-' + name));
     if (name === 'subscription' && !PLANS) loadPlans();
+    if (name === 'leaktargets' && !GRID) tgReload();
   }
 
   // ── Subscription ───────────────────────────────────────────────────────────
@@ -473,6 +601,246 @@
     document.getElementById('adm-error').classList.add('d-none');
     document.getElementById('adm-body').classList.remove('d-none');
     renderUsers();
+  }
+
+  let GRID = null;          // /api/leak-targets response
+  let BAND = 'all';         // 'all' | band key
+  const POSITIONS = ['EP', 'MP', 'CO', 'BTN', 'SB', 'BB'];
+
+
+  // Index cells by (position -> label -> cell) preserving per-position row order.
+  function indexGrid(data) {
+    const byPos = {};
+    const labelOrder = [];
+    const seen = new Set();
+    const streetOf = {};
+    data.positions.forEach(p => {
+      byPos[p.position] = {};
+      p.stats.forEach(s => {
+        byPos[p.position][s.label] = s;
+        streetOf[s.label] = s.street || '';
+        if (!seen.has(s.label)) { seen.add(s.label); labelOrder.push(s.label); }
+      });
+    });
+    return { byPos, labelOrder, streetOf };
+  }
+
+  function fmtTarget(t) {
+    if (!t) return 'N/A';
+    return t[0] + '–' + t[1];
+  }
+
+  // Which target applies for a cell at the current BAND: blended, or the
+  // band-specific override if the cell defines one. Returns {t, inherit}.
+  function cellTargetForBand(cell) {
+    if (BAND === 'all') return { t: cell.target, inherit: false, hasBands: !!cell.bands };
+    const bands = cell.bands || {};
+    if (Object.prototype.hasOwnProperty.call(bands, BAND)) {
+      return { t: bands[BAND], inherit: false, hasBands: true };
+    }
+    // No per-band value → inherits the blended target.
+    return { t: cell.target, inherit: true, hasBands: false };
+  }
+
+  function isPreflop(label, idx) { return (idx.streetOf[label] || '') === 'Preflop'; }
+
+  function renderBandTrack() {
+    const steps = [{ key: 'all', label: 'Blended' }].concat(
+      GRID.bands.map(b => ({ key: b.key, label: b.label })));
+    document.getElementById('tg-band-track').innerHTML = steps.map(s =>
+      `<div class="tg-band-step ${s.key === BAND ? 'active' : ''}" data-band="${s.key}">${s.label}</div>`
+    ).join('');
+    document.querySelectorAll('.tg-band-step').forEach(el =>
+      el.onclick = () => { BAND = el.dataset.band; renderBandTrack(); renderGrid(); });
+    document.getElementById('tg-band-note').textContent = BAND === 'all'
+      ? 'Blended target across all stack depths (what the report uses by default).'
+      : 'Per-depth target for preflop stats. Postflop and unset cells inherit the blended value.';
+  }
+
+  function renderGrid() {
+    const idx = indexGrid(GRID);
+    document.getElementById('tg-head').innerHTML =
+      '<th class="tg-statcol">Stat</th>' +
+      POSITIONS.map(p => `<th>${p}</th>`).join('');
+
+    let lastStreet = null;
+    const rows = [];
+    idx.labelOrder.forEach(label => {
+      const street = idx.streetOf[label] || '';
+      if (street !== lastStreet) {
+        lastStreet = street;
+        rows.push(`<tr class="tg-street-row"><td colspan="${POSITIONS.length + 1}">${street}</td></tr>`);
+      }
+      const cells = POSITIONS.map(pos => {
+        const cell = idx.byPos[pos] && idx.byPos[pos][label];
+        if (!cell) return '<td class="tg-cell na">·</td>';
+        const pf = isPreflop(label, idx);
+        // In a band view, postflop cells simply show the blended value (not editable per-band).
+        const useBand = (BAND !== 'all') && pf;
+        const info = useBand ? cellTargetForBand(cell) : { t: cell.target, inherit: false };
+        let cls = 'tg-cell';
+        if (!info.t) cls += ' na';
+        if (cell.overridden && BAND === 'all') cls += ' override';
+        if (useBand && info.inherit) cls += ' band-inherit';
+        if (useBand && !info.inherit && cell.overridden) cls += ' override';
+        const editable = (BAND === 'all') || pf;
+        return `<td class="${cls}" data-pos="${pos}" data-label="${encodeURIComponent(label)}"
+                    ${editable ? '' : 'style="cursor:default;opacity:.5"'}>${fmtTarget(info.t)}</td>`;
+      }).join('');
+      rows.push(`<tr><td class="tg-statname">${label}</td>${cells}</tr>`);
+    });
+    document.getElementById('tg-grid-body').innerHTML = rows.join('');
+
+    document.querySelectorAll('td.tg-cell[data-pos]').forEach(td => {
+      const pos = td.dataset.pos, label = decodeURIComponent(td.dataset.label);
+      const cell = idx.byPos[pos][label];
+      const pf = isPreflop(label, idx);
+      if (BAND !== 'all' && !pf) return;   // postflop not editable in band view
+      td.onclick = () => openEditor(td, pos, label, cell, pf);
+    });
+
+    const oc = GRID.override_count || 0;
+    document.getElementById('tg-summary').innerHTML =
+      `<b class="text-white">${idx.labelOrder.length}</b> stats × 6 positions` +
+      (oc ? ` · <span style="color:var(--green)">${oc} overridden</span>` : ' · all default');
+  }
+
+  let POP = null;
+  function closeEditor() { if (POP) { POP.remove(); POP = null; } }
+  document.addEventListener('click', e => {
+    if (POP && !POP.contains(e.target) && !e.target.classList.contains('tg-cell')) closeEditor();
+  });
+
+  function openEditor(td, pos, label, cell, pf) {
+    closeEditor();
+    const banded = pf && BAND !== 'all';
+    const cur = banded ? cellTargetForBand(cell).t : cell.target;
+    const def = banded
+      ? ((cell.default_bands && cell.default_bands[BAND]) || cell.default_target)
+      : cell.default_target;
+    const lo = cur ? cur[0] : '', hi = cur ? cur[1] : '';
+    const isNA = !cur;
+
+    POP = document.createElement('div');
+    POP.className = 'tg-pop';
+    POP.innerHTML = `
+      <h6>${pos} · ${label}</h6>
+      <div class="sub">${banded ? GRID.bands.find(b => b.key === BAND).label + ' depth' : 'Blended target'}</div>
+      <div class="tg-na-row"><input type="checkbox" id="tg-na"${isNA ? ' checked' : ''}/>
+        <label for="tg-na" style="width:auto">Not applicable (N/A)</label></div>
+      <div class="tg-row" id="tg-lohi">
+        <label>Target</label>
+        <input type="number" id="tg-lo" min="0" max="100" step="0.5" value="${lo}" placeholder="lo"/>
+        <span style="color:var(--muted)">–</span>
+        <input type="number" id="tg-hi" min="0" max="100" step="0.5" value="${hi}" placeholder="hi"/>
+      </div>
+      ${banded ? '' : `<div class="tg-row"><label>Rec</label>
+        <input type="text" id="tg-rec" value="${(cell.rec || '').replace(/"/g, '&quot;')}" placeholder="coaching tip"/></div>`}
+      <div class="tg-def">Default: ${fmtTarget(def)}${banded ? '' : (cell.default_rec ? ' · "' + cell.default_rec + '"' : '')}</div>
+      <div class="tg-warn" id="tg-warn"></div>
+      <div class="tg-pop-actions">
+        <button class="tg-btn tgSave" id="tg-tgSave">Save</button>
+        <button class="tg-btn reset" id="tg-reset"${cell.overridden ? '' : ' disabled'}>Reset</button>
+        <button class="tg-btn cancel" id="tg-cancel">Cancel</button>
+      </div>`;
+    document.body.appendChild(POP);
+    const r = td.getBoundingClientRect();
+    let left = Math.min(r.left, window.innerWidth - 266);
+    let top = r.bottom + 6;
+    if (top + POP.offsetHeight > window.innerHeight) top = Math.max(8, r.top - POP.offsetHeight - 6);
+    POP.style.left = Math.max(8, left) + 'px';
+    POP.style.top = top + 'px';
+
+    const naEl = POP.querySelector('#tg-na');
+    const loEl = POP.querySelector('#tg-lo'), hiEl = POP.querySelector('#tg-hi');
+    const warn = POP.querySelector('#tg-warn');
+    function syncNA() {
+      const on = naEl.checked;
+      loEl.disabled = hiEl.disabled = on;
+      POP.querySelector('#tg-lohi').style.opacity = on ? .4 : 1;
+    }
+    naEl.onchange = syncNA; syncNA();
+
+    function validate() {
+      warn.textContent = '';
+      if (naEl.checked) return null;
+      const l = parseFloat(loEl.value), h = parseFloat(hiEl.value);
+      if (isNaN(l) || isNaN(h)) { warn.textContent = 'Enter both lo and hi (or mark N/A).'; return false; }
+      if (!(l < h)) { warn.textContent = 'lo must be below hi.'; return false; }
+      if (l < 0 || h > 100) { warn.textContent = 'Values must be 0–100.'; return false; }
+      return [l, h];
+    }
+
+    POP.querySelector('#tg-cancel').onclick = closeEditor;
+    POP.querySelector('#tg-tgSave').onclick = async () => {
+      const t = validate();
+      if (t === false) return;
+      const target = naEl.checked ? null : t;
+      const payload = { position: pos, label: label };
+      if (banded) {
+        // Merge into existing bands, keep other bands untouched.
+        const bands = Object.assign({}, cell.bands || {});
+        bands[BAND] = target;
+        payload.bands = bands;
+      } else {
+        payload.target = target;
+        payload.rec = POP.querySelector('#tg-rec').value.trim() || null;
+      }
+      await tgSave(payload);
+    };
+    POP.querySelector('#tg-reset').onclick = async () => {
+      await authFetch(`/api/admin/leak-targets?position=${encodeURIComponent(pos)}&label=${encodeURIComponent(label)}`,
+        { method: 'DELETE' });
+      closeEditor(); await tgReload();
+    };
+  }
+
+  async function tgSave(payload) {
+    const res = await authFetch('/api/admin/leak-targets',
+      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (!res.ok) { const w = POP && POP.querySelector('#tg-warn'); if (w) w.textContent = data.error || 'Save failed'; return; }
+    closeEditor(); await tgReload();
+  }
+
+  document.getElementById('tg-reset-all').onclick = async () => {
+    if (!confirm('Remove ALL target overrides and revert to the shipped defaults?')) return;
+    await authFetch('/api/admin/leak-targets?all=1', { method: 'DELETE' });
+    await tgReload();
+  };
+
+  async function tgReload() {
+    let res;
+    try {
+      res = await authFetch('/api/leak-targets');
+    } catch (e) {
+      tgShowError('Could not reach the server: ' + e.message);
+      return;
+    }
+    if (res.status === 403) {
+      document.getElementById('tg-status').textContent = '';
+      tgShowError('This page is admin-only — your account is not in the admin list.');
+      return;
+    }
+    if (!res.ok) {
+      // Prefer the server's own error text (the endpoint returns JSON), but
+      // fall back to a stripped body if a proxy answered HTML.
+      let msg = 'Failed to load targets (' + res.status + ').';
+      try { const j = await res.json(); if (j && j.error) msg = j.error; }
+      catch (_) { try { const t = await res.text(); if (t) msg += ' ' + t.replace(/<[^>]*>/g, ' ').trim().slice(0, 200); } catch (__) {} }
+      tgShowError(msg);
+      return;
+    }
+    GRID = await res.json();
+    document.getElementById('tg-status').classList.add('d-none');
+    document.getElementById('tg-body').classList.remove('d-none');
+    renderBandTrack(); renderGrid();
+  }
+
+  function tgShowError(msg) {
+    const e = document.getElementById('tg-error');
+    e.textContent = msg; e.classList.remove('d-none');
+    document.getElementById('tg-status').classList.add('d-none');
   }
 
   (async () => {

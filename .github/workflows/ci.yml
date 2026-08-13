@@ -29,3 +29,4 @@ jobs:
           python test_leak_targets.py
           python test_leaks_api.py
           python test_admin_users.py
+          python test_pricing_refs.py

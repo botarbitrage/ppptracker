@@ -13,7 +13,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urlparse, parse_qs
 
 import requests
-from flask import Flask, jsonify, render_template, request, send_file, send_from_directory, Response
+from flask import Flask, jsonify, redirect, render_template, request, send_file, send_from_directory, Response
 
 from hand_parser import process_hands, build_hand_rows
 from hand_exporter import validate_hands, export_pokerstars
@@ -1021,18 +1021,23 @@ def admin_set_user_admin(target_uid):
 _DEFAULT_PLAN = 'early_access'
 
 
+# 'pro' is the full price; every other plan is a discount off it, which is what
+# lets the pricing card strike the full price through.
+_FULL_PRICE_PLAN = 'pro'
+
+
 def _pricing_plans():
     """Plan key -> {label, price_label, price_id, price_env}."""
     return {
         'early_access': {
             'label':       'Early Access',
-            'price_label': os.getenv('EARLY_ACCESS_PRICE_LABEL', 'A$7.99/mo'),
+            'price_label': os.getenv('STRIPE_EARLY_ACCESS_LABEL', 'A$7.99/mo'),
             'price_id':    os.getenv('STRIPE_PRICE_ID', ''),
             'price_env':   'STRIPE_PRICE_ID',
         },
         'pro': {
             'label':       'Pro',
-            'price_label': os.getenv('PRO_PRICE_LABEL', 'Price not set'),
+            'price_label': os.getenv('STRIPE_PRO_LABEL', 'A$13.99/mo'),
             'price_id':    os.getenv('STRIPE_PRO_PRICE_ID', ''),
             'price_env':   'STRIPE_PRO_PRICE_ID',
         },
@@ -1057,13 +1062,23 @@ def _active_plan():
 
 @app.route('/api/pricing', methods=['GET'])
 def pricing_get():
-    """Public: the plan the site is currently selling, for the pricing copy."""
-    key  = _active_plan()
-    plan = _pricing_plans()[key]
+    """Public: the plan the site is currently selling, for the pricing copy.
+
+    Also carries the full price so the card can strike it through whenever the
+    active plan is a discount off it. Every visible price on the site is driven
+    from this one response — see test_pricing_refs.py, which fails if a price
+    literal is reintroduced anywhere the switch can't reach.
+    """
+    plans = _pricing_plans()
+    key   = _active_plan()
+    plan  = plans[key]
+    full  = plans[_FULL_PRICE_PLAN]
     return jsonify({
-        'plan':        key,
-        'label':       plan['label'],
-        'price_label': plan['price_label'],
+        'plan':                key,
+        'label':               plan['label'],
+        'price_label':         plan['price_label'],
+        'regular_price_label': full['price_label'],
+        'is_discounted':       key != _FULL_PRICE_PLAN,
     })
 
 
@@ -1541,7 +1556,8 @@ def _clean_bands(bands):
 
 @app.route('/leaks/targets')
 def leaks_targets_page():
-    return render_template('leaks_targets.html')
+    """The target editor is a panel on /admin now; keep the old URL working."""
+    return redirect('/admin#leaktargets')
 
 
 @app.route('/api/leak-targets', methods=['GET'])

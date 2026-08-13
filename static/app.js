@@ -2410,7 +2410,12 @@ document.addEventListener('DOMContentLoaded', () => {
 // Which plan is on sale is set from the admin console (/api/pricing). These are
 // the pre-switch values, kept as the fallback so a failed fetch renders the same
 // copy the page shipped with rather than an empty CTA.
-let _PRICING = { label: 'Early Access', price_label: 'A$7.99/mo' };
+let _PRICING = {
+  label: 'Early Access',
+  price_label: 'A$7.99/mo',
+  regular_price_label: 'A$13.99/mo',
+  is_discounted: true,
+};
 
 /** Short CTA label used on the Pro gates, e.g. "Early Access · A$7.99/mo". */
 function _pricingCta() {
@@ -2430,9 +2435,16 @@ function _applyPricingCopy() {
   document.querySelectorAll('[data-pricing-price]').forEach(el => {
     el.textContent = _PRICING.price_label;
   });
+  document.querySelectorAll('[data-pricing-regular]').forEach(el => {
+    el.textContent = _PRICING.regular_price_label;
+  });
   document.querySelectorAll('[data-pricing-cta]').forEach(el => {
     el.textContent = _pricingCtaLong();
   });
+  // With the full price active there's no discount to show, so the struck-through
+  // price and the "locked in until launch" line would both be nonsense.
+  document.querySelectorAll('[data-pricing-regular], [data-pricing-discount-only]')
+    .forEach(el => el.classList.toggle('d-none', !_PRICING.is_discounted));
 }
 
 async function _loadPricing() {

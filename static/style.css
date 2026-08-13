@@ -171,6 +171,14 @@ body {
 .tier-free .tier-name { color: var(--muted); }
 .tier-pro  .tier-name { color: var(--yellow); }
 
+/* Full price, struck through while a discounted plan is the active one. */
+.tier-price-was {
+  color: var(--muted);
+  font-weight: 600;
+  opacity: .75;
+  margin-right: 2px;
+}
+
 /* Early Access price framing — sits under the tier name, deliberately quiet */
 .tier-early-note {
   font-size: .68rem;
