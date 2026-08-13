@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous"/>
-  <link rel="stylesheet" href="/static/style.css?v=55"/>
+  <link rel="stylesheet" href="/static/style.css?v=56"/>
   <style>
     .page-back {
       display:inline-flex; align-items:center; gap:6px; color:var(--muted);
@@ -76,6 +76,27 @@
       background:rgba(255,82,82,.12); border-color:rgba(255,82,82,.35); color:var(--red);
     }
     .adm-date { font-family:var(--font-body); font-size:.82rem; color:var(--muted); white-space:nowrap; }
+    /* ── Subscription panel ────────────────────────────────── */
+    .adm-plans { display:flex; gap:12px; flex-wrap:wrap; }
+    .adm-plan {
+      flex:1 1 220px; min-width:200px; text-align:left; padding:14px 16px;
+      background:var(--panel-alt); border:1px solid var(--border); border-radius:10px;
+      cursor:pointer; transition:border-color .15s, background .15s;
+    }
+    .adm-plan:hover:not(:disabled) { border-color:rgba(0,230,118,.4); }
+    .adm-plan.active { border-color:var(--green); background:rgba(0,230,118,.08); }
+    .adm-plan:disabled { opacity:.55; cursor:default; }
+    .adm-plan-name {
+      display:flex; align-items:center; gap:8px;
+      font-family:var(--font-head); font-size:.95rem; font-weight:700; color:var(--text);
+    }
+    .adm-plan.active .adm-plan-name { color:var(--green); }
+    .adm-plan-price {
+      font-family:var(--font-head); font-size:1.15rem; font-weight:800;
+      color:var(--green); margin-top:6px;
+    }
+    .adm-plan-note { font-family:var(--font-body); font-size:.75rem; color:var(--muted); margin-top:6px; }
+
     .adm-check { width:1.05rem; height:1.05rem; cursor:pointer; }
     .adm-check:disabled { cursor:default; opacity:.75; }
     .adm-row-busy { opacity:.5; }
@@ -97,13 +118,20 @@
 </head>
 <body>
   <div class="container py-3" style="max-width:1100px;">
-    <a href="/" class="page-back">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      Back to Analyser
-    </a>
-    <div class="d-flex align-items-center gap-3 flex-wrap mt-2 mb-3">
-      <span class="page-title">♠ Admin</span>
-      <span id="adm-summary" class="adm-meta"></span>
+    <!-- ── Top bar ─────────────────────────────────────────── -->
+    <div class="top-bar">
+      <a href="/" class="top-bar-brand">
+        <span aria-hidden="true">♠</span> PPPoker Hand Tracker
+      </a>
+      <div class="top-bar-right" id="adm-authbar"></div>
+    </div>
+
+    <div class="d-flex align-items-center gap-3 flex-wrap mb-3">
+      <span class="page-title">Admin</span>
+      <a href="/" class="page-back">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Analyser
+      </a>
     </div>
 
     <div id="adm-status" class="adm-meta py-4"></div>
@@ -118,7 +146,26 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             Users
           </button>
-          <div class="adm-nav-note">More sections coming soon.</div>
+
+          <!-- These three are their own pages, so they navigate rather than
+               switch panels. All three are admin-only. -->
+          <a class="adm-nav-item" href="/tournaments">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
+            Tournaments
+          </a>
+          <a class="adm-nav-item" href="/leaks">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Leak Finder
+          </a>
+          <a class="adm-nav-item" href="/leaks/targets">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            Leak Targets
+          </a>
+
+          <button type="button" class="adm-nav-item" data-section="subscription" onclick="switchSection('subscription')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Subscription
+          </button>
         </nav>
 
         <!-- ── Panels ──────────────────────────────────────── -->
@@ -147,6 +194,22 @@
                 </thead>
                 <tbody id="adm-users-body"></tbody>
               </table>
+            </div>
+          </section>
+
+          <section class="section-card adm-panel d-none" id="panel-subscription">
+            <div class="section-header">
+              <h2>Subscription</h2>
+            </div>
+            <div class="p-3">
+              <p class="adm-meta mb-3">
+                Which plan is on sale right now. This drives the pricing copy across the
+                site and the Stripe price used at checkout — switching here takes effect
+                immediately, with no deploy.
+              </p>
+              <div id="adm-plan-error" class="alert alert-danger d-none py-2"></div>
+              <div id="adm-plans" class="adm-plans"></div>
+              <div id="adm-plan-status" class="adm-meta mt-3"></div>
             </div>
           </section>
 
@@ -182,12 +245,100 @@
     });
   }
 
+  // ── Top bar ────────────────────────────────────────────────────────────────
+  function renderAuthBar(user) {
+    document.getElementById('adm-authbar').innerHTML =
+      `<span class="auth-chip">` +
+      `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>` +
+      `<span class="auth-email">${esc(user.email || user.uid)}</span>` +
+      `</span>` +
+      `<button class="auth-signout-btn" onclick="signOutUser()">Sign out</button>`;
+  }
+
+  function signOutUser() {
+    firebase.auth().signOut().then(() => { window.location.href = '/'; });
+  }
+
   // ── Sidebar ────────────────────────────────────────────────────────────────
   function switchSection(name) {
     document.querySelectorAll('.adm-nav-item').forEach(b =>
       b.classList.toggle('active', b.dataset.section === name));
     document.querySelectorAll('.adm-panel').forEach(p =>
       p.classList.toggle('d-none', p.id !== 'panel-' + name));
+    if (name === 'subscription' && !PLANS) loadPlans();
+  }
+
+  // ── Subscription ───────────────────────────────────────────────────────────
+  let PLANS = null;   // {active_plan, plans:[{key,label,price_label,stripe_configured}]}
+
+  async function loadPlans() {
+    const box = document.getElementById('adm-plans');
+    box.innerHTML = '<span class="adm-meta">Loading…</span>';
+    try {
+      const res = await authFetch('/api/admin/pricing');
+      if (!res.ok) {
+        box.innerHTML = '';
+        showPlanError(await errorText(res, 'Failed to load plans'));
+        return;
+      }
+      PLANS = await res.json();
+      renderPlans();
+    } catch (e) {
+      box.innerHTML = '';
+      showPlanError('Could not reach the server: ' + e.message);
+    }
+  }
+
+  function renderPlans() {
+    document.getElementById('adm-plans').innerHTML = PLANS.plans.map(p => {
+      const active = p.key === PLANS.active_plan;
+      // A plan with no Stripe price would break checkout, so it can't be selected.
+      const blocked = !p.stripe_configured && !active;
+      return `<button type="button" class="adm-plan${active ? ' active' : ''}"
+                      ${blocked ? 'disabled' : ''}
+                      onclick="setPlan('${esc(p.key)}')">
+        <div class="adm-plan-name">
+          ${active ? '<span aria-hidden="true">●</span>' : '<span aria-hidden="true">○</span>'}
+          ${esc(p.label)}${active ? ' <span class="adm-pill">Active</span>' : ''}
+        </div>
+        <div class="adm-plan-price">${esc(p.price_label)}</div>
+        <div class="adm-plan-note">${p.stripe_configured
+          ? (active ? 'Currently on sale sitewide.' : 'Click to make this the active plan.')
+          : 'Stripe price not configured — set its env var first.'}</div>
+      </button>`;
+    }).join('');
+    const active = PLANS.plans.find(p => p.key === PLANS.active_plan);
+    document.getElementById('adm-plan-status').textContent =
+      active ? `Visitors currently see “${active.label} — ${active.price_label}”.` : '';
+  }
+
+  async function setPlan(key) {
+    if (key === PLANS.active_plan) return;
+    showPlanError('');
+    document.querySelectorAll('.adm-plan').forEach(b => b.disabled = true);
+    try {
+      const res = await authFetch('/api/admin/pricing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: key }),
+      });
+      if (!res.ok) {
+        showPlanError(await errorText(res, 'Could not switch plan'));
+        renderPlans();
+        return;
+      }
+      PLANS.active_plan = key;
+      renderPlans();
+    } catch (e) {
+      showPlanError('Could not reach the server: ' + e.message);
+      renderPlans();
+    }
+  }
+
+  function showPlanError(msg) {
+    const e = document.getElementById('adm-plan-error');
+    e.textContent = msg || '';
+    e.classList.toggle('d-none', !msg);
   }
 
   // ── Users table ────────────────────────────────────────────────────────────
@@ -341,7 +492,7 @@
           return;
         }
         AUTH_USER = user;
-        document.getElementById('adm-summary').textContent = user.email || '';
+        renderAuthBar(user);
         await reload();
       });
     } catch (e) { showError(e.message); }

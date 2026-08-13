@@ -156,6 +156,9 @@ def main():
     _seed(db, vectors)
 
     A._verify_bearer = lambda req: UID
+    # /api/leaks is admin-gated now that the Leak Finder lives under /admin.
+    # This suite is about the report body, so stand the gate down.
+    A._is_admin = lambda uid: True
     A._get_admin_db = lambda: db
     A._build_leak_vector = lambda uid, tid: (vectors[tid][0], vectors[tid][1], 0)
     client = A.app.test_client()
@@ -281,11 +284,18 @@ def main():
     status, junk = _get(client, '?from=not-a-date')
     check('bad date ignored', status == 200 and junk['meta']['hands'] == total)
 
-    # 7. Non-pro and unauthenticated are refused in JSON.
-    db.put(('users', UID), {'is_pro': False})
+    # 7. Non-admin and unauthenticated are refused in JSON. The Leak Finder moved
+    # under /admin, so the gate is admin membership now, not is_pro — a non-pro
+    # admin is allowed through and a Pro non-admin is not.
+    A._is_admin = lambda uid: False
     status, denied = _get(client)
-    check('non-pro gets 403', status == 403, str(status))
-    check('non-pro gets a JSON error', 'error' in denied)
+    check('non-admin gets 403', status == 403, str(status))
+    check('non-admin gets a JSON error', 'error' in denied)
+    A._is_admin = lambda uid: True
+
+    db.put(('users', UID), {'is_pro': False})
+    status, _ = _get(client)
+    check('admin without pro is allowed', status == 200, str(status))
     db.put(('users', UID), {'is_pro': True})
 
     A._verify_bearer = lambda req: None

@@ -113,7 +113,7 @@ function handleUpgradeClick(tier = 'pro') {
   const fail = (msg) => {
     // Must match the button's initial label in index.html, or a failed checkout
     // silently relabels the CTA and drops the price from it.
-    if (btn) { btn.disabled = false; btn.textContent = 'Get Early Access — A$7.99/month'; }
+    if (btn) { btn.disabled = false; btn.textContent = _pricingCtaLong(); }
     const cs = document.getElementById('pro-coming-soon');
     if (cs) { cs.textContent = msg; cs.classList.remove('d-none'); }
   };
@@ -681,7 +681,7 @@ function renderTournaments(tournaments) {
               <div class="tourney-gate-overlay">
                 <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 <span class="tourney-gate-label">Pro only</span>
-                <button class="tourney-gate-btn" onclick="showUpgradeModal('tourney')">Early Access · A$7.99/mo</button>
+                <button class="tourney-gate-btn" onclick="showUpgradeModal('tourney')">${_pricingCta()}</button>
               </div>
             </div>`
         }
@@ -725,7 +725,7 @@ function _renderExportAllSection() {
       `<div class="tourney-gate-overlay">` +
       _LOCK_ICON_SVG +
       `<span class="tourney-gate-label">Export All Hands — Pro only</span>` +
-      `<button class="tourney-gate-btn" onclick="showUpgradeModal('export')">Early Access · A$7.99/mo</button>` +
+      `<button class="tourney-gate-btn" onclick="showUpgradeModal('export')">${_pricingCta()}</button>` +
       `</div></div>`;
   }
 }
@@ -1113,7 +1113,7 @@ function _renderPlayerExportAll() {
       `<div class="tourney-gate-overlay">` +
       _LOCK_ICON_SVG +
       `<span class="tourney-gate-label">Pro only</span>` +
-      `<button class="tourney-gate-btn" onclick="showUpgradeModal('export')">Early Access · A$7.99/mo</button>` +
+      `<button class="tourney-gate-btn" onclick="showUpgradeModal('export')">${_pricingCta()}</button>` +
       `</div></div>`;
     wrap.classList.remove('d-none');
   }
@@ -2405,6 +2405,48 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+/* ── Pricing copy ────────────────────────────────────────── */
+
+// Which plan is on sale is set from the admin console (/api/pricing). These are
+// the pre-switch values, kept as the fallback so a failed fetch renders the same
+// copy the page shipped with rather than an empty CTA.
+let _PRICING = { label: 'Early Access', price_label: 'A$7.99/mo' };
+
+/** Short CTA label used on the Pro gates, e.g. "Early Access · A$7.99/mo". */
+function _pricingCta() {
+  return `${_PRICING.label} · ${_PRICING.price_label}`;
+}
+
+/** Long CTA label used on the upgrade buttons. */
+function _pricingCtaLong() {
+  return `Get ${_PRICING.label} — ${_PRICING.price_label.replace('/mo', '/month')}`;
+}
+
+/** Push the active plan's wording into the static copy on the page. */
+function _applyPricingCopy() {
+  document.querySelectorAll('[data-pricing-plan]').forEach(el => {
+    el.textContent = _PRICING.label;
+  });
+  document.querySelectorAll('[data-pricing-price]').forEach(el => {
+    el.textContent = _PRICING.price_label;
+  });
+  document.querySelectorAll('[data-pricing-cta]').forEach(el => {
+    el.textContent = _pricingCtaLong();
+  });
+}
+
+async function _loadPricing() {
+  try {
+    const res = await fetch('/api/pricing');
+    if (!res.ok) return;
+    const p = await res.json();
+    if (p && p.label && p.price_label) _PRICING = p;
+  } catch (e) {
+    console.warn('pricing fetch failed, using default copy', e);
+  }
+  _applyPricingCopy();
+}
+
 /* ── Auth helpers ────────────────────────────────────────── */
 
 // UI hint only — mirrors _PERMANENT_ADMIN_EMAILS in app.py so the Admin button
@@ -2669,9 +2711,13 @@ async function _initFirebase() {
   } catch (e) { console.warn('Firebase init failed:', e); }
 }
 
-// Kick off Firebase after the page is interactive (non-blocking)
+// Kick off Firebase after the page is interactive (non-blocking). Pricing is
+// fetched independently so the CTAs still show the active plan if Firebase is
+// unavailable.
+function _boot() { _initFirebase(); _loadPricing(); }
+
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', _initFirebase);
+  document.addEventListener('DOMContentLoaded', _boot);
 } else {
-  _initFirebase();
+  _boot();
 }
