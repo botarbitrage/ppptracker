@@ -377,26 +377,46 @@ before uploading). Until GitHub-source builds recover, deploys need that
 command. Worth retrying auto-deploy in a day or so, and raising with Railway
 support if it persists — quote the `mise install` error above.
 
-**Still open:**
-- **Stripe** — no webhook endpoint registered yet against the new domain,
-  so `STRIPE_WEBHOOK_SECRET` is still whatever was carried over (or a
-  placeholder) rather than a secret tied to a real endpoint. Checkout/
-  upgrade-to-Pro flow hasn't been tested. Register a webhook at
-  `https://ppptracker.up.railway.app/api/stripe-webhook` in the Stripe
-  dashboard, put its secret in `STRIPE_WEBHOOK_SECRET`, then test a
-  checkout end-to-end.
-- **Deploy the hardened Firestore rules** — `firestore.rules` now blocks
-  clients from writing their own `is_pro`/`stripe_customer_id`, closing a
-  bypass that let any signed-in user grant themselves Pro for free (see
-  `launch_review.md` §1.6). **The repo change does nothing until the rules
-  are published to Firebase** — `firebase deploy --only firestore:rules`, or
-  paste the file into Firebase Console → Firestore → Rules → Publish. Until
-  then the bypass is live. The rules could not be syntax-checked from this
-  environment (no Firebase CLI/emulator), so watch for validation errors at
-  publish time — the Console validates before it lets you publish. After
-  publishing, confirm both halves: a signed-in user can no longer write
-  `is_pro`, *and* a brand-new account's first-visit doc still gets created
+**Reported done (2026-08-14), with the caveats below:**
+- **Firestore rules published** — reported published via the Firebase Console.
+  **Not independently verified from this environment**, and the reason is worth
+  recording: the hardening only changes behaviour for an *authenticated* client
+  writing `is_pro`, so there is no unauthenticated probe that distinguishes the
+  old rules from the new ones — the pre- and post-hardening files both require
+  auth for `users/{uid}` and both deny everything else. There is no Firebase
+  CLI or service-account credential on the dev machine either. To close this
+  properly, run one check signed in as a **non-admin, non-Pro** account on the
+  live site, in the browser console:
+
+  ```js
+  firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid)
+    .set({ is_pro: true }, { merge: true })
+    .then(() => console.log('BAD — rules are NOT live, self-grant succeeded'))
+    .catch(e => console.log('GOOD — blocked:', e.code));
+  ```
+
+  Expect `GOOD — blocked: permission-denied`. Then confirm the other half still
+  works: sign in with a brand-new account and check a `users/{uid}` doc appears
   (the `create` rule deliberately allows `is_pro: false` for exactly that).
+
+- **Stripe Pro price configured** — `STRIPE_PRO_PRICE_ID`, `STRIPE_PRO_LABEL`,
+  `STRIPE_PRICE_ID`, `STRIPE_PROTEST_PRICE_ID`, `STRIPE_SECRET_KEY` and
+  `STRIPE_WEBHOOK_SECRET` are all set on the Railway service, and a "PPP Hand
+  Tracker - Pro" price exists in the Stripe product catalog. Verified from
+  outside: `POST /api/create-checkout-session` returns 401 (auth required)
+  rather than 503 (Stripe not configured), which only happens when the API key
+  and the active plan's price id are both present.
+
+**Still open:**
+- **Stripe webhook registration is still unverified.** The secret is set, but
+  a set secret does not prove an endpoint is registered against this domain,
+  and `POST /api/stripe-webhook` answers 400 to a bogus signature whether or
+  not the secret matches a real endpoint — so there is no external probe for
+  this either. Confirm in Stripe → Developers → Webhooks that an endpoint
+  exists for `https://ppptracker.up.railway.app/api/stripe-webhook`, that its
+  signing secret matches `STRIPE_WEBHOOK_SECRET`, and that it subscribes to
+  `checkout.session.completed`. The end-to-end upgrade-to-Pro flow still has
+  not been run against a real checkout.
 - **Old Railway project / old GitHub repo** — untouched throughout, as
   required. The old prod (`pppokerha.up.railway.app`) should stay up until
   you're ready to actually cut users over to the new domain.
