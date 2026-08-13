@@ -171,6 +171,14 @@ body {
 .tier-free .tier-name { color: var(--muted); }
 .tier-pro  .tier-name { color: var(--yellow); }
 
+/* Early Access price framing — sits under the tier name, deliberately quiet */
+.tier-early-note {
+  font-size: .68rem;
+  line-height: 1.3;
+  color: var(--muted);
+  margin: -6px 0 10px;
+}
+
 .tier-list {
   list-style: none;
   padding: 0; margin: 0 0 12px;

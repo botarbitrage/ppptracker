@@ -111,7 +111,9 @@ function handleUpgradeClick(tier = 'pro') {
   const btn = document.getElementById('pro-upgrade-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Redirecting…'; }
   const fail = (msg) => {
-    if (btn) { btn.disabled = false; btn.textContent = 'Upgrade to Pro'; }
+    // Must match the button's initial label in index.html, or a failed checkout
+    // silently relabels the CTA and drops the price from it.
+    if (btn) { btn.disabled = false; btn.textContent = 'Get Early Access — A$7.99/month'; }
     const cs = document.getElementById('pro-coming-soon');
     if (cs) { cs.textContent = msg; cs.classList.remove('d-none'); }
   };
@@ -679,7 +681,7 @@ function renderTournaments(tournaments) {
               <div class="tourney-gate-overlay">
                 <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 <span class="tourney-gate-label">Pro only</span>
-                <button class="tourney-gate-btn" onclick="showUpgradeModal('tourney')">Upgrade · $7.99/mo</button>
+                <button class="tourney-gate-btn" onclick="showUpgradeModal('tourney')">Early Access · A$7.99/mo</button>
               </div>
             </div>`
         }
@@ -723,7 +725,7 @@ function _renderExportAllSection() {
       `<div class="tourney-gate-overlay">` +
       _LOCK_ICON_SVG +
       `<span class="tourney-gate-label">Export All Hands — Pro only</span>` +
-      `<button class="tourney-gate-btn" onclick="showUpgradeModal('export')">Upgrade · $7.99/mo</button>` +
+      `<button class="tourney-gate-btn" onclick="showUpgradeModal('export')">Early Access · A$7.99/mo</button>` +
       `</div></div>`;
   }
 }
@@ -1111,7 +1113,7 @@ function _renderPlayerExportAll() {
       `<div class="tourney-gate-overlay">` +
       _LOCK_ICON_SVG +
       `<span class="tourney-gate-label">Pro only</span>` +
-      `<button class="tourney-gate-btn" onclick="showUpgradeModal('export')">Upgrade · $7.99/mo</button>` +
+      `<button class="tourney-gate-btn" onclick="showUpgradeModal('export')">Early Access · A$7.99/mo</button>` +
       `</div></div>`;
     wrap.classList.remove('d-none');
   }
