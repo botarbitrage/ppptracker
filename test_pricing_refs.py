@@ -147,11 +147,20 @@ def check_propagation(check):
     check('switching back restores the price', p['price_label'] == 'A$7.99/mo', str(p))
 
     # Labels are env-driven, so a price change is a variable edit, not a deploy.
-    os.environ['STRIPE_PRO_LABEL'] = 'A$19.99/mo'
+    os.environ['STRIPE_PRO_PRICE_LABEL'] = 'A$19.99/mo'
     p = pricing()
-    check('regular price tracks STRIPE_PRO_LABEL',
+    check('regular price tracks STRIPE_PRO_PRICE_LABEL',
           p['regular_price_label'] == 'A$19.99/mo', str(p))
-    os.environ.pop('STRIPE_PRO_LABEL', None)
+    os.environ.pop('STRIPE_PRO_PRICE_LABEL', None)
+
+    # Every built-in default must actually look like a price. STRIPE_PRO_LABEL
+    # holds the Stripe *product* name ("Pro subscription"), and reading it as a
+    # price once shipped "PRO — ~~Pro subscription~~" to production.
+    for key, plan in A._pricing_plans().items():
+        check('%s default label looks like a price' % key,
+              bool(PRICE_RE.search(plan['price_label'])), plan['price_label'])
+        check('%s does not read a product-name variable' % key,
+              'LABEL' not in plan['price_env'], plan['price_env'])
 
     # Checkout must bill the plan that's actually on sale.
     plans = A._pricing_plans()

@@ -1031,13 +1031,15 @@ def _pricing_plans():
     return {
         'early_access': {
             'label':       'Early Access',
-            'price_label': os.getenv('STRIPE_EARLY_ACCESS_LABEL', 'A$7.99/mo'),
+            'price_label': os.getenv('STRIPE_EARLY_ACCESS_PRICE_LABEL', 'A$7.99/mo'),
             'price_id':    os.getenv('STRIPE_PRICE_ID', ''),
             'price_env':   'STRIPE_PRICE_ID',
         },
         'pro': {
             'label':       'Pro',
-            'price_label': os.getenv('STRIPE_PRO_LABEL', 'A$13.99/mo'),
+            # Deliberately NOT STRIPE_PRO_LABEL — that variable holds the Stripe
+            # product name ("Pro subscription"), which is not a price.
+            'price_label': os.getenv('STRIPE_PRO_PRICE_LABEL', 'A$13.99/mo'),
             'price_id':    os.getenv('STRIPE_PRO_PRICE_ID', ''),
             'price_env':   'STRIPE_PRO_PRICE_ID',
         },
