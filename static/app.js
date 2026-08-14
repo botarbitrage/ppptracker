@@ -866,17 +866,40 @@ function _renderExportCounter() {
   }
 }
 
-/** Show/hide tier-gated elements based on current Pro status. */
+/**
+ * Show/hide tier-gated elements based on current Pro status.
+ *
+ * FREE_ONLY_ELS ship with .tier-pending in the HTML so they are invisible at
+ * first paint — otherwise a Pro user sees the Free-vs-Pro upsell flash on every
+ * load until Firestore reports their tier. Clearing .tier-pending here is what
+ * finally reveals them, so this must run on every auth/tier resolution path,
+ * including the failure ones (see _resolveTierUI).
+ */
 function _applyTierVisibility() {
   const pro = isPro();
   FREE_ONLY_ELS.forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.style.display = pro ? 'none' : '';
+    if (!el) return;
+    el.style.display = pro ? 'none' : '';
+    el.classList.remove('tier-pending');
   });
   PRO_ONLY_ELS.forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.style.display = pro ? '' : 'none';
+    if (!el) return;
+    el.style.display = pro ? '' : 'none';
+    el.classList.remove('tier-pending');
   });
+}
+
+/**
+ * Terminal "we know the tier now (or never will)" hook. Safe to call more than
+ * once, and called from every Firebase bail-out path plus a watchdog timer so a
+ * blocked SDK / failed config fetch can't leave the free-tier UI hidden forever.
+ */
+let _tierResolveTimer = setTimeout(() => _resolveTierUI(), 4000);
+function _resolveTierUI() {
+  if (_tierResolveTimer) { clearTimeout(_tierResolveTimer); _tierResolveTimer = null; }
+  _updateExportGates();
 }
 
 /** Call after any state change that could affect export UI. */
@@ -2800,10 +2823,10 @@ async function _initFirebase() {
   // "Sign in" eagerly here caused a flash of the signed-out UI for signed-in users.
   try {
     const res = await fetch('/api/firebase-config');
-    if (!res.ok) return;
+    if (!res.ok) return _firebaseUnavailable();
     const cfg = await res.json();
-    if (!cfg.FIREBASE_API_KEY) return;
-    if (typeof firebase === 'undefined') return;
+    if (!cfg.FIREBASE_API_KEY) return _firebaseUnavailable();
+    if (typeof firebase === 'undefined') return _firebaseUnavailable();
 
     firebase.initializeApp({
       apiKey:            cfg.FIREBASE_API_KEY,
@@ -2843,6 +2866,7 @@ async function _initFirebase() {
       _auth.onAuthStateChanged(async (user) => {
         _currentUser = user;
         await _loadUserState();
+        _resolveTierUI();   // reveal the tier UI even if _loadUserState bailed early
         _renderAuthBar(user ? user.email : null);
         _checkAdmin(user);  // hides the button again on sign-out
         _loadGamification();  // hides the banner again on sign-out
@@ -2857,11 +2881,25 @@ async function _initFirebase() {
     } else {
       // Auth SDK not available — load guest state directly
       await _loadUserState();
+      _resolveTierUI();
       _renderAuthBar(null);
     }
 
     _trackEvent('app_open');
-  } catch (e) { console.warn('Firebase init failed:', e); }
+  } catch (e) {
+    console.warn('Firebase init failed:', e);
+    _firebaseUnavailable();
+  }
+}
+
+/**
+ * Firebase couldn't start (config fetch failed, no API key, SDK blocked, init
+ * threw). Nothing will ever resolve the auth/tier state, so fall back to the
+ * signed-out free view instead of leaving the header and tier cards blank.
+ */
+function _firebaseUnavailable() {
+  _resolveTierUI();
+  _renderAuthBar(null);
 }
 
 // Kick off Firebase after the page is interactive (non-blocking). Pricing is
