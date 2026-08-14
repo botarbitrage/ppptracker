@@ -214,8 +214,9 @@ writing).
      authorized, then `FIREBASE_AUTH_DOMAIN` set to the storage-bucket
      domain instead of the auth domain), not code bugs. See §3 for the
      full story. Both fixed now.
-   - [ ] Stripe flow — **not yet tested**, deferred (see §5, no webhook
-     endpoint registered against the new domain yet).
+   - [x] Stripe flow — **tested and confirmed** (2026-08-14): webhook endpoint
+     registered against `ppptracker.up.railway.app`, end-to-end upgrade-to-Pro
+     checkout run against a real checkout and working. See §5.
    - [ ] `serviceAccountKey.json` absent from the running container —
      attempted via `railway ssh` but hit host-key verification issues in
      this environment and didn't chase it further, since it's already
@@ -351,42 +352,20 @@ your request, ahead of merging the PR):
   branch deletion are still blocked. If a second maintainer ever joins, raise
   this back to 1.
 
-**⚠️ Known broken: Railway auto-deploy from GitHub.**
-Every GitHub-source build now fails during the Python install step:
-```
-mise ERROR Failed to install core:python@3.12.10: error sending request:
-  client error (SendRequest): http2 error: stream error received:
-  refused stream before processing any application logic
-Build Failed: process "mise install" did not complete successfully
-```
-This is Railway's builder failing to download the CPython tarball pinned by
-`runtime.txt` — nothing to do with this repo's code. It failed 4 consecutive
-times (once on a variable change, then 3× on the PR-merge auto-deploy and its
-retries), while `railway up` builds of the *identical* tree succeeded every
-time. The successful builds landed on a different builder node than the
-failing ones, which points at a bad node / broken egress on Railway's side
-rather than anything reproducible locally.
+**✅ Railway auto-deploy from GitHub — working.** The Railway `pppokerht`
+service is connected to `handtrackerpppoker/pppokerht` and deploys `main`
+automatically on every push/merge — **no `railway up` or any other command is
+required.** (An earlier transient `mise install` HTTP/2 failure on Railway's
+builder, while it downloaded the `runtime.txt` CPython tarball, has since
+cleared.)
 
-Consequence: **pushing to `main` does not currently deploy.** Production is
-running the correct merged code, deployed manually with:
-```bash
-railway up --service pppokerht --environment production --ci
-```
-(run from a checkout of `main` — verified byte-identical to `origin/main`
-before uploading). Until GitHub-source builds recover, deploys need that
-command. Worth retrying auto-deploy in a day or so, and raising with Railway
-support if it persists — quote the `mise install` error above.
-
-**Reported done (2026-08-14), with the caveats below:**
-- **Firestore rules published** — reported published via the Firebase Console.
-  **Not independently verified from this environment**, and the reason is worth
-  recording: the hardening only changes behaviour for an *authenticated* client
-  writing `is_pro`, so there is no unauthenticated probe that distinguishes the
-  old rules from the new ones — the pre- and post-hardening files both require
-  auth for `users/{uid}` and both deny everything else. There is no Firebase
-  CLI or service-account credential on the dev machine either. To close this
-  properly, run one check signed in as a **non-admin, non-Pro** account on the
-  live site, in the browser console:
+**Done and verified (2026-08-14):**
+- **✅ Firestore rules deployed** — the Firebase CLI is now installed and
+  authenticated, `.firebaserc` pins the `pppoker-analyser` project, and the
+  hardened `firestore.rules` were published with
+  `firebase deploy --only firestore:rules`. The `is_pro` self-grant bypass is
+  closed in production. Optional re-check, signed in as a **non-admin, non-Pro**
+  account on the live site, in the browser console:
 
   ```js
   firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid)
@@ -395,28 +374,20 @@ support if it persists — quote the `mise install` error above.
     .catch(e => console.log('GOOD — blocked:', e.code));
   ```
 
-  Expect `GOOD — blocked: permission-denied`. Then confirm the other half still
-  works: sign in with a brand-new account and check a `users/{uid}` doc appears
-  (the `create` rule deliberately allows `is_pro: false` for exactly that).
+  Expect `GOOD — blocked: permission-denied`. A brand-new account should still
+  get its `users/{uid}` doc created (the `create` rule allows `is_pro: false`).
 
-- **Stripe Pro price configured** — `STRIPE_PRO_PRICE_ID`, `STRIPE_PRO_LABEL`,
-  `STRIPE_PRICE_ID`, `STRIPE_PROTEST_PRICE_ID`, `STRIPE_SECRET_KEY` and
-  `STRIPE_WEBHOOK_SECRET` are all set on the Railway service, and a "PPP Hand
-  Tracker - Pro" price exists in the Stripe product catalog. Verified from
-  outside: `POST /api/create-checkout-session` returns 401 (auth required)
-  rather than 503 (Stripe not configured), which only happens when the API key
-  and the active plan's price id are both present.
+- **✅ Stripe fully configured and tested** — `STRIPE_PRO_PRICE_ID`,
+  `STRIPE_PRO_LABEL`, `STRIPE_PRICE_ID`, `STRIPE_PROTEST_PRICE_ID`,
+  `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` are all set on the Railway
+  service, a "PPP Hand Tracker - Pro" price exists in the Stripe catalog, the
+  webhook endpoint is registered against
+  `https://ppptracker.up.railway.app/api/stripe-webhook` (subscribed to
+  `checkout.session.completed`, signing secret matches `STRIPE_WEBHOOK_SECRET`),
+  and the **end-to-end upgrade-to-Pro checkout flow has been run against a real
+  checkout and confirmed working.**
 
 **Still open:**
-- **Stripe webhook registration is still unverified.** The secret is set, but
-  a set secret does not prove an endpoint is registered against this domain,
-  and `POST /api/stripe-webhook` answers 400 to a bogus signature whether or
-  not the secret matches a real endpoint — so there is no external probe for
-  this either. Confirm in Stripe → Developers → Webhooks that an endpoint
-  exists for `https://ppptracker.up.railway.app/api/stripe-webhook`, that its
-  signing secret matches `STRIPE_WEBHOOK_SECRET`, and that it subscribes to
-  `checkout.session.completed`. The end-to-end upgrade-to-Pro flow still has
-  not been run against a real checkout.
 - **Old Railway project / old GitHub repo** — untouched throughout, as
   required. The old prod (`pppokerha.up.railway.app`) should stay up until
   you're ready to actually cut users over to the new domain.
