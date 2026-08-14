@@ -109,10 +109,16 @@ TS_A, TS_B = 1780272000, 1784073600
 CASH_TID = 'CASH_TABLE'
 CASH_HANDS = 42
 
+# A play-money MTT: PPPoker reports room.mtt for it exactly like a real one, so
+# the only thing keeping it out of the report is the missing club room name.
+# Same trick as CASH_TID — absent from `vectors`, so selecting it would KeyError.
+PLAY_MTT_TID = 'PLAY_MONEY_MTT'
+PLAY_MTT_HANDS = 17
+
 
 def _seed(db, vectors):
-    """Two rooms, two dates, plus one cash-game tournament that must never
-    be selectable. Tournament ids are the fixture file names."""
+    """Two rooms, two dates, plus one cash-game tournament and one play-money
+    MTT that must never be selectable. Tournament ids are the fixture file names."""
     db.put(('users', UID), {'is_pro': True})
     names = sorted(vectors)
     for i, tid in enumerate(names):
@@ -129,6 +135,13 @@ def _seed(db, vectors):
         'earliest_ts': TS_A,
         'updated_at': 999,
         'hands': CASH_HANDS,
+    })
+    db.put(('users', UID, 'tournaments', PLAY_MTT_TID), {
+        'room_name': 'Unknown',
+        'is_mtt': True,
+        'earliest_ts': TS_A,
+        'updated_at': 998,
+        'hands': PLAY_MTT_HANDS,
     })
 
 
@@ -220,20 +233,35 @@ def main():
           data['meta']['hands'] == total, str(data['meta']['hands']))
     check('cash-game tournament excluded from the count',
           data['meta']['tournaments'] == len(vectors))
-    cash_room = next((r for r in data['filters']['rooms'] if r['is_mtt'] is False), None)
+    excluded_rooms = {r['key']: r for r in data['filters']['rooms'] if r['is_mtt'] is False}
+    cash_room = excluded_rooms.get('40100BB JP')
     check('cash room offered in filters, flagged is_mtt=False', cash_room is not None)
     if cash_room:
         check('cash room hand count shown for transparency',
               cash_room['hands'] == CASH_HANDS, str(cash_room))
-    check('every tournament room flagged is_mtt=True',
-          all(r['is_mtt'] for r in data['filters']['rooms'] if r is not cash_room))
 
-    # Explicitly asking for the cash room must still yield nothing selected —
-    # the exclusion is server-side and not just a disabled checkbox.
+    # A play-money MTT carries room.mtt just like a real one; only the missing
+    # room name demotes it. It must be offered as a disabled row, never selected.
+    play_room = excluded_rooms.get('UNKNOWN')
+    check('play-money MTT flagged is_mtt=False despite room.mtt',
+          play_room is not None, str(sorted(excluded_rooms)))
+    if play_room:
+        check('play-money MTT hand count shown for transparency',
+              play_room['hands'] == PLAY_MTT_HANDS, str(play_room))
+    check('every real-money tournament room flagged is_mtt=True',
+          all(r['is_mtt'] for r in data['filters']['rooms']
+              if r['key'] not in excluded_rooms))
+
+    # Explicitly asking for the cash / play-money rooms must still yield nothing
+    # selected — the exclusion is server-side, not just a disabled checkbox.
     status, cash_only = _get(client, '?rooms=40100BB%20JP')
     check('explicit cash-room filter still excludes it', status == 200 and
           cash_only['meta']['hands'] == 0 and cash_only['meta']['tournaments'] == 0,
           str(cash_only['meta']))
+    status, play_only = _get(client, '?rooms=UNKNOWN')
+    check('explicit play-money filter still excludes it', status == 200 and
+          play_only['meta']['hands'] == 0 and play_only['meta']['tournaments'] == 0,
+          str(play_only['meta']))
 
     mtt_rooms = [r for r in data['filters']['rooms'] if r['is_mtt']]
     room_keys = {r['key'] for r in mtt_rooms}
@@ -241,8 +269,9 @@ def main():
     check('tournament room hand counts sum to total',
           sum(r['hands'] for r in mtt_rooms) == total,
           '%s != %s' % (sum(r['hands'] for r in mtt_rooms), total))
-    check('all rooms (incl. cash) sum to total + cash hands',
-          sum(r['hands'] for r in data['filters']['rooms']) == total + CASH_HANDS)
+    check('all rooms (incl. cash + play money) sum to total + their hands',
+          sum(r['hands'] for r in data['filters']['rooms'])
+          == total + CASH_HANDS + PLAY_MTT_HANDS)
 
     # 2. Cache: the second call must serve from Firestore, not rebuild.
     writes_after_cold = db.writes

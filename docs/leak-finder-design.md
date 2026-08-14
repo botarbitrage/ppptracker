@@ -501,13 +501,20 @@ caught this before it shipped; nothing before it exercised the endpoint end-to-e
 **Tournament / cash-game split.** The scraper only imports tournaments (cash-game tiles are
 skipped by design — see the import skill), but a handful of cash sessions reached Firestore via
 manual/legacy imports: 101 hands across "40-100BB JP", "40-100BB BP", and "(unnamed)" in the live
-data. `hand_parser.py` already tags every tournament doc with `is_mtt` (from PPPoker's own
-`room.mtt` field) — a pre-existing, reliable signal that needed no new detection logic. `/api/leaks`
-now groups the room list by `(name, is_mtt)` and hard-excludes any `is_mtt=False` tournament from
-`selected`, **regardless of what the `rooms=` query asks for** — so the exclusion holds even
-against a hand-crafted URL, not just a disabled checkbox. The filter UI splits the room grid into
-a normal "Tournaments" section and a disabled "Cash games" section with a one-line explanation,
-so the missing hands are visible rather than silently absent.
+data. `hand_parser.classify_game` decides this: PPPoker's own `room.mtt` field marks a
+multi-table tournament, and the presence of a real club room name marks real money — play-money
+games are public lobby games and come back with a blank or "Unknown" room name. Only a game with
+both is a tracked tournament (`category == "tournament"`); everything else — cash tables,
+sit-and-gos, and play-money games including play-money MTTs — is `cash_play`. `room.mtt` alone
+was not enough: a play-money MTT sets it exactly as a club MTT does, so before the room-name
+signal was added those tournaments leaked into both the Tournaments section and this room list.
+`/api/leaks` re-derives the classification on read (so tournaments imported before the split need
+no backfill), groups the room list by `(name, is_mtt)` where `is_mtt` is the classifier's verdict,
+and hard-excludes any `is_mtt=False` tournament from `selected`, **regardless of what the `rooms=`
+query asks for** — so the exclusion holds even against a hand-crafted URL, not just a disabled
+checkbox. The filter UI splits the room grid into a normal "Tournaments" section and a disabled
+"Cash & play money" section with a one-line explanation, so the missing hands are visible rather
+than silently absent.
 
 **Compare mode.** Two ordinary `/api/leaks` reports — independent filters, no new endpoint or
 engine change — fetched in parallel and zipped client-side by stat `key` within each position.
@@ -703,6 +710,8 @@ labelling.
       app-wide `/api/*` JSON error handler (§16).
 - [x] Phase 6 — tournament/cash-game split: `is_mtt` hard-exclusion in `/api/leaks`, disabled
       "Cash games" section in the filter UI (§16).
+- [x] Follow-up — play-money games (MTTs included) folded into that same exclusion via
+      `hand_parser.classify_game`; the section is now "Cash & play money" (§16).
 - [x] Phase 6 — compare mode: two ranges zipped client-side, `Progress` column, dynamic
       `Rec. Action`, tail-pinned sorting (§16).
 - [ ] Known quirk (not fixed, out of Phase 6's scope): 14 cells in `bbz_leak_ranges.json` carry

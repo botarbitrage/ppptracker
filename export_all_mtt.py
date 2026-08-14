@@ -20,18 +20,23 @@ bucket = admin_storage.bucket(name=BUCKET_NAME)
 print('Listing tournaments …')
 docs = db.collection('users').document(UID).collection('tournaments').get()
 
+from hand_parser import classify_game, CATEGORY_TOURNAMENT
+
+# Real-money MTTs only — cash tables, sit-and-gos and play-money games (which
+# include play-money MTTs) would pollute a PT4 database with unreal stakes.
 mtt_docs = []
 cash_docs = []
 for doc in docs:
     d = doc.to_dict()
-    if d.get('is_mtt', True):
+    cls = classify_game(d.get('room_name') or '', d.get('is_mtt', False))
+    if cls['category'] == CATEGORY_TOURNAMENT:
         mtt_docs.append((doc.id, d))
     else:
         cash_docs.append((doc.id, d))
 
-print(f'  Total tournament docs : {len(mtt_docs) + len(cash_docs)}')
-print(f'  MTT (will export)     : {len(mtt_docs)}')
-print(f'  Cash (skipping)       : {len(cash_docs)}')
+print(f'  Total tournament docs      : {len(mtt_docs) + len(cash_docs)}')
+print(f'  Real-money MTT (exporting) : {len(mtt_docs)}')
+print(f'  Cash / play money (skip)   : {len(cash_docs)}')
 
 all_records = []
 failed = []
