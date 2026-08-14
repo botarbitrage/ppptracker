@@ -1,5 +1,62 @@
 """PPPoker hand parser — card decoding, position calc, stats."""
 
+import re as _re
+
+# ── Game classification ──────────────────────────────────────────────────────
+# PPPoker's room.mtt flag only says "multi-table tournament"; it says nothing
+# about whether the game was played for real money. Two independent signals are
+# therefore combined into one `category`:
+#
+#   is_mtt         raw room.mtt — multi-table tournament vs single table
+#                  (cash tables AND sit-and-gos both come back with mtt unset)
+#   is_play_money  derived from the room name — play-money games are public
+#                  lobby games, not club games, so PPPoker returns no usable
+#                  room name for them (blank, or a placeholder like "Unknown").
+#                  Every real-money club game carries the club's room name,
+#                  e.g. "🌐 LUCKY DAY" or "DEEP FREEZE".
+#
+# Only a real-money MTT is a tracked tournament. Everything else — cash tables,
+# sit-and-gos, and every play-money game including play-money MTTs — belongs in
+# the "Cash & Play Money" section and is kept out of leak reports, which are
+# only meaningful over real-money tournament play.
+CATEGORY_TOURNAMENT = 'tournament'
+CATEGORY_CASH_PLAY  = 'cash_play'
+
+# Normalized (see norm_room_name) names that carry no room identity. Extend this
+# set if PPPoker starts returning another placeholder rather than adding a
+# separate check elsewhere — this is the single source of truth.
+PLACEHOLDER_ROOM_NAMES = {
+    '', 'UNKNOWN', 'UNKNOW', 'UNKNOWN ROOM', 'UNNAMED', 'NO NAME',
+    'NA', 'N A', 'NONE', 'NULL', 'PLAY MONEY', 'PLAYMONEY',
+}
+
+
+def norm_room_name(s):
+    """Strip platform emoji/punctuation so room names compare cleanly, e.g.
+    "🌐 LUCKY DAY" (as stored on hand records) == "LUCKY DAY" (config doc name)."""
+    return _re.sub(r'[^A-Z0-9 ]', '', (s or '').upper()).strip()
+
+
+def is_play_money_room(room_name):
+    """True when a room name identifies no club room — the play-money marker."""
+    return norm_room_name(room_name) in PLACEHOLDER_ROOM_NAMES
+
+
+def classify_game(room_name, is_mtt):
+    """{'is_play_money': bool, 'category': str} for one tournament/session.
+
+    Callers should treat `category` as the only thing that decides which UI
+    section a game lands in; `is_mtt` stays raw so hand exports keep emitting
+    the correct PokerStars tournament header for play-money MTTs.
+    """
+    play_money = is_play_money_room(room_name)
+    return {
+        'is_play_money': play_money,
+        'category': (CATEGORY_TOURNAMENT if (bool(is_mtt) and not play_money)
+                     else CATEGORY_CASH_PLAY),
+    }
+
+
 # Card encoding: suit_idx = code // 256, rank = code % 256
 _RANK_MAP = {2:'2',3:'3',4:'4',5:'5',6:'6',7:'7',8:'8',9:'9',
              10:'T',11:'J',12:'Q',13:'K',14:'A'}
@@ -435,6 +492,7 @@ def process_hands(records):
             tourney_id=t['tourney_id'],
             room_name=t['room_name'],
             is_mtt=t['is_mtt'],
+            **classify_game(t['room_name'], t['is_mtt']),
             hands=h_count,
             net=t['net'],
             first_chips=t['first_chips'],

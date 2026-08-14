@@ -526,7 +526,10 @@ function cycleSortHands(position) {
 // tournament) — only the DOM checkbox/date state differs between them, so a
 // single `ns` argument threading through these functions is enough; there is
 // no need to fetch or store the room list twice.
-let ROOMS = [];                // [{key,label,is_mtt,tournaments,hands}] — MTT only
+// [{key,label,is_mtt,tournaments,hands}] — real-money MTTs only. The API's
+// is_mtt here is the classify_game verdict, not PPPoker's raw room.mtt flag,
+// so play-money MTTs arrive as is_mtt=false and land in the disabled section.
+let ROOMS = [];
 let LAST_FILTERS = null;
 const FILTERS_BUILT = {};      // {ns: true} once that bar's DOM has been built
 let AUTH_USER = null;
@@ -586,7 +589,7 @@ function filterBarSkeleton(ns) {
       </div>
       <div id="${barId(ns, 'room-list')}" class="lk-room-list"></div>
       <div id="${barId(ns, 'cash-section')}" class="lk-cash-section d-none">
-        <div class="lk-cash-note">Leak Finder evaluates tournaments only — cash-game hands aren't included.</div>
+        <div class="lk-cash-note">Leak Finder evaluates real-money tournaments only — cash-game and play-money hands aren't included.</div>
         <div id="${barId(ns, 'room-list-cash')}" class="lk-room-list"></div>
       </div>
     </div>`;
