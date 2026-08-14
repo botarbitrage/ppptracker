@@ -1,5 +1,16 @@
 # Account Migration Runbook — pppokerht → new GitHub/Railway/Firebase
 
+> **Rename note (2026-08-14):** The GitHub repo and the Railway service were both
+> renamed from `pppokerht` to **`ppptracker`**. The `origin` remote is now
+> `https://github.com/handtrackerpppoker/ppptracker.git`. The historical commands
+> and references below still say `pppokerht` (repo *and* `--service pppokerht`) —
+> they are left as-run for the record. GitHub redirects old repo URLs and
+> `gh api repos/handtrackerpppoker/pppokerht/...` calls to the new name
+> indefinitely (as long as no new repo reuses `pppokerht`), and the Railway
+> commands should now target `--service ppptracker`. The live domain
+> `ppptracker.up.railway.app`, the Firebase project `pppoker-analyser`, and Stripe
+> are unaffected by either rename.
+
 Target: relaunch under `handtrackerpppoker@gmail.com` (GitHub + Railway), new
 domain `ppptracker.up.railway.app`, without touching the old prod
 (`pppokerha.up.railway.app`, repo `botarbitrage/pppokerHA`) until the new one
