@@ -10,11 +10,15 @@ The module is deliberately split in two halves:
   * a **Firestore shell** — `on_import`, `settle_week`, `snapshot` — that reads and writes
     documents around that core inside transactions.
 
-Every time-of-day rule (the :55 break window, the 2-5am Steel Wheel, the 23:55 Closer, and
-the day/week boundaries themselves) is evaluated in the zone configured at
-`config/gamification.timezone`, defaulting to Australia/Adelaide. UTC day boundaries would
-reset the daily streak at ~09:30 Adelaide time — mid-morning, halfway through a player's
-day — which is why the boundary follows the player's clock rather than the server's.
+The day/week boundaries, the 2-5am Steel Wheel and the 23:55 Closer are evaluated in the zone
+configured at `config/gamification.timezone`, defaulting to Australia/Adelaide. UTC day
+boundaries would reset the daily streak at ~09:30 Adelaide time — mid-morning, halfway through
+a player's day — which is why those follow the player's clock rather than the server's.
+
+The :55 break window is the exception: it tracks the real tournament break, which is aligned to
+the top of the UTC hour, so it is measured against UTC minute-of-hour rather than the configured
+zone. A +X:30 zone like Adelaide is offset by 30 minutes, so scoring its break window in local
+time would credit it at :55 local (UTC :25) — thirty minutes off the actual :55-UTC break.
 
 State lives in the top-level `gamification/{uid}` collection, NOT under `users/{uid}`.
 firestore.rules lets a user write any non-paid field on their own user document and anything
@@ -114,6 +118,17 @@ PODIUM = {1: (2000, 'SF'), 2: (1000, 'QUADS'), 3: (500, 'BOAT')}
 
 def local_dt(ts, tz):
     return datetime.fromtimestamp(ts, tz)
+
+
+def utc_minute(ts):
+    """Minute-of-hour on the UTC clock, independent of the configured display zone.
+
+    The tournament break (:55 -> :00) is a fixed real-world event aligned to the top of the
+    UTC hour. Whole-hour zones share UTC's minute-of-hour, but +X:30 zones (Adelaide, Darwin)
+    are offset by 30, so the break window must be measured against UTC -- otherwise Adelaide's
+    break lands at :25 local instead of :55.
+    """
+    return int(ts // 60) % 60
 
 
 def day_key(ts, tz):
@@ -307,7 +322,10 @@ def evaluate(state, new_hands, now_ts, tz):
     else:
         add('base', 'Import', POINTS_BASE)
 
-    in_break = local.minute >= BREAK_MINUTE
+    # The break follows the tournament clock (top of the UTC hour), NOT the configured display
+    # zone — otherwise a +X:30 zone like Adelaide would credit the break at :55 local (UTC :25),
+    # thirty minutes off the real :55-UTC break.
+    in_break = utc_minute(now_ts) >= BREAK_MINUTE
     if in_break:
         add('break_sync', 'Break-Time Sync', POINTS_BREAK_SYNC)
 

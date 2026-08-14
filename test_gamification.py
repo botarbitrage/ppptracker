@@ -108,15 +108,25 @@ def test_streak_only_once_per_day():
 
 
 def test_break_window():
-    _, r = run({}, 20, ts(2026, 3, 2, 12, 54))
-    check(':54 is outside the break window', 'break_sync' not in award_codes(r),
+    # The break follows the tournament clock (top of the UTC hour), not the configured zone.
+    _, r = run({}, 20, ts(2026, 3, 2, 12, 54, tz=UTC))
+    check('UTC :54 is outside the break window', 'break_sync' not in award_codes(r),
           str(award_codes(r)))
-    _, r = run({}, 20, ts(2026, 3, 2, 12, 55))
-    check(':55 is inside the break window', 'break_sync' in award_codes(r),
+    _, r = run({}, 20, ts(2026, 3, 2, 12, 55, tz=UTC))
+    check('UTC :55 is inside the break window', 'break_sync' in award_codes(r),
           str(award_codes(r)))
-    _, r = run({}, 20, ts(2026, 3, 2, 12, 59))
-    check(':59 is inside the break window', 'break_sync' in award_codes(r),
+    _, r = run({}, 20, ts(2026, 3, 2, 12, 59, tz=UTC))
+    check('UTC :59 is inside the break window', 'break_sync' in award_codes(r),
           str(award_codes(r)))
+
+    # Adelaide is UTC+X:30, so the window is a half-hour off local time. The real break at
+    # UTC :55 is Adelaide-local :25; the bug was crediting it at Adelaide-local :55 (UTC :25).
+    _, r = run({}, 20, ts(2026, 3, 2, 12, 25, tz=ADL))       # == UTC :55
+    check('Adelaide :25 (UTC :55) is inside the break window',
+          'break_sync' in award_codes(r), str(award_codes(r)))
+    _, r = run({}, 20, ts(2026, 3, 2, 12, 55, tz=ADL))       # == UTC :25
+    check('Adelaide :55 (UTC :25) is NOT the break window',
+          'break_sync' not in award_codes(r), str(award_codes(r)))
 
 
 def test_hourly_surge():
@@ -218,9 +228,12 @@ def test_steel_wheel_follows_configured_zone():
 
 
 def test_closer():
+    # The Closer is day-boundary relative (local 23:55->midnight), so it stays in the configured
+    # zone — unlike the break window, which now tracks the UTC hour. At Adelaide 23:57 (UTC 13:27)
+    # the Closer fires but the break window does not: the two are decoupled.
     _, r = run({}, 20, ts(2026, 3, 2, 23, 57))
     check('23:57 earns The Closer', '99' in codes(r), str(codes(r)))
-    check('23:57 also pays break-time sync', 'break_sync' in award_codes(r),
+    check('Adelaide 23:57 no longer pays break-time sync', 'break_sync' not in award_codes(r),
           str(award_codes(r)))
     _, r = run({}, 20, ts(2026, 3, 2, 23, 54))
     check('23:54 is too early for The Closer', '99' not in codes(r), str(codes(r)))
@@ -231,7 +244,7 @@ def test_closer():
 def test_break_master():
     st = {}
     for day in range(1, 6):
-        st, r = run(st, 20, ts(2026, 3, day, 12, 57))
+        st, r = run(st, 20, ts(2026, 3, day, 12, 25))   # Adelaide :25 == UTC :55, in-break
         if day < 5:
             check('K-9 not earned on break day %d' % day, 'K9' not in codes(r), str(codes(r)))
     check('K-9 earned on the 5th consecutive break day', 'K9' in st['badge_codes'],
@@ -241,8 +254,8 @@ def test_break_master():
 def test_break_master_resets_on_a_gap():
     st = {}
     for day in (1, 2, 3):
-        st, _ = run(st, 20, ts(2026, 3, day, 12, 57))
-    st, _ = run(st, 20, ts(2026, 3, 6, 12, 57))     # gap — break streak restarts
+        st, _ = run(st, 20, ts(2026, 3, day, 12, 25))   # Adelaide :25 == UTC :55, in-break
+    st, _ = run(st, 20, ts(2026, 3, 6, 12, 25))     # gap — break streak restarts
     check('a missed break day restarts the count', st['break_streak_days'] == 1,
           str(st['break_streak_days']))
 

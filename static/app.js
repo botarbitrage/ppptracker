@@ -204,9 +204,13 @@ function shortHandNum(gameid) {
 
 /* ── Timezone helpers ────────────────────────────────────── */
 
+// The display zone is shared with the Tournaments page through this localStorage key, so a
+// choice made on either page carries across on the next load.
+function _savedTz() { return localStorage.getItem('pppha_tz') || 'Australia/Adelaide'; }
+
 function currentTz() {
   const sel = document.getElementById('tz-select');
-  return sel ? sel.value : 'Australia/Adelaide';
+  return sel ? sel.value : _savedTz();
 }
 
 /** Format parts of a date/time into a plain object keyed by part type. */
@@ -2081,6 +2085,7 @@ function _resetTournamentDetails() {
   if (hint) hint.textContent = '';
   document.querySelectorAll('.tsum-event-card.selected').forEach(c => c.classList.remove('selected'));
   _selectedTourneyId = null;
+  window._lastTourneyDetail = null;   // nothing open to re-render on a tz change
   _tgDestroy();
 }
 
@@ -2094,6 +2099,7 @@ async function _selectTourneyDetail(tid, cardEl) {
   document.querySelectorAll('.tsum-event-card.selected').forEach(c => c.classList.remove('selected'));
   if (cardEl) cardEl.classList.add('selected');
   _selectedTourneyId = tid;
+  window._lastTourneyDetail = null;   // drop any prior detail while this one loads
 
   const tbody   = document.getElementById('tourney-detail-tbody');
   const hint    = document.getElementById('tourney-detail-hint');
@@ -2124,6 +2130,7 @@ async function _selectTourneyDetail(tid, cardEl) {
     }
     renderHandsTable(hands, 'tourney-detail-tbody', { showExport: true, exportTid: tid });
     _renderTournamentChart(hands, meta);
+    window._lastTourneyDetail = { tid, hands, meta };   // so a tz change can re-render this graph
     if (hint) {
       const dateLabel = cardEl ? (cardEl.querySelector('.tsum-event-date')?.textContent || '') : '';
       hint.textContent = `${hands.length} hand${hands.length === 1 ? '' : 's'}${dateLabel ? ' · ' + dateLabel : ''}`;
@@ -2476,14 +2483,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  document.getElementById('tz-select').addEventListener('change', () => {
-    if (window._lastData) {
-      renderRecentHands(window._lastData.recent_hands || []);
-      renderRecentWonHands(window._lastData.recent_won_hands || []);
-      renderTournaments(window._lastData.tournaments || []);
-      updateTzHeaders();
-    }
-  });
+  const tzSelect = document.getElementById('tz-select');
+  if (tzSelect) {
+    tzSelect.value = _savedTz();                 // restore the choice shared with Tournaments
+    tzSelect.addEventListener('change', () => {
+      localStorage.setItem('pppha_tz', tzSelect.value);
+      if (window._lastData) {
+        renderRecentHands(window._lastData.recent_hands || []);
+        renderRecentWonHands(window._lastData.recent_won_hands || []);
+        renderTournaments(window._lastData.tournaments || []);
+        updateTzHeaders();
+      }
+      // Refresh an open tournament detail (hands table + graph) so its dates/times follow the zone.
+      const d = window._lastTourneyDetail;
+      if (d) {
+        renderHandsTable(d.hands, 'tourney-detail-tbody', { showExport: true, exportTid: d.tid });
+        _renderTournamentChart(d.hands, d.meta);
+      }
+    });
+  }
 });
 
 /* ── Pricing copy ────────────────────────────────────────── */
@@ -2680,6 +2698,7 @@ function signOutUser() {
     _currentUser = null;
     _userState   = { is_pro: false, exports_today: 0, last_export_date: '' };
     window._lastData = null;
+    window._lastTourneyDetail = null;
 
     // Reset UI to blank-slate state
     const urlInput = document.getElementById('url-input');

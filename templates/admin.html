@@ -371,9 +371,11 @@
 
               <h3 class="adm-subhead">Timezone</h3>
               <p class="adm-meta mb-2">
-                Every day and week boundary, the :55 break window, the 2–5am Steel Wheel and
-                the 23:55 Closer are evaluated in this zone. Changing it moves when daily
-                streaks reset, so it takes effect immediately for everyone.
+                Every day and week boundary, the 2–5am Steel Wheel and the 23:55 Closer are
+                evaluated in this zone. Changing it moves when daily streaks reset, so it takes
+                effect immediately for everyone. The :55 break window is the exception: it tracks
+                the real tournament break (top of the UTC hour), so it is not shifted by this
+                zone — half-hour zones like Adelaide included.
               </p>
               <div class="adm-toolbar px-0">
                 <select id="adm-gam-tz" class="form-select form-select-sm adm-search"
