@@ -129,6 +129,10 @@ body {
   gap: 10px;
   align-items: stretch;
 }
+/* Hidden-until-resolved: cleared by _applyTierVisibility() once the tier is known. */
+.tier-pending {
+  display: none !important;
+}
 .tier-vs {
   display: flex;
   align-items: center;

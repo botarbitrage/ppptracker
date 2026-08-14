@@ -15,7 +15,8 @@ from urllib.parse import urlparse, parse_qs
 import requests
 from flask import Flask, jsonify, redirect, render_template, request, send_file, send_from_directory, Response
 
-from hand_parser import process_hands, build_hand_rows
+from hand_parser import (process_hands, build_hand_rows, classify_game,
+                         norm_room_name, CATEGORY_TOURNAMENT)
 from hand_exporter import validate_hands, export_pokerstars
 from tournament_analyzer import analyze_tournament
 import gamification
@@ -541,6 +542,11 @@ def _merge_tournament(db, bucket, uid, tid, new_records):
             'tourney_id':    tid,
             'room_name':     stat.get('room_name', ''),
             'is_mtt':        stat.get('is_mtt', False),
+            # Persisted for queries that read Firestore directly; readers should
+            # still re-derive via _classify_doc so docs written before the
+            # play-money split (or by an older deploy) are classified correctly.
+            'is_play_money': stat.get('is_play_money', False),
+            'category':      stat.get('category', ''),
             'hands':         stat.get('hands', 0),
             'net':           stat.get('net', 0),
             'first_chips':   stat.get('first_chips', 0),
@@ -870,6 +876,17 @@ def _is_admin(uid):
         return False
 
 
+def _classify_doc(d):
+    """Re-derive is_play_money/category for one persisted tournament doc.
+
+    Classification is recomputed on every read rather than trusted from the
+    stored fields, so tournaments imported before the play-money split — and
+    any whose stored category came from older rules — are bucketed correctly
+    with no backfill migration.
+    """
+    return classify_game(d.get('room_name') or '', d.get('is_mtt', False))
+
+
 @app.route('/api/tournaments', methods=['GET'])
 def list_tournaments():
     db  = _get_admin_db()  # ensures firebase_admin.initialize_app() has run
@@ -882,6 +899,7 @@ def list_tournaments():
     for doc in docs:
         d = doc.to_dict()
         d.pop('storage_path', None)  # internal detail, not needed by client
+        d.update(_classify_doc(d))
         tournaments.append(d)
 
     return jsonify({'tournaments': tournaments})
@@ -1241,7 +1259,7 @@ def _fetch_tournament_records(uid, tourney_id):
 def _norm_room_name(s):
     """Strip platform emoji/punctuation so room names compare cleanly, e.g.
     "🌐 LUCKY DAY" (as stored on hand records) == "LUCKY DAY" (config doc name)."""
-    return _re.sub(r'[^A-Z0-9 ]', '', (s or '').upper()).strip()
+    return norm_room_name(s)
 
 
 def _resolve_tournament_cfg(room_name):
@@ -1915,11 +1933,13 @@ def leaks_api():
     db = _get_admin_db()
 
     # ── Available tournaments (filter options) ──
-    # is_mtt is set at import time from PPPoker's own room.mtt field (hand_parser.py),
-    # so it's a reliable, pre-existing signal — no new detection logic needed. The
-    # scraper is only supposed to import tournaments (yellow cash-game tiles are
-    # skipped), but a handful of cash sessions have made it in via manual/legacy
-    # imports; is_mtt=False marks those so they never enter a leak report.
+    # Only real-money MTTs make a meaningful leak report, so selectability keys
+    # off hand_parser.classify_game (room.mtt AND a real club room name) rather
+    # than room.mtt alone. The scraper is only supposed to import tournaments
+    # (yellow cash-game tiles are skipped), but cash sessions have made it in via
+    # manual/legacy imports, and play-money games — MTTs included — get imported
+    # whenever they show up in the hand history. Both are marked is_mtt=False on
+    # the wire so neither can enter a leak report.
     tourneys = {}
     for doc in db.collection('users').document(uid).collection('tournaments').get():
         d = doc.to_dict()
@@ -1927,7 +1947,7 @@ def leaks_api():
         tourneys[doc.id] = {
             'room_key': _norm_room_name(room) or '(unnamed)',
             'room_label': room or '(unnamed)',
-            'is_mtt': d.get('is_mtt', True),
+            'is_mtt': _classify_doc(d)['category'] == CATEGORY_TOURNAMENT,
             'earliest_ts': d.get('earliest_ts'),
             'updated_at': d.get('updated_at'),
             'hands': d.get('hands', 0),
@@ -1965,7 +1985,8 @@ def leaks_api():
     selected = {}
     for tid, meta in tourneys.items():
         if not meta['is_mtt']:
-            continue          # cash games are never selectable, whatever `rooms` asks for
+            continue          # cash / play-money games are never selectable,
+                              # whatever `rooms` asks for
         if want_rooms and meta['room_key'] not in want_rooms:
             continue
         ts = meta['earliest_ts']

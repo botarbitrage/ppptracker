@@ -690,6 +690,32 @@ function renderStats(s) {
   ].join('');
 }
 
+/* ── Game categorisation ─────────────────────────────────── */
+// Mirrors hand_parser.classify_game on the server: only a real-money MTT is a
+// tracked tournament. Play-money games (no club room name) and single-table
+// games — cash tables and sit-and-gos — all belong to Cash & Play Money.
+// `category` is computed server-side on every read; the is_mtt fallback only
+// covers a response from a server that predates the split.
+function _isTourneyGame(t) {
+  return t && t.category ? t.category === 'tournament' : !!(t && t.is_mtt);
+}
+
+function _isCashOrPlayGame(t) {
+  return !_isTourneyGame(t);
+}
+
+// Badge for one game: distinguishes why a game sits where it does, so a
+// play-money MTT in the Cash & Play Money table doesn't read as a cash session.
+function _gameTypeBadge(t) {
+  if (_isTourneyGame(t))  return '<span class="badge bg-primary">MTT</span>';
+  if (t && t.is_play_money) {
+    return t.is_mtt
+      ? '<span class="badge bg-secondary">Play MTT</span>'
+      : '<span class="badge bg-secondary">Play</span>';
+  }
+  return '<span class="badge bg-secondary">Cash</span>';
+}
+
 /* ── Table 3: Tournaments ────────────────────────────────── */
 
 function renderTournaments(tournaments) {
@@ -698,14 +724,16 @@ function renderTournaments(tournaments) {
   // Populate tourney strip
   const strip = document.getElementById('tourney-strip');
   if (strip) {
-    const mttCount = tournaments.filter(t => t.is_mtt).length;
-    const satCount = tournaments.filter(t => (t.room_name || '').toLowerCase().includes('sat')).length;
-    const wonCount = tournaments.filter(t => (t.net || 0) > 0).length;
+    const mttCount  = tournaments.filter(_isTourneyGame).length;
+    const playCount = tournaments.filter(t => t.is_play_money).length;
+    const satCount  = tournaments.filter(t => (t.room_name || '').toLowerCase().includes('sat')).length;
+    const wonCount  = tournaments.filter(t => (t.net || 0) > 0).length;
     const items = [
-      ['Tourneys',  tournaments.length],
-      ['MTT',       mttCount],
-      ['Satellite', satCount],
-      ['Won',       wonCount],
+      ['Games',      tournaments.length],
+      ['MTT',        mttCount],
+      ['Play money', playCount],
+      ['Satellite',  satCount],
+      ['Won',        wonCount],
     ];
     strip.innerHTML = items.map(([label, value]) =>
       `<span class="val-pill"><strong>${value}</strong><span class="val-pill-label">${label}</span></span>`
@@ -719,9 +747,7 @@ function renderTournaments(tournaments) {
 
   const tz = currentTz();
   tbody.innerHTML = tournaments.map(t => {
-    const typeBadge = t.is_mtt
-      ? '<span class="badge bg-primary">MTT</span>'
-      : '<span class="badge bg-secondary">Cash</span>';
+    const typeBadge = _gameTypeBadge(t);
 
     return `<tr>
       <td style="white-space:nowrap"><small>${fmtDate(t.earliest_ts, tz)}</small></td>
@@ -840,17 +866,40 @@ function _renderExportCounter() {
   }
 }
 
-/** Show/hide tier-gated elements based on current Pro status. */
+/**
+ * Show/hide tier-gated elements based on current Pro status.
+ *
+ * FREE_ONLY_ELS ship with .tier-pending in the HTML so they are invisible at
+ * first paint — otherwise a Pro user sees the Free-vs-Pro upsell flash on every
+ * load until Firestore reports their tier. Clearing .tier-pending here is what
+ * finally reveals them, so this must run on every auth/tier resolution path,
+ * including the failure ones (see _resolveTierUI).
+ */
 function _applyTierVisibility() {
   const pro = isPro();
   FREE_ONLY_ELS.forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.style.display = pro ? 'none' : '';
+    if (!el) return;
+    el.style.display = pro ? 'none' : '';
+    el.classList.remove('tier-pending');
   });
   PRO_ONLY_ELS.forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.style.display = pro ? '' : 'none';
+    if (!el) return;
+    el.style.display = pro ? '' : 'none';
+    el.classList.remove('tier-pending');
   });
+}
+
+/**
+ * Terminal "we know the tier now (or never will)" hook. Safe to call more than
+ * once, and called from every Firebase bail-out path plus a watchdog timer so a
+ * blocked SDK / failed config fetch can't leave the free-tier UI hidden forever.
+ */
+let _tierResolveTimer = setTimeout(() => _resolveTierUI(), 4000);
+function _resolveTierUI() {
+  if (_tierResolveTimer) { clearTimeout(_tierResolveTimer); _tierResolveTimer = null; }
+  _updateExportGates();
 }
 
 /** Call after any state change that could affect export UI. */
@@ -980,7 +1029,7 @@ function _sortGroups(rows, col, dir) {
     switch (col) {
       case 'name':     av = a[0].toLowerCase(); bv = b[0].toLowerCase(); break;
       case 'events':   av = a[1].length; bv = b[1].length; break;
-      case 'type':     av = a[1].some(t => t.is_mtt) ? 1 : 0; bv = b[1].some(t => t.is_mtt) ? 1 : 0; break;
+      case 'type':     av = a[1].some(_isTourneyGame) ? 1 : 0; bv = b[1].some(_isTourneyGame) ? 1 : 0; break;
       case 'avgHands': av = a[1].reduce((s, t) => s + (t.hands || 0), 0) / a[1].length;
                        bv = b[1].reduce((s, t) => s + (t.hands || 0), 0) / b[1].length; break;
       case 'avgDur':   av = a[1].reduce((s, t) => s + (t.duration_secs || 0), 0) / a[1].length;
@@ -1002,9 +1051,20 @@ function _sortGroups(rows, col, dir) {
   });
 }
 
-// ── Cash Games Summary ────────────────────────────────────────────────────────
+// ── Cash & Play Money Summary ─────────────────────────────────────────────────
+// Play-money games carry no room name, so grouping them by room_name would pile
+// every one of them into a single "(Unknown)" row. Split them by table format
+// instead, which is the only distinction that survives: play-money MTTs and
+// play-money sit-and-gos get a row each.
+function _cashGroupName(t) {
+  if (t && t.is_play_money) {
+    return t.is_mtt ? 'Play Money — MTT' : 'Play Money — Sit & Go';
+  }
+  return (t && t.room_name) || '(Unknown)';
+}
+
 function _renderCashGamesSummary(tournaments) {
-  const cashOnly = (tournaments || []).filter(t => !t.is_mtt);
+  const cashOnly = (tournaments || []).filter(_isCashOrPlayGame);
   const filtered = _filterTournamentsByDate(cashOnly, _cgsFilter);
 
   const cgsSection = document.getElementById('cash-games-summary-section');
@@ -1027,7 +1087,7 @@ function _renderCashGamesSummary(tournaments) {
 
   const byRoom = {};
   for (const t of filtered) {
-    const key = t.room_name || '(Unknown)';
+    const key = _cashGroupName(t);
     if (!byRoom[key]) byRoom[key] = [];
     byRoom[key].push(t);
   }
@@ -1037,7 +1097,7 @@ function _renderCashGamesSummary(tournaments) {
   _updateCgsSortIcons(_cgsSortCol, _cgsSortDir);
 
   if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">No cash game data in selected range.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">No cash or play money data in selected range.</td></tr>';
     return;
   }
 
@@ -1101,12 +1161,12 @@ function _toggleCgsDetail(rowId) {
   _toggleTsumDetail('cgs-summary-tbody', rowId);
 }
 
-// ── Cash Game Session Details ─────────────────────────────────────────────────
+// ── Cash & Play Money Session Details ─────────────────────────────────────────
 let _selectedCgsId = null;
 
 function _resetCgsd() {
   const tbody = document.getElementById('cgsd-tbody');
-  if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Select a cash game session above to view its hands.</td></tr>';
+  if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Select a cash or play money session above to view its hands.</td></tr>';
   const hint = document.getElementById('cgsd-hint');
   if (hint) hint.textContent = '';
   document.querySelectorAll('.tsum-event-card.selected').forEach(c => c.classList.remove('selected'));
@@ -1231,8 +1291,8 @@ async function _loadHistory() {
       return;
     }
 
-    const hasMtt  = tournaments.some(t =>  t.is_mtt);
-    const hasCash = tournaments.some(t => !t.is_mtt);
+    const hasMtt  = tournaments.some(_isTourneyGame);
+    const hasCash = tournaments.some(_isCashOrPlayGame);
 
     if (hasMtt) {
       _renderTournamentSummary(tournaments);
@@ -1303,8 +1363,9 @@ function _renderTournamentSummary(tournaments) {
   const tbody = document.getElementById('tourney-summary-tbody');
   if (!tbody) return;
 
-  // Exclude Cash games, then apply date filter
-  const mttOnly = (tournaments || []).filter(t => t.is_mtt);
+  // Real-money MTTs only (cash, sit-and-gos and play money live in the
+  // Cash & Play Money table), then apply date filter
+  const mttOnly = (tournaments || []).filter(_isTourneyGame);
   const filtered = _filterTournamentsByDate(mttOnly, _tsFilter);
 
   // Pills strip
@@ -1338,7 +1399,7 @@ function _renderTournamentSummary(tournaments) {
   tbody.innerHTML = rows.map(([name, entries], idx) => {
     const rowId       = `tsum-${idx}`;
     const count       = entries.length;
-    const isMtt       = entries.some(t => t.is_mtt);
+    const isMtt       = entries.some(_isTourneyGame);
     const totalHands  = entries.reduce((s, t) => s + (t.hands || 0), 0);
     const totalDurHr  = entries.reduce((s, t) => s + (t.duration_secs || 0), 0) / 3600;
     const handsPerHr  = totalDurHr > 0 ? (totalHands / totalDurHr) : 0;
@@ -1396,7 +1457,7 @@ function _toggleTourneyDetail(rowId) {
   _toggleTsumDetail('tourney-summary-tbody', rowId);
 }
 
-// Accordion toggle shared by the Tournament Summary and Cash Game Summary
+// Accordion toggle shared by the Tournament Summary and Cash & Play Money
 // tables: opening a row's detail closes any other open row in the same tbody.
 function _toggleTsumDetail(tbodyId, rowId) {
   const tbody   = document.getElementById(tbodyId);
@@ -3037,10 +3098,10 @@ async function _initFirebase() {
   // "Sign in" eagerly here caused a flash of the signed-out UI for signed-in users.
   try {
     const res = await fetch('/api/firebase-config');
-    if (!res.ok) return;
+    if (!res.ok) return _firebaseUnavailable();
     const cfg = await res.json();
-    if (!cfg.FIREBASE_API_KEY) return;
-    if (typeof firebase === 'undefined') return;
+    if (!cfg.FIREBASE_API_KEY) return _firebaseUnavailable();
+    if (typeof firebase === 'undefined') return _firebaseUnavailable();
 
     firebase.initializeApp({
       apiKey:            cfg.FIREBASE_API_KEY,
@@ -3080,6 +3141,7 @@ async function _initFirebase() {
       _auth.onAuthStateChanged(async (user) => {
         _currentUser = user;
         await _loadUserState();
+        _resolveTierUI();   // reveal the tier UI even if _loadUserState bailed early
         _renderAuthBar(user ? user.email : null);
         _checkAdmin(user);  // hides the button again on sign-out
         _loadGamification();  // hides the banner again on sign-out
@@ -3094,11 +3156,25 @@ async function _initFirebase() {
     } else {
       // Auth SDK not available — load guest state directly
       await _loadUserState();
+      _resolveTierUI();
       _renderAuthBar(null);
     }
 
     _trackEvent('app_open');
-  } catch (e) { console.warn('Firebase init failed:', e); }
+  } catch (e) {
+    console.warn('Firebase init failed:', e);
+    _firebaseUnavailable();
+  }
+}
+
+/**
+ * Firebase couldn't start (config fetch failed, no API key, SDK blocked, init
+ * threw). Nothing will ever resolve the auth/tier state, so fall back to the
+ * signed-out free view instead of leaving the header and tier cards blank.
+ */
+function _firebaseUnavailable() {
+  _resolveTierUI();
+  _renderAuthBar(null);
 }
 
 // Kick off Firebase after the page is interactive (non-blocking). Pricing is
