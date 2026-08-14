@@ -1908,3 +1908,138 @@ tr.row-flash > td {
   .tourney-graph-canvas-wrap { height: 220px; }
   .tg-btn { font-size: .7rem; padding: 2px 7px; }
 }
+
+/* ── Graph hand card (hover preview / pinned) ──────────────────── */
+/* Replaces the canvas tooltip: real DOM, so it can hold the replay link.
+   Ignores the pointer while it trails the cursor; takes it once pinned. */
+.tg-hand-card {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 5;
+  display: none;
+  min-width: 190px;
+  max-width: 280px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(13,17,23,.95);
+  box-shadow: 0 4px 18px rgba(0,0,0,.55);
+  font-family: var(--font-body);
+  font-size: .78rem;
+  color: var(--text);
+  pointer-events: none;
+}
+.tg-hand-card.show   { display: block; }
+.tg-hand-card.pinned {
+  pointer-events: auto;
+  border-color: rgba(0,230,118,.55);
+  box-shadow: 0 4px 18px rgba(0,0,0,.55), 0 0 0 1px rgba(0,230,118,.12);
+}
+
+.tg-card-head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.tg-card-hand {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: .8rem;
+  color: var(--green);
+  letter-spacing: .02em;
+}
+.tg-card-meta { color: var(--muted); font-size: .72rem; }
+.tg-card-close {
+  margin-left: auto;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: .78rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.tg-card-close:hover { color: var(--text); }
+
+.tg-card-badges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.tg-card-dim { color: var(--muted); }
+
+.tg-card-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: .76rem;
+}
+.tg-card-stats span { white-space: nowrap; }
+.tg-card-stats i {
+  display: block;
+  font-style: normal;
+  font-size: .64rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--muted);
+}
+
+.tg-card-hint {
+  margin-top: 7px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+  font-size: .68rem;
+  color: var(--muted);
+}
+
+.tg-card-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 7px;
+  padding-top: 7px;
+  border-top: 1px solid var(--border);
+}
+.tg-card-btn {
+  flex: 1 1 0;
+  padding: 4px 8px;
+  border: 1px solid rgba(0,230,118,.45);
+  border-radius: 6px;
+  background: rgba(0,230,118,.08);
+  color: var(--green);
+  font-family: var(--font-head);
+  font-size: .72rem;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, box-shadow .15s;
+}
+.tg-card-btn:hover {
+  background: rgba(0,230,118,.22);
+  border-color: var(--green);
+  box-shadow: 0 0 10px rgba(0,230,118,.3);
+  color: var(--green);
+}
+.tg-card-btn.is-disabled {
+  border-color: var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: default;
+  box-shadow: none;
+}
+
+/* Brief highlight when the card jumps to a hand's row. Deliberately not
+   `row-flash` — that one is the 60s "just imported" highlight. */
+@keyframes handJumpFlash {
+  0%   { background-color: rgba(0,230,118,.28); }
+  100% { background-color: transparent; }
+}
+tr.hand-jump-flash > td {
+  animation: handJumpFlash 1.6s ease-out forwards;
+}

@@ -640,7 +640,7 @@ function renderHandsTable(hands, tbodyId, options = {}) {
     // Column visibility mirrors the header priority in index.html: cards and
     // net p/l always survive, then position and street, and when/export/replay
     // drop off as the viewport narrows.
-    return `<tr>
+    return `<tr${h.hand_num ? ` data-hand-num="${h.hand_num}"` : ''}>
       <td class="d-none d-md-table-cell"><span class="hand-when-cell">${fmtHandDateTime(h.ts, tz)}${copyBtn}</span></td>
       <td class="no-wrap">${cards || '—'}</td>
       <td>${posBadge(h.position)}</td>
@@ -1423,6 +1423,16 @@ let _tgYMode      = 'both';   // 'both' | 'chips' | 'bb'
 let _tgXMode      = 'time';   // 'time' | 'level'
 let _tgPlayedOnly = false;    // when true, crop to played hands only
 let _tgState      = null;     // computed chart state shared across toggle updates
+let _tgPinned     = null;     // dataset index of the hand pinned in the hover card
+
+// Hero voluntarily put chips in preflop. `last_street` already encodes this:
+// 'Pre' is a pure fold, every other value means hero played the hand.
+const _tgIsVpip = h => !!h && h.last_street !== 'Pre';
+
+// How far (px) the cursor may sit from a played hand and still snap to it.
+// A 5h graph packs hands 1.5-4px apart, but folds are ~70% of them — snapping
+// to the played ones only is what makes a single hand reachable with a mouse.
+const TG_SNAP_PX = 14;
 
 // Tournament configs: ITM bubble / expected-end hours from tournament start
 const _TG_CFGS = {
@@ -1564,6 +1574,10 @@ const _TG_REFLINES_PLUGIN = {
   },
 };
 
+// Is a scale currently drawn? Chart.js exposes this as options.display — a bare
+// `scale.display` is undefined, which silently disables anything guarded on it.
+const _tgScaleOn = sc => !!(sc && (sc._isVisible ? sc._isVisible() : sc.options?.display));
+
 // Custom Chart.js plugin — draws ring + icon markers for biggest win/loss/bust
 const _TG_MARKERS_PLUGIN = {
   id: 'tgMarkers',
@@ -1575,8 +1589,8 @@ const _TG_MARKERS_PLUGIN = {
     for (const { secs, chipY, bbY, color, icon } of markers) {
       const px = x.getPixelForValue(secs);
       let py;
-      if (yLeft && yLeft.display && chipY != null) py = yLeft.getPixelForValue(chipY);
-      else if (yRight && yRight.display && bbY != null) py = yRight.getPixelForValue(bbY);
+      if (_tgScaleOn(yLeft) && chipY != null) py = yLeft.getPixelForValue(chipY);
+      else if (_tgScaleOn(yRight) && bbY != null) py = yRight.getPixelForValue(bbY);
       if (py == null) continue;
       ctx.fillStyle   = color + '22';
       ctx.strokeStyle = color;
@@ -1596,6 +1610,88 @@ const _TG_MARKERS_PLUGIN = {
     ctx.restore();
   },
 };
+
+// Pixel position of a dataset index, resolved against whichever y-axis is
+// currently on show — same approach as _TG_MARKERS_PLUGIN above.
+function _tgPointPixels(chart, idx) {
+  const s = _tgState;
+  if (!s || !chart) return null;
+  const cp = s.chipDataset[idx];
+  const bp = s.bbDataset[idx];
+  if (!cp) return null;
+  const { x, yLeft, yRight } = chart.scales;
+  let py = null;
+  if (_tgScaleOn(yLeft) && cp.y != null)        py = yLeft.getPixelForValue(cp.y);
+  else if (_tgScaleOn(yRight) && bp?.y != null) py = yRight.getPixelForValue(bp.y);
+  if (py == null) return null;
+  return { x: x.getPixelForValue(cp.x), y: py };
+}
+
+// Custom Chart.js plugin — rings the pinned hand and drops a faint guide down
+// to the axis, so the card stays visually tied to its point while you read it.
+const _TG_PIN_PLUGIN = {
+  id: 'tgPin',
+  afterDatasetsDraw(chart) {
+    const idx = chart.config.options.tgPinnedIndex;
+    if (idx == null) return;
+    const p = _tgPointPixels(chart, idx);
+    if (!p) return;
+    const { ctx, chartArea: ca } = chart;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(0,230,118,0.35)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(p.x, ca.bottom);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.strokeStyle = '#00e676';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 7, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  },
+};
+
+// Nearest played hand to a cursor x, in pixels. vpipIdx is ascending in x, so
+// the distance is unimodal and the scan can stop as soon as it starts growing.
+function _tgNearestVpip(chart, xPx) {
+  const s = _tgState;
+  if (!s || !s.vpipIdx.length) return null;
+  const xs = chart.scales.x;
+  let best = null, bestD = Infinity;
+  for (const i of s.vpipIdx) {
+    const d = Math.abs(xs.getPixelForValue(s.chipDataset[i].x) - xPx);
+    if (d < bestD) { bestD = d; best = i; }
+    else if (d > bestD) break;
+  }
+  return bestD <= TG_SNAP_PX ? best : null;
+}
+
+// Custom Chart.js interaction mode: behaves like the built-in 'index' mode, but
+// when a played hand sits within TG_SNAP_PX of the cursor it wins. Folds stay
+// hoverable so scrubbing the line for a stack reading still works anywhere.
+function _tgVpipMode(chart, e, options, useFinalPosition) {
+  const items = Chart.Interaction.modes.index(chart, e, { ...options, intersect: false }, useFinalPosition);
+  if (!_tgState || !_tgState.vpipIdx.length) return items;
+  // Hover arrives as a normalised ChartEvent (canvas-relative x); clicks come
+  // through getElementsAtEventForMode as a raw MouseEvent, whose .x is clientX.
+  // getRelativePosition tells them apart — don't read e.x directly.
+  const pos = Chart.helpers?.getRelativePosition
+    ? Chart.helpers.getRelativePosition(e, chart)
+    : ('native' in e ? e : { x: e.offsetX });
+  const snap = _tgNearestVpip(chart, pos.x);
+  if (snap == null || (items.length && items[0].index === snap)) return items;
+  const out = [];
+  chart.data.datasets.forEach((ds, di) => {
+    if (ds.hidden) return;
+    const el = chart.getDatasetMeta(di).data?.[snap];
+    if (el) out.push({ element: el, datasetIndex: di, index: snap });
+  });
+  return out.length ? out : items;
+}
 
 function _tgLevelFromElapsed(elapsedSecs, cfg) {
   const rebuyDur = (cfg.levelDurRebuyMin || cfg.levelDurMin) * 60;
@@ -1737,6 +1833,20 @@ function _renderTournamentChart(hands, meta) {
     pointList.push(null);
   }
 
+  // Lookups for the hover card, built once so its per-mousemove render stays
+  // O(1): the display hand number at each dataset index, and the indices of
+  // hands the hero actually played. `vpipIdx` is what the magnetic snap and the
+  // arrow-key stepping walk over; it is ascending in x, like the datasets.
+  const handNums = [];
+  const vpipIdx  = [];
+  let handNo = 0;
+  for (let i = 0; i < pointList.length; i++) {
+    const h = pointList[i];
+    if (!h) { handNums.push(null); continue; }
+    handNums.push(++handNo);
+    if (_tgIsVpip(h)) vpipIdx.push(i);
+  }
+
   // Track played range for "played only" zoom
   const playedMinSecs = elapsedOf(sorted[0].ts);
   const playedMaxSecs = bustPoint ? bustPoint.x : elapsedOf(sorted[sorted.length - 1].ts);
@@ -1790,13 +1900,14 @@ function _renderTournamentChart(hands, meta) {
   }
 
   _tgState = {
-    chipDataset, bbDataset, pointList,
+    chipDataset, bbDataset, pointList, handNums, vpipIdx,
     refLines, markers,
     tournStart, entryOffset, axisSecs,
     playedMinSecs, playedMaxSecs,
     roomName, cfg,
   };
 
+  _tgPinned = null;   // a different tournament invalidates any pinned index
   _tgBuildChart();
   wrap.classList.remove('d-none');
 }
@@ -1846,7 +1957,42 @@ function _tgBuildChart() {
   const niceSteps = [5*60, 10*60, 15*60, 20*60, 30*60, 45*60, 60*60];
   const stepSize = niceSteps.find(s => visibleRange / s <= 12) || 30*60;
 
-  Chart.register(_TG_REFLINES_PLUGIN, _TG_MARKERS_PLUGIN);
+  // Action dots. Folded hands drop to radius 0 so the line reads clean, and
+  // what is left is a sparse map of the hands hero actually played, coloured by
+  // how they went. Only one series carries them (chips unless chips is hidden)
+  // — two rows of dots would say the same thing twice.
+  //
+  // Resolved per render, off live dataset visibility rather than _tgYMode, so
+  // the dots follow both the Chips/BBs pills (which mutate `hidden` in place
+  // without rebuilding the chart) and a click on the Chart.js legend (which
+  // hides a series without the pills or _tgYMode ever hearing about it).
+  const _tgDotSeries = () => {
+    const ds = _tgChart?.data?.datasets;
+    if (ds) return ds[0].hidden ? 1 : 0;
+    return _tgYMode === 'bb' ? 1 : 0;
+  };
+  const dotRadius = di => ctx => {
+    if (di !== _tgDotSeries()) return 0;
+    const h = pointList[ctx.dataIndex];
+    if (!_tgIsVpip(h)) return 0;
+    return h.last_street === 'SD' ? 3.2 : 2.2;
+  };
+  const dotHoverRadius = di => ctx => {
+    if (di !== _tgDotSeries()) return 0;
+    const h = pointList[ctx.dataIndex];
+    if (!h) return 0;
+    return _tgIsVpip(h) ? (h.last_street === 'SD' ? 7 : 6) : 2.5;
+  };
+  const dotColor = seriesColor => ctx => {
+    const h = pointList[ctx.dataIndex];
+    if (!h || !h.profit) return seriesColor;
+    return h.profit > 0 ? '#00e676' : '#ff5252';
+  };
+  const dotHitRadius = di => ctx =>
+    (di === _tgDotSeries() && _tgIsVpip(pointList[ctx.dataIndex])) ? 10 : 0;
+
+  Chart.register(_TG_REFLINES_PLUGIN, _TG_MARKERS_PLUGIN, _TG_PIN_PLUGIN);
+  Chart.Interaction.modes.tgVpip = _tgVpipMode;
 
   _tgChart = new Chart(canvas.getContext('2d'), {
     type: 'line',
@@ -1860,10 +2006,11 @@ function _tgBuildChart() {
           fill: true,
           borderWidth: 1.5,
           tension: 0.3,
-          pointRadius: 1,
-          pointHoverRadius: 6,
-          pointBackgroundColor: chipColor,
-          pointBorderColor: chipColor,
+          pointRadius: dotRadius(0),
+          pointHoverRadius: dotHoverRadius(0),
+          pointHitRadius: dotHitRadius(0),
+          pointBackgroundColor: dotColor(chipColor),
+          pointBorderColor: dotColor(chipColor),
           yAxisID: 'yLeft',
           spanGaps: false,
           hidden: _tgYMode === 'bb',
@@ -1877,10 +2024,11 @@ function _tgBuildChart() {
           fill: true,
           borderWidth: 1.5,
           tension: 0.3,
-          pointRadius: 1,
-          pointHoverRadius: 6,
-          pointBackgroundColor: bbColor,
-          pointBorderColor: bbColor,
+          pointRadius: dotRadius(1),
+          pointHoverRadius: dotHoverRadius(1),
+          pointHitRadius: dotHitRadius(1),
+          pointBackgroundColor: dotColor(bbColor),
+          pointBorderColor: dotColor(bbColor),
           yAxisID: 'yRight',
           spanGaps: false,
           hidden: _tgYMode === 'chips',
@@ -1892,9 +2040,10 @@ function _tgBuildChart() {
       responsive: true,
       maintainAspectRatio: false,
       animation: { duration: 300 },
-      interaction: { mode: 'index', intersect: false },
+      interaction: { mode: 'tgVpip', intersect: false },
       tgRefLines: refLines,
       tgMarkers:  markers,
+      tgPinnedIndex: _tgPinned,
       plugins: {
         legend: {
           display: true,
@@ -1905,64 +2054,12 @@ function _tgBuildChart() {
             filter: item => !item.hidden,
           },
         },
+        // Rendered as real DOM instead of onto the canvas — a canvas tooltip is
+        // pixels and cannot hold the replay link.
         tooltip: {
-          backgroundColor: 'rgba(13,17,23,0.95)',
-          borderColor: '#1e2d1e',
-          borderWidth: 1,
-          titleColor: '#d0ddd0',
-          bodyColor: '#8aaa8a',
-          padding: 10,
-          displayColors: true,
-          boxWidth: 8,
-          boxHeight: 8,
-          caretPadding: 14,
-          yAlign: 'bottom',
+          enabled: false,
+          external: _tgTooltipExternal,
           filter: item => !item.dataset.hidden,
-          callbacks: {
-            title(items) {
-              if (!items.length) return '';
-              const i = items[0].dataIndex;
-              const h = pointList[i];
-              if (!h) return '';
-              const elapsed = _tgFmtElapsed((h.ts - tournStart) + entryOffset);
-              const lvl     = (h.level != null)
-                ? h.level
-                : _tgInferLevel(h.big_blind, roomName, h.chip_stack);
-              let hn = 0;
-              for (let j = 0; j <= i; j++) if (pointList[j]) hn++;
-              return `Hand #${hn} · +${elapsed}${lvl ? ' · L' + lvl : ''}`;
-            },
-            label(item) {
-              const i = item.dataIndex;
-              const h = pointList[i];
-              if (!h) return null;
-              if (item.datasetIndex === 0) {
-                return `  Chips: ${_tgFmtK(h.chip_stack)}`;
-              } else {
-                const bb = h.chip_stack && h.big_blind
-                  ? (h.chip_stack / h.big_blind).toFixed(1) : '—';
-                return `  BBs:   ${bb}`;
-              }
-            },
-            afterBody(items) {
-              if (!items.length) return [];
-              const i = items[0].dataIndex;
-              const h = pointList[i];
-              if (!h) return [];
-              const lines = [];
-              if (h.profit) {
-                const sign = h.profit > 0 ? '+' : '';
-                lines.push(`  P/L:   ${sign}${_tgFmtK(h.profit)}`);
-              }
-              if (h.position)                              lines.push(`  Pos:   ${h.position}`);
-              if (h.last_street && h.last_street !== 'Pre') lines.push(`  Street: ${h.last_street}`);
-              if (h.hole_cards?.length) {
-                const cards = h.hole_cards.map(c => c.display || '?').join(' ');
-                lines.push(`  Cards: ${cards}`);
-              }
-              return lines;
-            },
-          },
         },
       },
       scales: {
@@ -2004,6 +2101,180 @@ function _tgBuildChart() {
       },
     },
   });
+
+  _tgWireCanvas(canvas);
+}
+
+/* ── Hand card: hover preview, click to pin, replay out to PPPoker ──────── */
+
+// A card that follows the cursor cannot hold a button — reaching for it leaves
+// the canvas and dismisses it. So hover previews, and a click pins: the card
+// stops following, takes pointer events, and its actions become clickable.
+// Pinning also just plain helps on a 5h graph — it keeps one hand on screen
+// while you read the shape of the curve around it.
+function _tgWireCanvas(canvas) {
+  if (canvas.dataset.tgWired) return;
+  canvas.dataset.tgWired = '1';
+
+  canvas.addEventListener('click', e => {
+    if (!_tgChart || !_tgState) return;
+    const els = _tgChart.getElementsAtEventForMode(e, 'tgVpip', { intersect: false }, false);
+    const idx = els.length ? els[0].index : null;
+    if (idx == null || !_tgIsVpip(_tgState.pointList[idx])) { _tgUnpin(); return; }
+    _tgPin(idx);
+  });
+
+  const card = document.getElementById('tg-hand-card');
+  if (card) {
+    card.addEventListener('click', e => {
+      const jump = e.target.closest('[data-tg-jump]');
+      if (jump) { _tgJumpToRow(jump.dataset.tgJump); return; }
+      if (e.target.closest('[data-tg-close]')) _tgUnpin();
+    });
+  }
+
+  // Arrow keys walk the played hands in order, which turns a 5h graph into a
+  // browsable list of the session's actual decisions. Bound on the document
+  // rather than the canvas so it works right after a click without depending on
+  // where focus landed; it only claims the keys while a hand is pinned.
+  document.addEventListener('keydown', e => {
+    if (_tgPinned == null) return;
+    if (e.key === 'Escape')          { _tgUnpin(); return; }
+    if (e.key === 'ArrowLeft')       { e.preventDefault(); _tgStepPin(-1); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); _tgStepPin(1); }
+  });
+
+  document.addEventListener('click', e => {
+    if (_tgPinned == null || e.target === canvas) return;
+    if (card && card.contains(e.target)) return;
+    _tgUnpin();
+  });
+}
+
+function _tgTooltipExternal(context) {
+  if (_tgPinned != null) return;              // the pinned card owns the display
+  const tt = context.tooltip;
+  if (!tt || tt.opacity === 0) { _tgHideCard(); return; }
+  const idx = tt.dataPoints?.[0]?.dataIndex;
+  if (idx == null || !_tgState?.pointList[idx]) { _tgHideCard(); return; }
+  _tgShowCard(idx, false);
+}
+
+function _tgPin(idx) {
+  _tgPinned = idx;
+  if (_tgChart) { _tgChart.options.tgPinnedIndex = idx; _tgChart.update('none'); }
+  _tgShowCard(idx, true);
+}
+
+function _tgUnpin() {
+  if (_tgPinned == null) return;
+  _tgPinned = null;
+  if (_tgChart) { _tgChart.options.tgPinnedIndex = null; _tgChart.update('none'); }
+  _tgHideCard();
+}
+
+function _tgStepPin(dir) {
+  const s = _tgState;
+  if (!s || _tgPinned == null) return;
+  const at = s.vpipIdx.indexOf(_tgPinned);
+  const next = at === -1 ? null : s.vpipIdx[at + dir];
+  if (next != null) _tgPin(next);
+}
+
+function _tgHideCard() {
+  document.getElementById('tg-hand-card')?.classList.remove('show', 'pinned');
+}
+
+// Keeps the pinned card glued to its point after an axis change (Chips/BBs, PH,
+// Time/Level all update the chart in place rather than rebuilding it).
+function _tgRefreshCard() {
+  if (_tgPinned != null) _tgShowCard(_tgPinned, true);
+}
+
+function _tgShowCard(idx, pinned) {
+  const card = document.getElementById('tg-hand-card');
+  const s = _tgState;
+  if (!card || !s || !_tgChart) return;
+  const p = _tgPointPixels(_tgChart, idx);
+  if (!p) { _tgHideCard(); return; }
+  card.innerHTML = _tgCardHtml(idx, pinned);
+  card.classList.add('show');
+  card.classList.toggle('pinned', !!pinned);
+  _tgPositionCard(card, p.x, p.y);
+}
+
+function _tgPositionCard(card, px, py) {
+  const wrap = card.parentElement;
+  const W = wrap.clientWidth, H = wrap.clientHeight;
+  const cw = card.offsetWidth, ch = card.offsetHeight;
+  // Hands bunch up toward the right of a long graph, so an unclamped card
+  // spills out of the panel exactly where it is needed most.
+  const left = Math.max(4, Math.min(px - cw / 2, W - cw - 4));
+  let top = py - ch - 14;
+  if (top < 4) top = Math.min(py + 16, H - ch - 4);
+  card.style.left = `${left}px`;
+  card.style.top  = `${Math.max(4, top)}px`;
+}
+
+function _tgCardHtml(idx, pinned) {
+  const s = _tgState;
+  const h = s.pointList[idx];
+  const elapsed = _tgFmtElapsed((h.ts - s.tournStart) + s.entryOffset);
+  const lvl = h.level != null ? h.level : _tgInferLevel(h.big_blind, s.roomName, h.chip_stack);
+  const cards = (h.hole_cards || []).map(renderCard).join('');
+  const bb = h.chip_stack != null && h.big_blind
+    ? (h.chip_stack / h.big_blind).toFixed(1) : '—';
+
+  const head = `
+    <div class="tg-card-head">
+      <span class="tg-card-hand">Hand #${s.handNums[idx]}</span>
+      <span class="tg-card-meta">+${elapsed}${lvl ? ' · L' + lvl : ''}</span>
+      ${pinned ? '<button type="button" class="tg-card-close" data-tg-close title="Close (Esc)">✕</button>' : ''}
+    </div>`;
+
+  const badges = `
+    <div class="tg-card-badges">
+      ${cards || '<span class="tg-card-dim">—</span>'}
+      ${posBadge(h.position)}
+      ${streetBadge(h.last_street)}
+    </div>`;
+
+  const stats = `
+    <div class="tg-card-stats">
+      <span><i>Chips</i>${_tgFmtK(h.chip_stack)}</span>
+      <span><i>BBs</i>${bb}</span>
+      <span><i>Net P/L</i>${fmtProfitBB(h.profit, h.big_blind)}</span>
+    </div>`;
+
+  if (!_tgIsVpip(h)) return head + badges + stats;
+
+  const replay = h.replay_url && h.replay_url !== '#'
+    ? `<a class="tg-card-btn" href="${h.replay_url}" target="_blank" rel="noopener">▶ Replay</a>`
+    : `<span class="tg-card-btn is-disabled" title="No replay available for this hand">▶ Replay</span>`;
+
+  // The table is capped at the last 30 hands for free accounts while the graph
+  // plots every one, so the row this would jump to often is not rendered.
+  const rowExists = h.hand_num && document.querySelector(
+    `#tourney-detail-tbody tr[data-hand-num="${CSS.escape(h.hand_num)}"]`);
+  const jump = rowExists
+    ? `<button type="button" class="tg-card-btn" data-tg-jump="${h.hand_num}">↓ Row</button>`
+    : '';
+
+  const actions = pinned
+    ? `<div class="tg-card-actions">${replay}${jump}</div>`
+    : '<div class="tg-card-hint">Click to pin · ← → to step</div>';
+
+  return head + badges + stats + actions;
+}
+
+function _tgJumpToRow(handNum) {
+  const row = document.querySelector(
+    `#tourney-detail-tbody tr[data-hand-num="${CSS.escape(handNum)}"]`);
+  if (!row) return;
+  row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  row.classList.remove('hand-jump-flash');
+  void row.offsetWidth;                       // reflow so the flash can re-fire
+  row.classList.add('hand-jump-flash');
 }
 
 let _tgShowChips = true;
@@ -2024,6 +2295,7 @@ function _tgToggleY(which) {
   _tgChart.options.scales.yLeft.display  = _tgShowChips;
   _tgChart.options.scales.yRight.display = _tgShowBB;
   _tgChart.update();
+  _tgRefreshCard();
 }
 
 function _tgToggleX() {
@@ -2048,11 +2320,14 @@ function _tgTogglePlayed() {
     _tgChart.options.scales.x.max = s.axisSecs;
   }
   _tgChart.update();
+  _tgRefreshCard();
 }
 
 function _tgDestroy() {
   if (_tgChart) { _tgChart.destroy(); _tgChart = null; }
   _tgState = null;
+  _tgPinned = null;
+  _tgHideCard();
   _tgPlayedOnly = false;
   _tgShowChips = true;
   _tgShowBB = true;
