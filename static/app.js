@@ -2757,7 +2757,9 @@ function _trackEvent(name, params) {
 }
 
 async function _initFirebase() {
-  _renderAuthBar(null);   // show Sign in immediately; overwritten once auth state resolves
+  // #auth-bar starts empty in the HTML; leave it that way until onAuthStateChanged
+  // (or the SDK-unavailable fallback below) resolves the real state — rendering
+  // "Sign in" eagerly here caused a flash of the signed-out UI for signed-in users.
   try {
     const res = await fetch('/api/firebase-config');
     if (!res.ok) return;
