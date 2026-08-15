@@ -1,0 +1,67 @@
+name: Deploy Firestore rules
+
+# Railway auto-deploys the app on every push to main, but nothing deployed the
+# Firestore security rules — they rode along with _push_and_deploy.bat, which
+# only ran if you happened to ship that way instead of merging a PR. Rules that
+# lag the code they protect are the failure mode worth designing against: the
+# app can be live with a tier gate whose Firestore half is still the old,
+# permissive version.
+#
+# So the rules now ship the same way the code does, from main.
+
+on:
+  push:
+    branches: [main]
+    # Rules deploys create a new ruleset each time and a project can only hold
+    # so many, so this stays off the path of ordinary app-only pushes.
+    paths:
+      - 'firestore.rules'
+      - 'firebase.json'
+      - '.firebaserc'
+      - '.github/workflows/deploy-rules.yml'
+  workflow_dispatch:        # for a re-deploy without touching the rules file
+
+# Two pushes in quick succession must not race to publish different rulesets.
+concurrency:
+  group: firestore-rules
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check the deploy credentials are present
+        env:
+          SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -z "$SA" ]; then
+            echo "::error::FIREBASE_SERVICE_ACCOUNT_JSON is not set. Add it under" \
+                 "Settings → Secrets and variables → Actions. The service account" \
+                 "needs the Firebase Rules Admin role to publish a ruleset."
+            exit 1
+          fi
+
+      - name: Write service account credentials
+        env:
+          SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        # Via env, not an inline expression: a secret interpolated straight into
+        # a run block is pasted into the shell as code.
+        run: printf '%s' "$SA" > "$RUNNER_TEMP/firebase-sa.json"
+
+      - name: Deploy firestore.rules
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-sa.json
+        run: npx --yes firebase-tools@13 deploy --only firestore:rules --project pppoker-analyser --non-interactive
+
+      - name: Remove credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/firebase-sa.json"
