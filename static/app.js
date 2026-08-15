@@ -429,14 +429,21 @@ function posBadge(pos) {
   return `<span class="pos-badge ${cls}">${pos}</span>`;
 }
 
+// Street chips share .pos-badge's shape but carry their own fixed width, so the
+// two columns line up within themselves without one padding out to the other's
+// longest label.
+const _STREET_BADGES = {
+  'Pre':      ['pos-bl',        'Pre'],
+  'Pre VPIP': ['street-vpip',   'Pre VPIP'],
+  'Flop':     ['street-flop',   'Flop'],
+  'Turn':     ['street-turn',   'Turn'],
+  'River':    ['street-river',  'River'],
+  'SD':       ['street-sd',     'Showdown'],
+};
+
 function streetBadge(s) {
-  if (s === 'Pre')      return `<span class="pos-badge pos-bl">Pre</span>`;
-  if (s === 'Pre VPIP') return `<span class="pos-badge" style="color:var(--yellow);border-color:rgba(227,179,65,.3);background:rgba(227,179,65,.12)">Pre VPIP</span>`;
-  if (s === 'Flop')  return `<span class="pos-badge" style="color:var(--blue);border-color:rgba(88,166,255,.3);background:rgba(88,166,255,.12)">Flop</span>`;
-  if (s === 'Turn')  return `<span class="pos-badge" style="color:var(--yellow);border-color:rgba(227,179,65,.3);background:rgba(227,179,65,.12)">Turn</span>`;
-  if (s === 'River') return `<span class="pos-badge" style="color:var(--green);border-color:rgba(63,185,80,.3);background:rgba(63,185,80,.12)">River</span>`;
-  if (s === 'SD')    return `<span class="pos-badge" style="color:#a371f7;border-color:rgba(163,113,247,.3);background:rgba(163,113,247,.12)">Showdown</span>`;
-  return `<span class="pos-badge pos-bl">${s || '—'}</span>`;
+  const [cls, label] = _STREET_BADGES[s] || ['pos-bl', s || '—'];
+  return `<span class="pos-badge street-badge ${cls}">${label}</span>`;
 }
 
 function fmtProfitBB(profit, bigBlind) {
@@ -2266,7 +2273,11 @@ function _renderTournamentChart(hands, meta) {
   const markers = [];
   if (bigWinH  && bigWinVal  > 0) markers.push(_mkMarker(bigWinH,  '#00e676', '▲'));
   if (bigLossH && bigLossVal < 0) markers.push(_mkMarker(bigLossH, '#ff5252', '▼'));
-  if (bustPoint) markers.push({ secs: bustPoint.x, chipY: 0, bbY: 0, color: '#ff5252', icon: '✕' });
+  // No ✕ on the final bust: the losing hand already carries the ▼ a few pixels
+  // away and the line visibly drops to zero, so the ring on the zero line was
+  // a second mark saying the same thing. Mid-tournament busts keep theirs —
+  // those pair with a rebuy and would otherwise read as a stack that healed
+  // itself. (Legend below the chart names both.)
 
   // Rebuy / add-on spots detected by the backend analyser (marked at the hand
   // where the chip injection was observed).
@@ -2298,7 +2309,40 @@ function _renderTournamentChart(hands, meta) {
 
   _tgPinned = null;   // a different tournament invalidates any pinned index
   _tgBuildChart();
+  _tgRenderLegend(markers);
   wrap.classList.remove('d-none');
+}
+
+// Icon → [label, colour], matching what _TG_MARKERS_PLUGIN paints.
+const _TG_MARK_LEGEND = {
+  '▲': ['Biggest win',  '#00e676'],
+  '▼': ['Biggest loss', '#ff5252'],
+  'R': ['Rebuy',        '#ffb300'],
+  'A': ['Add-on',       '#40c4ff'],
+  '✕': ['Busted',       '#ff5252'],
+};
+
+// The dots are a deliberately sparse read of the run — only hands hero played,
+// and not the blind-ish ones (see _tgIsNotable) — which is not guessable from
+// the chart. Marks are drawn only when they occur, so the legend lists only the
+// ones this tournament actually has.
+function _tgRenderLegend(markers) {
+  const el = document.getElementById('tourney-graph-legend');
+  if (!el) return;
+  const items = [
+    '<span class="tg-lg"><i class="tg-lg-dot won"></i>Hand won</span>',
+    '<span class="tg-lg"><i class="tg-lg-dot lost"></i>Hand lost</span>',
+    '<span class="tg-lg"><i class="tg-lg-dot sd"></i>Reached showdown</span>',
+  ];
+  const drawn = new Set((markers || []).map(m => m.icon));
+  for (const [icon, [label, color]] of Object.entries(_TG_MARK_LEGEND)) {
+    if (!drawn.has(icon)) continue;
+    items.push(`<span class="tg-lg"><i class="tg-lg-mark" style="color:${color};`
+      + `border-color:${color};background:${color}22">${icon}</i>${label}</span>`);
+  }
+  items.push('<span class="tg-lg"><i class="tg-lg-line"></i>Stage (hover the line)</span>');
+  items.push('<span class="tg-lg tg-lg-note">Dots mark only hands you played</span>');
+  el.innerHTML = items.join('');
 }
 
 function _tgSetGraphWarning(message) {
@@ -2699,11 +2743,14 @@ function _tgCardHtml(idx, pinned) {
       ${pinned ? '<button type="button" class="tg-card-close" data-tg-close title="Close (Esc)">✕</button>' : ''}
     </div>`;
 
-  // No position/street pills — the card is a quick read off the curve, and the
-  // chips/BBs/P/L line plus the cards carry it. Both are still in the table row.
+  // Position earns its place — it is what the cards mean. Street does not: the
+  // dot's size already says whether the hand reached showdown, and the exact
+  // street is in the table row. The pill is fixed-width, so scrubbing between
+  // BTN and UTG+1 cannot resize the card out from under the cursor.
   const badges = `
     <div class="tg-card-badges">
       ${cards || '<span class="tg-card-dim">—</span>'}
+      ${posBadge(h.position)}
     </div>`;
 
   const stats = `
