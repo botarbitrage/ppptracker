@@ -13,19 +13,14 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urlparse, parse_qs
 
 import requests
-from flask import Flask, jsonify, redirect, render_template, request, send_file, send_from_directory, Response
+from flask import (Flask, g, has_app_context, jsonify, redirect, render_template,
+                   request, send_file, send_from_directory, Response)
 
 from hand_parser import (process_hands, build_hand_rows, classify_game,
                          norm_room_name, CATEGORY_TOURNAMENT)
 from hand_exporter import validate_hands, export_pokerstars
 from tournament_analyzer import analyze_tournament
 import gamification
-
-# In-memory store of imported hand records, keyed by the client's per-browser
-# session_id (see static/app.js getSessionId()) so concurrent/anonymous callers
-# can't read each other's imported hands through the export endpoints.
-_session_records = {}
-_SESSION_RECORDS_MAX = 200
 
 app = Flask(__name__)
 
@@ -176,21 +171,29 @@ def health():
 
 @app.route("/api/analyze", methods=["POST"])
 def analyze():
-    body       = request.get_json(force=True, silent=True) or {}
-    url        = body.get("url", "").strip()
-    session_id = (body.get("session_id") or "").strip()
-    auth_hdr   = request.headers.get('Authorization', '')
-    id_token   = auth_hdr[7:] if auth_hdr.startswith('Bearer ') else None
+    body = request.get_json(force=True, silent=True) or {}
+    url  = body.get("url", "").strip()
 
     if not url:
         return jsonify({"error": "URL is required."}), 400
-    if not session_id:
-        return jsonify({"error": "Missing session_id."}), 400
 
+    # `uid` here is the PPPoker player id from the replay link — deliberately not
+    # the Firebase uid, which is `viewer_uid` below.
     uid   = _extract(url, "uid")
     rdkey = _extract(url, "rdkey")
     if not uid or not rdkey:
         return jsonify({"error": "Invalid URL – could not find uid and rdkey parameters."}), 400
+
+    claims     = _verify_bearer_claims(request)
+    viewer_uid = claims.get('uid') if claims else None
+    tier       = _tier(viewer_uid)
+
+    if tier == 'free':
+        used = _quota_state(viewer_uid)['imports']
+        if used >= FREE_IMPORTS_PER_DAY:
+            return jsonify({'error': 'quota_exceeded', 'kind': 'import',
+                            'used': used, 'limit': FREE_IMPORTS_PER_DAY,
+                            'upgrade': True}), 402
 
     _EXPIRED_MSG = (
         "This link may have expired. Please re-open PPPoker, go to Hand History, "
@@ -226,6 +229,69 @@ def analyze():
     # Newest first (matching original list order)
     records.sort(key=lambda r: r["summary"].get("C", 0), reverse=True)
 
+    payload = _build_import_response(records, claims, tier, uid, len(hands))
+
+    if tier == 'anon':
+        # Nothing is persisted for an anonymous import. Park it in Storage for an
+        # hour so signing in can claim it, and ship the per-tournament graph data
+        # inline — the detail endpoint that normally serves it needs an account.
+        _sweep_anon_sessions()
+        payload['session_token']      = _issue_anon_session(records, uid)
+        payload['tournament_graphs']  = _tournament_graphs(records, payload['tournaments'])
+
+    return jsonify(payload)
+
+
+@app.route("/api/analyze/claim", methods=["POST"])
+def analyze_claim():
+    """Adopt a signed-out import into the signed-in account.
+
+    The anonymous session holds the hands that were already fetched, so claiming
+    costs no PPPoker round trip — but it is a real import: it counts against the
+    day's quota and obeys the free tier's history window.
+    """
+    claims = _verify_bearer_claims(request)
+    if not claims:
+        return jsonify({'error': 'login_required'}), 401
+    uid  = claims['uid']
+    tier = _tier(uid)
+
+    token = ((request.get_json(silent=True) or {}).get('session_token') or '').strip()
+    if not token:
+        return jsonify({'error': 'session_token is required'}), 400
+
+    if tier == 'free':
+        used = _quota_state(uid)['imports']
+        if used >= FREE_IMPORTS_PER_DAY:
+            # The blob is left alone on purpose: the user can claim it tomorrow,
+            # or after upgrading, for as long as its hour lasts.
+            return jsonify({'error': 'quota_exceeded', 'kind': 'import',
+                            'used': used, 'limit': FREE_IMPORTS_PER_DAY,
+                            'upgrade': True}), 402
+
+    session = _load_anon_session(token)
+    if not session:
+        return jsonify({'error': 'session_expired'}), 404
+    records = session.get('records') or []
+    if not records:
+        return jsonify({'error': 'session_expired'}), 404
+
+    payload = _build_import_response(records, claims, tier,
+                                     session.get('player_uid') or '', len(records))
+    if payload.get('saved'):
+        _delete_anon_session(token)
+    payload['claimed'] = bool(payload.get('saved'))
+    return jsonify(payload)
+
+
+def _build_import_response(records, claims, tier, player_uid, total_available):
+    """The shared body of /api/analyze and /api/analyze/claim.
+
+    Prunes anything outside a free account's history window (from the response as
+    well as from what gets persisted), saves, scores, and assembles the payload.
+    """
+    from hand_parser import extract_tourney_id as _extract_tid
+
     player_name = "Hero"
     for rec in records:
         for p in rec.get("full_hand", {}).get("info", {}).get("players", []):
@@ -235,22 +301,39 @@ def analyze():
         if player_name != "Hero":
             break
 
-    _session_records[session_id] = records  # persist for export endpoints
-    if len(_session_records) > _SESSION_RECORDS_MAX:
-        _session_records.pop(next(iter(_session_records)))  # evict oldest
-
     recent_hands, recent_won, stats, tournaments = process_hands(records)
+
+    # Hands PPPoker listed but we could not retrieve, counted before the history
+    # window prunes anything — otherwise a free account's pruned tournaments read
+    # to the UI as a failed fetch.
+    fetch_failed = max(0, total_available - len(records))
+
+    # Free accounts keep a 7-day window. A tournament we can't date is kept —
+    # "no timestamp" is not evidence that it is old.
+    expired = 0
+    if tier == 'free':
+        cutoff = int(time.time()) - FREE_HISTORY_DAYS * 86400
+        stale = {t.get('tourney_id') for t in tournaments
+                 if t.get('earliest_ts') is not None and t['earliest_ts'] < cutoff}
+        if stale:
+            expired = len(stale)
+            records = [r for r in records
+                       if _extract_tid(r.get('summary', {}).get('D', '')) not in stale]
+            recent_hands, recent_won, stats, tournaments = process_hands(records)
+
     validation = validate_hands(records)
 
-    saved, new_ids, claims = _try_save_tournaments(id_token, records, tournaments)
+    saved, new_ids = _save_tournaments(claims, records, tournaments)
     new_hands = len(new_ids)
+
+    if saved and tier == 'free':
+        _bump_quota(claims['uid'], 'imports')
 
     gamification_result = _score_import(claims, new_hands)
 
     # Compute stats/validation for only the truly-new records so the UI can
     # show "X new hands loaded" with accurate breakdown counts.
     if new_ids:
-        from hand_parser import extract_tourney_id as _extract_tid
         new_recs = [r for r in records if r.get('summary', {}).get('D') in new_ids]
         _, _, new_stats, new_tourneys = process_hands(new_recs)
         new_validation = validate_hands(new_recs)
@@ -265,10 +348,13 @@ def analyze():
         new_ts_min = None
         new_ts_max = None
 
-    return jsonify({
-        "player": {"name": player_name, "uid": uid},
+    return {
+        "player": {"name": player_name, "uid": player_uid},
+        "tier": tier,
         "total_fetched": len(records),
-        "total_available": len(hands),
+        "total_available": total_available,
+        "fetch_failed": fetch_failed,
+        "history_expired_tournaments": expired,
         "new_hands": new_hands,
         "new_tourney_count": new_tourney_count,
         "new_ts_min": new_ts_min,
@@ -282,83 +368,77 @@ def analyze():
         "validation": validation,
         "saved": saved,
         "gamification": gamification_result,
-    })
+    }
+
+
+def _tournament_graphs(records, tournaments):
+    """Per-tournament graph payloads for an import that was never persisted."""
+    from hand_parser import extract_tourney_id
+    graphs = []
+    for t in tournaments:
+        tid = t.get('tourney_id')
+        if not tid:
+            continue
+        recs = [r for r in records
+                if extract_tourney_id(r.get('summary', {}).get('D', '')) == tid]
+        if not recs:
+            continue
+        try:
+            detail = _tournament_detail(recs, t)
+        except Exception as exc:
+            # One unconfigured tournament must not cost the whole import its graphs.
+            print(f"[_tournament_graphs] {tid} skipped: {type(exc).__name__}: {exc}")
+            continue
+        detail['tourney_id'] = tid
+        graphs.append(detail)
+    return graphs
 
 
 @app.route("/api/export/hand", methods=["POST"])
 def export_hand():
-    body    = request.get_json(force=True, silent=True) or {}
-    records = _session_records.get((body.get("session_id") or "").strip())
-    if not records:
-        return jsonify({"error": "No hand data available. Please import first."}), 400
-    hand_id  = (body.get("hand_id") or "").strip().replace("-", "")
-    platform = (body.get("platform") or "").strip()
-    if not hand_id:
-        return jsonify({"error": "Please provide a hand ID."}), 400
+    """Single hand from a persisted tournament (survey-gated past the free ones).
 
-    # Match against the gameid stored in summary["D"], ignoring dashes
-    match = next(
-        (r for r in records
-         if r.get("summary", {}).get("D", "").replace("-", "") == hand_id),
-        None,
-    )
-    if not match:
-        return jsonify({"error": f"Hand '{hand_id}' not found in the imported data."}), 404
-
-    try:
-        filepath, _ = export_pokerstars([match], platform=platform,
-                                         blind_levels_by_room=_blind_levels_by_room([match]))
-        return send_file(
-            os.path.abspath(filepath),
-            as_attachment=True,
-            download_name=os.path.basename(filepath),
-            mimetype="text/plain",
-        )
-    except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+    The tournament id is required now: the process-global session cache this used
+    to read is gone, so a hand is only exportable once it has been saved.
+    """
+    body = request.get_json(force=True, silent=True) or {}
+    tid  = str(body.get("tourney_id") or "").strip()
+    if not tid:
+        return jsonify({"error": "tourney_id is required. Import and save this "
+                                 "session before exporting."}), 400
+    return export_persisted_hand(tid)
 
 
 @app.route("/api/export/tournament", methods=["POST"])
 def export_tournament():
     body = request.get_json(force=True, silent=True) or {}
-    session_records = _session_records.get((body.get("session_id") or "").strip())
-    if not session_records:
-        return jsonify({"error": "No hand data available. Please import first."}), 400
-    tid      = str(body.get("tourney_id", "")).strip()
-    platform = (body.get("platform") or "").strip()
+    tid  = str(body.get("tourney_id") or "").strip()
     if not tid:
         return jsonify({"error": "Please provide a tourney_id."}), 400
-
-    from hand_parser import extract_tourney_id
-    records = [r for r in session_records
-               if extract_tourney_id(r.get("summary", {}).get("D", "")) == tid]
-    if not records:
-        return jsonify({"error": f"No hands found for tournament '{tid}'."}), 404
-
-    try:
-        filepath, _ = export_pokerstars(records, platform=platform,
-                                         blind_levels_by_room=_blind_levels_by_room(records))
-        return send_file(
-            os.path.abspath(filepath),
-            as_attachment=True,
-            download_name=os.path.basename(filepath),
-            mimetype="text/plain",
-        )
-    except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+    return export_persisted_tournament(tid)
 
 
 @app.route("/api/export/pokerstars", methods=["POST"])
 def export_ps():
+    """Whole-session export — every hand of every tournament named in the body.
+
+    Pro only: this is the bulk path, and it is the one the free tier upgrades for.
+    """
+    uid, err = _require_pro_export(request, 'full_session_export')
+    if err:
+        return err
+
+    body     = request.get_json(force=True, silent=True) or {}
+    platform = (body.get("platform") or "").strip()
+    records, err = _collect_session_records(uid, body)
+    if err:
+        return err
+
+    limit = body.get("limit")          # None = all hands
+    if limit:
+        records = records[:limit]
     try:
-        body    = request.get_json(force=True, silent=True) or {}
-        session_records = _session_records.get((body.get("session_id") or "").strip())
-        if not session_records:
-            return jsonify({"error": "No hand data available. Please import first."}), 400
-        limit    = body.get("limit")          # None = all hands
-        platform = (body.get("platform") or "").strip()
-        records  = session_records[:limit] if limit else session_records
-        filepath, log = export_pokerstars(records, platform=platform,
+        filepath, _log = export_pokerstars(records, platform=platform,
                                            blind_levels_by_room=_blind_levels_by_room(records))
         return send_file(
             os.path.abspath(filepath),
@@ -370,33 +450,52 @@ def export_ps():
         return jsonify({"error": str(exc)}), 500
 
 
+def _collect_session_records(uid, body):
+    """Hands for every tourney_id in the body, newest first.
+
+    Returns (records, None) or (None, error_tuple). Replaces the old in-process
+    session cache: the client names the tournaments it just imported, and we read
+    them back from that user's own persisted storage.
+    """
+    tids = body.get('tourney_ids')
+    if not isinstance(tids, list):
+        tids = [t for t in [str(body.get('tourney_id') or '').strip()] if t]
+    tids = [str(t).strip() for t in tids if str(t).strip()]
+    if not tids:
+        return None, (jsonify({'error': 'tourney_ids is required. Import and save '
+                                        'this session before exporting.'}), 400)
+
+    records = []
+    for tid in tids:
+        recs, _doc = _fetch_tournament_records(uid, tid)
+        if recs:
+            records.extend(recs)
+    if not records:
+        return None, (jsonify({'error': 'No stored hands found for this session.'}), 404)
+    records.sort(key=lambda r: r.get('summary', {}).get('C', 0), reverse=True)
+    return records, None
+
+
 # ── JSON export endpoints ─────────────────────────────────────────────────────
 
 import re as _re
 from datetime import datetime as _dt
 
 
-def _room_slug(records):
-    """Return alphanumeric room name slug from the first record that has one."""
-    for r in (records or []):
-        name = (r.get('full_hand', {}).get('info', {})
-                 .get('room', {}).get('room_name', '') or '')
-        slug = _re.sub(r'[^A-Za-z0-9]', '', name)[:24]
-        if slug:
-            return slug
-    return ''
-
-
 @app.route("/api/export/json/all", methods=["POST"])
 def export_json_all():
+    """Raw JSON of the whole session — Pro only, same as the PokerStars variant."""
+    uid, err = _require_pro_export(request, 'full_session_export')
+    if err:
+        return err
     body = request.get_json(force=True, silent=True) or {}
-    session_records = _session_records.get((body.get("session_id") or "").strip())
-    if not session_records:
-        return jsonify({"error": "No hand data available. Please import first."}), 400
+    records, err = _collect_session_records(uid, body)
+    if err:
+        return err
     import json as _json
     ts    = _dt.now().strftime("%Y%m%d_%H%M%S")
     filename = f"pppoker_full_export_{ts}.json"
-    data = _json.dumps(session_records, indent=2)
+    data = _json.dumps(records, indent=2)
     return Response(data, mimetype="application/json",
                     headers={"Content-Disposition": f"attachment; filename={filename}"})
 
@@ -404,48 +503,20 @@ def export_json_all():
 @app.route("/api/export/json/tournament", methods=["POST"])
 def export_json_tournament():
     body = request.get_json(force=True, silent=True) or {}
-    session_records = _session_records.get((body.get("session_id") or "").strip())
-    if not session_records:
-        return jsonify({"error": "No hand data available. Please import first."}), 400
     tid  = str(body.get("tourney_id", "")).strip()
     if not tid:
         return jsonify({"error": "Please provide a tourney_id."}), 400
-    from hand_parser import extract_tourney_id
-    import json as _json
-    records = [r for r in session_records
-               if extract_tourney_id(r.get("summary", {}).get("D", "")) == tid]
-    if not records:
-        return jsonify({"error": f"No hands found for tournament '{tid}'."}), 404
-    room  = _room_slug(records)
-    ts    = _dt.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"pppoker_{room}_{ts}.json" if room else f"pppoker_tourney{tid}_{ts}.json"
-    data = _json.dumps(records, indent=2)
-    return Response(data, mimetype="application/json",
-                    headers={"Content-Disposition": f"attachment; filename={filename}"})
+    return export_persisted_tournament_json(tid)
 
 
 @app.route("/api/export/json/hand", methods=["POST"])
 def export_json_hand():
-    body         = request.get_json(force=True, silent=True) or {}
-    session_records = _session_records.get((body.get("session_id") or "").strip())
-    if not session_records:
-        return jsonify({"error": "No hand data available. Please import first."}), 400
-    raw_hand_id  = (body.get("hand_id") or "").strip()
-    hand_id      = raw_hand_id.replace("-", "")
-    if not hand_id:
-        return jsonify({"error": "Please provide a hand ID."}), 400
-    match = next(
-        (r for r in session_records
-         if r.get("summary", {}).get("D", "").replace("-", "") == hand_id),
-        None,
-    )
-    if not match:
-        return jsonify({"error": f"Hand '{raw_hand_id}' not found."}), 404
-    import json as _json
-    filename = f"pppoker_hand_{raw_hand_id}.json"
-    data = _json.dumps(match, indent=2)
-    return Response(data, mimetype="application/json",
-                    headers={"Content-Disposition": f"attachment; filename={filename}"})
+    body = request.get_json(force=True, silent=True) or {}
+    tid  = str(body.get("tourney_id") or "").strip()
+    if not tid:
+        return jsonify({"error": "tourney_id is required. Import and save this "
+                                 "session before exporting."}), 400
+    return export_persisted_hand_json(tid)
 
 
 # ── Firebase config endpoint ─────────────────────────────────────────────────
@@ -486,6 +557,679 @@ def _get_admin_bucket():
     if not bucket_name:
         return None
     return admin_storage.bucket(name=bucket_name)
+
+
+# ── Tiering: anon / free / pro ────────────────────────────────────────────────
+# Three tiers, resolved per request from the bearer token:
+#   anon — no bearer. Can import and look, can export nothing.
+#   free — bearer, users/{uid}.is_pro falsy. Daily import/export quotas and a
+#          7-day history window; the bigger exports need a survey credit.
+#   pro  — bearer, is_pro true. No quota, no window, no survey gate.
+# Firestore is the source of truth for every counter below; nothing is cached in
+# process memory, because gunicorn runs several workers and a user's requests are
+# spread across all of them.
+
+FREE_HISTORY_DAYS         = 7
+FREE_IMPORTS_PER_DAY      = 3
+FREE_HAND_EXPORTS_PER_DAY = 5    # hard cap
+FREE_HAND_EXPORTS_UNGATED = 2    # first N of the day need no survey credit
+FREE_TOURNEY_EXPORTS_DAY  = 1
+
+# Survey credits are single-use unlocks. They deliberately do NOT reset daily —
+# but they are capped so a user can't stockpile a week of surveys and dump them.
+CREDIT_CAPS = {'hand': 3, 'tourney': 1}
+CREDIT_KINDS = tuple(CREDIT_CAPS)
+
+_AD_TOKEN_SECRET      = os.getenv('AD_TOKEN_SECRET', '')
+_ANON_SESSION_SECRET  = os.getenv('ANON_SESSION_SECRET', '')
+_CPX_APP_ID           = os.getenv('CPX_APP_ID', '')
+_CPX_SECURE_HASH      = os.getenv('CPX_SECURE_HASH', '')
+_TALLY_SIGNING_SECRET = os.getenv('TALLY_SIGNING_SECRET', '')
+# The Tally fallback needs a form to embed; the signing secret alone doesn't say
+# which one. Optional — with it unset the client simply never offers the fallback.
+_TALLY_FORM_URL       = os.getenv('TALLY_FORM_URL', '')
+
+_ANON_SESSION_TTL   = 3600          # 1h, matched by the signed token's exp
+_ANON_SESSION_PREFIX = 'anon_sessions/'
+_AD_TOKEN_TTL       = 300
+
+
+def _utc_day(ts=None):
+    from datetime import datetime as _d, timezone as _tz
+    return _d.fromtimestamp(ts if ts is not None else time.time(),
+                            tz=_tz.utc).strftime('%Y-%m-%d')
+
+
+def _user_ref(uid):
+    return _get_admin_db().collection('users').document(uid)
+
+
+def _user_data(uid):
+    """users/{uid} as a plain dict, memoised for the life of the request.
+
+    Tier, quota, credits and the history window all live in this one document, so
+    a single gated export would otherwise read it four times. A failed read
+    answers {} — every caller's fallback for "no such user" is the same as its
+    fallback for "couldn't ask", and both are the cautious side.
+    """
+    if not uid:
+        return {}
+    cache = None
+    if has_app_context():
+        cache = getattr(g, '_user_doc_cache', None)
+        if cache is None:
+            cache = g._user_doc_cache = {}
+        if uid in cache:
+            return cache[uid]
+    try:
+        snap = _user_ref(uid).get()
+        data = (snap.to_dict() or {}) if snap.exists else {}
+    except Exception as exc:
+        print(f"[_user_data] read failed for uid={uid}: {type(exc).__name__}: {exc}")
+        data = {}
+    if cache is not None:
+        cache[uid] = data
+    return data
+
+
+def _invalidate_user_data(uid):
+    """Drop the memoised copy after a write, so a later read in the same request
+    sees the new counters."""
+    if has_app_context():
+        cache = getattr(g, '_user_doc_cache', None)
+        if cache:
+            cache.pop(uid, None)
+
+
+def _tier(uid):
+    """'anon' | 'free' | 'pro' for a (possibly None) verified uid.
+
+    A Firestore failure resolves to 'free' rather than 'pro': the quota path is
+    the safe side to fail towards, and a Pro user briefly seeing a quota beats
+    handing every free user the paid tier during an outage.
+    """
+    if not uid:
+        return 'anon'
+    return 'pro' if _user_data(uid).get('is_pro') else 'free'
+
+
+_EMPTY_QUOTA = {'imports': 0, 'hand_exports': 0, 'tourney_exports': 0}
+
+
+def _quota_state(uid):
+    """Today's counters for uid: {day, imports, hand_exports, tourney_exports}.
+
+    Read-only and lazy — a stored quota from a previous UTC day reads as all
+    zeroes and is not rewritten until the next _bump_quota.
+    """
+    today = _utc_day()
+    state = dict(_EMPTY_QUOTA, day=today)
+    stored = _user_data(uid).get('quota')
+    if isinstance(stored, dict) and stored.get('day') == today:
+        for key in _EMPTY_QUOTA:
+            state[key] = int(stored.get(key) or 0)
+    return state
+
+
+def _bump_quota(uid, key):
+    """Transactionally +1 one of today's counters, rolling the day over first."""
+    if key not in _EMPTY_QUOTA:
+        raise ValueError(f'unknown quota key: {key}')
+    from google.cloud import firestore as gcf
+    db, ref, today = _get_admin_db(), _user_ref(uid), _utc_day()
+
+    @gcf.transactional
+    def _txn(transaction):
+        snap = ref.get(transaction=transaction)
+        stored = (snap.to_dict() or {}).get('quota') if snap.exists else None
+        quota = (dict(_EMPTY_QUOTA, **{k: int(stored.get(k) or 0) for k in _EMPTY_QUOTA})
+                 if isinstance(stored, dict) and stored.get('day') == today
+                 else dict(_EMPTY_QUOTA))
+        quota['day'] = today
+        quota[key] = quota[key] + 1
+        if snap.exists:
+            transaction.update(ref, {'quota': quota})
+        else:
+            transaction.set(ref, {'quota': quota})
+        return quota
+
+    try:
+        quota = _txn(db.transaction())
+        _invalidate_user_data(uid)
+        return quota
+    except Exception as exc:
+        # Never fail a completed import/export because the counter didn't stick.
+        print(f"[_bump_quota] {key} failed for uid={uid}: {type(exc).__name__}: {exc}")
+        return None
+
+
+def _credits(uid):
+    """{'hand': n, 'tourney': n} — unspent survey unlocks for uid."""
+    out = {k: 0 for k in CREDIT_KINDS}
+    stored = _user_data(uid).get('credits')
+    if isinstance(stored, dict):
+        for kind in CREDIT_KINDS:
+            out[kind] = int(stored.get(f'survey_credit_{kind}') or 0)
+    return out
+
+
+def _grant_credit(uid, kind):
+    """Transactionally +1 survey_credit_<kind>, capped at CREDIT_CAPS[kind].
+    Returns True when the balance actually moved."""
+    if kind not in CREDIT_CAPS:
+        return False
+    from google.cloud import firestore as gcf
+    db, ref = _get_admin_db(), _user_ref(uid)
+    field, cap = f'survey_credit_{kind}', CREDIT_CAPS[kind]
+
+    @gcf.transactional
+    def _txn(transaction):
+        snap = ref.get(transaction=transaction)
+        stored = ((snap.to_dict() or {}).get('credits') or {}) if snap.exists else {}
+        current = int(stored.get(field) or 0)
+        if current >= cap:
+            return False
+        credits = {f'survey_credit_{k}': int(stored.get(f'survey_credit_{k}') or 0)
+                   for k in CREDIT_KINDS}
+        credits[field] = current + 1
+        if snap.exists:
+            transaction.update(ref, {'credits': credits})
+        else:
+            transaction.set(ref, {'credits': credits})
+        return True
+
+    granted = _txn(db.transaction())
+    _invalidate_user_data(uid)
+    return granted
+
+
+def _consume_credit(uid, kind):
+    """Transactionally -1 survey_credit_<kind>. False (and no write) when zero."""
+    if kind not in CREDIT_CAPS:
+        return False
+    from google.cloud import firestore as gcf
+    db, ref = _get_admin_db(), _user_ref(uid)
+    field = f'survey_credit_{kind}'
+
+    @gcf.transactional
+    def _txn(transaction):
+        snap = ref.get(transaction=transaction)
+        stored = ((snap.to_dict() or {}).get('credits') or {}) if snap.exists else {}
+        current = int(stored.get(field) or 0)
+        if current <= 0:
+            return False
+        credits = {f'survey_credit_{k}': int(stored.get(f'survey_credit_{k}') or 0)
+                   for k in CREDIT_KINDS}
+        credits[field] = current - 1
+        transaction.update(ref, {'credits': credits})
+        return True
+
+    try:
+        spent = _txn(db.transaction())
+        _invalidate_user_data(uid)
+        return spent
+    except Exception as exc:
+        print(f"[_consume_credit] {kind} failed for uid={uid}: {type(exc).__name__}: {exc}")
+        return False
+
+
+def _history_cutoff_ts(uid):
+    """Oldest earliest_ts a free user may see, or None when there's no window."""
+    return None if _tier(uid) == 'pro' else int(time.time()) - FREE_HISTORY_DAYS * 86400
+
+
+def _is_expired(doc, cutoff):
+    """True when a stored tournament falls outside the caller's history window.
+
+    Nothing is ever deleted — Firestore keeps the whole history and upgrading
+    brings it all straight back. A tournament with no earliest_ts is kept: not
+    knowing when it happened is not evidence that it was long ago.
+    """
+    if cutoff is None or not doc:
+        return False
+    ts = doc.get('earliest_ts')
+    return ts is not None and ts < cutoff
+
+
+# ── Ad tokens: "this user has earned one unlock" ───────────────────────────────
+# Issued only against a survey credit (see /api/ad-token), never on demand. The
+# header contract is kept so the client always says "here is my unlock" the same
+# way, whichever provider paid for it.
+
+def _sign(secret, msg):
+    import hmac, hashlib, base64
+    digest = hmac.new(secret.encode(), msg.encode(), hashlib.sha256).digest()
+    return base64.urlsafe_b64encode(digest).decode().rstrip('=')
+
+
+def _issue_ad_token(uid, kind):
+    """(token, exp). Token is base64(uid|kind|exp|jti) plus an HMAC tag."""
+    import base64, uuid
+    exp = int(time.time()) + _AD_TOKEN_TTL
+    payload = f'{uid}|{kind}|{exp}|{uuid.uuid4().hex}'
+    encoded = base64.urlsafe_b64encode(payload.encode()).decode().rstrip('=')
+    return f'{encoded}.{_sign(_AD_TOKEN_SECRET, encoded)}', exp
+
+
+def _b64_decode(value):
+    import base64
+    return base64.urlsafe_b64decode(value + '=' * (-len(value) % 4)).decode()
+
+
+def _verify_ad_token(header_val, uid, expected_kind):
+    """True when header_val is a live, correctly-scoped, not-yet-spent unlock.
+
+    Consumes the token on success by writing users/{uid}/ad_jtis/{jti} with
+    create(), which is atomic — a replayed token loses the race and is rejected.
+    """
+    import hmac
+    if not header_val or not _AD_TOKEN_SECRET:
+        return False
+    try:
+        encoded, _, sig = header_val.strip().partition('.')
+        if not encoded or not sig or not hmac.compare_digest(sig, _sign(_AD_TOKEN_SECRET, encoded)):
+            return False
+        tok_uid, kind, exp, jti = _b64_decode(encoded).split('|')
+    except Exception:
+        return False
+    if tok_uid != uid or kind != expected_kind or int(exp) < int(time.time()):
+        return False
+    try:
+        from google.api_core import exceptions as gexc
+        try:
+            _user_ref(uid).collection('ad_jtis').document(jti).create(
+                {'kind': kind, 'exp': int(exp), 'used_at': int(time.time())})
+        except gexc.AlreadyExists:
+            return False       # replay
+    except Exception as exc:
+        # Can't prove single use — refuse rather than hand out a free unlock.
+        print(f"[_verify_ad_token] jti write failed for uid={uid}: {type(exc).__name__}: {exc}")
+        return False
+    return True
+
+
+# ── Export gate ───────────────────────────────────────────────────────────────
+
+class _ExportGate:
+    """Answer to "may this export be charged for?", plus what to charge.
+
+    error is a ready-to-return Flask tuple when the answer is no. On yes, the
+    route calls commit() once the file has actually been built, so a failed
+    export doesn't burn the day's quota or the user's credit.
+    """
+
+    def __init__(self, uid, error=None, quota_key=None, credit_kind=None):
+        self.uid = uid
+        self.error = error
+        self._quota_key = quota_key
+        self._credit_kind = credit_kind
+
+    @property
+    def ok(self):
+        return self.error is None
+
+    def commit(self):
+        if self._credit_kind:
+            _consume_credit(self.uid, self._credit_kind)
+        if self._quota_key:
+            _bump_quota(self.uid, self._quota_key)
+
+
+def _export_uid(req):
+    """(uid, None) for a signed-in caller, (None, 401) otherwise.
+
+    Every export needs an account now — that's the email capture, and it's also
+    what makes the per-user quotas mean anything.
+    """
+    uid = _verify_bearer(req)
+    if not uid:
+        return None, (jsonify({'error': 'login_required'}), 401)
+    return uid, None
+
+
+def _export_gate(req, uid, kind):
+    """Quota/survey gate for one export. kind is 'hand' or 'tourney'.
+
+    Called last, once the route knows it can actually produce the file: a request
+    that was going to 404 anyway must not be answered with "buy a survey first",
+    and must not consume the day's allowance.
+
+    pro  → always allowed, uncounted
+    free → daily cap, then a survey credit or X-Ad-Token for the gated slots
+    """
+    if _tier(uid) == 'pro':
+        return _ExportGate(uid)
+
+    state = _quota_state(uid)
+    if kind == 'tourney':
+        used, cap, quota_key = state['tourney_exports'], FREE_TOURNEY_EXPORTS_DAY, 'tourney_exports'
+        needs_unlock = True
+    else:
+        used, cap, quota_key = state['hand_exports'], FREE_HAND_EXPORTS_PER_DAY, 'hand_exports'
+        needs_unlock = used >= FREE_HAND_EXPORTS_UNGATED
+
+    if used >= cap:
+        return _ExportGate(uid, error=(jsonify({
+            'error': 'quota_exceeded', 'kind': kind, 'used': used, 'limit': cap,
+            'upgrade': True}), 402))
+
+    if not needs_unlock:
+        return _ExportGate(uid, quota_key=quota_key)
+
+    if _verify_ad_token(req.headers.get('X-Ad-Token', ''), uid, kind):
+        return _ExportGate(uid, quota_key=quota_key)     # token already spent
+    if _credits(uid).get(kind, 0) > 0:
+        return _ExportGate(uid, quota_key=quota_key, credit_kind=kind)
+
+    return _ExportGate(uid, error=(jsonify({
+        'error': 'survey_required', 'kind': kind, 'used': used, 'limit': cap}), 402))
+
+
+def _require_pro_export(req, feature):
+    """Gate for the exports that are Pro-only outright (no survey path).
+    Returns (uid, None) when allowed, (None, error_tuple) when not."""
+    uid = _verify_bearer(req)
+    if not uid:
+        return None, (jsonify({'error': 'login_required'}), 401)
+    if _tier(uid) != 'pro':
+        return None, (jsonify({'error': 'upgrade_required', 'feature': feature}), 403)
+    return uid, None
+
+
+# ── Anonymous import sessions ─────────────────────────────────────────────────
+# An anon import is analysed but never persisted to the user's history — it lives
+# in Cloud Storage for an hour so that signing in can claim it. The client holds
+# only a signed token, so possession of the token is the whole authorisation.
+
+def _anon_blob(token):
+    bucket = _get_admin_bucket()
+    return bucket.blob(f'{_ANON_SESSION_PREFIX}{token}.json') if bucket else None
+
+
+def _sweep_anon_sessions():
+    """Best-effort GC of expired anon sessions. Never raises."""
+    try:
+        bucket = _get_admin_bucket()
+        if not bucket:
+            return
+        cutoff = time.time() - _ANON_SESSION_TTL
+        for blob in bucket.list_blobs(prefix=_ANON_SESSION_PREFIX, max_results=100):
+            created = (blob.metadata or {}).get('created_at')
+            try:
+                created = float(created) if created is not None else blob.time_created.timestamp()
+            except Exception:
+                continue
+            if created < cutoff:
+                blob.delete()
+    except Exception as exc:
+        print(f"[_sweep_anon_sessions] skipped: {type(exc).__name__}: {exc}")
+
+
+def _issue_anon_session(records, player_uid=''):
+    """Park records in Storage and return a signed base64(token|exp), or None.
+
+    The stored payload keeps the PPPoker uid alongside the hands so a later claim
+    can rebuild the exact same response the anonymous import returned.
+    """
+    import base64, json as _jj, uuid
+    if not _ANON_SESSION_SECRET:
+        return None
+    token = uuid.uuid4().hex
+    blob = _anon_blob(token)
+    if blob is None:
+        return None
+    try:
+        blob.metadata = {'created_at': str(int(time.time()))}
+        blob.upload_from_string(
+            _jj.dumps({'player_uid': player_uid, 'records': records}),
+            content_type='application/json')
+    except Exception as exc:
+        print(f"[_issue_anon_session] upload failed: {type(exc).__name__}: {exc}")
+        return None
+    exp = int(time.time()) + _ANON_SESSION_TTL
+    encoded = base64.urlsafe_b64encode(f'{token}|{exp}'.encode()).decode().rstrip('=')
+    return f'{encoded}.{_sign(_ANON_SESSION_SECRET, encoded)}'
+
+
+def _parse_anon_session(session_token):
+    """Signed token → storage token, or None when it's forged or expired."""
+    import hmac
+    if not session_token or not _ANON_SESSION_SECRET:
+        return None
+    try:
+        encoded, _, sig = session_token.strip().partition('.')
+        if not encoded or not sig or not hmac.compare_digest(sig, _sign(_ANON_SESSION_SECRET, encoded)):
+            return None
+        token, exp = _b64_decode(encoded).split('|')
+    except Exception:
+        return None
+    if int(exp) < int(time.time()):
+        return None
+    return token
+
+
+def _load_anon_session(session_token):
+    """{'player_uid': str, 'records': [...]} for a valid token, else None."""
+    import json as _jj
+    token = _parse_anon_session(session_token)
+    if not token:
+        return None
+    try:
+        blob = _anon_blob(token)
+        if blob is None or not blob.exists():
+            return None
+        payload = _jj.loads(blob.download_as_bytes())
+    except Exception as exc:
+        print(f"[_load_anon_session] read failed: {type(exc).__name__}: {exc}")
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _delete_anon_session(session_token):
+    token = _parse_anon_session(session_token)
+    if not token:
+        return
+    try:
+        blob = _anon_blob(token)
+        if blob is not None:
+            blob.delete()
+    except Exception as exc:
+        print(f"[_delete_anon_session] delete failed: {type(exc).__name__}: {exc}")
+
+
+# ── Survey providers: CPX Research (primary) + Tally (fallback) ───────────────
+# Completing a survey is how a free user earns an export unlock. Both providers
+# call us server-to-server; both are idempotent on the provider's own id, because
+# retries are normal and paying twice for one survey is not.
+
+def _verify_cpx_hash(trans_id, provided_hash):
+    """CPX signs each postback as md5(trans_id + secure_hash)."""
+    import hashlib, hmac
+    if not _CPX_SECURE_HASH or not trans_id or not provided_hash:
+        return False
+    expected = hashlib.md5(f'{trans_id}{_CPX_SECURE_HASH}'.encode()).hexdigest()
+    return hmac.compare_digest(expected, provided_hash.strip().lower())
+
+
+def _verify_tally_signature(raw_body, header_val):
+    """Tally signs the raw request body: base64(HMAC-SHA256(body, secret))."""
+    import base64, hashlib, hmac
+    if not _TALLY_SIGNING_SECRET or not header_val:
+        return False
+    digest = hmac.new(_TALLY_SIGNING_SECRET.encode(), raw_body or b'', hashlib.sha256).digest()
+    return hmac.compare_digest(base64.b64encode(digest).decode(), header_val.strip())
+
+
+def _record_survey_completion(uid, doc_id, payload):
+    """Write the completion record, or report that we've already seen it.
+
+    Returns (created, existing_dict). create() is what makes this safe against
+    two concurrent deliveries of the same postback.
+    """
+    from google.api_core import exceptions as gexc
+    ref = _user_ref(uid).collection('survey_completions').document(doc_id)
+    try:
+        ref.create(dict(payload, at=int(time.time())))
+        return True, None
+    except gexc.AlreadyExists:
+        snap = ref.get()
+        return False, (snap.to_dict() if snap.exists else {})
+
+
+@app.route('/api/survey-config', methods=['GET'])
+def survey_config():
+    """Everything the client needs to open a survey for the signed-in user.
+
+    secure_hash is computed here because CPX's per-user hash is keyed with the
+    app secret, which must never reach the browser.
+    """
+    import hashlib
+    uid = _verify_bearer(request)
+    if not uid:
+        return jsonify({'error': 'login_required'}), 401
+    cpx = {}
+    if _CPX_APP_ID:
+        cpx = {'app_id': _CPX_APP_ID, 'ext_user_id': uid}
+        if _CPX_SECURE_HASH:
+            cpx['secure_hash'] = hashlib.md5(f'{uid}{_CPX_SECURE_HASH}'.encode()).hexdigest()
+    return jsonify({'cpx': cpx, 'tally_form_url': _TALLY_FORM_URL,
+                    'caps': CREDIT_CAPS})
+
+
+@app.route('/api/credits', methods=['GET'])
+def get_credits():
+    """Unspent survey unlocks — polled by the client while a survey is open."""
+    uid = _verify_bearer(request)
+    if not uid:
+        return jsonify({'error': 'login_required'}), 401
+    return jsonify(_credits(uid))
+
+
+@app.route('/api/ad-token', methods=['POST'])
+def issue_ad_token():
+    """Trade one survey credit for a short-lived, single-use export unlock.
+
+    The credit is spent here rather than at export time, so a client that prefers
+    the header contract can use it; clients that just retry the export get the
+    same effect with one fewer round trip.
+    """
+    uid = _verify_bearer(request)
+    if not uid:
+        return jsonify({'error': 'login_required'}), 401
+    if not _AD_TOKEN_SECRET:
+        return jsonify({'error': 'ad_tokens_unavailable'}), 503
+    kind = ((request.get_json(silent=True) or {}).get('kind') or '').strip()
+    if kind not in CREDIT_KINDS:
+        return jsonify({'error': f'kind must be one of {", ".join(CREDIT_KINDS)}'}), 400
+    if not _consume_credit(uid, kind):
+        return jsonify({'error': 'survey_required', 'kind': kind}), 402
+    token, exp = _issue_ad_token(uid, kind)
+    return jsonify({'token': token, 'exp': exp})
+
+
+@app.route('/api/cpx/postback', methods=['GET', 'POST'])
+def cpx_postback():
+    """CPX Research server-to-server callback. Answers a literal `1` on success.
+
+    status 1 = completed (grant), status 2 = reversal (claw back if unspent).
+    subid_1 carries which unlock the user was chasing when the survey opened.
+    """
+    args     = request.args if request.args else (request.form or {})
+    uid      = (args.get('user_id') or '').strip()
+    trans_id = (args.get('trans_id') or '').strip()
+    kind     = (args.get('subid_1') or 'hand').strip()
+    status   = (args.get('status') or '1').strip()
+
+    if not _verify_cpx_hash(trans_id, args.get('hash') or ''):
+        return jsonify({'error': 'invalid_hash'}), 403
+    if not uid or not trans_id:
+        return jsonify({'error': 'user_id and trans_id are required'}), 400
+    if kind not in CREDIT_KINDS:
+        kind = 'hand'
+
+    payload = {
+        'source': 'cpx', 'trans_id': trans_id, 'kind': kind, 'status': status,
+        'amount_local': args.get('amount_local'), 'amount_usd': args.get('amount_usd'),
+        'offer_id': args.get('offer_id'), 'subid_1': args.get('subid_1'),
+    }
+
+    if status == '2':
+        _reverse_survey_credit(uid, trans_id, payload)
+        return Response('1', mimetype='text/plain')
+
+    created, _existing = _record_survey_completion(uid, trans_id, payload)
+    if not created:
+        return Response('1', mimetype='text/plain')     # already paid out
+    granted = _grant_credit(uid, kind)
+    _user_ref(uid).collection('survey_completions').document(trans_id).update(
+        {'credit_granted': bool(granted)})
+    return Response('1', mimetype='text/plain')
+
+
+def _reverse_survey_credit(uid, doc_id, payload):
+    """Best-effort claw-back of a credit whose survey was reversed.
+
+    Only takes a credit back while it is still unspent — once the export has
+    happened there is nothing to reverse, and driving the balance negative would
+    silently cost the user their next legitimate survey.
+    """
+    try:
+        ref = _user_ref(uid).collection('survey_completions').document(doc_id)
+        snap = ref.get()
+        if not snap.exists:
+            _record_survey_completion(uid, doc_id, dict(payload, credit_granted=False))
+            return
+        d = snap.to_dict() or {}
+        if not d.get('credit_granted') or d.get('credit_reversed'):
+            return
+        kind = d.get('kind', 'hand')
+        if _consume_credit(uid, kind):
+            ref.update({'credit_reversed': True, 'reversed_at': int(time.time())})
+    except Exception as exc:
+        print(f"[_reverse_survey_credit] failed for uid={uid} {doc_id}: "
+              f"{type(exc).__name__}: {exc}")
+
+
+def _tally_field(fields, name):
+    """Pull a hidden field out of a Tally submission by key or label."""
+    for f in fields or []:
+        if not isinstance(f, dict):
+            continue
+        if (f.get('key') or '').lower() == name or (f.get('label') or '').lower() == name:
+            value = f.get('value')
+            return str(value).strip() if value is not None else ''
+    return ''
+
+
+@app.route('/api/tally/callback', methods=['POST'])
+def tally_callback():
+    """Tally webhook — the no-eligible-survey fallback. No revenue, but it keeps
+    the user moving and the answers are product research."""
+    raw = request.get_data()
+    if not _verify_tally_signature(raw, request.headers.get('Tally-Signature', '')):
+        return jsonify({'error': 'invalid_signature'}), 403
+
+    body = request.get_json(silent=True) or {}
+    data = body.get('data') or {}
+    response_id = str(data.get('responseId') or '').strip()
+    fields = data.get('fields') or []
+    uid  = _tally_field(fields, 'uid')
+    kind = (_tally_field(fields, 'kind') or 'hand').lower()
+    if kind not in CREDIT_KINDS:
+        kind = 'hand'
+    if not uid or not response_id:
+        return jsonify({'error': 'uid and responseId are required'}), 400
+
+    created, _existing = _record_survey_completion(uid, response_id, {
+        'source': 'tally', 'response_id': response_id, 'kind': kind,
+        'form_id': body.get('data', {}).get('formId'), 'status': '1',
+    })
+    if not created:
+        return jsonify({'ok': True, 'duplicate': True})
+    granted = _grant_credit(uid, kind)
+    _user_ref(uid).collection('survey_completions').document(response_id).update(
+        {'credit_granted': bool(granted)})
+    return jsonify({'ok': True, 'granted': bool(granted)})
 
 
 def _merge_tournament(db, bucket, uid, tid, new_records):
@@ -572,28 +1316,28 @@ def _merge_tournament(db, bucket, uid, tid, new_records):
     return _txn(db.transaction())
 
 
-def _try_save_tournaments(id_token, records, tournaments):
+def _save_tournaments(claims, records, tournaments):
     """
     Merge each tournament from this import into per-tournament persisted storage.
     On a re-import of the same tourney_id, hands are merged (de-duped by gameid)
     with any previously stored hands for that tournament and stats recomputed
-    from the merged set. Returns (saved, new_game_ids, claims): saved is True when
-    any tournament was written, new_game_ids is the set of game IDs not previously
-    stored, and claims are the verified token claims (or None).
+    from the merged set. Returns (saved, new_game_ids): saved is True when any
+    tournament was written and new_game_ids is the set of game IDs not previously
+    stored. `claims` are the already-verified token claims, or None for anonymous
+    callers — an anonymous import persists nothing.
 
     Persistence is deliberately NOT gated on is_pro. Every signed-in player's hands
     are stored so the gamification economy can count genuinely-new hands for them;
-    the Free/Pro split is enforced at display and export time instead
-    (static/app.js `_loadHistory` and the export quota), not at write time.
+    the Free/Pro split is enforced at display and export time instead (the history
+    window and the export quota), not at write time.
     """
-    if not id_token or not tournaments:
-        return False, set(), None
+    if not claims or not claims.get('uid') or not tournaments:
+        return False, set()
     try:
         from hand_parser import extract_tourney_id
 
         db = _get_admin_db()  # ensures firebase_admin.initialize_app() has run
-        decoded = admin_auth.verify_id_token(id_token)
-        uid = decoded['uid']
+        uid = claims['uid']
 
         bucket = _get_admin_bucket()
 
@@ -609,12 +1353,12 @@ def _try_save_tournaments(id_token, records, tournaments):
             ids = _merge_tournament(db, bucket, uid, tid, new_records)
             if ids:
                 all_new_ids.update(ids)
-        return True, all_new_ids, decoded
+        return True, all_new_ids
     except Exception as exc:
         import traceback
-        print(f"[_try_save_tournaments] FAILED: {type(exc).__name__}: {exc}")
+        print(f"[_save_tournaments] FAILED: {type(exc).__name__}: {exc}")
         traceback.print_exc()
-        return False, set(), None
+        return False, set()
 
 
 def _score_import(claims, new_hands):
@@ -894,15 +1638,23 @@ def list_tournaments():
     if not uid:
         return jsonify({'error': 'Unauthorized'}), 401
 
+    # Free accounts see a rolling 7-day window. Nothing is deleted — the filter
+    # is applied on read, so upgrading restores the full history instantly.
+    cutoff = _history_cutoff_ts(uid)
     docs = db.collection('users').document(uid).collection('tournaments').get()
-    tournaments = []
+    tournaments, hidden = [], 0
     for doc in docs:
         d = doc.to_dict()
+        if _is_expired(d, cutoff):
+            hidden += 1
+            continue
         d.pop('storage_path', None)  # internal detail, not needed by client
         d.update(_classify_doc(d))
         tournaments.append(d)
 
-    return jsonify({'tournaments': tournaments})
+    return jsonify({'tournaments': tournaments,
+                    'history_days': None if cutoff is None else FREE_HISTORY_DAYS,
+                    'hidden_by_history_cap': hidden})
 
 
 # ── Admin: tournament-config CRUD (writes via Admin SDK, gated to /config/admins) ─
@@ -1269,9 +2021,28 @@ def _resolve_tournament_cfg(room_name):
     /config/tournament_defaults. The blind ladder is composed as base+extra
     (or the override ladder for LUCKY DAY / TEXAS), falling back to the canonical
     80-level ladder when no config doc matches. Returns a plain dict.
+
+    Memoised per request: every call scans the whole /tournaments collection plus
+    three config docs, and a single anonymous import resolves one config per
+    tournament in the batch, which without this would be a dozen full scans.
     """
-    db = _get_admin_db()
     room = _norm_room_name(room_name)
+    cache = None
+    if has_app_context():
+        cache = getattr(g, '_tourney_cfg_cache', None)
+        if cache is None:
+            cache = g._tourney_cfg_cache = {}
+        if room in cache:
+            return cache[room]
+
+    cfg = _resolve_tournament_cfg_uncached(room_name, room)
+    if cache is not None:
+        cache[room] = cfg
+    return cfg
+
+
+def _resolve_tournament_cfg_uncached(room_name, room):
+    db = _get_admin_db()
 
     cfg_doc = {}
     if room:
@@ -1343,25 +2114,21 @@ def _blind_levels_by_room(records):
     }
 
 
-@app.route('/api/tournaments/<tourney_id>/hands', methods=['GET'])
-def tournament_hands(tourney_id):
-    """Per-hand display rows for one persisted tournament (Tournament Details)."""
-    uid = _verify_bearer(request)
-    if not uid:
-        return jsonify({'error': 'Unauthorized'}), 401
+def _tournament_detail(records, doc):
+    """{'hands': rows, 'meta': meta} for one tournament.
 
-    records, doc = _fetch_tournament_records(uid, tourney_id)
-    if records is None:
-        return jsonify({'error': 'Tournament data not available'}), 404
+    Shared by /api/tournaments/<tid>/hands and by the inline graph payload an
+    anonymous import receives, so both render from identical data.
 
+    Resolves the tournament's static config from Firebase (per-tournament values
+    with a canonical fallback) and runs the post-tournament analyser so the graphs
+    get the ACTUAL level per hand plus rebuy/add-on spots. This may be slow on
+    large tournaments — acceptable for now; it is a pure function designed to be
+    reused later by an asynchronous Cowork skill.
+    """
     meta = {k: (doc or {}).get(k) for k in
             ['room_name', 'earliest_ts', 'last_chips', 'first_chips', 'finish_busted']}
 
-    # Resolve the tournament's static config from Firebase (per-tournament values
-    # with a canonical fallback) and run the post-tournament analyser so the
-    # graphs get the ACTUAL level per hand plus rebuy/add-on spots. This may be
-    # slow on large tournaments — acceptable for now; it is a pure function
-    # designed to be reused later by an asynchronous Cowork skill.
     cfg = _resolve_tournament_cfg(meta.get('room_name') or '')
     analysis = analyze_tournament(records, cfg)
 
@@ -1388,6 +2155,7 @@ def tournament_hands(tourney_id):
 
     rows = build_hand_rows(records)
     hand_levels = analysis['hand_levels']
+    meta['hand_levels'] = hand_levels
     chip_scale = analysis.get('scale', 1)
     for row in rows:
         row['level'] = hand_levels.get(row.get('hand_num'))
@@ -1399,24 +2167,66 @@ def tournament_hands(tourney_id):
             if row.get('big_blind') is not None:
                 row['big_blind'] = round(row['big_blind'] / chip_scale)
 
-    return jsonify({'hands': rows, 'meta': meta})
+    return {'hands': rows, 'meta': meta}
 
 
-@app.route('/api/tournaments/<tourney_id>/export', methods=['POST'])
-def export_persisted_tournament(tourney_id):
+@app.route('/api/tournaments/<tourney_id>/hands', methods=['GET'])
+def tournament_hands(tourney_id):
+    """Per-hand display rows for one persisted tournament (Tournament Details)."""
     uid = _verify_bearer(request)
     if not uid:
         return jsonify({'error': 'Unauthorized'}), 401
 
-    records, _doc = _fetch_tournament_records(uid, tourney_id)
+    records, doc = _fetch_tournament_records(uid, tourney_id)
     if records is None:
         return jsonify({'error': 'Tournament data not available'}), 404
+
+    cutoff = _history_cutoff_ts(uid)
+    if _is_expired(doc, cutoff):
+        return jsonify({'error': 'history_expired', 'upgrade': True}), 404
+
+    return jsonify(_tournament_detail(records, doc))
+
+
+def _records_in_window(uid, tourney_id):
+    """Stored records for one tournament, if the caller's tier can still see it.
+    Returns (records, doc, None) or (None, None, error_tuple)."""
+    records, doc = _fetch_tournament_records(uid, tourney_id)
+    if records is None:
+        return None, None, (jsonify({'error': 'Tournament data not available'}), 404)
+    if _is_expired(doc, _history_cutoff_ts(uid)):
+        return None, None, (jsonify({'error': 'history_expired', 'upgrade': True}), 404)
+    return records, doc, None
+
+
+def _find_hand(records, hand_id):
+    """One record by gameid, dashes ignored (that's how the UI copies them)."""
+    return next(
+        (r for r in records if r.get('summary', {}).get('D', '').replace('-', '') == hand_id),
+        None,
+    )
+
+
+@app.route('/api/tournaments/<tourney_id>/export', methods=['POST'])
+def export_persisted_tournament(tourney_id):
+    uid, err = _export_uid(request)
+    if err:
+        return err
+
+    records, _doc, err = _records_in_window(uid, tourney_id)
+    if err:
+        return err
+
+    gate = _export_gate(request, uid, 'tourney')
+    if not gate.ok:
+        return gate.error
 
     body     = request.get_json(force=True, silent=True) or {}
     platform = (body.get('platform') or '').strip()
     try:
         filepath, _ = export_pokerstars(records, platform=platform,
                                          blind_levels_by_room=_blind_levels_by_room(records))
+        gate.commit()
         return send_file(
             os.path.abspath(filepath),
             as_attachment=True,
@@ -1429,18 +2239,23 @@ def export_persisted_tournament(tourney_id):
 
 @app.route('/api/tournaments/<tourney_id>/export/json', methods=['POST'])
 def export_persisted_tournament_json(tourney_id):
-    uid = _verify_bearer(request)
-    if not uid:
-        return jsonify({'error': 'Unauthorized'}), 401
+    uid, err = _export_uid(request)
+    if err:
+        return err
 
-    records, doc = _fetch_tournament_records(uid, tourney_id)
-    if records is None:
-        return jsonify({'error': 'Tournament data not available'}), 404
+    records, doc, err = _records_in_window(uid, tourney_id)
+    if err:
+        return err
+
+    gate = _export_gate(request, uid, 'tourney')
+    if not gate.ok:
+        return gate.error
 
     import json as _jj
     room     = _re.sub(r'[^A-Za-z0-9]', '', (doc or {}).get('room_name', ''))[:24]
     filename = f"pppoker_{room}_{tourney_id}.json" if room else f"pppoker_tourney{tourney_id}.json"
     data = _jj.dumps(records, indent=2)
+    gate.commit()
     return Response(data, mimetype='application/json',
                     headers={'Content-Disposition': f'attachment; filename={filename}'})
 
@@ -1448,9 +2263,9 @@ def export_persisted_tournament_json(tourney_id):
 @app.route('/api/tournaments/<tourney_id>/export/hand', methods=['POST'])
 def export_persisted_hand(tourney_id):
     _get_admin_db()  # ensure Firebase Admin SDK is initialized before token verification
-    uid = _verify_bearer(request)
-    if not uid:
-        return jsonify({'error': 'Unauthorized'}), 401
+    uid, err = _export_uid(request)
+    if err:
+        return err
 
     body        = request.get_json(force=True, silent=True) or {}
     raw_hand_id = (body.get('hand_id') or '').strip()
@@ -1459,20 +2274,22 @@ def export_persisted_hand(tourney_id):
     if not hand_id:
         return jsonify({'error': 'hand_id required'}), 400
 
-    records, _doc = _fetch_tournament_records(uid, tourney_id)
-    if records is None:
-        return jsonify({'error': 'Tournament data not available'}), 404
+    records, _doc, err = _records_in_window(uid, tourney_id)
+    if err:
+        return err
 
-    match = next(
-        (r for r in records if r.get('summary', {}).get('D', '').replace('-', '') == hand_id),
-        None,
-    )
+    match = _find_hand(records, hand_id)
     if not match:
         return jsonify({'error': f"Hand '{raw_hand_id}' not found."}), 404
+
+    gate = _export_gate(request, uid, 'hand')
+    if not gate.ok:
+        return gate.error
 
     try:
         filepath, _ = export_pokerstars([match], platform=platform,
                                          blind_levels_by_room=_blind_levels_by_room([match]))
+        gate.commit()
         return send_file(
             os.path.abspath(filepath),
             as_attachment=True,
@@ -1486,9 +2303,9 @@ def export_persisted_hand(tourney_id):
 @app.route('/api/tournaments/<tourney_id>/export/json/hand', methods=['POST'])
 def export_persisted_hand_json(tourney_id):
     _get_admin_db()  # ensure Firebase Admin SDK is initialized before token verification
-    uid = _verify_bearer(request)
-    if not uid:
-        return jsonify({'error': 'Unauthorized'}), 401
+    uid, err = _export_uid(request)
+    if err:
+        return err
 
     body        = request.get_json(force=True, silent=True) or {}
     raw_hand_id = (body.get('hand_id') or '').strip()
@@ -1496,20 +2313,22 @@ def export_persisted_hand_json(tourney_id):
     if not hand_id:
         return jsonify({'error': 'hand_id required'}), 400
 
-    records, _doc = _fetch_tournament_records(uid, tourney_id)
-    if records is None:
-        return jsonify({'error': 'Tournament data not available'}), 404
+    records, _doc, err = _records_in_window(uid, tourney_id)
+    if err:
+        return err
 
-    match = next(
-        (r for r in records if r.get('summary', {}).get('D', '').replace('-', '') == hand_id),
-        None,
-    )
+    match = _find_hand(records, hand_id)
     if not match:
         return jsonify({'error': f"Hand '{raw_hand_id}' not found."}), 404
+
+    gate = _export_gate(request, uid, 'hand')
+    if not gate.ok:
+        return gate.error
 
     import json as _jj
     filename = f"pppoker_hand_{raw_hand_id}.json"
     data = _jj.dumps(match, indent=2)
+    gate.commit()
     return Response(data, mimetype='application/json',
                     headers={'Content-Disposition': f'attachment; filename={filename}'})
 
@@ -1940,9 +2759,12 @@ def leaks_api():
     # manual/legacy imports, and play-money games — MTTs included — get imported
     # whenever they show up in the hand history. Both are marked is_mtt=False on
     # the wire so neither can enter a leak report.
+    cutoff = _history_cutoff_ts(uid)
     tourneys = {}
     for doc in db.collection('users').document(uid).collection('tournaments').get():
         d = doc.to_dict()
+        if _is_expired(d, cutoff):
+            continue      # outside the caller's history window — not selectable
         room = d.get('room_name') or ''
         tourneys[doc.id] = {
             'room_key': _norm_room_name(room) or '(unnamed)',
