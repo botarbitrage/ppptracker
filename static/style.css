@@ -399,6 +399,26 @@ body {
 .export-icon-btn:hover { background: rgba(0,230,118,.22); border-color: var(--green); box-shadow: 0 0 10px rgba(0,230,118,.3); color: var(--green); }
 .export-icon-btn img { display: block; border-radius: 3px; }
 
+/* Signed out, the four export icons collapse into one honest label. */
+.signin-export-btn {
+  width: auto;
+  height: auto;
+  gap: 6px;
+  padding: 5px 10px;
+  white-space: nowrap;
+  background: rgba(227,179,65,.08);
+  border-color: rgba(227,179,65,.4);
+  color: var(--yellow);
+  font-size: .72rem;
+  letter-spacing: .02em;
+}
+.signin-export-btn:hover {
+  background: rgba(227,179,65,.2);
+  border-color: var(--yellow);
+  box-shadow: 0 0 10px rgba(227,179,65,.25);
+  color: var(--yellow);
+}
+
 /* ── Section cards ────────────────────────────────────────── */
 .section-card {
   background: var(--panel);
@@ -1591,6 +1611,19 @@ tr.row-flash > td {
   border-color: var(--green);
   background: rgba(0,230,118,.10);
   box-shadow: 0 0 0 1px var(--green) inset;
+}
+
+/* Signed-out Tournament History rows are the way into each tournament's graph,
+   so they need to read as clickable — the signed-in view uses cards for this. */
+.anon-tourney-row { cursor: pointer; }
+.anon-tourney-row:hover > td { background: rgba(0,230,118,.06); }
+.anon-tourney-row:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: -2px;
+}
+.anon-tourney-row.selected > td {
+  background: rgba(0,230,118,.12);
+  box-shadow: inset 0 -1px 0 var(--green), inset 0 1px 0 var(--green);
 }
 
 .tsum-event-stats {

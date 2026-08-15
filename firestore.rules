@@ -14,26 +14,32 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Per-user data — only the owner can read/write, EXCEPT the paid-tier
-    // fields. is_pro/stripe_customer_id gate every Pro feature and are written
-    // by the Stripe webhook through the Admin SDK (which bypasses these rules);
-    // if the client could write them, any signed-in user could grant themselves
-    // Pro from the browser console and skip payment entirely.
-    function paidFields() {
-      return ['is_pro', 'stripe_customer_id'];
+    // Per-user data — only the owner can read/write, EXCEPT the fields the
+    // server owns. is_pro/stripe_customer_id gate every Pro feature and are
+    // written by the Stripe webhook through the Admin SDK (which bypasses these
+    // rules); if the client could write them, any signed-in user could grant
+    // themselves Pro from the browser console and skip payment entirely.
+    //
+    // quota and credits are here for the same reason: they are the free tier's
+    // daily import/export counters and its survey unlocks. A counter the browser
+    // can zero is not a counter, so both are written only by app.py.
+    function serverOnlyFields() {
+      return ['is_pro', 'stripe_customer_id', 'quota', 'credits'];
     }
     match /users/{uid} {
       allow read: if request.auth != null && request.auth.uid == uid;
       // The app seeds a new user doc with is_pro:false on first visit, so
       // create must permit that exact shape — but not a self-granted true,
-      // and not a delete-then-recreate to wash away a cancelled subscription.
+      // not a pre-filled quota or credit balance, and not a delete-then-recreate
+      // to wash away a cancelled subscription or a spent daily allowance.
       allow create: if request.auth != null && request.auth.uid == uid
                     && (!('is_pro' in request.resource.data)
                         || request.resource.data.is_pro == false)
-                    && !('stripe_customer_id' in request.resource.data);
+                    && !request.resource.data.keys()
+                          .hasAny(['stripe_customer_id', 'quota', 'credits']);
       allow update: if request.auth != null && request.auth.uid == uid
                     && !request.resource.data.diff(resource.data)
-                          .affectedKeys().hasAny(paidFields());
+                          .affectedKeys().hasAny(serverOnlyFields());
       allow delete: if false;
     }
 
@@ -41,9 +47,31 @@ service cloud.firestore {
     // only. Deliberately NOT /users/{uid}/{document=**}: under rules_version 2
     // a recursive wildcard also matches zero segments, i.e. the user doc
     // itself, and because rule matches are OR'd that permissive block would
-    // silently re-open the paid-field hole closed above.
+    // silently re-open the server-owned-field hole closed above.
+    //
+    // ad_jtis and survey_completions are carved out for the same reason and
+    // must be excluded *here* rather than only re-matched below: rule matches
+    // are OR'd, so a blanket write on the parent would outvote a stricter rule
+    // on the child.
     match /users/{uid}/{sub}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read, write: if request.auth != null && request.auth.uid == uid
+                         && !(sub in ['ad_jtis', 'survey_completions']);
+    }
+
+    // Spent export unlocks. The whole point of the jti record is that it exists
+    // exactly once, so the account that would benefit from deleting it is the
+    // one account that must not be able to.
+    match /users/{uid}/ad_jtis/{jti} {
+      allow read:  if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // Survey payouts, keyed by the provider's own transaction id — this is what
+    // makes a redelivered postback pay once. Client-deletable would mean one
+    // survey could be cashed in repeatedly.
+    match /users/{uid}/survey_completions/{completionId} {
+      allow read:  if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
     }
 
     // Gamification state — owner-readable, never client-writable. This deliberately
