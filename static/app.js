@@ -1485,10 +1485,25 @@ let _tgXMode      = 'time';   // 'time' | 'level'
 let _tgPlayedOnly = false;    // when true, crop to played hands only
 let _tgState      = null;     // computed chart state shared across toggle updates
 let _tgPinned     = null;     // dataset index of the hand pinned in the hover card
+let _tgCardBox    = null;     // last placed card rect, for drawing its connector
 
 // Hero voluntarily put chips in preflop. `last_street` already encodes this:
 // 'Pre' is a pure fold, every other value means hero played the hand.
 const _tgIsVpip = h => !!h && h.last_street !== 'Pre';
+
+// Played hands losing less than this many BB are dropped from the graph — they
+// are blind-ish folds, not decisions, and they crowd out the spots worth
+// finding. (`_is_vpip` over-counts action types 12/13, see
+// docs/pppoker-action-model.md, so a chunk of these are -0.5BB SB folds that
+// were never really voluntary.) Hovering one still gets you a full card; it
+// just no longer earns a dot or a place in the snap/step order.
+const _TG_DEAD_PL_BB = -0.65;
+function _tgIsNotable(h) {
+  if (!_tgIsVpip(h)) return false;
+  if (!h.big_blind || !h.profit) return true;   // no P/L to judge, or break-even
+  const bb = h.profit / h.big_blind;
+  return !(bb < 0 && bb > _TG_DEAD_PL_BB);
+}
 
 // How far (px) the cursor may sit from a played hand and still snap to it.
 // A 5h graph packs hands 1.5-4px apart, but folds are ~70% of them — snapping
@@ -1706,6 +1721,19 @@ const _TG_PIN_PLUGIN = {
     ctx.moveTo(p.x, p.y);
     ctx.lineTo(p.x, ca.bottom);
     ctx.stroke();
+    // The card gets pushed into clear space, which can leave it well away from
+    // its hand — run a leader to the nearest edge of it so the pairing reads.
+    const box = _tgCardBox;
+    if (box) {
+      const bx = Math.max(box.x, Math.min(p.x, box.x + box.w));
+      const by = Math.max(box.y, Math.min(p.y, box.y + box.h));
+      if (Math.hypot(bx - p.x, by - p.y) > 14) {
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(bx, by);
+        ctx.stroke();
+      }
+    }
     ctx.setLineDash([]);
     ctx.strokeStyle = '#00e676';
     ctx.lineWidth = 2;
@@ -1905,7 +1933,7 @@ function _renderTournamentChart(hands, meta) {
     const h = pointList[i];
     if (!h) { handNums.push(null); continue; }
     handNums.push(++handNo);
-    if (_tgIsVpip(h)) vpipIdx.push(i);
+    if (_tgIsNotable(h)) vpipIdx.push(i);
   }
 
   // Track played range for "played only" zoom
@@ -2035,14 +2063,14 @@ function _tgBuildChart() {
   const dotRadius = di => ctx => {
     if (di !== _tgDotSeries()) return 0;
     const h = pointList[ctx.dataIndex];
-    if (!_tgIsVpip(h)) return 0;
+    if (!_tgIsNotable(h)) return 0;
     return h.last_street === 'SD' ? 3.2 : 2.2;
   };
   const dotHoverRadius = di => ctx => {
     if (di !== _tgDotSeries()) return 0;
     const h = pointList[ctx.dataIndex];
     if (!h) return 0;
-    return _tgIsVpip(h) ? (h.last_street === 'SD' ? 7 : 6) : 2.5;
+    return _tgIsNotable(h) ? (h.last_street === 'SD' ? 7 : 6) : 2.5;
   };
   const dotColor = seriesColor => ctx => {
     const h = pointList[ctx.dataIndex];
@@ -2050,7 +2078,7 @@ function _tgBuildChart() {
     return h.profit > 0 ? '#00e676' : '#ff5252';
   };
   const dotHitRadius = di => ctx =>
-    (di === _tgDotSeries() && _tgIsVpip(pointList[ctx.dataIndex])) ? 10 : 0;
+    (di === _tgDotSeries() && _tgIsNotable(pointList[ctx.dataIndex])) ? 10 : 0;
 
   Chart.register(_TG_REFLINES_PLUGIN, _TG_MARKERS_PLUGIN, _TG_PIN_PLUGIN);
   Chart.Interaction.modes.tgVpip = _tgVpipMode;
@@ -2223,8 +2251,10 @@ function _tgTooltipExternal(context) {
 
 function _tgPin(idx) {
   _tgPinned = idx;
-  if (_tgChart) { _tgChart.options.tgPinnedIndex = idx; _tgChart.update('none'); }
+  // Card first: placing it sets _tgCardBox, which the pin plugin needs in order
+  // to draw the leader on this same frame rather than one behind.
   _tgShowCard(idx, true);
+  if (_tgChart) { _tgChart.options.tgPinnedIndex = idx; _tgChart.update('none'); }
 }
 
 function _tgUnpin() {
@@ -2238,12 +2268,22 @@ function _tgStepPin(dir) {
   const s = _tgState;
   if (!s || _tgPinned == null) return;
   const at = s.vpipIdx.indexOf(_tgPinned);
-  const next = at === -1 ? null : s.vpipIdx[at + dir];
-  if (next != null) _tgPin(next);
+  if (at !== -1) {
+    const next = s.vpipIdx[at + dir];
+    if (next != null) _tgPin(next);
+    return;
+  }
+  // Pinned hand isn't in the stepped set — it was reached by the nearest-point
+  // fallback. Step from where it would sit rather than dead-ending.
+  let after = s.vpipIdx.findIndex(i => i > _tgPinned);
+  if (after === -1) after = s.vpipIdx.length;
+  const target = dir > 0 ? s.vpipIdx[after] : s.vpipIdx[after - 1];
+  if (target != null) _tgPin(target);
 }
 
 function _tgHideCard() {
   document.getElementById('tg-hand-card')?.classList.remove('show', 'pinned');
+  _tgCardBox = null;
 }
 
 // Keeps the pinned card glued to its point after an axis change (Chips/BBs, PH,
@@ -2262,25 +2302,91 @@ function _tgShowCard(idx, pinned) {
   card.classList.add('show');
   card.classList.toggle('pinned', !!pinned);
   _tgPositionCard(card, p.x, p.y);
+  if (pinned && _tgChart) _tgChart.render();   // redraw the leader to the new box
 }
 
+// Pixel positions of every plotted point on the visible series, for scoring how
+// much of the curve a candidate card position would bury.
+function _tgInkPoints() {
+  const s = _tgState, chart = _tgChart;
+  if (!s || !chart) return [];
+  const xs = chart.scales.x, ca = chart.chartArea;
+  const series = [];
+  if (!chart.data.datasets[0].hidden && _tgScaleOn(chart.scales.yLeft)) {
+    series.push([s.chipDataset, chart.scales.yLeft]);
+  }
+  if (!chart.data.datasets[1].hidden && _tgScaleOn(chart.scales.yRight)) {
+    series.push([s.bbDataset, chart.scales.yRight]);
+  }
+  const out = [];
+  for (const [data, ys] of series) {
+    for (let i = 0; i < data.length; i++) {
+      const d = data[i];
+      if (d.y == null) continue;
+      const x = xs.getPixelForValue(d.x);
+      if (x < ca.left || x > ca.right) continue;
+      out.push({ x, y: ys.getPixelForValue(d.y) });
+    }
+  }
+  return out;
+}
+
+// Remembers which slot was chosen last, so scrubbing along the line doesn't
+// make the card flap between above/below on every pixel of mouse travel.
+let _tgCardSlot = null;
+
+// Place the card where it hides the least curve. A card parked over a dense
+// stretch of the line covers the very thing you are reading it against, so we
+// score a handful of candidate slots by how many plotted points fall under each
+// and take the cheapest, with only a mild pull back toward the point. The ring
+// and connector drawn by _TG_PIN_PLUGIN keep it tied to its hand when it has to
+// sit well away.
 function _tgPositionCard(card, px, py) {
   const wrap = card.parentElement;
   const W = wrap.clientWidth, H = wrap.clientHeight;
   const cw = card.offsetWidth, ch = card.offsetHeight;
-  // Hands bunch up toward the right of a long graph, so an unclamped card
-  // spills out of the panel exactly where it is needed most.
-  const left = Math.max(4, Math.min(px - cw / 2, W - cw - 4));
-  let top = py - ch - 14;
-  if (top < 4) top = Math.min(py + 16, H - ch - 4);
-  card.style.left = `${left}px`;
-  card.style.top  = `${Math.max(4, top)}px`;
+  const PAD = 6, GAP = 16;
+  const ca = _tgChart ? _tgChart.chartArea : { top: 0, bottom: H };
+  const clampX = v => Math.max(PAD, Math.min(v, W - cw - PAD));
+  const clampY = v => Math.max(PAD, Math.min(v, H - ch - PAD));
+
+  const ink = _tgInkPoints();
+  const xOpts = [
+    ['c', px - cw / 2], ['r', px + GAP], ['l', px - cw - GAP],
+    ['R', px + GAP * 3], ['L', px - cw - GAP * 3],
+  ];
+  const yOpts = [
+    ['a', py - ch - GAP], ['b', py + GAP],
+    ['t', ca.top + PAD], ['m', ca.bottom - ch - PAD],
+  ];
+
+  let best = null;
+  for (const [xk, ox] of xOpts) {
+    for (const [yk, oy] of yOpts) {
+      const x = clampX(ox), y = clampY(oy);
+      let covered = 0;
+      for (let i = 0; i < ink.length; i++) {
+        const p = ink[i];
+        if (p.x >= x && p.x <= x + cw && p.y >= y && p.y <= y + ch) covered++;
+      }
+      const dx = (x + cw / 2) - px, dy = (y + ch / 2) - py;
+      // Covering the curve dominates; distance only breaks ties between
+      // equally clear slots. Staying put beats a marginally better neighbour.
+      let score = covered * 60 + Math.hypot(dx, dy);
+      if (`${xk}${yk}` === _tgCardSlot) score -= 90;
+      if (!best || score < best.score) best = { x, y, score, slot: `${xk}${yk}` };
+    }
+  }
+
+  _tgCardSlot = best.slot;
+  card.style.left = `${best.x}px`;
+  card.style.top  = `${best.y}px`;
+  _tgCardBox = { x: best.x, y: best.y, w: cw, h: ch };
 }
 
 function _tgCardHtml(idx, pinned) {
   const s = _tgState;
   const h = s.pointList[idx];
-  const elapsed = _tgFmtElapsed((h.ts - s.tournStart) + s.entryOffset);
   const lvl = h.level != null ? h.level : _tgInferLevel(h.big_blind, s.roomName, h.chip_stack);
   const cards = (h.hole_cards || []).map(renderCard).join('');
   const bb = h.chip_stack != null && h.big_blind
@@ -2289,15 +2395,15 @@ function _tgCardHtml(idx, pinned) {
   const head = `
     <div class="tg-card-head">
       <span class="tg-card-hand">Hand #${s.handNums[idx]}</span>
-      <span class="tg-card-meta">+${elapsed}${lvl ? ' · L' + lvl : ''}</span>
+      ${lvl ? `<span class="tg-card-meta">L${lvl}</span>` : ''}
       ${pinned ? '<button type="button" class="tg-card-close" data-tg-close title="Close (Esc)">✕</button>' : ''}
     </div>`;
 
+  // No position/street pills — the card is a quick read off the curve, and the
+  // chips/BBs/P/L line plus the cards carry it. Both are still in the table row.
   const badges = `
     <div class="tg-card-badges">
       ${cards || '<span class="tg-card-dim">—</span>'}
-      ${posBadge(h.position)}
-      ${streetBadge(h.last_street)}
     </div>`;
 
   const stats = `
