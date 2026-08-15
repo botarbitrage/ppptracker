@@ -25,8 +25,17 @@ Two things to remember when shipping:
 - **Verify prod actually serves the new build** rather than assuming the merge
   was enough: load the site and confirm the bumped `?v=N` appears.
 
-To re-publish the rules without changing them, run the **Deploy Firestore rules**
-workflow from the Actions tab.
+To re-publish the rules without changing them — say someone edited them in the
+Firebase console and you want the repo's version back — run the **Deploy
+Firestore rules** workflow from the Actions tab.
+
+If GitHub Actions itself is unavailable, the rules deploy is one command from a
+checkout that has them (mind which branch you're on — the repo root usually sits
+on `main`):
+
+```bash
+firebase deploy --only firestore:rules --project pppoker-analyser
+```
 
 ### CI secrets
 
