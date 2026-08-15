@@ -2127,7 +2127,8 @@ def _tournament_detail(records, doc):
     reused later by an asynchronous Cowork skill.
     """
     meta = {k: (doc or {}).get(k) for k in
-            ['room_name', 'earliest_ts', 'last_chips', 'first_chips', 'finish_busted']}
+            ['room_name', 'earliest_ts', 'last_chips', 'first_chips',
+             'finish_busted', 'max_players']}
 
     cfg = _resolve_tournament_cfg(meta.get('room_name') or '')
     analysis = analyze_tournament(records, cfg)

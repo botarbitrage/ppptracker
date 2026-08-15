@@ -2031,14 +2031,14 @@ tr.row-flash > td {
   display: none;
   /* Fixed, not min/max: the card is repositioned on every mousemove, and a
      width that tracked its contents would make it twitch as you scrub. */
-  width: 218px;
-  padding: 9px 11px 10px;
+  width: 184px;
+  padding: 7px 8px 7px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: rgba(13,17,23,.95);
   box-shadow: 0 4px 18px rgba(0,0,0,.55);
   font-family: var(--font-body);
-  font-size: .78rem;
+  font-size: .74rem;
   color: var(--text);
   pointer-events: none;
 }
@@ -2049,27 +2049,38 @@ tr.row-flash > td {
   box-shadow: 0 4px 18px rgba(0,0,0,.55), 0 0 0 1px rgba(0,230,118,.12);
 }
 
-.tg-card-head {
-  display: flex;
+/* Top-right identifier pill (Hand # · L#) — floats over the card so the badges
+   below stay visually centred. */
+.tg-card-head-pill {
+  position: absolute;
+  top: 5px;
+  right: 6px;
+  display: inline-flex;
   align-items: baseline;
-  gap: 6px;
-  margin-bottom: 6px;
+  gap: 4px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(0,230,118,.10);
+  border: 1px solid rgba(0,230,118,.28);
+  line-height: 1.2;
 }
 .tg-card-hand {
   font-family: var(--font-head);
   font-weight: 700;
-  font-size: .8rem;
+  font-size: .68rem;
   color: var(--green);
   letter-spacing: .02em;
 }
-.tg-card-meta { color: var(--muted); font-size: .72rem; }
+.tg-card-meta { color: var(--muted); font-size: .62rem; }
 .tg-card-close {
-  margin-left: auto;
-  padding: 0 2px;
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  padding: 0 4px;
   border: 0;
   background: none;
   color: var(--muted);
-  font-size: .78rem;
+  font-size: .76rem;
   line-height: 1;
   cursor: pointer;
 }
@@ -2078,14 +2089,14 @@ tr.row-flash > td {
 .tg-card-badges {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
-  margin-bottom: 8px;
+  margin: 4px 0 6px;
 }
-/* Cards left, position right — the two ends of a fixed-width row. */
+/* Position pill sits beside the centred hole-cards. */
 .tg-card-badges .pos-badge {
-  margin-left: auto;
-  min-width: 3.7rem;
-  font-size: .72rem;
+  min-width: 3.4rem;
+  font-size: .68rem;
 }
 .tg-card-badges .playing-card:last-of-type { margin-right: 0; }
 .tg-card-dim { color: var(--muted); }
@@ -2096,7 +2107,7 @@ tr.row-flash > td {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2px;
-  font-size: .76rem;
+  font-size: .7rem;
 }
 .tg-card-stats span { white-space: nowrap; }
 .tg-card-stats span + span  { text-align: center; }
@@ -2104,7 +2115,7 @@ tr.row-flash > td {
 .tg-card-stats i {
   display: block;
   font-style: normal;
-  font-size: .64rem;
+  font-size: .58rem;
   text-transform: uppercase;
   letter-spacing: .05em;
   color: var(--muted);

@@ -25,10 +25,14 @@ const _PENDING_SESSION_KEY = 'pppha_pending_session';
 // PRO_ONLY_ELS   → visible to Pro users; hidden for non-Pro (note: sections managed
 //                  by _loadHistory() are NOT listed here — they handle their own state).
 const FREE_ONLY_ELS = [
-  'tier-compare',       // Free vs Pro marketing cards
 ];
 const PRO_ONLY_ELS = [
   // (tournament sections managed separately by _loadHistory)
+];
+// Visible only to anon (signed-out) visitors — signed-in free users have already
+// made the sign-in decision and don't need the marketing pitch again.
+const ANON_ONLY_ELS = [
+  'tier-compare',       // Free vs Pro marketing cards
 ];
 
 // Firebase handles — populated by _initFirebase()
@@ -581,17 +585,31 @@ function showImportSuccess(data) {
   const spinner = document.getElementById('loading-spinner');
   const text    = document.getElementById('loading-text');
   const name    = data.player?.name || 'Player';
-  const hands   = data.new_hands ?? 0;
-  const tours   = data.new_tourney_count ?? 0;
+  const newHands  = data.new_hands ?? 0;
+  const total     = data.total_fetched ?? 0;
+  const tourCount = data.new_tourney_count || (data.tournaments?.length || 0);
   spinner.classList.add('d-none');
   text.style.color = 'var(--green)';
   _importCount++;
-  const greeting = _importCount > 1 ? 'Welcome back' : 'Welcome';
-  text.innerHTML =
-    `✓ ${greeting}, <strong>${name}</strong>! ` +
-    `<strong>${hands}</strong> hands loaded` +
-    (tours ? ` across <strong>${tours}</strong> tournament${tours !== 1 ? 's' : ''}` : '') +
-    `.`;
+  const tourFrag = tourCount
+    ? ` across <strong>${tourCount}</strong> tournament${tourCount !== 1 ? 's' : ''}`
+    : '';
+
+  let html;
+  if (data.tier === 'anon') {
+    html =
+      `✓ Analysed <strong>${total}</strong> hands${tourFrag}. ` +
+      `<button class="btn-link-inline" onclick="showSignInModal('Sign in to save your hands.')">Sign in to save them.</button>`;
+  } else if (newHands > 0) {
+    html =
+      `✓ Welcome, <strong>${name}</strong>! ` +
+      `<strong>${newHands}</strong> new hands loaded${tourFrag}.`;
+  } else {
+    html =
+      `✓ Welcome back, <strong>${name}</strong>! ` +
+      `<strong>${total}</strong> hands re-analysed (all already saved).`;
+  }
+  text.innerHTML = html;
   box.classList.remove('d-none');
 }
 
@@ -1136,13 +1154,24 @@ const _LOCK_ICON_SVG =
   `stroke="var(--yellow)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">` +
   `<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
 
-/** Renders the Export All Hands container — real buttons for Pro, blurred gate for free. */
+// Signed-in-wall for the Export All Hands section — same visual treatment as the
+// Pro-only wall, but the pitch is "sign in" rather than "upgrade".
+const _SIGNIN_EXPORT_ALL_WRAP_HTML =
+  `<div class="export-gate-wrap signin-export-all-wrap">` +
+  `<div class="tourney-gate-blur" aria-hidden="true">${_EXPORT_ALL_BTNS_HTML}</div>` +
+  `<div class="tourney-gate-overlay">` +
+  _LOCK_ICON_SVG +
+  `<span class="tourney-gate-label">Sign in to export</span>` +
+  `<button class="tourney-gate-btn" onclick="showSignInModal('Sign in to export your hands — it stays free.')">Sign in</button>` +
+  `</div></div>`;
+
+/** Renders the Export All Hands container — real buttons for Pro, sign-in wall for anon, Pro upsell for signed-in free. */
 function _renderExportAllSection() {
   const el = document.getElementById('export-all-container');
   if (!el) return;
   if (isPro()) {
     el.innerHTML = _EXPORT_ALL_BTNS_HTML;
-  } else {
+  } else if (isSignedIn()) {
     el.innerHTML =
       `<div class="export-gate-wrap">` +
       `<div class="tourney-gate-blur" aria-hidden="true">${_EXPORT_ALL_BTNS_HTML}</div>` +
@@ -1151,6 +1180,8 @@ function _renderExportAllSection() {
       `<span class="tourney-gate-label">Export All Hands — Pro only</span>` +
       `<button class="tourney-gate-btn" onclick="showUpgradeModal('export')">${_pricingCta()}</button>` +
       `</div></div>`;
+  } else {
+    el.innerHTML = _SIGNIN_EXPORT_ALL_WRAP_HTML;
   }
 }
 
@@ -1168,7 +1199,8 @@ function _renderExportAllSection() {
  * including the failure ones (see _resolveTierUI).
  */
 function _applyTierVisibility() {
-  const pro = isPro();
+  const pro  = isPro();
+  const anon = currentTier() === 'anon';
   FREE_ONLY_ELS.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -1179,6 +1211,12 @@ function _applyTierVisibility() {
     const el = document.getElementById(id);
     if (!el) return;
     el.style.display = pro ? '' : 'none';
+    el.classList.remove('tier-pending');
+  });
+  ANON_ONLY_ELS.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = anon ? '' : 'none';
     el.classList.remove('tier-pending');
   });
 }
@@ -1537,8 +1575,7 @@ function _renderPlayerExportAll() {
   if (!window._lastData) { wrap.classList.add('d-none'); return; }
   if (isPro()) {
     btns.innerHTML = _EXPORT_ALL_BTNS_HTML;
-    wrap.classList.remove('d-none');
-  } else {
+  } else if (isSignedIn()) {
     btns.innerHTML =
       `<div class="export-gate-wrap" style="min-height:auto">` +
       `<div class="tourney-gate-blur" aria-hidden="true">${_EXPORT_ALL_BTNS_HTML}</div>` +
@@ -1547,8 +1584,10 @@ function _renderPlayerExportAll() {
       `<span class="tourney-gate-label">Pro only</span>` +
       `<button class="tourney-gate-btn" onclick="showUpgradeModal('export')">${_pricingCta()}</button>` +
       `</div></div>`;
-    wrap.classList.remove('d-none');
+  } else {
+    btns.innerHTML = _SIGNIN_EXPORT_ALL_WRAP_HTML;
   }
+  wrap.classList.remove('d-none');
 }
 
 /**
@@ -1817,6 +1856,12 @@ function _tgIsNotable(h) {
 // to the played ones only is what makes a single hand reachable with a mouse.
 const TG_SNAP_PX = 14;
 
+// Vertical dead-zone (px): folds only fire the hand-card when the cursor is
+// this close to the curve. Keeps the Stage line at the top of the plot readable
+// without stripping the "scrub anywhere for a stack reading" feature — snapped
+// played hands ignore this and always show, since aiming at a marker is intent.
+const TG_VDEAD_PX = 50;
+
 // Tournament configs: ITM bubble / expected-end hours from tournament start
 const _TG_CFGS = {
   'DEEP FREEZE':  { itmH: 4.0, endH: 5.5, lateRegLevels: 14, levelDurRebuyMin: null, levelDurMin: 12 },
@@ -2077,16 +2122,25 @@ function _tgVpipMode(chart, e, options, useFinalPosition) {
   // getRelativePosition tells them apart — don't read e.x directly.
   const pos = Chart.helpers?.getRelativePosition
     ? Chart.helpers.getRelativePosition(e, chart)
-    : ('native' in e ? e : { x: e.offsetX });
+    : ('native' in e ? e : { x: e.offsetX, y: e.offsetY });
   const snap = _tgNearestVpip(chart, pos.x);
-  if (snap == null || (items.length && items[0].index === snap)) return items;
-  const out = [];
-  chart.data.datasets.forEach((ds, di) => {
-    if (ds.hidden) return;
-    const el = chart.getDatasetMeta(di).data?.[snap];
-    if (el) out.push({ element: el, datasetIndex: di, index: snap });
-  });
-  return out.length ? out : items;
+  // Snapped played hands always win — the user has aimed at that marker.
+  if (snap != null && !(items.length && items[0].index === snap)) {
+    const out = [];
+    chart.data.datasets.forEach((ds, di) => {
+      if (ds.hidden) return;
+      const el = chart.getDatasetMeta(di).data?.[snap];
+      if (el) out.push({ element: el, datasetIndex: di, index: snap });
+    });
+    if (out.length) return out;
+  }
+  // No snap: only surface the fold-hover if the cursor is near the curve.
+  if (snap == null && items.length && pos.y != null) {
+    const idx = items[0].index;
+    const el = chart.getDatasetMeta(0).data?.[idx];
+    if (el && Math.abs(pos.y - el.y) > TG_VDEAD_PX) return [];
+  }
+  return items;
 }
 
 function _tgLevelFromElapsed(elapsedSecs, cfg) {
@@ -2737,11 +2791,11 @@ function _tgCardHtml(idx, pinned) {
     ? (h.chip_stack / h.big_blind).toFixed(1) : '—';
 
   const head = `
-    <div class="tg-card-head">
-      <span class="tg-card-hand">Hand #${s.handNums[idx]}</span>
+    <div class="tg-card-head-pill">
+      <span class="tg-card-hand">#${s.handNums[idx]}</span>
       ${lvl ? `<span class="tg-card-meta">L${lvl}</span>` : ''}
-      ${pinned ? '<button type="button" class="tg-card-close" data-tg-close title="Close (Esc)">✕</button>' : ''}
-    </div>`;
+    </div>
+    ${pinned ? '<button type="button" class="tg-card-close" data-tg-close title="Close (Esc)">✕</button>' : ''}`;
 
   // Position earns its place — it is what the cards mean. Street does not: the
   // dot's size already says whether the hand reached showdown, and the exact
@@ -2911,11 +2965,16 @@ function _selectAnonTourneyDetail(tid, rowEl) {
   window._lastTourneyDetail = { tid, hands, meta };
 
   const hint = document.getElementById('tourney-detail-hint');
-  if (hint) {
-    hint.textContent = `${hands.length} hand${hands.length === 1 ? '' : 's'}`
-      + (meta.room_name ? ` · ${meta.room_name}` : '');
-  }
+  if (hint) hint.innerHTML = _tourneyDetailHintHtml(hands.length, meta);
   if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Hands count + K-max as pills — used by both anon and signed-in headers.
+function _tourneyDetailHintHtml(handsCount, meta) {
+  const maxP = Number(meta?.max_players) || 0;
+  const hands = `<span class="tsum-stat-pill">${handsCount} hand${handsCount === 1 ? '' : 's'}</span>`;
+  const seats = maxP > 0 ? ` <span class="tsum-stat-pill">${maxP}-max</span>` : '';
+  return hands + seats;
 }
 
 /** Loads one tournament's hands into the Tournament Details table; clicking the same card again clears it. */
@@ -2968,10 +3027,7 @@ async function _selectTourneyDetail(tid, cardEl) {
     renderHandsTable(hands, 'tourney-detail-tbody', { showExport: true, exportTid: tid });
     _renderTournamentChart(hands, meta);
     window._lastTourneyDetail = { tid, hands, meta };   // so a tz change can re-render this graph
-    if (hint) {
-      const dateLabel = cardEl ? (cardEl.querySelector('.tsum-event-date')?.textContent || '') : '';
-      hint.textContent = `${hands.length} hand${hands.length === 1 ? '' : 's'}${dateLabel ? ' · ' + dateLabel : ''}`;
-    }
+    if (hint) hint.innerHTML = _tourneyDetailHintHtml(hands.length, meta);
     if (section) {
       section.scrollIntoView({ behavior: 'smooth', block: 'start' });
       const card = section.querySelector('.section-card');
@@ -3007,17 +3063,18 @@ function exportPersistedTournamentJson(tourneyId, btn) {
 /* ── Export Panel ────────────────────────────────────────── */
 
 function renderHandStats(data) {
-  const newHands = data.new_hands ?? 0;
-  // Only use new_stats/new_validation — never fall back to all-time stats for pills
-  const v = (newHands > 0 ? data.new_validation : null) || {};
-  const s = (newHands > 0 ? data.new_stats      : null) || {};
+  // data.stats / data.validation are scoped to THIS import's records — accurate
+  // for anon (nothing persisted) and for signed-in re-imports of already-saved
+  // hands, where data.new_hands is 0 but real data is still on screen.
+  const s = data.stats || {};
+  const v = data.validation || {};
   const _set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val ?? '—'; };
-  _set('hs-hands', newHands);
-  _set('hs-flop',  newHands > 0 ? s.hands_hero_saw_flop  : 0);
-  _set('hs-won',   newHands > 0 ? v.hands_won             : 0);
-  _set('hs-turn',  newHands > 0 ? s.hands_hero_saw_turn  : 0);
-  _set('hs-river', newHands > 0 ? s.hands_hero_saw_river : 0);
-  _set('hs-sd',    newHands > 0 ? s.hands_at_showdown    : 0);
+  _set('hs-hands', s.total_hands ?? 0);
+  _set('hs-flop',  s.hands_hero_saw_flop  ?? 0);
+  _set('hs-won',   v.hands_won            ?? 0);
+  _set('hs-turn',  s.hands_hero_saw_turn  ?? 0);
+  _set('hs-river', s.hands_hero_saw_river ?? 0);
+  _set('hs-sd',    s.hands_at_showdown    ?? 0);
   const row = document.getElementById('loaded-hands-row');
   if (row) row.classList.remove('d-none');
 }

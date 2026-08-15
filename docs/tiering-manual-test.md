@@ -4,6 +4,25 @@
 path against a real one, which is the only way to see the transactions, the
 security rules and the CPX postback actually behave.
 
+## Findings from 2026-08-15 prod test — all fixed in this PR
+
+1. **Anon banner + Hand pill zeroed out.** `showImportSuccess` / `renderHandStats`
+   now read `data.stats` (current-import scope), and the banner has three copy
+   variants for anon / signed-in-new / signed-in-re-import.
+2. **Export All wall.** Signed-out users no longer see the "Pro only" upsell —
+   they get a "Sign in to export" wall on both the top section and the player
+   badge. Signed-in free still gets the Pro upsell.
+3. **Hand-card blocked the Stage line.** Added a 50px vertical dead-zone: folds
+   only surface the card when the cursor is near the curve; snapped played hands
+   always win.
+4. **Hand-card layout.** Smaller footprint, hole cards centred, `#hand · L#`
+   moved to a top-right pill.
+5. **Tournament header.** Hands count + `K-max` render as pills; the duplicated
+   tournament name is gone. `_tournament_detail` meta now surfaces `max_players`
+   for the anon path.
+6. **Tier-compare card.** Moved from `FREE_ONLY_ELS` to a new `ANON_ONLY_ELS`
+   list so signed-in free users don't see the sign-in pitch again.
+
 ## Setup
 
 ```bash
