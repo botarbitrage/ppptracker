@@ -29,6 +29,14 @@ No secrets, keys, or credential values appear anywhere in this document.
 - **Not fixed / out of scope:** `is_pko` is still not read by the badge renderer (it drives other logic elsewhere, e.g. exports); left as-is since the string-based badge now correctly covers MKO. If a tournament's `type` field is ever something other than a literal `"MKO"`/`"PKO"`/`"SAT"` substring, it will still fall through to MTT — that's a pre-existing design (free-text `type` field), not something introduced here.
 
 ### 1.2 — Cross-user hand-data leak via shared in-memory session state — **[FIXED IN THIS PR]**
+
+> **Superseded by the tiered-access work.** The `_session_records` dict described
+> below no longer exists: process memory could not survive gunicorn's multi-worker
+> model either way. A signed-out import is now parked in Cloud Storage under a
+> signed token (`anon_sessions/{token}.json`, 1h TTL), and every export reads the
+> caller's own persisted tournaments. The "verify exports don't cross over"
+> smoke test below still applies. See `docs/firestore-schema.md`.
+
 - **Where:** `app.py` — was a single process-global `_session_records = None` (previously line 22-23), written unconditionally by `POST /api/analyze` with no auth check, and read by six export endpoints (`/api/export/hand`, `/api/export/tournament`, `/api/export/pokerstars`, `/api/export/json/all`, `/api/export/json/tournament`, `/api/export/json/hand`) that also had no auth or ownership check.
 - **What was wrong:** `/api/analyze` is intentionally anonymous (paste-a-replay-link, no login required — that's a real free-tier feature, not an oversight). But because the imported hand data was stored in one shared global with no per-caller scoping, whichever user's import ran most recently was the data every subsequent export call — from any browser, any user — would receive. Two people using the app around the same time (not even concurrently — just sequentially within the same worker's lifetime) would leak one user's imported PPPoker hand history to the other via the export endpoints. Requiring Firebase auth was **not** the right fix here since it would break the intentional anonymous flow.
 - **Fix applied:** Reused the app's existing per-browser `session_id` (`static/app.js` `getSessionId()`, already used to key anonymous `guests/{session_id}` usage docs in Firestore — same trust model, nothing new invented). `_session_records` is now a dict keyed by that `session_id`, sent by the client on `/api/analyze` and all seven export calls; the backend rejects analyze calls missing a `session_id` and looks up `_session_records.get(session_id)` (falling back to the same "please import first" error) instead of a bare global. A simple bound (`_SESSION_RECORDS_MAX = 200`, oldest-evicted) prevents unbounded memory growth from abandoned sessions.

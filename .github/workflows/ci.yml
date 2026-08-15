@@ -32,3 +32,4 @@ jobs:
           python test_admin_users.py
           python test_pricing_refs.py
           python test_gamification.py
+          python test_tiering.py

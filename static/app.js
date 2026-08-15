@@ -4,9 +4,20 @@ let _importCount = 0;   // tracks how many times Import has been successfully us
 
 /* ── Freemium tier helpers ────────────────────────────────── */
 
-const FREE_HAND_LIMIT   = 30;
-const FREE_EXPORT_LIMIT = 5;   // single-hand exports per calendar day (free tier)
-const _SESSION_KEY      = 'pppha_session_id';
+// These mirror the server's constants in app.py — they only shape the copy the
+// user reads. Every limit is enforced server-side against Firestore; nothing here
+// grants anything.
+const FREE_HAND_LIMIT            = 30;   // hands shown per table
+const FREE_HISTORY_DAYS          = 7;
+const FREE_IMPORTS_PER_DAY       = 3;
+const FREE_HAND_EXPORTS_PER_DAY  = 5;
+const FREE_TOURNEY_EXPORTS_DAY   = 1;
+
+const _SESSION_KEY         = 'pppha_session_id';
+// An import made while signed out lives on the server for an hour; this is the
+// claim ticket for it. sessionStorage, not localStorage: it belongs to this tab's
+// visit, and a stale ticket in another tab would claim someone else's import.
+const _PENDING_SESSION_KEY = 'pppha_pending_session';
 
 // ── Tier-gated UI element lists ────────────────────────────────────────────────
 // Add/remove IDs here to control which elements are shown per tier.
@@ -26,9 +37,10 @@ let _db          = null;
 let _auth        = null;
 let _currentUser = null;  // firebase.User or null
 
-// In-memory freemium state — loaded from Firestore on auth change
-// Defaults to free tier until Firestore responds (safe fallback)
-let _userState = { is_pro: false, exports_today: 0, last_export_date: '' };
+// In-memory freemium state — loaded from Firestore on auth change.
+// Defaults to free tier until Firestore responds (safe fallback). Only is_pro
+// lives here now: every counter is server-side, in users/{uid}.quota.
+let _userState = { is_pro: false };
 
 function getSessionId() {
   let id = localStorage.getItem(_SESSION_KEY);
@@ -48,49 +60,33 @@ function isPro() {
   return _userState.is_pro === true;
 }
 
-function _todayStr() {
-  return new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
+function isSignedIn() {
+  return !!_currentUser;
 }
 
-function checkExportQuota() {
-  if (isPro()) return true;
-  const today = _todayStr();
-  if (_userState.last_export_date !== today) return true;
-  return (_userState.exports_today || 0) < FREE_EXPORT_LIMIT;
+/** 'anon' | 'free' | 'pro' — the same three tiers the server resolves. */
+function currentTier() {
+  if (!isSignedIn()) return 'anon';
+  return isPro() ? 'pro' : 'free';
 }
 
-function consumeExportQuota() {
-  if (isPro()) return;
-  const today = _todayStr();
-  // Update in-memory state synchronously so subsequent gate checks are correct
-  if (_userState.last_export_date !== today) {
-    _userState.exports_today    = 0;
-    _userState.last_export_date = today;
-  }
-  _userState.exports_today = (_userState.exports_today || 0) + 1;
-  // Persist to Firestore async (non-blocking)
-  _trackEvent('export_clicked', { allowed: true });
-  if (_db) {
-    const ref = _getUserDocRef();
-    if (ref) ref.set({
-      exports_today:    _userState.exports_today,
-      last_export_date: today,
-      last_seen:        firebase.firestore.FieldValue.serverTimestamp(),
-    }, { merge: true }).catch(e => console.warn('Firestore quota update failed:', e));
-  }
-  _renderExportCounter();
-}
+// Daily counters used to live here, in localStorage and a client-written
+// Firestore field. They are server-side now (users/{uid}.quota): a counter the
+// browser owns is a counter the browser can reset.
+const _UPGRADE_REASONS = {
+  export:        "You've used your exports for today. Upgrade to Pro for unlimited daily exports.",
+  hands:         `Free accounts see only the last ${FREE_HAND_LIMIT} hands. Upgrade to Pro for unlimited history.`,
+  tourney:       'Tournament exports are limited on the free plan.',
+  import_quota:  `That's all ${FREE_IMPORTS_PER_DAY} imports for today. Upgrade to Pro for unlimited imports.`,
+  hand_quota:    `That's all ${FREE_HAND_EXPORTS_PER_DAY} hand exports for today. Upgrade to Pro for unlimited exports.`,
+  tourney_quota: `Free accounts get ${FREE_TOURNEY_EXPORTS_DAY} tournament export a day. Upgrade to Pro for unlimited exports.`,
+  full_session:  'Exporting a whole session in one file is a Pro feature.',
+  history:       `Free accounts keep ${FREE_HISTORY_DAYS} days of history. Upgrade to Pro to keep everything.`,
+};
 
 function showUpgradeModal(reason) {
   const reasonEl = document.getElementById('pro-modal-reason');
-  if (reasonEl) {
-    const msgs = {
-      export: "You've used your free export for today. Upgrade to Pro for unlimited daily exports.",
-      hands:  "Free accounts see only the last 30 hands. Upgrade to Pro for unlimited history.",
-      tourney:"Tournament exports are a Pro feature.",
-    };
-    reasonEl.textContent = msgs[reason] || '';
-  }
+  if (reasonEl) reasonEl.textContent = _UPGRADE_REASONS[reason] || '';
   // Reset coming-soon banner and button
   const cs  = document.getElementById('pro-coming-soon');
   const btn = document.getElementById('pro-upgrade-btn');
@@ -137,6 +133,262 @@ function handleUpgradeClick(tier = 'pro') {
 // activateProDev()/deactivateProDev() removed: they wrote is_pro straight from
 // the client, which the Firestore rules now reject (see firestore.rules — a
 // client-writable is_pro meant any signed-in user could self-grant Pro).
+
+/** Open the sign-in modal, optionally explaining why it appeared. */
+function showSignInModal(note) {
+  const el = document.getElementById('auth-gate-note');
+  if (el) {
+    el.textContent = note || '';
+    el.classList.toggle('d-none', !note);
+  }
+  _trackEvent('signin_modal_shown', { reason: note ? 'export' : 'manual' });
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('modal-auth')).show();
+}
+
+/* ── Export gate responses ───────────────────────────────── */
+
+/**
+ * Turn a refused export into the right prompt, and return the message to show
+ * on the button.
+ *
+ * The server owns every one of these decisions; this only decides which door to
+ * open. `retry` is re-run verbatim once the user earns their unlock, so callers
+ * must pass a closure that repeats the exact same export.
+ */
+async function _handleExportFailure(res, kind, retry) {
+  const body = await res.json().catch(() => ({}));
+  const err  = body.error || '';
+
+  if (res.status === 401 || err === 'login_required') {
+    showSignInModal('Sign in to export your hands — it takes a few seconds and it stays free.');
+    return 'Sign in to export';
+  }
+  if (err === 'upgrade_required') {
+    showUpgradeModal(body.feature === 'full_session_export' ? 'full_session' : 'export');
+    return 'Pro feature';
+  }
+  if (err === 'history_expired') {
+    showUpgradeModal('history');
+    return `Outside your ${FREE_HISTORY_DAYS}-day history`;
+  }
+  if (err === 'quota_exceeded') {
+    showUpgradeModal(kind === 'tourney' ? 'tourney_quota' : 'hand_quota');
+    return "That's your last one for today";
+  }
+  if (err === 'survey_required') {
+    openSurveyModal(kind, retry);
+    return 'Unlock with a quick survey';
+  }
+  return err || 'Export failed';
+}
+
+/**
+ * Run an export request, handling every tier refusal in one place.
+ * Returns {blob, filename} on success; throws with a user-facing message
+ * otherwise (the gate prompts have already been opened by then).
+ */
+async function _runExport(url, { kind, body, headers, fallbackName }) {
+  const token = _currentUser ? await _currentUser.getIdToken().catch(() => null) : null;
+  const h = Object.assign({ 'Content-Type': 'application/json' }, headers || {});
+  if (token) h['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(url, { method: 'POST', headers: h, body: JSON.stringify(body || {}) });
+  if (!res.ok) {
+    const retry = () => _downloadExport(url, { kind, body, headers, fallbackName });
+    throw new Error(await _handleExportFailure(res, kind, retry));
+  }
+  const cd = res.headers.get('Content-Disposition') || '';
+  const m  = cd.match(/filename[^;=\n]*=([^;\n]*)/);
+  return { blob: await res.blob(),
+           filename: m ? m[1].replace(/['"]/g, '').trim() : fallbackName };
+}
+
+/** _runExport plus the browser download and the status toast. */
+async function _downloadExport(url, opts, btn) {
+  _rowExportStatus(btn, 'loading', opts.loadingText || 'Exporting…');
+  try {
+    const { blob, filename } = await _runExport(url, opts);
+    _triggerDownload(blob, filename);
+    _rowExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
+    return true;
+  } catch (err) {
+    _rowExportStatus(btn, 'err', err.message, 6000);
+    return false;
+  }
+}
+
+/* ── Survey unlocks ──────────────────────────────────────── */
+// A free user earns an export by completing a survey. CPX Research is the paid
+// provider; Tally is the fallback for when CPX has nothing eligible — no revenue,
+// but the user still gets moving and we get product research out of it.
+//
+// The server grants the credit from the provider's server-to-server callback, so
+// the browser's only job is to open the survey and then watch /api/credits until
+// the balance moves.
+
+const _SURVEY_POLL_MS      = 1000;
+const _SURVEY_POLL_TIMEOUT = 60000;
+
+let _surveyState = { kind: null, retry: null, baseline: 0, timer: null, deadline: 0 };
+
+function _surveyStatus(msg, tone) {
+  const el = document.getElementById('survey-status');
+  if (!el) return;
+  el.textContent = msg || '';
+  el.style.color = tone === 'err' ? 'var(--red)'
+                 : tone === 'ok'  ? 'var(--green)' : 'var(--muted)';
+}
+
+async function openSurveyModal(kind, retry) {
+  if (!_currentUser) { showSignInModal('Sign in to unlock exports.'); return; }
+  _surveyState = { kind, retry, baseline: 0, timer: null, deadline: 0 };
+
+  const modalEl = document.getElementById('survey-modal');
+  if (!modalEl) return;
+  const label = document.getElementById('survey-kind-label');
+  if (label) {
+    label.textContent = kind === 'tourney'
+      ? 'one tournament export' : 'one more hand export';
+  }
+  _surveyStatus('Loading a survey…');
+  const frame = document.getElementById('survey-frame');
+  if (frame) frame.removeAttribute('src');
+  const fallbackBtn = document.getElementById('survey-fallback-btn');
+  if (fallbackBtn) fallbackBtn.classList.add('d-none');
+
+  _trackEvent('survey_modal_shown', { kind });
+  bootstrap.Modal.getOrCreateInstance(modalEl).show();
+
+  let cfg = {};
+  try {
+    const token = await _currentUser.getIdToken();
+    const res   = await fetch('/api/survey-config', { headers: { Authorization: `Bearer ${token}` } });
+    cfg = res.ok ? await res.json() : {};
+    _surveyState.baseline = (await _fetchCredits())[kind] || 0;
+  } catch (e) {
+    console.warn('survey config failed', e);
+  }
+  _surveyState.config = cfg;
+
+  if (cfg.cpx && cfg.cpx.app_id) {
+    _surveyShowCpx(cfg.cpx, kind);
+  } else if (cfg.tally_form_url) {
+    _surveyShowTally(cfg.tally_form_url, kind);
+  } else {
+    _surveyStatus('No surveys are available right now — please try again later.', 'err');
+    return;
+  }
+  if (cfg.tally_form_url && fallbackBtn) fallbackBtn.classList.remove('d-none');
+  _surveyStartPolling();
+}
+
+/**
+ * Point the modal's iframe at CPX Research.
+ *
+ * TODO(cpx): confirm the widget path and parameter names against the CPX
+ * dashboard's "Website Script" page before launch. ext_user_id is the Firebase
+ * uid and subid_1 carries which unlock the user is chasing, so the postback in
+ * app.py knows which credit to grant. secure_hash is computed server-side in
+ * /api/survey-config — the app secret must never reach the browser.
+ */
+function _surveyShowCpx(cpx, kind) {
+  const frame = document.getElementById('survey-frame');
+  if (!frame) return;
+  const params = new URLSearchParams({
+    app_id:      cpx.app_id,
+    ext_user_id: cpx.ext_user_id,
+    subid_1:     kind,
+  });
+  if (cpx.secure_hash) params.set('secure_hash', cpx.secure_hash);
+  frame.src = `https://offers.cpx-research.com/index.php?${params.toString()}`;
+  _surveyStatus('Complete the survey to unlock your export.');
+  _trackEvent('survey_provider_shown', { provider: 'cpx', kind });
+}
+
+/**
+ * Swap to the Tally fallback form.
+ *
+ * TODO(tally): the form must define hidden fields named `uid` and `kind` and have
+ * its webhook pointed at /api/tally/callback with the signing secret set to
+ * TALLY_SIGNING_SECRET. Tally maps URL query params onto hidden fields of the
+ * same name, which is how the two values below reach the webhook payload.
+ */
+function _surveyShowTally(formUrl, kind) {
+  const frame = document.getElementById('survey-frame');
+  if (!frame) return;
+  const sep = formUrl.includes('?') ? '&' : '?';
+  frame.src = `${formUrl}${sep}uid=${encodeURIComponent(_currentUser.uid)}&kind=${encodeURIComponent(kind)}`;
+  _surveyStatus('Answer a few quick questions to unlock your export.');
+  _trackEvent('survey_provider_shown', { provider: 'tally', kind });
+}
+
+function useSurveyFallback() {
+  const url = (_surveyState.config || {}).tally_form_url;
+  if (url) _surveyShowTally(url, _surveyState.kind);
+}
+
+async function _fetchCredits() {
+  if (!_currentUser) return { hand: 0, tourney: 0 };
+  try {
+    const token = await _currentUser.getIdToken();
+    const res = await fetch('/api/credits', { headers: { Authorization: `Bearer ${token}` } });
+    return res.ok ? await res.json() : { hand: 0, tourney: 0 };
+  } catch (e) {
+    return { hand: 0, tourney: 0 };
+  }
+}
+
+/**
+ * Watch /api/credits until the balance for this kind goes up, then retry the
+ * export that was refused. Polling (rather than trusting a postMessage from the
+ * provider's iframe) is deliberate: the credit is only real once the provider's
+ * server-to-server callback has landed, and a message from a third-party frame
+ * is not evidence that it has.
+ */
+function _surveyStartPolling() {
+  clearTimeout(_surveyState.timer);
+  _surveyState.deadline = Date.now() + _SURVEY_POLL_TIMEOUT;
+
+  const tick = async () => {
+    if (!_surveyState.kind) return;
+    const credits = await _fetchCredits();
+    if ((credits[_surveyState.kind] || 0) > _surveyState.baseline) {
+      _surveyEarned();
+      return;
+    }
+    if (Date.now() > _surveyState.deadline) {
+      _surveyStatus('Still waiting on the survey provider. Close this and try the '
+                    + 'export again in a minute — your unlock is not lost.', 'err');
+      return;
+    }
+    _surveyState.timer = setTimeout(tick, _SURVEY_POLL_MS);
+  };
+  _surveyState.timer = setTimeout(tick, _SURVEY_POLL_MS);
+}
+
+function _surveyEarned() {
+  const retry = _surveyState.retry;
+  const kind  = _surveyState.kind;
+  clearTimeout(_surveyState.timer);
+  _surveyStatus('Unlocked — starting your export…', 'ok');
+  _trackEvent('survey_completed', { kind });
+  setTimeout(() => {
+    closeSurveyModal();
+    if (retry) retry();
+  }, 900);
+}
+
+function closeSurveyModal() {
+  clearTimeout(_surveyState.timer);
+  _surveyState = { kind: null, retry: null, baseline: 0, timer: null, deadline: 0 };
+  const frame = document.getElementById('survey-frame');
+  if (frame) frame.removeAttribute('src');   // stop the provider's page running
+  const modalEl = document.getElementById('survey-modal');
+  if (modalEl) {
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (modal) modal.hide();
+  }
+}
 
 /* ── Helpers ─────────────────────────────────────────────── */
 
@@ -222,13 +474,10 @@ function _tzParts(ts, tz, opts) {
   return out;
 }
 
-/** "8 Jun 26, 14:30" — on mobile collapses to "8 Jun, 14:30" */
-let _pendingHandId  = '';
-let _exportHandCb   = null;
+/* ── Hand id copy ─────────────────────────────────────── */
 
 function copyHandId(btn) {
   const handNum = btn.dataset.handNum;
-  _pendingHandId = handNum;
   navigator.clipboard.writeText(handNum).catch(() => {});
   btn.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
   btn.classList.add('copied');
@@ -238,73 +487,7 @@ function copyHandId(btn) {
   }, 1500);
 }
 
-function _openExportHandModal(cb) {
-  _exportHandCb = cb;
-  const input  = document.getElementById('hand-id-input');
-  const status = document.getElementById('hand-id-status');
-  input.value  = _pendingHandId;
-  status.innerHTML = '';
-  _pendingHandId = '';
-  bootstrap.Modal.getOrCreateInstance(document.getElementById('modal-export-hand')).show();
-  // Focus + trigger validation if pre-filled
-  setTimeout(() => {
-    input.focus();
-    if (input.value) _validateExportHandInput(input.value);
-  }, 300);
-}
-
-function _validateExportHandInput(val) {
-  const status = document.getElementById('hand-id-status');
-  const okBtn  = document.getElementById('hand-id-ok-btn');
-  const trimmed = val.trim();
-  if (!trimmed) {
-    status.innerHTML = '';
-    if (okBtn) okBtn.disabled = true;
-    return;
-  }
-  if (/^\d{12}(-\w+)+$/.test(trimmed)) {
-    status.innerHTML = `<span style="color:var(--green)">✓ Valid hand ID</span>`;
-    if (okBtn) okBtn.disabled = false;
-  } else {
-    const hint = /^\d{12}/.test(trimmed) ? 'Missing segments after timestamp'
-                                          : 'Must start with a 12-digit timestamp (e.g. 260611124411-…)';
-    status.innerHTML = `<span style="color:var(--red)">✗ ${hint}</span>`;
-    if (okBtn) okBtn.disabled = true;
-  }
-}
-
-function _confirmExportHand() {
-  const input  = document.getElementById('hand-id-input');
-  const status = document.getElementById('hand-id-status');
-  const okBtn  = document.getElementById('hand-id-ok-btn');
-  const val    = input.value.trim();
-  if (!val || !/^[\w-]{4,}$/.test(val) || !_exportHandCb) return;
-
-  const cb = _exportHandCb;
-  _exportHandCb = null;
-  if (okBtn) okBtn.disabled = true;
-
-  status.innerHTML = `<span style="color:var(--muted)">Exporting hand <strong>${val}</strong>…</span>`;
-
-  const onDone = () => {
-    status.innerHTML = `<span style="color:var(--green)">✓ Export completed successfully</span>`;
-    setTimeout(() => bootstrap.Modal.getOrCreateInstance(
-      document.getElementById('modal-export-hand')).hide(), 1500);
-  };
-  const onFail = (msg) => {
-    status.innerHTML = `<span style="color:var(--red)">✗ ${msg || 'Export failed'}</span>`;
-    _exportHandCb = cb;
-    if (okBtn) okBtn.disabled = false;
-  };
-
-  const result = cb(val);
-  if (result && typeof result.then === 'function') {
-    result.then(onDone).catch(err => onFail(err.message));
-  } else {
-    onDone();
-  }
-}
-
+/** "8 Jun 26, 14:30" — on mobile collapses to "8 Jun, 14:30" */
 function fmtHandDateTime(ts, tz) {
   if (!ts) return '—';
   const d = new Date(ts * 1000);
@@ -502,22 +685,23 @@ function handleImport() {
     fetch('/api/analyze', {
       method: 'POST',
       headers,
-      body: JSON.stringify({ url, session_id: getSessionId() }),
+      // No session_id: the server used to key an in-process cache of the
+      // imported hands off it. That cache is gone — exports read from the
+      // player's own persisted tournaments instead.
+      body: JSON.stringify({ url }),
     })
-      .then(r => r.json())
-      .then(data => {
+      .then(r => r.json().then(data => ({ ok: r.ok, status: r.status, data })))
+      .then(({ ok, data }) => {
         setLoading(false);
+        if (!ok && data.error === 'quota_exceeded') {
+          showUpgradeModal('import_quota');
+          showError(`You've used all ${data.limit ?? FREE_IMPORTS_PER_DAY} imports for today. `
+                    + 'Imports reset at midnight UTC.');
+          return;
+        }
         if (data.error) { showError(data.error); return; }
-        renderResults(data);
-        showImportSuccess(data);
-        if (data.gamification) {
-          showGamificationToast(data.gamification);
-          _loadGamification();
-        }
-        if (data.saved) {
-          _startImportHighlights((data.tournaments || []).map(t => t.tourney_id).filter(Boolean));
-          _loadHistory();
-        }
+        _rememberPendingSession(data.session_token);
+        applyImportResult(data);
       })
       .catch(err => {
         setLoading(false);
@@ -532,11 +716,92 @@ function handleImport() {
   }
 }
 
+/** Render one import (fresh or claimed) and refresh everything that follows it. */
+function applyImportResult(data) {
+  renderResults(data);
+  showImportSuccess(data);
+  if (data.gamification) {
+    showGamificationToast(data.gamification);
+    _loadGamification();
+  }
+  if (data.saved) {
+    _startImportHighlights((data.tournaments || []).map(t => t.tourney_id).filter(Boolean));
+    _loadHistory();
+  }
+}
+
+/* ── Signed-out import → sign-in handoff ─────────────────── */
+
+/**
+ * Hold on to the claim ticket for an import made while signed out.
+ *
+ * The hands themselves stay on the server for an hour; this is only the signed
+ * token that proves which parked import is ours. Signing in during that hour
+ * adopts it into the account instead of making the user paste the link again.
+ */
+function _rememberPendingSession(token) {
+  try {
+    if (token) sessionStorage.setItem(_PENDING_SESSION_KEY, token);
+  } catch (e) { /* private mode — the user just re-imports after signing in */ }
+}
+
+function _pendingSession() {
+  try { return sessionStorage.getItem(_PENDING_SESSION_KEY) || ''; }
+  catch (e) { return ''; }
+}
+
+function _clearPendingSession() {
+  try { sessionStorage.removeItem(_PENDING_SESSION_KEY); } catch (e) {}
+}
+
+/** Adopt a signed-out import into the account that just signed in. */
+async function _claimPendingSession() {
+  const token = _pendingSession();
+  if (!token || !_currentUser) return;
+  try {
+    const idToken = await _currentUser.getIdToken();
+    const res = await fetch('/api/analyze/claim', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+      body: JSON.stringify({ session_token: token }),
+    });
+    const data = await res.json().catch(() => ({}));
+
+    if (res.ok && data.claimed) {
+      _clearPendingSession();
+      window._anonGraphs = null;         // the persisted endpoints serve them now
+      applyImportResult(data);
+      _trackEvent('anon_session_claimed', { hands: data.total_fetched || 0 });
+      return;
+    }
+    if (data.error === 'quota_exceeded') {
+      // Deliberately keeps the ticket: the import is still parked server-side and
+      // can be claimed tomorrow, or straight away after upgrading.
+      showUpgradeModal('import_quota');
+      return;
+    }
+    _clearPendingSession();             // expired or already claimed
+  } catch (e) {
+    console.warn('claim failed', e);
+  }
+}
+
 /* ── Render all ──────────────────────────────────────────── */
 
 function renderResults(data) {
   window._lastData = data;   // persisted so tz changes can re-render
   _trackEvent('hands_imported', { total: data.total_fetched || 0 });
+
+  // A signed-out import gets its per-tournament graph data inline, because the
+  // detail endpoint that normally serves it needs an account. Keyed by id so a
+  // row click can render the graph with no further round trip.
+  window._anonGraphs = null;
+  if (Array.isArray(data.tournament_graphs) && data.tournament_graphs.length) {
+    window._anonGraphs = {};
+    data.tournament_graphs.forEach(g => {
+      if (g && g.tourney_id) window._anonGraphs[g.tourney_id] = g;
+    });
+  }
 
   // Derive date span from newly-imported hands only
   const _spanStr = (() => {
@@ -557,23 +822,30 @@ function renderResults(data) {
     `<strong>${data.player.name}</strong>` +
     `<span style="color:var(--muted);font-size:.8rem">&nbsp;&nbsp;UID: ${data.player.uid}</span>` +
     (_spanStr ? `<span style="color:var(--muted);font-size:.78rem">&nbsp;&nbsp;${_spanStr}</span>` : '') +
-    (data.total_fetched < data.total_available
-      ? `&nbsp;&nbsp;<span class="text-warning" style="font-size:.8rem">(${data.total_available - data.total_fetched} hands failed to load)</span>`
+    // fetch_failed, not (available - fetched): on a free account the difference
+    // also contains hands pruned by the history window, which did not fail.
+    (data.fetch_failed
+      ? `&nbsp;&nbsp;<span class="text-warning" style="font-size:.8rem">(${data.fetch_failed} hands failed to load)</span>`
       : '');
 
   renderHandStats(data);
   renderRecentHands(data.recent_hands || []);
   renderRecentWonHands(data.recent_won_hands || []);
-  // Pro users get the persisted cross-session Tournament History from the
-  // independent top-level section below (populated by _loadHistory(), which
-  // runs whether or not an import happened this session). The free-tier card
-  // inside #results-section only shows the current import's tournaments.
+  // Signed-in players get the persisted cross-session Tournament History from
+  // the independent top-level sections below (populated by _loadHistory(), which
+  // runs whether or not an import happened this session). The card inside
+  // #results-section is the signed-out view: this import's tournaments only,
+  // since nothing was saved.
   const freeCard = document.getElementById('free-tournament-history-card');
   if (data.saved) {
     if (freeCard) freeCard.classList.add('d-none');
   } else {
     if (freeCard) freeCard.classList.remove('d-none');
     renderTournaments(data.tournaments || []);
+    _resetTournamentDetails();
+  }
+  if (data.history_expired_tournaments) {
+    _showHistoryCapNotice(data.history_expired_tournaments);
   }
   updateTzHeaders();
   _updateExportGates();
@@ -612,8 +884,17 @@ function renderHandsTable(hands, tbodyId, options = {}) {
     if (showExport) {
       const hn = h.hand_num;
       const tid = exportTid;
-      const exportBtns = hn
-        ? `<div class="d-flex gap-1 flex-wrap justify-content-center">
+      const exportBtns = !hn
+        ? '<span class="text-muted">—</span>'
+        // Signed out, every export needs an account first — so say that instead
+        // of offering four buttons that all answer 401.
+        : !isSignedIn()
+        ? `<button class="btn export-icon-btn signin-export-btn" title="Sign in to export"
+                   onclick="showSignInModal('Sign in to export your hands — it stays free.')">
+             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+             <span>Sign in to export</span>
+           </button>`
+        : `<div class="d-flex gap-1 flex-wrap justify-content-center">
             <button class="btn export-icon-btn" data-platform="PokerTracker" title="Export PT4" onclick="exportHandFromRow('${hn}','PokerTracker',this,'${tid}')">
               <img src="https://www.google.com/s2/favicons?domain=pokertracker.com&sz=64" width="16" height="16" alt="PT">
             </button>
@@ -626,8 +907,7 @@ function renderHandsTable(hands, tbodyId, options = {}) {
             <button class="btn export-icon-btn" title="Export JSON" onclick="exportHandFromRow('${hn}','',this,'${tid}')">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </button>
-          </div>`
-        : '<span class="text-muted">—</span>';
+          </div>`;
       // Export mode: Net P/L (BB) | Export
       cols56 = `<td>${fmtProfitBB(h.profit, h.big_blind)}</td>
       <td class="text-center d-none d-lg-table-cell">${exportBtns}</td>`;
@@ -748,8 +1028,17 @@ function renderTournaments(tournaments) {
   const tz = currentTz();
   tbody.innerHTML = tournaments.map(t => {
     const typeBadge = _gameTypeBadge(t);
+    const hasGraph  = !!(window._anonGraphs && window._anonGraphs[t.tourney_id]);
+    // Signed out, the row itself is the way into the tournament's graph — the
+    // data came down with the import, so there is nothing to fetch.
+    const rowAttrs = hasGraph
+      ? ` class="anon-tourney-row" role="button" tabindex="0"` +
+        ` title="View this tournament's graph"` +
+        ` onclick="_selectAnonTourneyDetail('${t.tourney_id}', this)"` +
+        ` onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();_selectAnonTourneyDetail('${t.tourney_id}', this);}"`
+      : '';
 
-    return `<tr>
+    return `<tr${rowAttrs}>
       <td style="white-space:nowrap"><small>${fmtDate(t.earliest_ts, tz)}</small></td>
       <td class="d-none d-sm-table-cell"><small>${t.room_name || '—'}</small></td>
       <td class="d-none d-lg-table-cell"><small class="text-muted">${fmtTime(t.earliest_ts, tz)}</small></td>
@@ -757,49 +1046,66 @@ function renderTournaments(tournaments) {
       <td class="d-none">${typeBadge}</td>
       <td class="text-center">${t.hands}</td>
       <td class="text-center export-col" style="vertical-align:middle">
-        ${isPro()
+        ${isSignedIn()
           ? `<div class="d-flex gap-2 flex-wrap justify-content-center">
-              <button class="btn export-icon-btn" data-platform="PokerTracker" title="Export for PokerTracker" onclick="exportTournament('${t.tourney_id}', this)">
+              <button class="btn export-icon-btn" data-platform="PokerTracker" title="Export for PokerTracker" onclick="event.stopPropagation();exportTournament('${t.tourney_id}', this)">
                 <img src="https://www.google.com/s2/favicons?domain=pokertracker.com&sz=64" width="22" height="22" alt="PT">
               </button>
-              <button class="btn export-icon-btn" data-platform="DriveHUD" title="Export for DriveHUD" onclick="exportTournament('${t.tourney_id}', this)">
+              <button class="btn export-icon-btn" data-platform="DriveHUD" title="Export for DriveHUD" onclick="event.stopPropagation();exportTournament('${t.tourney_id}', this)">
                 <img src="https://www.google.com/s2/favicons?domain=drivehud.com&sz=64" width="22" height="22" alt="DH">
               </button>
-              <button class="btn export-icon-btn" data-platform="GTOWizard" title="Export for GTO Wizard" onclick="exportTournament('${t.tourney_id}', this)">
+              <button class="btn export-icon-btn" data-platform="GTOWizard" title="Export for GTO Wizard" onclick="event.stopPropagation();exportTournament('${t.tourney_id}', this)">
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 32 32"><rect width="32" height="32" rx="5" fill="#0f0f10"/><polyline points="4,8 9,24 16,13 23,24 28,8" fill="none" stroke="#3dff7a" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/></svg>
               </button>
-              <button class="btn export-icon-btn" title="Export as JSON file" onclick="exportTournamentJson('${t.tourney_id}', this)">
+              <button class="btn export-icon-btn" title="Export as JSON file" onclick="event.stopPropagation();exportTournamentJson('${t.tourney_id}', this)">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
               </button>
             </div>`
-          : `<div class="tourney-gate-wrap">
-              <div class="tourney-gate-blur" aria-hidden="true">
-                <div class="d-flex gap-2 flex-wrap justify-content-center">
-                  <button class="btn export-icon-btn" tabindex="-1" disabled>
-                    <img src="https://www.google.com/s2/favicons?domain=pokertracker.com&sz=64" width="22" height="22" alt="">
-                  </button>
-                  <button class="btn export-icon-btn" tabindex="-1" disabled>
-                    <img src="https://www.google.com/s2/favicons?domain=drivehud.com&sz=64" width="22" height="22" alt="">
-                  </button>
-                  <button class="btn export-icon-btn" tabindex="-1" disabled>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 32 32"><rect width="32" height="32" rx="5" fill="#0f0f10"/><polyline points="4,8 9,24 16,13 23,24 28,8" fill="none" stroke="#3dff7a" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/></svg>
-                  </button>
-                  <button class="btn export-icon-btn" tabindex="-1" disabled>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                  </button>
-                </div>
-              </div>
-              <div class="tourney-gate-overlay">
-                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                <span class="tourney-gate-label">Pro only</span>
-                <button class="tourney-gate-btn" onclick="showUpgradeModal('tourney')">${_pricingCta()}</button>
-              </div>
-            </div>`
+          : _SIGNIN_TO_EXPORT_GATE
         }
       </td>
     </tr>`;
   }).join('');
 
+}
+
+// Signed-out export column: the buttons are shown but inert, because the offer
+// is "sign in and these work", not "pay us".
+const _SIGNIN_TO_EXPORT_GATE =
+  `<div class="tourney-gate-wrap">
+    <div class="tourney-gate-blur" aria-hidden="true">
+      <div class="d-flex gap-2 flex-wrap justify-content-center">
+        <button class="btn export-icon-btn" tabindex="-1" disabled>
+          <img src="https://www.google.com/s2/favicons?domain=pokertracker.com&sz=64" width="22" height="22" alt="">
+        </button>
+        <button class="btn export-icon-btn" tabindex="-1" disabled>
+          <img src="https://www.google.com/s2/favicons?domain=drivehud.com&sz=64" width="22" height="22" alt="">
+        </button>
+        <button class="btn export-icon-btn" tabindex="-1" disabled>
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 32 32"><rect width="32" height="32" rx="5" fill="#0f0f10"/><polyline points="4,8 9,24 16,13 23,24 28,8" fill="none" stroke="#3dff7a" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/></svg>
+        </button>
+        <button class="btn export-icon-btn" tabindex="-1" disabled>
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="tourney-gate-overlay">
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span class="tourney-gate-label">Sign in to export</span>
+      <button class="tourney-gate-btn" onclick="event.stopPropagation();showSignInModal('Sign in to export your hands — it stays free.')">Sign in</button>
+    </div>
+  </div>`;
+
+/** Banner for tournaments the free tier's 7-day window dropped from an import. */
+function _showHistoryCapNotice(count) {
+  const box = document.getElementById('history-cap-notice');
+  if (!box) return;
+  box.innerHTML =
+    `${count} tournament${count === 1 ? '' : 's'} from this link ` +
+    `${count === 1 ? 'is' : 'are'} older than ${FREE_HISTORY_DAYS} days and ` +
+    `${count === 1 ? "wasn't" : "weren't"} saved. ` +
+    `<button class="btn-link-inline" onclick="showUpgradeModal('history')">Upgrade to keep everything</button>`;
+  box.classList.remove('d-none');
 }
 
 /* ── Export gate renderers ───────────────────────────────── */
@@ -841,30 +1147,9 @@ function _renderExportAllSection() {
   }
 }
 
-/** Updates the per-hand export counter and enables/disables the hand export buttons. */
-function _renderExportCounter() {
-  const el = document.getElementById('export-hand-counter');
-  if (!el) return;
-  if (isPro()) {
-    el.classList.add('d-none');
-    document.querySelectorAll('#export-hand-grid .export-grid-btn').forEach(b => { b.disabled = false; });
-    return;
-  }
-  const today = _todayStr();
-  const used  = (_userState.last_export_date === today) ? (_userState.exports_today || 0) : 0;
-  const atLimit = used >= FREE_EXPORT_LIMIT;
-  el.classList.remove('d-none');
-  if (atLimit) {
-    el.innerHTML =
-      `<span class="export-counter-limit">Daily limit reached (${used}/${FREE_EXPORT_LIMIT}) — ` +
-      `<button class="btn-link-inline" onclick="showUpgradeModal('export')">upgrade to Pro</button>` +
-      ` for unlimited exports</span>`;
-    document.querySelectorAll('#export-hand-grid .export-grid-btn').forEach(b => { b.disabled = true; });
-  } else {
-    el.innerHTML = `<strong>${used}</strong> of <strong>${FREE_EXPORT_LIMIT}</strong> exports used today`;
-    document.querySelectorAll('#export-hand-grid .export-grid-btn').forEach(b => { b.disabled = false; });
-  }
-}
+// The per-hand export counter that used to live here is gone with the
+// client-side quota: the server owns the count, and the honest place to learn
+// you're out is the response to the export you just asked for.
 
 /**
  * Show/hide tier-gated elements based on current Pro status.
@@ -1213,33 +1498,28 @@ async function _selectCgsdDetail(tid, cardEl) {
 }
 
 // ── Per-row hand export (TD + CGSD) ──────────────────────────────────────────
-async function exportHandFromRow(handNum, platform, btn, tid) {
-  if (!_currentUser) { showUpgradeModal('tourney'); return; }
-  _rowExportStatus(btn, 'loading', 'Exporting…');
-  const token = await _currentUser.getIdToken().catch(() => null);
-  const isJson = !platform;
-  // If a tournament ID is provided, use storage-backed endpoints (work without a live import session)
-  const endpoint = tid
-    ? (isJson ? `/api/tournaments/${tid}/export/json/hand` : `/api/tournaments/${tid}/export/hand`)
-    : (isJson ? '/api/export/json/hand' : '/api/export/hand');
-  const headers = { 'Content-Type': 'application/json' };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-  try {
-    const r = await fetch(endpoint, {
-      method:  'POST',
-      headers,
-      body: JSON.stringify({ hand_id: handNum, platform, session_id: getSessionId() }),
-    });
-    if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error || 'Export failed'); }
-    const cd = r.headers.get('Content-Disposition') || '';
-    const m  = cd.match(/filename[^;=\n]*=([^;\n]*)/);
-    const filename = m ? m[1].replace(/['"]/g, '').trim() : `hand_export.${isJson ? 'json' : 'txt'}`;
-    const blob = await r.blob();
-    _triggerDownload(blob, filename);
-    _rowExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
-  } catch (err) {
-    _rowExportStatus(btn, 'err', err.message, 6000);
+function exportHandFromRow(handNum, platform, btn, tid) {
+  if (!_currentUser) {
+    showSignInModal('Sign in to export this hand — it takes a few seconds and it stays free.');
+    return;
   }
+  const isJson = !platform;
+  // Every hand export goes through the tournament it belongs to: the server no
+  // longer keeps the imported session in memory. The id is in the gameid when
+  // the caller didn't pass one (rows rendered from a fresh import).
+  const tourneyId = tid || _tidFromHandId(handNum);
+  if (!tourneyId) {
+    _rowExportStatus(btn, 'err', 'Could not tell which tournament this hand belongs to', 6000);
+    return;
+  }
+  const endpoint = isJson
+    ? `/api/tournaments/${tourneyId}/export/json/hand`
+    : `/api/tournaments/${tourneyId}/export/hand`;
+  _downloadExport(endpoint, {
+    kind: 'hand',
+    body: { hand_id: handNum, platform },
+    fallbackName: `hand_export.${isJson ? 'json' : 'txt'}`,
+  }, btn);
 }
 
 // ── Player badge: Export All (moves here from removed section) ────────────────
@@ -1264,6 +1544,18 @@ function _renderPlayerExportAll() {
   }
 }
 
+/**
+ * Drop tournaments outside a free account's history window.
+ *
+ * A tournament with no earliest_ts is kept — matching the server, where "we
+ * can't date it" is not treated as "it's old".
+ */
+function _withinHistoryWindow(tournaments) {
+  if (isPro()) return tournaments;
+  const cutoff = (Date.now() - FREE_HISTORY_DAYS * 86400000) / 1000;
+  return (tournaments || []).filter(t => t.earliest_ts == null || t.earliest_ts >= cutoff);
+}
+
 function _fmtDuration(secs) {
   if (!secs || secs < 0) return '—';
   const h = Math.floor(secs / 3600);
@@ -1271,8 +1563,16 @@ function _fmtDuration(secs) {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
+/**
+ * Persisted history for any signed-in player.
+ *
+ * Free accounts see the last FREE_HISTORY_DAYS days of it — the server already
+ * filters, and the filter below is the belt to that pair of braces: it keeps an
+ * expired tournament off the page even if a stale response or a cached payload
+ * still carries one.
+ */
 async function _loadHistory() {
-  if (!isPro() || !_currentUser) return;
+  if (!_currentUser) return;
   const token = await _currentUser.getIdToken().catch(() => null);
   if (!token) return;
   const tsSection  = document.getElementById('tournament-summary-section');
@@ -1283,7 +1583,7 @@ async function _loadHistory() {
     const r = await fetch('/api/tournaments', { headers: { 'Authorization': `Bearer ${token}` } });
     if (!r.ok) return;
     const data = await r.json();
-    const tournaments = data.tournaments || [];
+    const tournaments = _withinHistoryWindow(data.tournaments || []);
     _allTournaments = tournaments;
 
     if (!tournaments.length) {
@@ -2525,10 +2825,50 @@ function _resetTournamentDetails() {
   }
   const hint = document.getElementById('tourney-detail-hint');
   if (hint) hint.textContent = '';
-  document.querySelectorAll('.tsum-event-card.selected').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.tsum-event-card.selected, .anon-tourney-row.selected')
+    .forEach(c => c.classList.remove('selected'));
   _selectedTourneyId = null;
   window._lastTourneyDetail = null;   // nothing open to re-render on a tz change
   _tgDestroy();
+}
+
+/**
+ * Render one tournament of a signed-out import into the Tournament Details
+ * section, straight from the payload the import returned.
+ *
+ * Same section, same chart, same table as the signed-in path — the only
+ * difference is that the data is already here rather than a fetch away, which
+ * is what lets a signed-out visitor see a graph at all.
+ */
+function _selectAnonTourneyDetail(tid, rowEl) {
+  const graph = (window._anonGraphs || {})[tid];
+  if (!graph) return;
+
+  if (rowEl && rowEl.classList.contains('selected')) {   // click again to close
+    _resetTournamentDetails();
+    return;
+  }
+  document.querySelectorAll('.anon-tourney-row.selected')
+    .forEach(el => el.classList.remove('selected'));
+  if (rowEl) rowEl.classList.add('selected');
+
+  const hands = graph.hands || [];
+  const meta  = graph.meta  || {};
+  _selectedTourneyId = tid;
+  _tgDestroy();
+
+  const section = document.getElementById('tournament-history-pro-section');
+  if (section) section.classList.remove('d-none');
+  renderHandsTable(hands, 'tourney-detail-tbody', { showExport: true, exportTid: tid });
+  _renderTournamentChart(hands, meta);
+  window._lastTourneyDetail = { tid, hands, meta };
+
+  const hint = document.getElementById('tourney-detail-hint');
+  if (hint) {
+    hint.textContent = `${hands.length} hand${hands.length === 1 ? '' : 's'}`
+      + (meta.room_name ? ` · ${meta.room_name}` : '');
+  }
+  if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 /** Loads one tournament's hands into the Tournament Details table; clicking the same card again clears it. */
@@ -2557,6 +2897,14 @@ async function _selectTourneyDetail(tid, cardEl) {
     const r = await fetch(`/api/tournaments/${tid}/hands`, { headers: { 'Authorization': `Bearer ${token}` } });
     if (_selectedTourneyId !== tid) return;  // selection changed mid-fetch — drop stale response
     if (!r.ok) {
+      const err = (await r.json().catch(() => ({}))).error;
+      if (err === 'history_expired') {
+        if (tbody) tbody.innerHTML =
+          `<tr><td colspan="7" class="text-center py-4 text-muted">This tournament is older than `
+          + `${FREE_HISTORY_DAYS} days and is outside your free history window.</td></tr>`;
+        showUpgradeModal('history');
+        return;
+      }
       if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Could not load hands.</td></tr>';
       return;
     }
@@ -2591,56 +2939,22 @@ async function _selectTourneyDetail(tid, cardEl) {
   }
 }
 
-async function exportPersistedTournament(tourneyId, btn) {
-  if (!_currentUser) return;
-  const platform = (btn && btn.dataset.platform) || '';
-  _rowExportStatus(btn, 'loading');
-  const token = await _currentUser.getIdToken().catch(() => null);
-  if (!token) { _rowExportStatus(btn, 'err', 'Not signed in', 5000); return; }
-  try {
-    const r = await fetch(`/api/tournaments/${tourneyId}/export`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({ platform }),
-    });
-    if (!r.ok) {
-      const d = await r.json().catch(() => ({}));
-      throw new Error(d.error || 'Export failed');
-    }
-    const cd = r.headers.get('Content-Disposition') || '';
-    const m  = cd.match(/filename[^;=\n]*=([^;\n]*)/);
-    const filename = m ? m[1].replace(/['"]/g, '').trim() : `pppoker_${tourneyId}.txt`;
-    const blob = await r.blob();
-    _triggerDownload(blob, filename);
-    _rowExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
-  } catch (err) {
-    _rowExportStatus(btn, 'err', err.message, 6000);
-  }
+function exportPersistedTournament(tourneyId, btn) {
+  if (!_currentUser) { showSignInModal('Sign in to export this tournament.'); return; }
+  _downloadExport(`/api/tournaments/${tourneyId}/export`, {
+    kind: 'tourney',
+    body: { platform: (btn && btn.dataset.platform) || '' },
+    fallbackName: `pppoker_${tourneyId}.txt`,
+  }, btn);
 }
 
-async function exportPersistedTournamentJson(tourneyId, btn) {
-  if (!_currentUser) return;
-  _rowExportStatus(btn, 'loading');
-  const token = await _currentUser.getIdToken().catch(() => null);
-  if (!token) { _rowExportStatus(btn, 'err', 'Not signed in', 5000); return; }
-  try {
-    const r = await fetch(`/api/tournaments/${tourneyId}/export/json`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
-    if (!r.ok) {
-      const d = await r.json().catch(() => ({}));
-      throw new Error(d.error || 'Export failed');
-    }
-    const cd = r.headers.get('Content-Disposition') || '';
-    const m  = cd.match(/filename[^;=\n]*=([^;\n]*)/);
-    const filename = m ? m[1].replace(/['"]/g, '').trim() : `pppoker_${tourneyId}.json`;
-    const blob = await r.blob();
-    _triggerDownload(blob, filename);
-    _rowExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
-  } catch (err) {
-    _rowExportStatus(btn, 'err', err.message, 6000);
-  }
+function exportPersistedTournamentJson(tourneyId, btn) {
+  if (!_currentUser) { showSignInModal('Sign in to export this tournament.'); return; }
+  _downloadExport(`/api/tournaments/${tourneyId}/export/json`, {
+    kind: 'tourney',
+    body: {},
+    fallbackName: `pppoker_${tourneyId}.json`,
+  }, btn);
 }
 
 /* ── Export Panel ────────────────────────────────────────── */
@@ -2673,140 +2987,43 @@ function _triggerDownload(blob, filename) {
   URL.revokeObjectURL(url);
 }
 
-function exportRawJson() {
-  const data = window._lastData;
-  if (!data) return;
-  try {
-    const blob     = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const ts       = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    const filename = `pppoker_raw_${ts}.json`;
-    _triggerDownload(blob, filename);
-    _rowExportStatus(null, 'ok', `Saved as ${filename}`, 5000);
-  } catch (e) {
-    _rowExportStatus(null, 'err', `JSON export error: ${e.message}`, 6000);
-  }
+/** tourney_id lives in the middle segment of a gameid (prefix-tourneyid-seq). */
+function _tidFromHandId(handId) {
+  const parts = String(handId || '').split('-');
+  return parts.length >= 2 ? parts[1] : '';
 }
 
-function exportSpecificHandJson(btn) {
-  if (!checkExportQuota()) { showUpgradeModal('export'); return; }
-  _openExportHandModal(handId => {
-    consumeExportQuota();
-    _rowExportStatus(btn, 'loading', 'Building JSON…');
-    return fetch('/api/export/json/hand', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ hand_id: handId, session_id: getSessionId() }),
-    })
-      .then(r => {
-        if (!r.ok) return r.json().then(d => { throw new Error(d.error || 'Export failed'); });
-        const cd = r.headers.get('Content-Disposition') || '';
-        const m  = cd.match(/filename[^;=\n]*=([^;\n]*)/);
-        const filename = m ? m[1].replace(/['"]/g, '').trim() : 'hand.json';
-        return r.blob().then(blob => ({ blob, filename }));
-      })
-      .then(({ blob, filename }) => {
-        _triggerDownload(blob, filename);
-        _rowExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
-      })
-      .catch(err => { _rowExportStatus(btn, 'err', err.message, 6000); throw err; });
-  });
+/** tourney_ids of the import currently on screen — what a session export covers. */
+function _sessionTourneyIds() {
+  const data = window._lastData || {};
+  return (data.tournaments || []).map(t => t.tourney_id).filter(Boolean);
 }
 
 function exportAllHandsJson(btn) {
-  if (!isPro()) { showUpgradeModal('export'); return; }
-  _rowExportStatus(btn, 'loading', 'Building JSON…');
-  fetch('/api/export/json/all', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ session_id: getSessionId() }),
-  })
-    .then(r => {
-      if (!r.ok) return r.json().then(d => { throw new Error(d.error || 'Export failed'); });
-      const cd = r.headers.get('Content-Disposition') || '';
-      const m  = cd.match(/filename[^;=\n]*=([^;\n]*)/);
-      const filename = m ? m[1].replace(/['"]/g, '').trim() : 'pppoker_all.json';
-      return r.blob().then(blob => ({ blob, filename }));
-    })
-    .then(({ blob, filename }) => {
-      _triggerDownload(blob, filename);
-      _rowExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
-    })
-    .catch(err => _rowExportStatus(btn, 'err', err.message, 6000));
-}
-
-function exportTournamentJson(tourneyId, btn) {
-  if (!checkExportQuota()) { showUpgradeModal('export'); return; }
-  consumeExportQuota();
-  _rowExportStatus(btn, 'loading');
-  fetch('/api/export/json/tournament', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ tourney_id: tourneyId, session_id: getSessionId() }),
-  })
-    .then(r => {
-      if (!r.ok) return r.json().then(d => { throw new Error(d.error || 'Export failed'); });
-      const cd = r.headers.get('Content-Disposition') || '';
-      const m  = cd.match(/filename[^;=\n]*=([^;\n]*)/);
-      const filename = m ? m[1].replace(/['"]/g, '').trim() : 'tournament.json';
-      return r.blob().then(blob => ({ blob, filename }));
-    })
-    .then(({ blob, filename }) => {
-      _triggerDownload(blob, filename);
-      _rowExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
-    })
-    .catch(err => _rowExportStatus(btn, 'err', err.message, 6000));
-}
-
-function exportSpecificHand(btn) {
-  if (!checkExportQuota()) { showUpgradeModal('export'); return; }
-  const platform = (btn && btn.dataset.platform) || '';
-  _openExportHandModal(handId => {
-    consumeExportQuota();
-    _rowExportStatus(btn, 'loading', 'Looking up hand…');
-    return fetch('/api/export/hand', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ hand_id: handId, platform, session_id: getSessionId() }),
-    })
-      .then(r => {
-        if (!r.ok) return r.json().then(d => { throw new Error(d.error || 'Export failed'); });
-        const cd = r.headers.get('Content-Disposition') || '';
-        const m  = cd.match(/filename[^;=\n]*=([^;\n]*)/);
-        const filename = m ? m[1].replace(/['"]/g, '').trim() : 'hand_export.txt';
-        return r.blob().then(blob => ({ blob, filename }));
-      })
-      .then(({ blob, filename }) => {
-        _triggerDownload(blob, filename);
-        _rowExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
-      })
-      .catch(err => { _rowExportStatus(btn, 'err', err.message, 6000); throw err; });
-  });
+  _downloadExport('/api/export/json/all', {
+    kind: 'session',
+    body: { tourney_ids: _sessionTourneyIds() },
+    fallbackName: 'pppoker_all.json',
+    loadingText: 'Building JSON…',
+  }, btn);
 }
 
 function exportAllHands(btn) {
-  if (!isPro()) { showUpgradeModal('export'); return; }
-  _rowExportStatus(btn, 'loading', 'Generating export…');
+  _downloadExport('/api/export/pokerstars', {
+    kind: 'session',
+    body: { platform: (btn && btn.dataset.platform) || '',
+            tourney_ids: _sessionTourneyIds() },
+    fallbackName: 'pppoker_export.txt',
+    loadingText: 'Generating export…',
+  }, btn);
+}
 
-  const platform = (btn && btn.dataset.platform) || '';
-  fetch('/api/export/pokerstars', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ platform, session_id: getSessionId() }),
-  })
-    .then(r => {
-      if (!r.ok) return r.json().then(d => { throw new Error(d.error || 'Export failed'); });
-      const cd = r.headers.get('Content-Disposition') || '';
-      const m  = cd.match(/filename[^;=\n]*=([^;\n]*)/);
-      const filename = m ? m[1].replace(/['"]/g, '').trim() : 'pppoker_export.txt';
-      return r.blob().then(blob => ({ blob, filename }));
-    })
-    .then(({ blob, filename }) => {
-      _triggerDownload(blob, filename);
-      _rowExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
-    })
-    .catch(err => {
-      _rowExportStatus(btn, 'err', err.message, 6000);
-    });
+function exportTournamentJson(tourneyId, btn) {
+  _downloadExport('/api/export/json/tournament', {
+    kind: 'tourney',
+    body: { tourney_id: tourneyId },
+    fallbackName: 'tournament.json',
+  }, btn);
 }
 
 function _rowExportStatus(btn, state, text, autoClear) {
@@ -2827,35 +3044,11 @@ function _rowExportStatus(btn, state, text, autoClear) {
 }
 
 function _doExportTournament(tourneyId, btn) {
-  if (!checkExportQuota()) { showUpgradeModal('export'); return; }
-  consumeExportQuota();
-  _rowExportStatus(btn, 'loading');
-
-  const platform = (btn && btn.dataset.platform) || '';
-  fetch('/api/export/tournament', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ tourney_id: tourneyId, platform, session_id: getSessionId() }),
-  })
-    .then(r => {
-      if (!r.ok) return r.json().then(d => { throw new Error(d.error || 'Export failed'); });
-      const cd = r.headers.get('Content-Disposition') || '';
-      const m  = cd.match(/filename[^;=\n]*=([^;\n]*)/);
-      const filename = m ? m[1].replace(/['"]/g, '').trim() : 'tournament_export.txt';
-      return r.blob().then(blob => ({ blob, filename }));
-    })
-    .then(({ blob, filename }) => {
-      const url = URL.createObjectURL(blob);
-      const a   = Object.assign(document.createElement('a'), { href: url, download: filename });
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      _rowExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
-    })
-    .catch(err => {
-      _rowExportStatus(btn, 'err', err.message, 6000);
-    });
+  _downloadExport('/api/export/tournament', {
+    kind: 'tourney',
+    body: { tourney_id: tourneyId, platform: (btn && btn.dataset.platform) || '' },
+    fallbackName: 'tournament_export.txt',
+  }, btn);
 }
 
 function exportTournament(tourneyId, btn) {
@@ -2896,6 +3089,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Auth modal: send link on Enter, and clear state each time modal opens
   const authModal = document.getElementById('modal-auth');
   if (authModal) {
+    // Opening the modal from the auth bar must not inherit the "you need this
+    // to export" note left behind by an earlier gated open.
+    authModal.addEventListener('hidden.bs.modal', () => {
+      const note = document.getElementById('auth-gate-note');
+      if (note) { note.textContent = ''; note.classList.add('d-none'); }
+    });
     authModal.addEventListener('shown.bs.modal', () => {
       const inp = document.getElementById('auth-email-input');
       const msg = document.getElementById('auth-msg');
@@ -2910,20 +3109,40 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Export hand modal — validate on input, auto-proceed on valid ID
-  const exportHandModal = document.getElementById('modal-export-hand');
-  const handIdInput = document.getElementById('hand-id-input');
-  if (exportHandModal && handIdInput) {
-    handIdInput.addEventListener('input', () => _validateExportHandInput(handIdInput.value));
-    handIdInput.addEventListener('keydown', e => { if (e.key === 'Enter') _confirmExportHand(); });
-    exportHandModal.addEventListener('hidden.bs.modal', () => {
-      handIdInput.value = '';
-      document.getElementById('hand-id-status').innerHTML = '';
-      const okBtn = document.getElementById('hand-id-ok-btn');
-      if (okBtn) okBtn.disabled = true;
-      _exportHandCb = null;
+  // Closing the survey modal stops the credit poll and unloads the provider's
+  // iframe — including when it's dismissed with the backdrop or Esc.
+  const surveyModal = document.getElementById('survey-modal');
+  if (surveyModal) {
+    surveyModal.addEventListener('hidden.bs.modal', () => {
+      clearTimeout(_surveyState.timer);
+      const frame = document.getElementById('survey-frame');
+      if (frame) frame.removeAttribute('src');
     });
   }
+
+  // Providers post a message into the page when a survey finishes or when there
+  // is nothing eligible to show. Treated as a hint only — it starts the fallback
+  // or shortens the wait, but the credit itself still comes from /api/credits,
+  // which only moves once the provider's server-to-server callback has landed.
+  //
+  // TODO(cpx/tally): confirm the exact message payloads in each provider's docs
+  // and tighten the matching below once they're known.
+  window.addEventListener('message', (ev) => {
+    if (!_surveyState.kind) return;
+    const raw = typeof ev.data === 'string' ? ev.data : JSON.stringify(ev.data || '');
+    if (/no[_\s-]?surveys|no_offers|noSurveysAvailable/i.test(raw)) {
+      const url = (_surveyState.config || {}).tally_form_url;
+      if (url) {
+        _surveyStatus('No surveys available right now — here are a few quick questions instead.');
+        _surveyShowTally(url, _surveyState.kind);
+      } else {
+        _surveyStatus('No surveys are available right now — please try again later.', 'err');
+      }
+    } else if (/complete|finished|success/i.test(raw)) {
+      _surveyStatus('Checking your unlock…');
+      _surveyStartPolling();
+    }
+  });
 
   const tzSelect = document.getElementById('tz-select');
   if (tzSelect) {
@@ -3049,20 +3268,14 @@ async function _loadUserState() {
   try {
     const snap = await ref.get();
     if (snap.exists) {
-      const d = snap.data();
-      _userState = {
-        is_pro:           d.is_pro           || false,
-        exports_today:    d.exports_today    || 0,
-        last_export_date: d.last_export_date || '',
-      };
+      _userState = { is_pro: snap.data().is_pro || false };
     } else {
-      // First visit — create doc with defaults
+      // First visit — create doc with defaults. Quota and credits are written
+      // server-side on first use; the client must not seed them.
       const base = {
-        is_pro:           false,
-        exports_today:    0,
-        last_export_date: _todayStr(),
-        first_seen:       firebase.firestore.FieldValue.serverTimestamp(),
-        last_seen:        firebase.firestore.FieldValue.serverTimestamp(),
+        is_pro:     false,
+        first_seen: firebase.firestore.FieldValue.serverTimestamp(),
+        last_seen:  firebase.firestore.FieldValue.serverTimestamp(),
       };
       if (_currentUser) {
         base.uid   = _currentUser.uid;
@@ -3071,7 +3284,7 @@ async function _loadUserState() {
         base.session_id = getSessionId();
       }
       await ref.set(base);
-      _userState = { is_pro: false, exports_today: 0, last_export_date: _todayStr() };
+      _userState = { is_pro: false };
     }
     _updateExportGates(); // Refresh gate UI whenever state loads/reloads
   } catch (e) { console.warn('Firestore user state load failed:', e); }
@@ -3138,9 +3351,11 @@ function signOutUser() {
   if (!_auth) return;
   _auth.signOut().then(() => {
     _currentUser = null;
-    _userState   = { is_pro: false, exports_today: 0, last_export_date: '' };
+    _userState   = { is_pro: false };
     window._lastData = null;
     window._lastTourneyDetail = null;
+    window._anonGraphs = null;
+    _clearPendingSession();
 
     // Reset UI to blank-slate state
     const urlInput = document.getElementById('url-input');
@@ -3256,7 +3471,10 @@ async function _initFirebase() {
             email:     user.email,
             last_seen: firebase.firestore.FieldValue.serverTimestamp(),
           }, { merge: true }).catch(() => {});
-          if (isPro()) _loadHistory();
+          // An import made before signing in is adopted first, so the history
+          // load below already includes it instead of racing it.
+          await _claimPendingSession();
+          _loadHistory();     // free accounts have history too, just 7 days of it
         }
       });
     } else {
