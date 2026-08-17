@@ -205,6 +205,13 @@
   <!-- ── Timezone row ────────────────────────────────────────── -->
   <div class="d-flex align-items-center justify-content-end mb-2 gap-2">
     <div class="player-tz">
+      <span class="tz-label">Language</span>
+      <select id="lang-select" class="tz-select form-select form-select-sm" aria-label="Language">
+        <option value="en" {{ 'selected' if current_locale == 'en' }}>EN</option>
+        <option value="pt_BR" {{ 'selected' if current_locale == 'pt_BR' }}>PT-BR</option>
+      </select>
+    </div>
+    <div class="player-tz">
       <span class="tz-label">Timezone</span>
       <select id="tz-select" class="tz-select form-select form-select-sm" aria-label="Timezone">
         <option value="Australia/Adelaide">ADL</option>
@@ -400,6 +407,16 @@ function _initTzSelect() {
   sel.addEventListener('change', () => {
     localStorage.setItem('pppha_tz', sel.value);
     _renderTourneyTable();
+  });
+}
+
+// ── Language ────────────────────────────────────────────────────────────────
+function _initLangSelect() {
+  const sel = document.getElementById('lang-select');
+  if (!sel) return;
+  sel.addEventListener('change', () => {
+    document.cookie = 'lang=' + sel.value + '; max-age=31536000; path=/; SameSite=Lax';
+    location.reload();
   });
 }
 
@@ -800,6 +817,7 @@ async function _stampNewTourneys(user) {
 
 document.addEventListener('DOMContentLoaded', () => {
   _initTzSelect();
+  _initLangSelect();
   const modalEl = document.getElementById('tourney-form-modal');
   if (modalEl && window.bootstrap) _tourneyModal = new bootstrap.Modal(modalEl);
   loadTournaments();

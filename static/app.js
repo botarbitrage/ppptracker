@@ -3248,6 +3248,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  const langSelect = document.getElementById('lang-select');
+  if (langSelect) {
+    langSelect.addEventListener('change', () => {
+      document.cookie = 'lang=' + langSelect.value + '; max-age=31536000; path=/; SameSite=Lax';
+      location.reload();
+    });
+  }
+
   const tzSelect = document.getElementById('tz-select');
   if (tzSelect) {
     tzSelect.value = _savedTz();                 // restore the choice shared with Tournaments

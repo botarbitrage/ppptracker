@@ -15,6 +15,7 @@ from urllib.parse import urlparse, parse_qs
 import requests
 from flask import (Flask, g, has_app_context, jsonify, redirect, render_template,
                    request, send_file, send_from_directory, Response)
+from flask_babel import Babel
 
 from hand_parser import (process_hands, build_hand_rows, classify_game,
                          norm_room_name, CATEGORY_TOURNAMENT)
@@ -23,6 +24,25 @@ from tournament_analyzer import analyze_tournament
 import gamification
 
 app = Flask(__name__)
+
+app.config['LANGUAGES'] = ['en', 'pt_BR']
+
+
+def get_locale():
+    # Explicit user choice (lang cookie) always wins over auto-detection.
+    cookie_lang = request.cookies.get('lang')
+    if cookie_lang in app.config['LANGUAGES']:
+        return cookie_lang
+    return request.accept_languages.best_match(app.config['LANGUAGES']) or 'en'
+
+
+babel = Babel(app, locale_selector=get_locale)
+
+
+@app.context_processor
+def _inject_locale():
+    return {'current_locale': get_locale()}
+
 
 @app.after_request
 def _set_coop_header(response):

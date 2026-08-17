@@ -46,6 +46,13 @@
       Admin
     </a>
     <div class="player-tz">
+      <span class="tz-label">Language</span>
+      <select id="lang-select" class="tz-select form-select form-select-sm" aria-label="Language">
+        <option value="en" {{ 'selected' if current_locale == 'en' }}>EN</option>
+        <option value="pt_BR" {{ 'selected' if current_locale == 'pt_BR' }}>PT-BR</option>
+      </select>
+    </div>
+    <div class="player-tz">
       <span class="tz-label">Timezone</span>
       <select id="tz-select" class="tz-select form-select form-select-sm" aria-label="Timezone">
         <option value="Australia/Adelaide">ADL</option>
