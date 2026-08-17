@@ -828,7 +828,7 @@
         <ul>
           <li><strong>Fetches your hands</strong> directly from PPPoker's API using your hand review link — no installs, no file uploads, no screen scraping.</li>
           <li><strong>Converts to PokerStars format</strong> — the industry-standard hand history format accepted by PokerTracker 4, DriveHUD, and GTO Wizard.</li>
-          <li><strong>Tracks tournament history</strong> — see every tournament you've played, hands logged, session length, and result at a glance.</li>
+          <li><strong>Tracks tournaments and cash sessions</strong> — every event you've played with hands logged, session length, and result, plus a per-tournament progress graph you can click through to any hand.</li>
           <li><strong>Exports on demand</strong> — download all hands, a single hand by ID, or a full tournament in .txt or .json format.</li>
         </ul>
         <hr style="border-color:var(--border);margin:14px 0"/>
@@ -868,7 +868,7 @@
           <li>
             <div class="howto-step-text">
               <strong>Paste the link here</strong>
-              <span>Drop it into the input box at the top of this page and click <strong>Download My Hands</strong>. The app fetches up to 200 of your most recent hands — this takes 10–30 seconds.</span>
+              <span>Drop it into the input box at the top of this page and click <strong>IMPORT</strong>. The app fetches up to 200 of your most recent hands — this takes 10–30 seconds.</span>
             </div>
           </li>
           <li>
@@ -880,7 +880,7 @@
           <li>
             <div class="howto-step-text">
               <strong>Export to your training tool</strong>
-              <span>Hit <strong>PT4</strong>, <strong>DriveHUD</strong>, or <strong>GTO Wizard</strong> to download a PokerStars-format .txt file. Import it into your software and start studying.</span>
+              <span>Hit <strong>PokerTracker</strong>, <strong>DriveHUD</strong>, or <strong>GTO Wizard</strong> to download a PokerStars-format .txt file. Import it into your software and start studying.</span>
             </div>
           </li>
         </ol>
@@ -910,12 +910,13 @@
           <tbody>
             <tr><td>Imports</td><td>3/day</td><td>Unlimited</td></tr>
             <tr><td>History kept</td><td>7 days</td><td>Forever</td></tr>
-            <tr><td>Hand history displayed</td><td>Last 30</td><td>All 200</td></tr>
+            <tr><td>Hand history displayed</td><td>Last 30</td><td>Unlimited</td></tr>
             <tr><td>Session stats &amp; graphs</td><td>✓ Full</td><td>✓ Full</td></tr>
+            <tr><td>Tournament Details &amp; progress graph</td><td>✓ Full</td><td>✓ Full</td></tr>
+            <tr><td>Gamification (points, streaks, badges)</td><td>✓</td><td>✓</td></tr>
             <tr><td>Single-hand exports/day</td><td>5/day<sup>*</sup></td><td>Unlimited</td></tr>
             <tr><td>Tournament exports/day</td><td>1/day<sup>*</sup></td><td>Unlimited</td></tr>
             <tr><td>Export a whole session</td><td>✕ Locked</td><td>✓ Unlocked</td></tr>
-            <tr><td>Priority new features</td><td>—</td><td>✓</td></tr>
           </tbody>
         </table>
         <p style="margin-top:10px;font-size:.8rem;color:var(--muted)"><sup>*</sup> Exports need a free account. Beyond the first two hand exports each day, one short survey unlocks the next export — Pro never asks.</p>
@@ -940,8 +941,26 @@
       <div class="modal-body info-modal-body">
 
         <div class="release-block release-latest">
-          <div class="release-version">v0.3 — Jun 2026</div>
+          <div class="release-version">v0.5 — Aug 2026</div>
           <div class="release-tag">Latest</div>
+          <ul>
+            <li>🏆 Tournament progress graph — watch your stack rise and crash over a tournament, then click any point on the curve to jump straight to that hand</li>
+            <li>🎮 Points, streaks &amp; weekly leaderboard — every import earns you points and unlocks badges, and there's a fresh leaderboard to climb each week</li>
+            <li>💳 Pro is live — Early Access pricing locked in until we launch globally</li>
+          </ul>
+        </div>
+
+        <div class="release-block">
+          <div class="release-version">v0.4 — Jul 2026</div>
+          <ul>
+            <li>🆓 Free and Pro accounts with sensible daily limits — sign in to keep your history and lift the caps</li>
+            <li>💵 Cash &amp; Play Money Games — cash tables and sit-and-gos now get their own section, separate from real-money tournaments</li>
+            <li>♠ Tournament Summary — buy-in, finish position, and ITM% at a glance across every event you've played</li>
+          </ul>
+        </div>
+
+        <div class="release-block">
+          <div class="release-version">v0.3 — Jun 2026</div>
           <ul>
             <li>🎨 Full UI redesign — gaming dark theme, Oxanium font, neon green accents</li>
             <li>🆓 Free &amp; Pro tiers introduced — freemium gates, upgrade modal</li>
