@@ -1539,11 +1539,17 @@ def stripe_webhook():
         uid = obj.get('metadata', {}).get('uid', '')
         if uid:
             db.collection('users').document(uid).set(
-                {'is_pro': True, 'stripe_customer_id': obj.get('customer', '')},
+                {
+                    'is_pro':            True,
+                    'stripe_customer_id': obj.get('customer', ''),
+                    'last_payment_at':    int(time.time()),
+                },
                 merge=True
             )
 
     elif t in ('customer.subscription.deleted', 'customer.subscription.updated'):
+        # Status sync only — not necessarily a new payment, so last_payment_at
+        # is intentionally left untouched here.
         uid = (obj.get('metadata', {}).get('uid', '')
                or _uid_for_customer(db, obj.get('customer', '')))
         if uid:
@@ -1562,7 +1568,10 @@ def stripe_webhook():
         if obj.get('subscription'):   # only subscription invoices, not one-off
             uid = _uid_for_customer(db, obj.get('customer', ''))
             if uid:
-                db.collection('users').document(uid).set({'is_pro': True}, merge=True)
+                db.collection('users').document(uid).set(
+                    {'is_pro': True, 'last_payment_at': int(time.time())},
+                    merge=True
+                )
 
     return jsonify({'received': True})
 
@@ -1865,6 +1874,7 @@ def admin_list_users():
             'last_seen':           _fs_ts_to_secs(d.get('last_seen')),
             'exports_today':       exports_today,
             'subscription_status': d.get('subscription_status') or None,
+            'last_payment_at':     d.get('last_payment_at'),  # already epoch secs, not a Firestore timestamp
         }
 
     users = []
@@ -1888,6 +1898,7 @@ def admin_list_users():
                     'last_seen':           profile.get('last_seen'),
                     'exports_today':       profile.get('exports_today', 0),
                     'subscription_status': profile.get('subscription_status'),
+                    'last_payment_at':     profile.get('last_payment_at'),
                 })
             page = page.get_next_page()
     except Exception as exc:
@@ -1933,6 +1944,44 @@ def admin_set_user_admin(target_uid):
     op = gcf.ArrayUnion([target_uid]) if make_admin else gcf.ArrayRemove([target_uid])
     ref.set({'uids': op}, merge=True)  # merge=True also creates the doc if absent
     return jsonify({'ok': True, 'uid': target_uid, 'is_admin': make_admin})
+
+
+@app.route('/api/admin/users/<target_uid>/pro', methods=['PATCH'])
+def admin_set_user_pro(target_uid):
+    """Manually grant or revoke Pro access on users/{uid}.is_pro.
+
+    Manually-granted pro users have no stripe_customer_id, so Stripe webhook
+    events (checkout, subscription updates) can never resolve to their uid via
+    _uid_for_customer() and won't silently overwrite this.
+    """
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+
+    body = request.get_json(silent=True) or {}
+    make_pro = body.get('is_pro')
+    if not isinstance(make_pro, bool):
+        return jsonify({'error': 'is_pro must be true or false'}), 400
+
+    try:
+        admin_auth.get_user(target_uid)
+    except admin_auth.UserNotFoundError:
+        return jsonify({'error': 'No such user'}), 404
+    except Exception as exc:
+        print(f"[admin_set_user_pro] get_user failed for {target_uid}: "
+              f"{type(exc).__name__}: {exc}")
+        return jsonify({'error': f'Could not look up user: {exc}'}), 500
+
+    ref = _get_admin_db().collection('users').document(target_uid)
+    # .update() merges without a full-document overwrite, per project convention —
+    # but a user who has never loaded the home page has no users/{uid} doc yet
+    # (see admin_list_users), so fall back to a merge-set rather than 500ing on
+    # what is otherwise a perfectly valid manual grant.
+    if ref.get().exists:
+        ref.update({'is_pro': make_pro})
+    else:
+        ref.set({'is_pro': make_pro}, merge=True)
+    return jsonify({'ok': True, 'uid': target_uid, 'is_pro': make_pro})
 
 
 # ── Pricing plan ─────────────────────────────────────────────────────────────

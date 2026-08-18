@@ -57,6 +57,11 @@ class _Doc:
                 cur[k] = v
         self._store.put(self._path, cur)
 
+    def update(self, data):
+        cur = dict(self._store.get(self._path) or {})
+        cur.update(data)
+        self._store.put(self._path, cur)
+
 
 class _Col:
     def __init__(self, store, path):
@@ -176,6 +181,7 @@ def main():
         'last_seen': datetime(2024, 6, 1, tzinfo=timezone.utc),
         'quota': {'day': today, 'hand_exports': 2, 'tourney_exports': 1},
         'subscription_status': 'active',
+        'last_payment_at': 1_717_200_000,
     })
     db.put(('users', ADMIN_UID), {
         'is_pro': False,
@@ -205,6 +211,14 @@ def main():
         return _json(client.post('/api/admin/users/%s/admin' % uid,
                                  data=json.dumps({'is_admin': value}),
                                  content_type='application/json'))
+
+    def set_pro(uid, value):
+        return _json(client.patch('/api/admin/users/%s/pro' % uid,
+                                  data=json.dumps({'is_pro': value}),
+                                  content_type='application/json'))
+
+    def is_pro_now(uid):
+        return bool((db.get(('users', uid)) or {}).get('is_pro'))
 
     # ── 1. Permanent admin is admin without being in the allowlist ───────────
     check('permanent admin is admin', A._is_admin(PERM_UID) is True)
@@ -260,6 +274,10 @@ def main():
           rows[ADMIN_UID]['subscription_status'] is None, str(rows[ADMIN_UID]))
     check('subscription_status is null for a user with no Firestore doc',
           rows[PERM_UID]['subscription_status'] is None, str(rows[PERM_UID]))
+    check('last_payment_at surfaced when present',
+          rows[PLAIN_UID]['last_payment_at'] == 1_717_200_000, str(rows[PLAIN_UID]['last_payment_at']))
+    check('last_payment_at null when never paid',
+          rows[ADMIN_UID]['last_payment_at'] is None, str(rows[ADMIN_UID]['last_payment_at']))
 
     order = [u['uid'] for u in data['users']]
     check('admins first, then email A-Z', order == [ADMIN_UID, PERM_UID, PLAIN_UID],
@@ -281,6 +299,46 @@ def main():
     check('demote 200', status == 200, str(status))
     check('demote removes uid', PLAIN_UID not in admins_now(), str(admins_now()))
     check('demote leaves others alone', ADMIN_UID in admins_now(), str(admins_now()))
+
+    # ── 4b. Manual Pro toggle ─────────────────────────────────────────────────
+    check('admin starts free', is_pro_now(ADMIN_UID) is False)
+    status, body = set_pro(ADMIN_UID, True)
+    check('grant pro 200', status == 200, str(status))
+    check('grant pro echoes state', body.get('is_pro') is True, str(body))
+    check('grant pro writes doc', is_pro_now(ADMIN_UID) is True)
+    # Existing sibling fields on the doc must survive an .update() (no clobber).
+    check('grant pro leaves other fields alone',
+          (db.get(('users', ADMIN_UID)) or {}).get('first_seen') is not None)
+
+    status, body = set_pro(ADMIN_UID, False)
+    check('revoke pro 200', status == 200, str(status))
+    check('revoke pro writes doc', is_pro_now(ADMIN_UID) is False)
+
+    # PERM_UID has no users/{uid} doc at all (never loaded the home page) — the
+    # endpoint must create one via a merge-set rather than 500 on a missing doc.
+    check('perm admin has no doc yet', db.get(('users', PERM_UID)) is None)
+    status, body = set_pro(PERM_UID, True)
+    check('grant pro for docless user 200', status == 200, str(status))
+    check('grant pro for docless user creates doc', is_pro_now(PERM_UID) is True)
+
+    for who, label in ((PLAIN_UID, 'non-admin'), (None, 'signed-out')):
+        caller['uid'] = who
+        status, _ = set_pro(ADMIN_UID, True)
+        check('PATCH pro 403 for %s' % label, status == 403, str(status))
+    caller['uid'] = ADMIN_UID
+
+    status, _ = set_pro('uid-does-not-exist', True)
+    check('unknown uid pro 404', status == 404, str(status))
+
+    for bad in ('yes', 1, None):
+        res = client.patch('/api/admin/users/%s/pro' % PLAIN_UID,
+                           data=json.dumps({'is_pro': bad}),
+                           content_type='application/json')
+        check('non-bool is_pro (%r) 400' % bad, res.status_code == 400,
+              str(res.status_code))
+    res = client.patch('/api/admin/users/%s/pro' % PLAIN_UID,
+                       data='not json', content_type='application/json')
+    check('malformed pro body 400', res.status_code == 400, str(res.status_code))
 
     # ── 5. Guardrails ────────────────────────────────────────────────────────
     before = admins_now()
