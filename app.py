@@ -1539,11 +1539,17 @@ def stripe_webhook():
         uid = obj.get('metadata', {}).get('uid', '')
         if uid:
             db.collection('users').document(uid).set(
-                {'is_pro': True, 'stripe_customer_id': obj.get('customer', '')},
+                {
+                    'is_pro':            True,
+                    'stripe_customer_id': obj.get('customer', ''),
+                    'last_payment_at':    int(time.time()),
+                },
                 merge=True
             )
 
     elif t in ('customer.subscription.deleted', 'customer.subscription.updated'):
+        # Status sync only — not necessarily a new payment, so last_payment_at
+        # is intentionally left untouched here.
         uid = (obj.get('metadata', {}).get('uid', '')
                or _uid_for_customer(db, obj.get('customer', '')))
         if uid:
@@ -1557,7 +1563,10 @@ def stripe_webhook():
         if obj.get('subscription'):   # only subscription invoices, not one-off
             uid = _uid_for_customer(db, obj.get('customer', ''))
             if uid:
-                db.collection('users').document(uid).set({'is_pro': True}, merge=True)
+                db.collection('users').document(uid).set(
+                    {'is_pro': True, 'last_payment_at': int(time.time())},
+                    merge=True
+                )
 
     return jsonify({'received': True})
 
@@ -1855,10 +1864,11 @@ def admin_list_users():
         exports_today = (int(quota.get('hand_exports') or 0) + int(quota.get('tourney_exports') or 0)) \
             if quota.get('day') == today else 0
         profiles[doc.id] = {
-            'is_pro':        bool(d.get('is_pro')),
-            'first_seen':    _fs_ts_to_secs(d.get('first_seen')),
-            'last_seen':     _fs_ts_to_secs(d.get('last_seen')),
-            'exports_today': exports_today,
+            'is_pro':          bool(d.get('is_pro')),
+            'first_seen':      _fs_ts_to_secs(d.get('first_seen')),
+            'last_seen':       _fs_ts_to_secs(d.get('last_seen')),
+            'exports_today':   exports_today,
+            'last_payment_at': d.get('last_payment_at'),  # already epoch secs, not a Firestore timestamp
         }
 
     users = []
@@ -1877,10 +1887,11 @@ def admin_list_users():
                     'disabled':      bool(getattr(u, 'disabled', False)),
                     'created_at':    _ms_to_secs(getattr(meta, 'creation_timestamp', None)),
                     'last_sign_in':  _ms_to_secs(getattr(meta, 'last_sign_in_timestamp', None)),
-                    'is_pro':        profile.get('is_pro', False),
-                    'first_seen':    profile.get('first_seen'),
-                    'last_seen':     profile.get('last_seen'),
-                    'exports_today': profile.get('exports_today', 0),
+                    'is_pro':          profile.get('is_pro', False),
+                    'first_seen':      profile.get('first_seen'),
+                    'last_seen':       profile.get('last_seen'),
+                    'exports_today':   profile.get('exports_today', 0),
+                    'last_payment_at': profile.get('last_payment_at'),
                 })
             page = page.get_next_page()
     except Exception as exc:
