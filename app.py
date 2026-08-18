@@ -15,7 +15,7 @@ from urllib.parse import urlparse, parse_qs
 import requests
 from flask import (Flask, g, has_app_context, jsonify, redirect, render_template,
                    request, send_file, send_from_directory, Response)
-from flask_babel import Babel
+from flask_babel import Babel, gettext
 
 from hand_parser import (process_hands, build_hand_rows, classify_game,
                          norm_room_name, CATEGORY_TOURNAMENT)
@@ -2246,15 +2246,15 @@ def _tournament_detail(records, doc):
         meta[key] = cfg.get(key)
     if not meta.get('graph_ready'):
         if not meta.get('graph_config_found'):
-            meta['graph_warning'] = (
+            meta['graph_warning'] = gettext(
                 'Graph cannot be displayed because this tournament has no matching '
                 'configuration in the tournaments table.'
             )
         else:
             fields = ', '.join(meta.get('graph_missing_fields') or [])
-            meta['graph_warning'] = (
+            meta['graph_warning'] = gettext(
                 'Graph cannot be displayed because this tournament configuration '
-                f'is missing: {fields}.'
+                'is missing: %(fields)s.', fields=fields
             )
     meta['rebuys'] = analysis['rebuys']
     meta['addons'] = analysis['addons']

@@ -2182,7 +2182,8 @@ function _renderTournamentChart(hands, meta) {
 
   if (meta && meta.graph_ready === false) {
     wrap.classList.add('d-none');
-    _tgSetGraphWarning(meta.graph_warning || 'Graph cannot be displayed because this tournament configuration is incomplete.');
+    const warnEl = document.getElementById('tourney-graph-warning');
+    _tgSetGraphWarning(meta.graph_warning || (warnEl && warnEl.dataset.fallback) || '');
     return;
   }
 
@@ -2367,13 +2368,15 @@ function _renderTournamentChart(hands, meta) {
   wrap.classList.remove('d-none');
 }
 
-// Icon → [label, colour], matching what _TG_MARKERS_PLUGIN paints.
+// Icon → [dataset key, colour], matching what _TG_MARKERS_PLUGIN paints. The
+// label text itself is server-translated and read from #tourney-graph-legend's
+// data-* attributes (see _tgRenderLegend) rather than hardcoded here.
 const _TG_MARK_LEGEND = {
-  '▲': ['Biggest win',  '#00e676'],
-  '▼': ['Biggest loss', '#ff5252'],
-  'R': ['Rebuy',        '#ffb300'],
-  'A': ['Add-on',       '#40c4ff'],
-  '✕': ['Busted',       '#ff5252'],
+  '▲': ['biggestWin',  '#00e676'],
+  '▼': ['biggestLoss', '#ff5252'],
+  'R': ['rebuy',        '#ffb300'],
+  'A': ['addon',        '#40c4ff'],
+  '✕': ['busted',       '#ff5252'],
 };
 
 // The dots are a deliberately sparse read of the run — only hands hero played,
@@ -2383,19 +2386,20 @@ const _TG_MARK_LEGEND = {
 function _tgRenderLegend(markers) {
   const el = document.getElementById('tourney-graph-legend');
   if (!el) return;
+  const t = el.dataset;
   const items = [
-    '<span class="tg-lg"><i class="tg-lg-dot won"></i>Hand won</span>',
-    '<span class="tg-lg"><i class="tg-lg-dot lost"></i>Hand lost</span>',
-    '<span class="tg-lg"><i class="tg-lg-dot sd"></i>Reached showdown</span>',
+    `<span class="tg-lg"><i class="tg-lg-dot won"></i>${t.handWon}</span>`,
+    `<span class="tg-lg"><i class="tg-lg-dot lost"></i>${t.handLost}</span>`,
+    `<span class="tg-lg"><i class="tg-lg-dot sd"></i>${t.reachedShowdown}</span>`,
   ];
   const drawn = new Set((markers || []).map(m => m.icon));
-  for (const [icon, [label, color]] of Object.entries(_TG_MARK_LEGEND)) {
+  for (const [icon, [key, color]] of Object.entries(_TG_MARK_LEGEND)) {
     if (!drawn.has(icon)) continue;
     items.push(`<span class="tg-lg"><i class="tg-lg-mark" style="color:${color};`
-      + `border-color:${color};background:${color}22">${icon}</i>${label}</span>`);
+      + `border-color:${color};background:${color}22">${icon}</i>${t[key]}</span>`);
   }
-  items.push('<span class="tg-lg"><i class="tg-lg-line"></i>Stage (hover the line)</span>');
-  items.push('<span class="tg-lg tg-lg-note">Dots mark only hands you played</span>');
+  items.push(`<span class="tg-lg"><i class="tg-lg-line"></i>${t.stage}</span>`);
+  items.push(`<span class="tg-lg tg-lg-note">${t.note}</span>`);
   el.innerHTML = items.join('');
 }
 

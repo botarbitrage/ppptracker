@@ -478,7 +478,8 @@
       </div>
 
       <!-- Tournament Progress Graph -->
-      <div id="tourney-graph-warning" class="tourney-graph-warning d-none" role="status"></div>
+      <div id="tourney-graph-warning" class="tourney-graph-warning d-none" role="status"
+           data-fallback="{{ _('Graph cannot be displayed because this tournament configuration is incomplete.') }}"></div>
       <div id="tourney-graph-wrap" class="tourney-graph-wrap d-none">
         <div class="tourney-graph-controls">
           <div class="tg-group">
@@ -503,7 +504,17 @@
         </div>
         <!-- What the dots and marks mean. Built from what the chart actually
              drew, so it never advertises a rebuy that never happened. -->
-        <div id="tourney-graph-legend" class="tg-legend" aria-label="{{ _('Graph legend') }}"></div>
+        <div id="tourney-graph-legend" class="tg-legend" aria-label="{{ _('Graph legend') }}"
+             data-hand-won="{{ _('Hand won') }}"
+             data-hand-lost="{{ _('Hand lost') }}"
+             data-reached-showdown="{{ _('Reached showdown') }}"
+             data-biggest-win="{{ _('Biggest win') }}"
+             data-biggest-loss="{{ _('Biggest loss') }}"
+             data-rebuy="{{ _('Rebuy') }}"
+             data-addon="{{ _('Add-on') }}"
+             data-busted="{{ _('Busted') }}"
+             data-stage="{{ _('Stage (hover the line)') }}"
+             data-note="{{ _('Dots mark only hands you played') }}"></div>
       </div>
 
       <div class="table-responsive">
@@ -1031,7 +1042,7 @@
     googleSignInFailed: "{{ _('Google sign-in failed.') }}"
   };
 </script>
-<script src="/static/app.js?v=56"></script>
+<script src="/static/app.js?v=57"></script>
 <script>
   if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
     navigator.serviceWorker.register('/static/sw.js', { scope: '/' })

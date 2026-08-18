@@ -136,6 +136,7 @@ authoritative in the header comment of
 - Stack/format terms: Stack, BB / BBs, MTT, Satellite
 - Hole-card jargon: hero, board, runout, all-in
 - Stats: VPIP, PFR
+- Tournament structure jargon: Showdown, Rebuy, Add-on
 
 ## Environment variables
 
