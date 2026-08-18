@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-08-18 10:36+0930\n"
+"POT-Creation-Date: 2026-08-18 11:14+0930\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -536,7 +536,7 @@ msgstr ""
 msgid "No surveys available? Answer a few quick questions instead"
 msgstr ""
 
-#: templates/index.html:705
+#: templates/index.html:705 templates/index.html:1022
 msgid "Sign in"
 msgstr ""
 
@@ -1009,5 +1009,41 @@ msgstr ""
 
 #: templates/index.html:1000
 msgid "Replay links to PPPoker hand viewer"
+msgstr ""
+
+#: templates/index.html:1023
+msgid "Sign out"
+msgstr ""
+
+#: templates/index.html:1024
+msgid "Auth service not available. Check Firebase config."
+msgstr ""
+
+#: templates/index.html:1025
+msgid "Please enter your email address."
+msgstr ""
+
+#: templates/index.html:1026
+msgid "Sending…"
+msgstr ""
+
+#: templates/index.html:1027
+msgid "Link sent to"
+msgstr ""
+
+#: templates/index.html:1028
+msgid "check your inbox."
+msgstr ""
+
+#: templates/index.html:1029
+msgid "Failed to send link."
+msgstr ""
+
+#: templates/index.html:1030
+msgid "Auth not ready — please wait a moment and try again."
+msgstr ""
+
+#: templates/index.html:1031
+msgid "Google sign-in failed."
 msgstr ""
 

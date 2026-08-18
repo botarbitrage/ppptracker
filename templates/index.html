@@ -1015,7 +1015,23 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="/static/app.js?v=55"></script>
+<script>
+  {# JS-side strings for the auth bar / modal — babel.cfg only scans templates/**.html
+     and app.py, so app.js can't call _() directly; these are handed over instead. #}
+  window.I18N_AUTH = {
+    signIn: "{{ _('Sign in') }}",
+    signOut: "{{ _('Sign out') }}",
+    authServiceUnavailable: "{{ _('Auth service not available. Check Firebase config.') }}",
+    enterEmailAddress: "{{ _('Please enter your email address.') }}",
+    sending: "{{ _('Sending…') }}",
+    linkSentTo: "{{ _('Link sent to') }}",
+    checkYourInbox: "{{ _('check your inbox.') }}",
+    failedToSendLink: "{{ _('Failed to send link.') }}",
+    authNotReady: "{{ _('Auth not ready — please wait a moment and try again.') }}",
+    googleSignInFailed: "{{ _('Google sign-in failed.') }}"
+  };
+</script>
+<script src="/static/app.js?v=56"></script>
 <script>
   if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
     navigator.serviceWorker.register('/static/sw.js', { scope: '/' })

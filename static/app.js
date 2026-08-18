@@ -3412,12 +3412,12 @@ function _renderAuthBar(email) {
       `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>` +
       `<span class="auth-email">${email}</span>` +
       `</span>` +
-      `<button class="auth-signout-btn auth-signout-standalone" onclick="signOutUser()">Sign out</button>`;
+      `<button class="auth-signout-btn auth-signout-standalone" onclick="signOutUser()">${window.I18N_AUTH?.signOut || 'Sign out'}</button>`;
   } else {
     bar.innerHTML =
       `<button class="auth-chip auth-signin-btn" data-bs-toggle="modal" data-bs-target="#modal-auth">` +
       `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>` +
-      `<span>Sign in</span>` +
+      `<span>${window.I18N_AUTH?.signIn || 'Sign in'}</span>` +
       `</button>`;
   }
 }
@@ -3429,9 +3429,10 @@ function _renderAuthBar(email) {
  *   2. Add your app's domain to the Authorized Domains list (localhost is pre-authorized)
  */
 function sendMagicLink() {
+  const t = window.I18N_AUTH || {};
   if (!_auth) {
     const msgEl = document.getElementById('auth-msg');
-    if (msgEl) { msgEl.className = 'mt-2'; msgEl.innerHTML = '<span style="color:var(--red)">Auth service not available. Check Firebase config.</span>'; msgEl.classList.remove('d-none'); }
+    if (msgEl) { msgEl.className = 'mt-2'; msgEl.innerHTML = `<span style="color:var(--red)">${t.authServiceUnavailable || 'Auth service not available. Check Firebase config.'}</span>`; msgEl.classList.remove('d-none'); }
     return;
   }
   const emailInput = document.getElementById('auth-email-input');
@@ -3439,21 +3440,21 @@ function sendMagicLink() {
   const btn        = document.getElementById('auth-send-btn');
   const email      = (emailInput ? emailInput.value : '').trim();
   if (!email) {
-    if (msgEl) { msgEl.className = 'mt-2'; msgEl.innerHTML = '<span style="color:var(--yellow)">Please enter your email address.</span>'; msgEl.classList.remove('d-none'); }
+    if (msgEl) { msgEl.className = 'mt-2'; msgEl.innerHTML = `<span style="color:var(--yellow)">${t.enterEmailAddress || 'Please enter your email address.'}</span>`; msgEl.classList.remove('d-none'); }
     return;
   }
   if (btn) btn.disabled = true;
-  if (msgEl) { msgEl.className = 'mt-2'; msgEl.innerHTML = '<span style="color:var(--muted)">Sending…</span>'; msgEl.classList.remove('d-none'); }
+  if (msgEl) { msgEl.className = 'mt-2'; msgEl.innerHTML = `<span style="color:var(--muted)">${t.sending || 'Sending…'}</span>`; msgEl.classList.remove('d-none'); }
 
   _auth.sendSignInLinkToEmail(email, {
     url: window.location.origin + '/',
     handleCodeInApp: true,
   }).then(() => {
     localStorage.setItem('emailForSignIn', email);
-    if (msgEl) msgEl.innerHTML = `<span style="color:var(--green)">✓ Link sent to <strong>${email}</strong> — check your inbox.</span>`;
+    if (msgEl) msgEl.innerHTML = `<span style="color:var(--green)">✓ ${t.linkSentTo || 'Link sent to'} <strong>${email}</strong> — ${t.checkYourInbox || 'check your inbox.'}</span>`;
     if (btn) btn.disabled = false;
   }).catch(err => {
-    if (msgEl) msgEl.innerHTML = `<span style="color:var(--red)">${err.message || 'Failed to send link.'}</span>`;
+    if (msgEl) msgEl.innerHTML = `<span style="color:var(--red)">${err.message || t.failedToSendLink || 'Failed to send link.'}</span>`;
     if (btn) btn.disabled = false;
   });
 }
@@ -3493,11 +3494,12 @@ function signOutUser() {
 
 /** Sign in with Google popup. onAuthStateChanged handles the rest. */
 function signInWithGoogle() {
+  const t = window.I18N_AUTH || {};
   const msgEl = document.getElementById('auth-msg');
   if (!_auth) {
     if (msgEl) {
       msgEl.className = 'mt-2';
-      msgEl.innerHTML = `<span style="color:var(--red,#f85149)">Auth not ready — please wait a moment and try again.</span>`;
+      msgEl.innerHTML = `<span style="color:var(--red,#f85149)">${t.authNotReady || 'Auth not ready — please wait a moment and try again.'}</span>`;
       msgEl.classList.remove('d-none');
     }
     return;
@@ -3511,7 +3513,7 @@ function signInWithGoogle() {
     .catch(err => {
       if (msgEl) {
         msgEl.className = 'mt-2';
-        msgEl.innerHTML = `<span style="color:var(--red,#f85149)">${err.message || 'Google sign-in failed.'}</span>`;
+        msgEl.innerHTML = `<span style="color:var(--red,#f85149)">${err.message || t.googleSignInFailed || 'Google sign-in failed.'}</span>`;
         msgEl.classList.remove('d-none');
       }
     });
