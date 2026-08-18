@@ -650,7 +650,10 @@
           <td class="adm-date">${esc(fmtDate(u.created_at))}</td>
           <td class="adm-date">${esc(fmtDate(u.last_sign_in))}</td>
           <td class="text-center">
-            <span class="adm-pill${u.is_pro ? '' : ' off'}">${u.is_pro ? 'Yes' : 'No'}</span>
+            <input type="checkbox" class="form-check-input adm-check"
+                   aria-label="Pro"
+                   ${u.is_pro ? 'checked' : ''}
+                   onchange="setPro('${esc(u.uid)}', this)"/>
           </td>
           <td class="adm-date">${esc(fmtDate(u.first_seen))}</td>
           <td class="adm-date">${esc(fmtDate(u.last_seen))}</td>
@@ -699,6 +702,37 @@
         return;
       }
       if (user) user.is_admin = want;
+      renderUsers();
+    } catch (e) {
+      checkbox.checked = !want;
+      showUsersError('Could not reach the server: ' + e.message);
+    } finally {
+      checkbox.disabled = false;
+      if (row) row.classList.remove('adm-row-busy');
+    }
+  }
+
+  async function setPro(uid, checkbox) {
+    const want = checkbox.checked;
+    const user = USERS.find(u => u.uid === uid);
+
+    const row = checkbox.closest('tr');
+    checkbox.disabled = true;
+    if (row) row.classList.add('adm-row-busy');
+    showUsersError('');
+
+    try {
+      const res = await authFetch(`/api/admin/users/${encodeURIComponent(uid)}/pro`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_pro: want }),
+      });
+      if (!res.ok) {
+        checkbox.checked = !want;  // revert — the server rejected it
+        showUsersError(await errorText(res, 'Could not update Pro status'));
+        return;
+      }
+      if (user) user.is_pro = want;
       renderUsers();
     } catch (e) {
       checkbox.checked = !want;
