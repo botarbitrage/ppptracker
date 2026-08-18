@@ -26,6 +26,7 @@ One document per signed-in account.
 | `last_seen` | timestamp | client | Server timestamp, refreshed on each sign-in. |
 | `is_pro` | bool | **server-only** (Stripe webhook) | The whole Free/Pro split. `true` removes every quota, the history window and the survey gate. |
 | `stripe_customer_id` | string | **server-only** (Stripe webhook) | Fallback lookup key when a subscription event carries no uid metadata. |
+| `last_payment_at` | int (epoch secs) | **server-only** (Stripe webhook) | Stamped on `checkout.session.completed` and `invoice.payment_succeeded` — the two events that represent an actual payment. Left untouched by `customer.subscription.updated` (status sync, not necessarily a new payment). Unset for users who have never paid (`app.py:stripe_webhook`). |
 | `quota` | map | **server-only** | Today's usage counters. See below. |
 | `credits` | map | **server-only** | Unspent survey unlocks. See below. |
 

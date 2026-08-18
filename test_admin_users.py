@@ -175,6 +175,7 @@ def main():
         'first_seen': datetime(2024, 1, 1, tzinfo=timezone.utc),
         'last_seen': datetime(2024, 6, 1, tzinfo=timezone.utc),
         'quota': {'day': today, 'hand_exports': 2, 'tourney_exports': 1},
+        'last_payment_at': 1_717_200_000,
     })
     db.put(('users', ADMIN_UID), {
         'is_pro': False,
@@ -252,6 +253,10 @@ def main():
           rows[ADMIN_UID]['exports_today'] == 0, str(rows[ADMIN_UID]['exports_today']))
     check('user with no Firestore doc has zero exports today',
           rows[PERM_UID]['exports_today'] == 0, str(rows[PERM_UID]['exports_today']))
+    check('last_payment_at surfaced when present',
+          rows[PLAIN_UID]['last_payment_at'] == 1_717_200_000, str(rows[PLAIN_UID]['last_payment_at']))
+    check('last_payment_at null when never paid',
+          rows[ADMIN_UID]['last_payment_at'] is None, str(rows[ADMIN_UID]['last_payment_at']))
 
     order = [u['uid'] for u in data['users']]
     check('admins first, then email A-Z', order == [ADMIN_UID, PERM_UID, PLAIN_UID],

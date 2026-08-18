@@ -302,6 +302,7 @@
                     <th class="text-center">Pro</th>
                     <th>Registered</th>
                     <th>Last active</th>
+                    <th>Last Payment</th>
                     <th class="text-center">Admin</th>
                   </tr>
                 </thead>
@@ -428,6 +429,14 @@
       year: 'numeric', month: 'short', day: 'numeric',
       hour: '2-digit', minute: '2-digit',
     });
+  }
+
+  // No last_payment_at means never paid — fall back to first_seen so the
+  // column isn't blank, but label it so it isn't mistaken for a real payment.
+  function fmtLastPayment(u) {
+    if (u.last_payment_at) return fmtDate(u.last_payment_at);
+    if (u.first_seen) return fmtDate(u.first_seen) + ' (registered)';
+    return '—';
   }
 
   // ── Top bar ────────────────────────────────────────────────────────────────
@@ -635,7 +644,7 @@
     const body = document.getElementById('adm-users-body');
 
     if (!rows.length) {
-      body.innerHTML = `<tr><td colspan="7" class="text-center adm-meta py-4">` +
+      body.innerHTML = `<tr><td colspan="8" class="text-center adm-meta py-4">` +
         (USERS.length ? 'No users match that search.' : 'No registered users yet.') +
         `</td></tr>`;
     } else {
@@ -654,6 +663,7 @@
           </td>
           <td class="adm-date">${esc(fmtDate(u.first_seen))}</td>
           <td class="adm-date">${esc(fmtDate(u.last_seen))}</td>
+          <td class="adm-date">${esc(fmtLastPayment(u))}</td>
           <td class="text-center">
             <input type="checkbox" class="form-check-input adm-check"
                    aria-label="Admin"
