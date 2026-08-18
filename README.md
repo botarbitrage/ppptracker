@@ -62,6 +62,24 @@ Tests are standalone scripts, run the same way CI does:
 python test_tiering.py
 ```
 
+## Translations (i18n)
+
+Templates use Flask-Babel (`_('...')` / `{% trans %}` in `templates/*.html`,
+`babel.cfg` lists which files get scanned). After editing translatable
+strings, re-extract and rebuild the compiled catalog:
+
+```bash
+pybabel extract -F babel.cfg -o translations/messages.pot .
+pybabel update -i translations/messages.pot -d translations
+# fill in any new/blank msgstr entries in translations/pt_BR/LC_MESSAGES/messages.po
+pybabel compile -d translations
+```
+
+`pybabel compile` must run before deploying — the app reads the compiled
+`.mo` file, not the `.po` source. Poker taxonomy (Flop, Turn, River, Street,
+Stack, BB/BBs, MTT, Satellite, etc.) is intentionally left untranslated in
+`pt_BR`; see the header comment in `messages.po` for the full rationale.
+
 ## Environment variables
 
 Set these in Railway for the deployed app, and in `.env` locally.

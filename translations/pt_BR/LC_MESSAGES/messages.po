@@ -3,12 +3,18 @@
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
+# NOTE on poker taxonomy: standard poker terms (Flop, Turn, River, Street,
+# Stack, BB/BBs, MTT, Satellite, hole cards jargon like "hero"/"board"/
+# "runout"/"all-in", stats like VPIP/PFR) are intentionally left
+# untranslated
+# — Brazilian poker players use these English terms natively, matching how
+# PPPoker itself and other poker training tools present them.
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-08-18 08:05+0930\n"
-"PO-Revision-Date: 2026-08-18 08:04+0930\n"
+"POT-Creation-Date: 2026-08-18 10:36+0930\n"
+"PO-Revision-Date: 2026-08-18 10:35+0930\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: pt_BR\n"
 "Language-Team: pt_BR <LL@li.org>\n"
@@ -17,4 +23,1115 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
+
+#: templates/index.html:33
+msgid "Skip to main content"
+msgstr "Pular para o conteúdo principal"
+
+#: templates/index.html:46
+msgid "Admin"
+msgstr "Admin"
+
+#: templates/index.html:49 templates/index.html:50
+msgid "Language"
+msgstr "Idioma"
+
+#: templates/index.html:56 templates/index.html:57
+msgid "Timezone"
+msgstr "Fuso Horário"
+
+#: templates/index.html:77
+msgid "Points"
+msgstr "Pontos"
+
+#: templates/index.html:81
+msgid "Day Streak"
+msgstr "Sequência Diária"
+
+#: templates/index.html:85
+msgid "Weekly Rank"
+msgstr "Ranking Semanal"
+
+#: templates/index.html:99
+msgid "ANALYSE"
+msgstr "ANALISE"
+
+#: templates/index.html:99
+msgid "STUDY"
+msgstr "ESTUDE"
+
+#: templates/index.html:99
+msgid "WIN"
+msgstr "VENÇA"
+
+#: templates/index.html:106
+msgid "Page sections"
+msgstr "Seções da página"
+
+#: templates/index.html:110
+msgid "What this tool does"
+msgstr "O que esta ferramenta faz"
+
+#: templates/index.html:112 templates/index.html:828
+msgid "The Tool"
+msgstr "A Ferramenta"
+
+#: templates/index.html:116
+msgid "Step-by-step guide"
+msgstr "Guia passo a passo"
+
+#: templates/index.html:118 templates/index.html:855
+msgid "How to Use"
+msgstr "Como Usar"
+
+#: templates/index.html:122
+msgid "Free vs Pro — what you get"
+msgstr "Grátis vs Pro — o que você ganha"
+
+#: templates/index.html:124 templates/index.html:906
+msgid "Free vs Pro"
+msgstr "Grátis vs Pro"
+
+#: templates/index.html:128
+msgid "What's new in each version"
+msgstr "O que há de novo em cada versão"
+
+#: templates/index.html:130 templates/index.html:943
+msgid "Release Notes"
+msgstr "Notas de Versão"
+
+#: templates/index.html:143
+msgid "FREE"
+msgstr "GRÁTIS"
+
+#: templates/index.html:145
+msgid "3 imports/day"
+msgstr "3 importações/dia"
+
+#: templates/index.html:146
+msgid "7 days of history"
+msgstr "7 dias de histórico"
+
+#: templates/index.html:147
+msgid "Full session stats & graphs"
+msgstr "Estatísticas e gráficos completos da sessão"
+
+#: templates/index.html:148
+msgid "5 hand exports/day"
+msgstr "5 exportações de mãos/dia"
+
+#: templates/index.html:149
+msgid "1 tournament export/day"
+msgstr "1 exportação de torneio/dia"
+
+#: templates/index.html:150 templates/index.html:163
+msgid "Whole-session exports"
+msgstr "Exportação da sessão completa"
+
+#: templates/index.html:153
+msgid "VS"
+msgstr "VS"
+
+#: templates/index.html:157
+msgid "PRO —"
+msgstr "PRO —"
+
+#: templates/index.html:159 templates/index.html:167 templates/index.html:255
+#: templates/index.html:929
+msgid "Early Access"
+msgstr "Acesso Antecipado"
+
+#: templates/index.html:159
+msgid "locked in until global launch"
+msgstr "garantido até o lançamento global"
+
+#: templates/index.html:161
+msgid "Unlimited imports"
+msgstr "Importações ilimitadas"
+
+#: templates/index.html:162
+msgid "History that never expires"
+msgstr "Histórico que nunca expira"
+
+#: templates/index.html:164 templates/index.html:251
+msgid "Unlimited daily exports"
+msgstr "Exportações diárias ilimitadas"
+
+#: templates/index.html:165
+msgid "No surveys, ever"
+msgstr "Sem pesquisas, nunca"
+
+#: templates/index.html:167
+msgid "Get"
+msgstr "Obter"
+
+#: templates/index.html:181
+msgid "Paste PPPoker replay link…"
+msgstr "Cole o link de replay do PPPoker…"
+
+#: templates/index.html:182
+msgid "PPPoker replay link"
+msgstr "Link de replay do PPPoker"
+
+#: templates/index.html:190
+msgid "IMPORT"
+msgstr "IMPORTAR"
+
+#: templates/index.html:199
+msgid "Fetching hand history… this may take a few seconds"
+msgstr "Buscando histórico de mãos… isso pode levar alguns segundos"
+
+#: templates/index.html:208
+msgid "Export Accuracy Notice"
+msgstr "Aviso de Precisão da Exportação"
+
+#: templates/index.html:209 templates/index.html:244 templates/index.html:618
+#: templates/index.html:671 templates/index.html:692 templates/index.html:707
+#: templates/index.html:809 templates/index.html:830 templates/index.html:857
+#: templates/index.html:908 templates/index.html:945
+msgid "Close"
+msgstr "Fechar"
+
+#: templates/index.html:212
+msgid ""
+"Hand history exported from PPPokerHA is converted to PokerStars format "
+"and <strong>may not be 100% accurate</strong> when imported into third-"
+"party tools such as PokerTracker 4, DriveHUD, or GTO Wizard."
+msgstr ""
+"O histórico de mãos exportado do PPPokerHA é convertido para o formato "
+"PokerStars e <strong>pode não ser 100% preciso</strong> ao ser importado "
+"em ferramentas de terceiros como PokerTracker 4, DriveHUD ou GTO Wizard."
+
+#: templates/index.html:213
+msgid "Known limitations:"
+msgstr "Limitações conhecidas:"
+
+#: templates/index.html:215
+msgid "Pot sizes may differ slightly in edge cases"
+msgstr "O tamanho do pote pode diferir ligeiramente em casos extremos"
+
+#: templates/index.html:216
+msgid "Some action types may not translate perfectly"
+msgstr "Alguns tipos de ação podem não ser convertidos perfeitamente"
+
+#: templates/index.html:217
+msgid "Community cards may be missing for folded-out hands"
+msgstr "As cartas comunitárias podem estar ausentes em mãos onde houve fold"
+
+#: templates/index.html:219
+msgid "Use exported data for study purposes only — not for official records."
+msgstr ""
+"Use os dados exportados apenas para fins de estudo — não como registro "
+"oficial."
+
+#: templates/index.html:224
+msgid "Don't show this again"
+msgstr "Não mostrar isso novamente"
+
+#: templates/index.html:227 templates/index.html:645 templates/index.html:739
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: templates/index.html:228 templates/index.html:348 templates/index.html:377
+#: templates/index.html:521 templates/index.html:598
+msgid "Export"
+msgstr "Exportar"
+
+#: templates/index.html:242
+msgid "Unlock Pro"
+msgstr "Desbloquear o Pro"
+
+#: templates/index.html:248
+msgid "What you get with Pro:"
+msgstr "O que você ganha com o Pro:"
+
+#: templates/index.html:250
+msgid "Unlimited hand history (free tier shows last 30)"
+msgstr "Histórico de mãos ilimitado (o plano grátis mostra as últimas 30)"
+
+#: templates/index.html:252
+msgid "Full tournament export access"
+msgstr "Acesso completo à exportação de torneios"
+
+#: templates/index.html:253
+msgid "More features coming…"
+msgstr "Mais recursos em breve…"
+
+#: templates/index.html:255
+msgid "until we launch globally. Cancel any time."
+msgstr "até o lançamento global. Cancele quando quiser."
+
+#: templates/index.html:264 templates/index.html:930
+msgid "Get Early Access — A$7.99/month"
+msgstr "Obter Acesso Antecipado — A$7,99/mês"
+
+#: templates/index.html:266
+msgid "Maybe later"
+msgstr "Talvez depois"
+
+#: templates/index.html:273
+msgid "Pro-test — A$0.50/month (test sub)"
+msgstr "Pro-teste — A$0,50/mês (assinatura de teste)"
+
+#: templates/index.html:291 templates/index.html:414
+msgid "Hands"
+msgstr "Mãos"
+
+#: templates/index.html:292
+msgid "Flop"
+msgstr "Flop"
+
+#: templates/index.html:293
+msgid "Turn"
+msgstr "Turn"
+
+#: templates/index.html:294
+msgid "River"
+msgstr "River"
+
+#: templates/index.html:295
+msgid "SD"
+msgstr "SD"
+
+#: templates/index.html:296
+msgid "Won"
+msgstr "Vitórias"
+
+#: templates/index.html:308
+msgid "Export All Hands"
+msgstr "Exportar Todas as Mãos"
+
+#: templates/index.html:309
+msgid "About conversion accuracy"
+msgstr "Sobre a precisão da conversão"
+
+#: templates/index.html:333
+msgid "Last 3 Hands"
+msgstr "Últimas 3 Mãos"
+
+#: templates/index.html:343 templates/index.html:372 templates/index.html:516
+#: templates/index.html:593
+msgid "When"
+msgstr "Quando"
+
+#: templates/index.html:344 templates/index.html:373 templates/index.html:517
+#: templates/index.html:594
+msgid "Hole Cards"
+msgstr "Cartas na Mão"
+
+#: templates/index.html:345 templates/index.html:374 templates/index.html:518
+#: templates/index.html:595
+msgid "Position"
+msgstr "Posição"
+
+#: templates/index.html:346 templates/index.html:375 templates/index.html:519
+#: templates/index.html:596
+msgid "Street"
+msgstr "Street"
+
+#: templates/index.html:347 templates/index.html:376 templates/index.html:520
+#: templates/index.html:597
+msgid "Net P/L (BB)"
+msgstr "Resultado Líquido (BB)"
+
+#: templates/index.html:349 templates/index.html:378 templates/index.html:522
+#: templates/index.html:599
+msgid "Replay"
+msgstr "Replay"
+
+#: templates/index.html:362
+msgid "Last 3 Winning Hands"
+msgstr "Últimas 3 Mãos Vencedoras"
+
+#: templates/index.html:397
+msgid "Tournament History"
+msgstr "Histórico de Torneios"
+
+#: templates/index.html:400 templates/index.html:401
+#, python-format
+msgid ""
+"Buy-in, ITM%%, and finishing position are not available in the PPPoker "
+"API data."
+msgstr ""
+"Buy-in, %% ITM e posição final não estão disponíveis nos dados da API do "
+"PPPoker."
+
+#: templates/index.html:409
+msgid "Date"
+msgstr "Data"
+
+#: templates/index.html:410
+msgid "Room"
+msgstr "Sala"
+
+#: templates/index.html:411
+msgid "Sit Down Time"
+msgstr "Horário de Início"
+
+#: templates/index.html:412
+msgid "Time Played"
+msgstr "Tempo Jogado"
+
+#: templates/index.html:413 templates/index.html:453
+msgid "Type"
+msgstr "Tipo"
+
+#: templates/index.html:415
+msgid "Export Format"
+msgstr "Formato de Exportação"
+
+#: templates/index.html:433
+msgid "Tournament Summary"
+msgstr "Resumo de Torneios"
+
+#: templates/index.html:438 templates/index.html:546
+msgid "Interval"
+msgstr "Intervalo"
+
+#: templates/index.html:440 templates/index.html:548
+msgid "All"
+msgstr "Todos"
+
+#: templates/index.html:441 templates/index.html:549
+msgid "Today"
+msgstr "Hoje"
+
+#: templates/index.html:442 templates/index.html:550
+msgid "This Week"
+msgstr "Esta Semana"
+
+#: templates/index.html:443 templates/index.html:551
+msgid "This Month"
+msgstr "Este Mês"
+
+#: templates/index.html:451
+msgid "Tournament"
+msgstr "Torneio"
+
+#: templates/index.html:452
+msgid "Events"
+msgstr "Eventos"
+
+#: templates/index.html:454 templates/index.html:561
+msgid "Seats"
+msgstr "Assentos"
+
+#: templates/index.html:455 templates/index.html:562
+msgid "Avg Hands"
+msgstr "Média de Mãos"
+
+#: templates/index.html:456 templates/index.html:563
+msgid "Avg Duration"
+msgstr "Duração Média"
+
+#: templates/index.html:457 templates/index.html:564
+msgid "Hands/hr"
+msgstr "Mãos/h"
+
+#: templates/index.html:458 templates/index.html:565
+msgid "Last Played"
+msgstr "Última Jogada"
+
+#: templates/index.html:462 templates/index.html:569
+msgid "Loading…"
+msgstr "Carregando…"
+
+#: templates/index.html:475
+msgid "Tournament Details"
+msgstr "Detalhes do Torneio"
+
+#: templates/index.html:485
+msgid "Stack"
+msgstr "Stack"
+
+#: templates/index.html:486
+msgid "Chips"
+msgstr "Fichas"
+
+#: templates/index.html:487
+msgid "BBs"
+msgstr "BBs"
+
+#: templates/index.html:491
+msgid "Show played hands only"
+msgstr "Mostrar apenas mãos jogadas"
+
+#: templates/index.html:491
+msgid "PH"
+msgstr "MJ"
+
+#: templates/index.html:493
+msgid "Duration"
+msgstr "Duração"
+
+#: templates/index.html:494
+msgid "Time"
+msgstr "Tempo"
+
+#: templates/index.html:502
+msgid "Hand details"
+msgstr "Detalhes da mão"
+
+#: templates/index.html:506
+msgid "Graph legend"
+msgstr "Legenda do gráfico"
+
+#: templates/index.html:526
+msgid "Select a tournament above to view its hands."
+msgstr "Selecione um torneio acima para ver suas mãos."
+
+#: templates/index.html:541
+msgid "Cash & Play Money Games"
+msgstr "Cash & Play Money Games"
+
+#: templates/index.html:559
+msgid "Session"
+msgstr "Sessão"
+
+#: templates/index.html:560
+msgid "Sessions"
+msgstr "Sessões"
+
+#: templates/index.html:582
+msgid "Cash & Play Money Session Details"
+msgstr "Detalhes da Sessão de Cash & Play Money"
+
+#: templates/index.html:603
+msgid "Select a cash or play money session above to view its hands."
+msgstr "Selecione uma sessão de cash ou play money acima para ver suas mãos."
+
+#: templates/index.html:617
+msgid "DATE RANGE FILTER"
+msgstr "FILTRO DE PERÍODO"
+
+#: templates/index.html:623
+msgid "FROM"
+msgstr "DE"
+
+#: templates/index.html:628
+msgid "TO"
+msgstr "ATÉ"
+
+#: templates/index.html:635
+msgid "QUICK RANGE"
+msgstr "PERÍODO RÁPIDO"
+
+#: templates/index.html:635
+msgid "30 days"
+msgstr "30 dias"
+
+#: templates/index.html:640
+msgid "1 week"
+msgstr "1 semana"
+
+#: templates/index.html:640
+msgid "1 year"
+msgstr "1 ano"
+
+#: templates/index.html:648
+msgid "Apply"
+msgstr "Aplicar"
+
+#: templates/index.html:669
+msgid "Unlock"
+msgstr "Desbloquear"
+
+#: templates/index.html:669
+msgid "one more export"
+msgstr "mais uma exportação"
+
+#: templates/index.html:675
+msgid ""
+"Answer a short survey and your export starts automatically. Nothing is "
+"charged, and you can close this at any time."
+msgstr ""
+"Responda a uma pesquisa curta e sua exportação começa automaticamente. "
+"Nada é cobrado, e você pode fechar isso a qualquer momento."
+
+#: templates/index.html:690
+msgid "No surveys available? Answer a few quick questions instead"
+msgstr "Sem pesquisas disponíveis? Responda a algumas perguntas rápidas"
+
+#: templates/index.html:705
+msgid "Sign in"
+msgstr "Entrar"
+
+#: templates/index.html:724
+msgid "Continue with Google"
+msgstr "Continuar com o Google"
+
+#: templates/index.html:728
+msgid "or"
+msgstr "ou"
+
+#: templates/index.html:731
+msgid "Email a magic link — no password needed."
+msgstr "Envie um link mágico por e-mail — sem necessidade de senha."
+
+#: templates/index.html:734
+msgid "Email address"
+msgstr "Endereço de e-mail"
+
+#: templates/index.html:742
+msgid "Send Magic Link"
+msgstr "Enviar Link Mágico"
+
+#: templates/index.html:754
+msgid "© 2026 PPPoker Hand Tracker — Built by a punter, for punters"
+msgstr "© 2026 PPPoker Hand Tracker — Feito por um apostador, para apostadores"
+
+#: templates/index.html:756
+msgid "Not affiliated with PPPoker"
+msgstr "Não afiliado ao PPPoker"
+
+#: templates/index.html:758
+msgid "About me"
+msgstr "Sobre mim"
+
+#: templates/index.html:764
+msgid "Legal, Privacy & Responsible Gambling"
+msgstr "Legal, Privacidade e Jogo Responsável"
+
+#: templates/index.html:770
+msgid "Legal & Compliance"
+msgstr "Legal e Conformidade"
+
+#: templates/index.html:771
+msgid ""
+"PPPoker Hand Tracker is an independent tool for educational and study "
+"purposes only. It is not affiliated with, endorsed by, or connected to "
+"PPPoker or its parent company in any way. Use of this tool is entirely at"
+" your own discretion."
+msgstr ""
+"O PPPoker Hand Tracker é uma ferramenta independente destinada apenas a "
+"fins educacionais e de estudo. Não é afiliado, endossado ou conectado ao "
+"PPPoker ou à sua empresa controladora de forma alguma. O uso desta "
+"ferramenta é de sua inteira responsabilidade."
+
+#: templates/index.html:772
+msgid ""
+"This tool does not facilitate gambling, accept wagers, or process any "
+"financial transactions. It is a hand history converter intended to assist"
+" players in reviewing their own gameplay."
+msgstr ""
+"Esta ferramenta não facilita apostas, não aceita apostas nem processa "
+"transações financeiras. É um conversor de histórico de mãos destinado a "
+"ajudar jogadores a revisar suas próprias partidas."
+
+#: templates/index.html:776
+msgid "Responsible Gambling"
+msgstr "Jogo Responsável"
+
+#: templates/index.html:777
+msgid ""
+"You must be 18 years of age or older to use poker platforms in Australia."
+" If gambling is causing distress for you or someone you know, free "
+"confidential support is available 24/7:"
+msgstr ""
+"Você deve ter 18 anos ou mais para usar plataformas de poker na "
+"Austrália. Se o jogo está causando sofrimento a você ou a alguém que você"
+" conhece, há suporte confidencial e gratuito disponível 24 horas por dia,"
+" 7 dias por semana:"
+
+#: templates/index.html:779
+msgid "Gambling Help Online"
+msgstr "Gambling Help Online"
+
+#: templates/index.html:782
+msgid ""
+"Online gambling is regulated in Australia under the <em>Interactive "
+"Gambling Act 2001</em>. This tool does not constitute a gambling service."
+msgstr ""
+"O jogo online é regulamentado na Austrália pelo <em>Interactive Gambling "
+"Act 2001</em>. Esta ferramenta não constitui um serviço de jogo."
+
+#: templates/index.html:786
+msgid "Data & Security"
+msgstr "Dados e Segurança"
+
+#: templates/index.html:787
+msgid ""
+"This tool operates in accordance with the <em>Privacy Act 1988 (Cth)</em>"
+" and the Australian Privacy Principles. No PPPoker account credentials, "
+"passwords, or personal login information are ever requested, stored, or "
+"transmitted."
+msgstr ""
+"Esta ferramenta opera em conformidade com o <em>Privacy Act 1988 "
+"(Cth)</em> e os Princípios Australianos de Privacidade. Nenhuma "
+"credencial de conta do PPPoker, senha ou informação pessoal de login é "
+"solicitada, armazenada ou transmitida."
+
+#: templates/index.html:788
+msgid ""
+"The only data processed is the hand history contained in the public "
+"replay link you voluntarily provide. An anonymous session ID is stored "
+"locally in your browser to track your daily single-hand export usage "
+"(5/day on the free tier). No personally identifiable information is "
+"collected or sold."
+msgstr ""
+"Os únicos dados processados são o histórico de mãos contido no link "
+"público de replay que você fornece voluntariamente. Um ID de sessão "
+"anônimo é armazenado localmente no seu navegador para controlar seu uso "
+"diário de exportação de mãos avulsas (5/dia no plano grátis). Nenhuma "
+"informação pessoal identificável é coletada ou vendida."
+
+#: templates/index.html:789
+#, python-format
+msgid ""
+"Conversion accuracy is 95%%+ across tested hand types. Exported files are"
+" for study purposes only — not official records."
+msgstr ""
+"A precisão da conversão é de 95%%+ nos tipos de mãos testados. Os "
+"arquivos exportados são apenas para fins de estudo — não são registros "
+"oficiais."
+
+#: templates/index.html:807
+msgid "About Me"
+msgstr "Sobre Mim"
+
+#: templates/index.html:812
+msgid ""
+"Hey everyone! Just a regular Aussie poker player here who got hooked on "
+"PPPoker a while back. The games are good, the action is decent, and the "
+"community is there. But there's one thing that's always driven me mad: "
+"<strong>you can't study your hands.</strong>"
+msgstr ""
+"Olá a todos! Sou apenas um jogador de poker australiano comum que ficou "
+"viciado no PPPoker há um tempo. Os jogos são bons, a ação é boa e a "
+"comunidade está presente. Mas há uma coisa que sempre me deixou louco: "
+"<strong>você não consegue estudar suas mãos.</strong>"
+
+#: templates/index.html:813
+msgid ""
+"PokerTracker, DriveHUD, GTO Wizard — all the serious training tools need "
+"a hand history file. PPPoker doesn't give you one. Their replay system is"
+" locked inside the app, and there's no export button in sight. So if you "
+"want to actually improve your game, you're stuck replaying hands one by "
+"one in a clunky mobile viewer."
+msgstr ""
+"PokerTracker, DriveHUD, GTO Wizard — todas as ferramentas de treino "
+"sérias precisam de um arquivo de histórico de mãos. O PPPoker não fornece"
+" isso. O sistema de replay deles fica preso dentro do aplicativo, e não "
+"há botão de exportação à vista. Então, se você quer realmente melhorar "
+"seu jogo, fica preso revendo mãos uma por uma em um visualizador mobile "
+"emperrado."
+
+#: templates/index.html:814
+msgid ""
+"I got frustrated enough to do something about it. With the help of AI "
+"tools, I built <strong>PPPoker Hand Tracker</strong> — a web app that "
+"pulls your hand history straight from PPPoker's API and converts it into "
+"a format that actually works with your training software."
+msgstr ""
+"Fiquei frustrado o suficiente para fazer algo a respeito. Com a ajuda de "
+"ferramentas de IA, criei o <strong>PPPoker Hand Tracker</strong> — um "
+"aplicativo web que puxa seu histórico de mãos direto da API do PPPoker e "
+"o converte para um formato que realmente funciona com seu software de "
+"treino."
+
+#: templates/index.html:815
+msgid ""
+"No poker background in software development. No team. Just a player who "
+"wanted better tools and figured out how to build them. If it helps your "
+"game even a little, it was worth it. ♠"
+msgstr ""
+"Nenhuma experiência em desenvolvimento de software. Nenhuma equipe. "
+"Apenas um jogador que queria ferramentas melhores e descobriu como "
+"construí-las. Se isso ajudar seu jogo mesmo que um pouco, já valeu a "
+"pena. ♠"
+
+#: templates/index.html:833
+msgid ""
+"<strong>PPPoker Hand Tracker</strong> bridges the gap between PPPoker and"
+" your training software. Here's what it does:"
+msgstr ""
+"O <strong>PPPoker Hand Tracker</strong> preenche a lacuna entre o PPPoker"
+" e seu software de treino. Veja o que ele faz:"
+
+#: templates/index.html:835
+msgid ""
+"<strong>Fetches your hands</strong> directly from PPPoker's API using "
+"your hand review link — no installs, no file uploads, no screen scraping."
+msgstr ""
+"<strong>Busca suas mãos</strong> diretamente da API do PPPoker usando seu"
+" link de revisão de mão — sem instalações, sem upload de arquivos, sem "
+"captura de tela."
+
+#: templates/index.html:836
+msgid ""
+"<strong>Converts to PokerStars format</strong> — the industry-standard "
+"hand history format accepted by PokerTracker 4, DriveHUD, and GTO Wizard."
+msgstr ""
+"<strong>Converte para o formato PokerStars</strong> — o formato padrão do"
+" setor, aceito pelo PokerTracker 4, DriveHUD e GTO Wizard."
+
+#: templates/index.html:837
+msgid ""
+"<strong>Tracks tournaments and cash sessions</strong> — every event "
+"you've played with hands logged, session length, and result, plus a per-"
+"tournament progress graph you can click through to any hand."
+msgstr ""
+"<strong>Acompanha torneios e sessões de cash</strong> — todo evento que "
+"você jogou com as mãos registradas, duração da sessão e resultado, além "
+"de um gráfico de progresso por torneio no qual você pode clicar para ir "
+"direto a qualquer mão."
+
+#: templates/index.html:838
+msgid ""
+"<strong>Exports on demand</strong> — download all hands, a single hand by"
+" ID, or a full tournament in .txt or .json format."
+msgstr ""
+"<strong>Exporta sob demanda</strong> — baixe todas as mãos, uma única mão"
+" por ID, ou um torneio completo em formato .txt ou .json."
+
+#: templates/index.html:841
+msgid ""
+"<strong>🔒 Your PPPoker account is never touched.</strong> This tool works"
+" entirely through the public hand review link PPPoker generates for you. "
+"It does not ask for, store, or transmit your PPPoker username, password, "
+"or any account credentials — ever. The only data processed is the hand "
+"history contained in the link you provide."
+msgstr ""
+"<strong>🔒 Sua conta do PPPoker nunca é acessada.</strong> Esta ferramenta"
+" funciona inteiramente através do link público de revisão de mãos que o "
+"PPPoker gera para você. Ela nunca solicita, armazena ou transmite seu "
+"usuário, senha ou qualquer credencial de conta do PPPoker. Os únicos "
+"dados processados são o histórico de mãos contido no link que você "
+"fornece."
+
+#: templates/index.html:842
+msgid ""
+"<strong>Conversion accuracy is 95%+</strong> across the hands tested so "
+"far. The vast majority of hand types, bet sizes, and board runouts "
+"convert cleanly. That said, edge cases exist — unusual all-in situations,"
+" incomplete hands, or rare PPPoker-specific action types may not convert "
+"perfectly. Use exported files for study and improvement, not as official "
+"records."
+msgstr ""
+"<strong>A precisão da conversão é de 95%+</strong> nas mãos testadas até "
+"agora. A grande maioria dos tipos de mão, tamanhos de aposta e runouts do"
+" board converte perfeitamente. Dito isso, existem casos extremos — "
+"situações incomuns de all-in, mãos incompletas ou tipos de ação raros "
+"específicos do PPPoker podem não converter perfeitamente. Use os arquivos"
+" exportados para estudo e melhoria, não como registros oficiais."
+
+#: templates/index.html:863
+msgid "Open PPPoker on your phone or PC"
+msgstr "Abra o PPPoker no seu celular ou PC"
+
+#: templates/index.html:864
+msgid "Go to your profile → Hand History. You'll see a list of recent hands."
+msgstr ""
+"Vá até seu perfil → Histórico de Mãos. Você verá uma lista das mãos "
+"recentes."
+
+#: templates/index.html:869
+msgid "Tap any hand to open the replay"
+msgstr "Toque em qualquer mão para abrir o replay"
+
+#: templates/index.html:870
+msgid ""
+"Inside the replay screen, look for a <em>Share</em> or <em>Copy Link</em>"
+" button. It produces a URL that looks like:"
+msgstr ""
+"Dentro da tela de replay, procure um botão <em>Share</em> ou <em>Copy "
+"Link</em>. Ele gera uma URL parecida com:"
+
+#: templates/index.html:876
+msgid "Paste the link here"
+msgstr "Cole o link aqui"
+
+#: templates/index.html:877
+msgid ""
+"Drop it into the input box at the top of this page and click "
+"<strong>IMPORT</strong>. The app fetches up to 200 of your most recent "
+"hands — this takes 10–30 seconds."
+msgstr ""
+"Cole-o na caixa de entrada no topo desta página e clique em "
+"<strong>IMPORTAR</strong>. O aplicativo busca até 200 das suas mãos mais "
+"recentes — isso leva de 10 a 30 segundos."
+
+#: templates/index.html:882
+msgid "Review your stats"
+msgstr "Revise suas estatísticas"
+
+#: templates/index.html:883
+msgid ""
+"Your session stats, recent hands, and tournament history all load "
+"automatically. Check your hole cards, position, and results inline."
+msgstr ""
+"Suas estatísticas de sessão, mãos recentes e histórico de torneios "
+"carregam automaticamente. Confira suas cartas, posição e resultados "
+"diretamente na tela."
+
+#: templates/index.html:888
+msgid "Export to your training tool"
+msgstr "Exporte para sua ferramenta de treino"
+
+#: templates/index.html:889
+msgid ""
+"Hit <strong>PokerTracker</strong>, <strong>DriveHUD</strong>, or "
+"<strong>GTO Wizard</strong> to download a PokerStars-format .txt file. "
+"Import it into your software and start studying."
+msgstr ""
+"Clique em <strong>PokerTracker</strong>, <strong>DriveHUD</strong> ou "
+"<strong>GTO Wizard</strong> para baixar um arquivo .txt no formato "
+"PokerStars. Importe-o no seu software e comece a estudar."
+
+#: templates/index.html:893
+msgid ""
+"Links expire after a short time. If you get a \"link expired\" error, go "
+"back to PPPoker and copy a fresh link."
+msgstr ""
+"Os links expiram depois de um curto período. Se você receber um erro de "
+"\"link expirado\", volte ao PPPoker e copie um link novo."
+
+#: templates/index.html:911
+msgid ""
+"PPPoker Hand Tracker is free to use with sensible limits. Pro removes "
+"those limits and unlocks everything."
+msgstr ""
+"O PPPoker Hand Tracker é gratuito, com limites razoáveis. O Pro remove "
+"esses limites e desbloqueia tudo."
+
+#: templates/index.html:914
+msgid "Feature"
+msgstr "Recurso"
+
+#: templates/index.html:914
+msgid "Free"
+msgstr "Grátis"
+
+#: templates/index.html:914
+msgid "Pro"
+msgstr "Pro"
+
+#: templates/index.html:917
+msgid "Imports"
+msgstr "Importações"
+
+#: templates/index.html:917
+msgid "3/day"
+msgstr "3/dia"
+
+#: templates/index.html:917 templates/index.html:919 templates/index.html:923
+#: templates/index.html:924
+msgid "Unlimited"
+msgstr "Ilimitado"
+
+#: templates/index.html:918
+msgid "History kept"
+msgstr "Histórico mantido"
+
+#: templates/index.html:918
+msgid "7 days"
+msgstr "7 dias"
+
+#: templates/index.html:918
+msgid "Forever"
+msgstr "Para sempre"
+
+#: templates/index.html:919
+msgid "Hand history displayed"
+msgstr "Histórico de mãos exibido"
+
+#: templates/index.html:919
+msgid "Last 30"
+msgstr "Últimas 30"
+
+#: templates/index.html:920
+msgid "Session stats & graphs"
+msgstr "Estatísticas e gráficos de sessão"
+
+#: templates/index.html:920 templates/index.html:921
+msgid "Full"
+msgstr "Completo"
+
+#: templates/index.html:921
+msgid "Tournament Details & progress graph"
+msgstr "Detalhes do torneio e gráfico de progresso"
+
+#: templates/index.html:922
+msgid "Gamification (points, streaks, badges)"
+msgstr "Gamificação (pontos, sequências, emblemas)"
+
+#: templates/index.html:923
+msgid "Single-hand exports/day"
+msgstr "Exportações de mãos avulsas/dia"
+
+#: templates/index.html:923
+msgid "5/day"
+msgstr "5/dia"
+
+#: templates/index.html:924
+msgid "Tournament exports/day"
+msgstr "Exportações de torneios/dia"
+
+#: templates/index.html:924
+msgid "1/day"
+msgstr "1/dia"
+
+#: templates/index.html:925
+msgid "Export a whole session"
+msgstr "Exportar uma sessão inteira"
+
+#: templates/index.html:925
+msgid "Locked"
+msgstr "Bloqueado"
+
+#: templates/index.html:925
+msgid "Unlocked"
+msgstr "Desbloqueado"
+
+#: templates/index.html:928
+msgid ""
+"Exports need a free account. Beyond the first two hand exports each day, "
+"one short survey unlocks the next export — Pro never asks."
+msgstr ""
+"Exportações exigem uma conta gratuita. Depois das duas primeiras "
+"exportações de mãos por dia, uma pesquisa rápida desbloqueia a próxima "
+"exportação — o Pro nunca pede isso."
+
+#: templates/index.html:929
+msgid "Pro is"
+msgstr "O Pro custa"
+
+#: templates/index.html:929
+msgid "pricing is locked in until we launch globally."
+msgstr "o preço fica garantido até o lançamento global."
+
+#: templates/index.html:929
+msgid "Cancel any time."
+msgstr "Cancele quando quiser."
+
+#: templates/index.html:951
+msgid "Latest"
+msgstr "Mais recente"
+
+#: templates/index.html:953
+msgid ""
+"Tournament progress graph — watch your stack rise and crash over a "
+"tournament, then click any point on the curve to jump straight to that "
+"hand"
+msgstr ""
+"Gráfico de progresso do torneio — acompanhe seu stack subir e cair ao "
+"longo do torneio, e clique em qualquer ponto da curva para ir direto "
+"àquela mão"
+
+#: templates/index.html:954
+msgid ""
+"Points, streaks & weekly leaderboard — every import earns you points and "
+"unlocks badges, and there's a fresh leaderboard to climb each week"
+msgstr ""
+"Pontos, sequências e ranking semanal — cada importação rende pontos e "
+"desbloqueia emblemas, e há um novo ranking para subir a cada semana"
+
+#: templates/index.html:955
+msgid "Pro is live — Early Access pricing locked in until we launch globally"
+msgstr ""
+"O Pro está no ar — preço de Acesso Antecipado garantido até o lançamento "
+"global"
+
+#: templates/index.html:962
+msgid ""
+"Free and Pro accounts with sensible daily limits — sign in to keep your "
+"history and lift the caps"
+msgstr ""
+"Contas Grátis e Pro com limites diários razoáveis — entre para manter seu"
+" histórico e remover os limites"
+
+#: templates/index.html:963
+msgid ""
+"Cash & Play Money Games — cash tables and sit-and-gos now get their own "
+"section, separate from real-money tournaments"
+msgstr ""
+"Cash & Play Money Games — mesas de cash e sit-and-gos agora têm sua "
+"própria seção, separada dos torneios com dinheiro real"
+
+#: templates/index.html:964
+#, python-format
+msgid ""
+"Tournament Summary — buy-in, finish position, and ITM%% at a glance "
+"across every event you've played"
+msgstr ""
+"Resumo de Torneios — buy-in, posição final e %% ITM rapidinho, em todos "
+"os eventos que você jogou"
+
+#: templates/index.html:971
+msgid "Full UI redesign — gaming dark theme, Oxanium font, neon green accents"
+msgstr ""
+"Redesign completo da interface — tema escuro gamer, fonte Oxanium, "
+"detalhes em verde neon"
+
+#: templates/index.html:972
+msgid "Free & Pro tiers introduced — freemium gates, upgrade modal"
+msgstr "Planos Grátis e Pro introduzidos — barreiras freemium, modal de upgrade"
+
+#: templates/index.html:973
+msgid "Firebase Analytics + Firestore session tracking added"
+msgstr "Adicionado Firebase Analytics + rastreamento de sessão via Firestore"
+
+#: templates/index.html:974
+msgid "Platform-specific export filenames (PokerTracker, DriveHUD, GTOWizard)"
+msgstr ""
+"Nomes de arquivo de exportação específicos por plataforma (PokerTracker, "
+"DriveHUD, GTOWizard)"
+
+#: templates/index.html:975
+msgid "Export buttons redesigned as 2×2 icon grid"
+msgstr "Botões de exportação redesenhados como grade de ícones 2×2"
+
+#: templates/index.html:976
+msgid "Mobile-first layout improvements throughout"
+msgstr "Melhorias de layout mobile-first em todo o app"
+
+#: templates/index.html:983
+msgid "Playing card visuals for hole cards with 4-colour suit support"
+msgstr ""
+"Visuais de cartas de baralho para as cartas na mão, com suporte a naipes "
+"em 4 cores"
+
+#: templates/index.html:984
+msgid "Suit mapping corrected (clubs/hearts/spades/diamonds)"
+msgstr "Correção do mapeamento de naipes (paus/copas/espadas/ouros)"
+
+#: templates/index.html:985
+msgid "Hero-centric validation pills (Flop / Turn / River / Showdown)"
+msgstr "Pílulas de validação centradas no hero (Flop / Turn / River / Showdown)"
+
+#: templates/index.html:986
+msgid "Tournament History section with MTT / Satellite / Won pills"
+msgstr "Seção de Histórico de Torneios com pílulas MTT / Satellite / Won"
+
+#: templates/index.html:987
+msgid "JSON export endpoints for hands & tournaments"
+msgstr "Endpoints de exportação JSON para mãos e torneios"
+
+#: templates/index.html:988
+msgid "DriveHUD replaces PokerStars branding throughout"
+msgstr "DriveHUD substitui a marca PokerStars em todo o app"
+
+#: templates/index.html:989
+msgid "Timezone selector for date/time display"
+msgstr "Seletor de fuso horário para exibição de data/hora"
+
+#: templates/index.html:996
+msgid "Initial launch — proof of concept"
+msgstr "Lançamento inicial — prova de conceito"
+
+#: templates/index.html:997
+msgid "PPPoker API hand fetching via share link"
+msgstr "Busca de mãos via API do PPPoker usando link de compartilhamento"
+
+#: templates/index.html:998
+msgid "PokerStars-format hand history export"
+msgstr "Exportação de histórico de mãos no formato PokerStars"
+
+#: templates/index.html:999
+msgid "Basic session stats (VPIP, PFR, hands played)"
+msgstr "Estatísticas básicas de sessão (VPIP, PFR, mãos jogadas)"
+
+#: templates/index.html:1000
+msgid "Replay links to PPPoker hand viewer"
+msgstr "Links de replay para o visualizador de mãos do PPPoker"
 

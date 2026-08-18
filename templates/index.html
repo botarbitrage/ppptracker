@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ current_locale.replace('_', '-') }}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -30,7 +30,7 @@
 </head>
 <body>
 <!-- Skip navigation link (Fix 4) -->
-<a href="#main-content" class="skip-link">Skip to main content</a>
+<a href="#main-content" class="skip-link">{{ _('Skip to main content') }}</a>
 
 <!-- Outer container is now <main> for landmark (Fix 5 & 6) -->
 <main id="main-content" class="container-fluid py-4 px-3 px-md-5">
@@ -43,18 +43,18 @@
     <!-- Revealed by _checkAdmin() once the signed-in user is confirmed admin -->
     <a href="/admin" id="admin-nav-btn" class="auth-chip admin-chip d-none">
       <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      Admin
+      {{ _('Admin') }}
     </a>
     <div class="player-tz">
-      <span class="tz-label">Language</span>
-      <select id="lang-select" class="tz-select form-select form-select-sm" aria-label="Language">
+      <span class="tz-label">{{ _('Language') }}</span>
+      <select id="lang-select" class="tz-select form-select form-select-sm" aria-label="{{ _('Language') }}">
         <option value="en" {{ 'selected' if current_locale == 'en' }}>EN</option>
         <option value="pt_BR" {{ 'selected' if current_locale == 'pt_BR' }}>PT-BR</option>
       </select>
     </div>
     <div class="player-tz">
-      <span class="tz-label">Timezone</span>
-      <select id="tz-select" class="tz-select form-select form-select-sm" aria-label="Timezone">
+      <span class="tz-label">{{ _('Timezone') }}</span>
+      <select id="tz-select" class="tz-select form-select form-select-sm" aria-label="{{ _('Timezone') }}">
         <option value="Australia/Adelaide">ADL</option>
         <option value="Australia/Brisbane">BNE</option>
         <option value="Australia/Darwin">DRW</option>
@@ -74,15 +74,15 @@
     <div class="gam-stats">
       <div class="gam-stat">
         <span class="gam-stat-value" id="gam-points">—</span>
-        <span class="gam-stat-label">Points</span>
+        <span class="gam-stat-label">{{ _('Points') }}</span>
       </div>
       <div class="gam-stat">
         <span class="gam-stat-value" id="gam-streak">—</span>
-        <span class="gam-stat-label">Day Streak</span>
+        <span class="gam-stat-label">{{ _('Day Streak') }}</span>
       </div>
       <div class="gam-stat">
         <span class="gam-stat-value" id="gam-rank">—</span>
-        <span class="gam-stat-label">Weekly Rank</span>
+        <span class="gam-stat-label">{{ _('Weekly Rank') }}</span>
       </div>
     </div>
     <div class="gam-side">
@@ -96,38 +96,38 @@
   <div class="text-center mb-3">
     <!-- Decorative emoji hidden from screen readers (Fix 12) -->
     <h1 class="app-title"><span aria-hidden="true">♠</span> PPPoker Hand Tracker <span aria-hidden="true">♣</span></h1>
-    <p class="app-tagline">ANALYSE &nbsp;·&nbsp; STUDY &nbsp;·&nbsp; WIN</p>
+    <p class="app-tagline">{{ _('ANALYSE') }} &nbsp;·&nbsp; {{ _('STUDY') }} &nbsp;·&nbsp; {{ _('WIN') }}</p>
   </div>
 
   <!-- ── Feature banner ───────────────────────────────────── -->
   <div class="feature-banner mb-4" style="max-width:1400px;margin:0 auto">
 
     <!-- Info tiles row — wrapped in <nav> for landmark (Fix 6) -->
-    <nav aria-label="Page sections">
+    <nav aria-label="{{ _('Page sections') }}">
     <div class="info-tiles">
 
 <button class="info-tile" data-bs-toggle="modal" data-bs-target="#modal-tool"
-        title="What this tool does">
+        title="{{ _('What this tool does') }}">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        <span>The Tool</span>
+        <span>{{ _('The Tool') }}</span>
       </button>
 
       <button class="info-tile" data-bs-toggle="modal" data-bs-target="#modal-howto"
-        title="Step-by-step guide">
+        title="{{ _('Step-by-step guide') }}">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        <span>How to Use</span>
+        <span>{{ _('How to Use') }}</span>
       </button>
 
       <button class="info-tile" data-bs-toggle="modal" data-bs-target="#modal-tiers"
-        title="Free vs Pro — what you get">
+        title="{{ _('Free vs Pro — what you get') }}">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        <span>Free vs Pro</span>
+        <span>{{ _('Free vs Pro') }}</span>
       </button>
 
       <button class="info-tile" data-bs-toggle="modal" data-bs-target="#modal-releases"
-        title="What's new in each version">
+        title="{{ _('What\'s new in each version') }}">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        <span>Release Notes</span>
+        <span>{{ _('Release Notes') }}</span>
       </button>
 
       <!-- Tournaments and Leaks moved under /admin — both are admin-only now. -->
@@ -140,31 +140,31 @@
          so Pro users don't get a flash of the free-tier upsell on every load. -->
     <div id="tier-compare" class="tier-compare tier-pending">
       <div class="tier-card tier-free">
-        <div class="tier-name">FREE</div>
+        <div class="tier-name">{{ _('FREE') }}</div>
         <ul class="tier-list">
-          <li><span class="tier-check">✓</span> 3 imports/day</li>
-          <li><span class="tier-check">✓</span> 7 days of history</li>
-          <li><span class="tier-check">✓</span> Full session stats &amp; graphs</li>
-          <li><span class="tier-check">✓</span> 5 hand exports/day</li>
-          <li><span class="tier-check">✓</span> 1 tournament export/day</li>
-          <li><span class="tier-x">✕</span> Whole-session exports</li>
+          <li><span class="tier-check">✓</span> {{ _('3 imports/day') }}</li>
+          <li><span class="tier-check">✓</span> {{ _('7 days of history') }}</li>
+          <li><span class="tier-check">✓</span> {{ _('Full session stats & graphs') }}</li>
+          <li><span class="tier-check">✓</span> {{ _('5 hand exports/day') }}</li>
+          <li><span class="tier-check">✓</span> {{ _('1 tournament export/day') }}</li>
+          <li><span class="tier-x">✕</span> {{ _('Whole-session exports') }}</li>
         </ul>
       </div>
-      <div class="tier-vs">VS</div>
+      <div class="tier-vs">{{ _('VS') }}</div>
       <div class="tier-card tier-pro">
         <div class="tier-name">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          PRO — <s class="tier-price-was" data-pricing-regular>A$13.99/mo</s> <span data-pricing-price>A$7.99/mo</span>
+          {{ _('PRO —') }} <s class="tier-price-was" data-pricing-regular>A$13.99/mo</s> <span data-pricing-price>A$7.99/mo</span>
         </div>
-        <div class="tier-early-note" data-pricing-discount-only><span data-pricing-plan>Early Access</span> <span data-pricing-price>A$7.99/mo</span> — locked in until global launch</div>
+        <div class="tier-early-note" data-pricing-discount-only><span data-pricing-plan>{{ _('Early Access') }}</span> <span data-pricing-price>A$7.99/mo</span> — {{ _('locked in until global launch') }}</div>
         <ul class="tier-list">
-          <li><span class="tier-check">✓</span> Unlimited imports</li>
-          <li><span class="tier-check">✓</span> History that never expires</li>
-          <li><span class="tier-check">✓</span> Whole-session exports</li>
-          <li><span class="tier-check">✓</span> Unlimited daily exports</li>
-          <li><span class="tier-check">✓</span> No surveys, ever</li>
+          <li><span class="tier-check">✓</span> {{ _('Unlimited imports') }}</li>
+          <li><span class="tier-check">✓</span> {{ _('History that never expires') }}</li>
+          <li><span class="tier-check">✓</span> {{ _('Whole-session exports') }}</li>
+          <li><span class="tier-check">✓</span> {{ _('Unlimited daily exports') }}</li>
+          <li><span class="tier-check">✓</span> {{ _('No surveys, ever') }}</li>
         </ul>
-        <button class="tier-cta" onclick="showUpgradeModal('banner')">Get <span data-pricing-plan>Early Access</span></button>
+        <button class="tier-cta" onclick="showUpgradeModal('banner')">{{ _('Get') }} <span data-pricing-plan>{{ _('Early Access') }}</span></button>
       </div>
     </div>
 
@@ -178,8 +178,8 @@
         type="text"
         id="url-input"
         class="form-control form-control-lg import-input"
-        placeholder="Paste PPPoker replay link…"
-        aria-label="PPPoker replay link"
+        placeholder="{{ _('Paste PPPoker replay link…') }}"
+        aria-label="{{ _('PPPoker replay link') }}"
         autocomplete="off"
         spellcheck="false"
       />
@@ -187,7 +187,7 @@
         id="import-btn"
         class="btn btn-import btn-lg"
         onclick="handleImport()"
-      >IMPORT</button>
+      >{{ _('IMPORT') }}</button>
     </div>
 
     <!-- Error -->
@@ -196,7 +196,7 @@
     <!-- Loading / Success -->
     <div id="loading-msg" class="d-none mt-3 text-center">
       <div id="loading-spinner" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></div>
-      <span id="loading-text" style="color:var(--green)">Fetching hand history&hellip; this may take a few seconds</span>
+      <span id="loading-text" style="color:var(--green)">{{ _('Fetching hand history… this may take a few seconds') }}</span>
     </div>
   </div>
 
@@ -205,27 +205,27 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content" style="background:var(--panel);border:1px solid var(--border);color:var(--text)">
         <div class="modal-header" style="border-bottom:1px solid var(--border)">
-          <h2 class="modal-title h5" id="export-warning-title"><span aria-hidden="true">⚠️</span> Export Accuracy Notice</h2>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h2 class="modal-title h5" id="export-warning-title"><span aria-hidden="true">⚠️</span> {{ _('Export Accuracy Notice') }}</h2>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{{ _('Close') }}"></button>
         </div>
         <div class="modal-body" style="font-size:.88rem;line-height:1.6">
-          <p>Hand history exported from PPPokerHA is converted to PokerStars format and <strong>may not be 100% accurate</strong> when imported into third-party tools such as PokerTracker 4, DriveHUD, or GTO Wizard.</p>
-          <p class="mb-1">Known limitations:</p>
+          <p>{% trans %}Hand history exported from PPPokerHA is converted to PokerStars format and <strong>may not be 100% accurate</strong> when imported into third-party tools such as PokerTracker 4, DriveHUD, or GTO Wizard.{% endtrans %}</p>
+          <p class="mb-1">{{ _('Known limitations:') }}</p>
           <ul style="color:var(--muted)">
-            <li>Pot sizes may differ slightly in edge cases</li>
-            <li>Some action types may not translate perfectly</li>
-            <li>Community cards may be missing for folded-out hands</li>
+            <li>{{ _('Pot sizes may differ slightly in edge cases') }}</li>
+            <li>{{ _('Some action types may not translate perfectly') }}</li>
+            <li>{{ _('Community cards may be missing for folded-out hands') }}</li>
           </ul>
-          <p class="mb-0" style="color:var(--muted);font-size:.82rem">Use exported data for study purposes only — not for official records.</p>
+          <p class="mb-0" style="color:var(--muted);font-size:.82rem">{{ _('Use exported data for study purposes only — not for official records.') }}</p>
         </div>
         <div class="modal-footer d-flex align-items-center justify-content-between" style="border-top:1px solid var(--border)">
           <label class="d-flex align-items-center gap-2 mb-0" style="font-size:.82rem;color:var(--muted);cursor:pointer">
             <input type="checkbox" id="export-warning-suppress" style="accent-color:var(--green)">
-            Don't show this again
+            {{ _("Don't show this again") }}
           </label>
           <div class="d-flex gap-2">
-            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-import btn-sm px-4" id="export-confirm-btn">Export</button>
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
+            <button type="button" class="btn btn-import btn-sm px-4" id="export-confirm-btn">{{ _('Export') }}</button>
           </div>
         </div>
       </div>
@@ -239,20 +239,20 @@
         <div class="modal-header" style="border-bottom:1px solid var(--border)">
           <h2 class="modal-title h5 d-flex align-items-center gap-2" id="pro-upgrade-title">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            Unlock Pro
+            {{ _('Unlock Pro') }}
           </h2>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{{ _('Close') }}"></button>
         </div>
         <div class="modal-body" style="font-size:.9rem;line-height:1.7">
           <p id="pro-modal-reason" class="mb-3" style="color:var(--muted);font-size:.85rem"></p>
-          <p class="mb-2 fw-600" style="font-weight:600">What you get with Pro:</p>
+          <p class="mb-2 fw-600" style="font-weight:600">{{ _('What you get with Pro:') }}</p>
           <ul class="mb-3" style="color:var(--text);padding-left:1.2rem">
-            <li>Unlimited hand history (free tier shows last 30)</li>
-            <li>Unlimited daily exports</li>
-            <li>Full tournament export access</li>
-            <li style="color:var(--muted)"><em>More features coming…</em></li>
+            <li>{{ _('Unlimited hand history (free tier shows last 30)') }}</li>
+            <li>{{ _('Unlimited daily exports') }}</li>
+            <li>{{ _('Full tournament export access') }}</li>
+            <li style="color:var(--muted)"><em>{{ _('More features coming…') }}</em></li>
           </ul>
-          <p class="mb-2 text-center" style="color:var(--yellow);font-size:.82rem"><span data-pricing-plan>Early Access</span> — <strong data-pricing-price>A$7.99/mo</strong> until we launch globally. Cancel any time.</p>
+          <p class="mb-2 text-center" style="color:var(--yellow);font-size:.82rem"><span data-pricing-plan>{{ _('Early Access') }}</span> — <strong data-pricing-price>A$7.99/mo</strong> {{ _('until we launch globally. Cancel any time.') }}</p>
           <!-- Checkout status/error line, populated by handleUpgradeClick. Starts
                empty and styled red: it previously held a hardcoded pre-launch
                teaser, which would flash as stale copy on a checkout error now
@@ -261,16 +261,16 @@
         </div>
         <div class="modal-footer flex-column align-items-stretch gap-2" style="border-top:1px solid var(--border)">
           <button type="button" id="pro-upgrade-btn" class="btn btn-import btn-lg w-100" onclick="handleUpgradeClick()" data-pricing-cta>
-            Get Early Access — A$7.99/month
+            {{ _('Get Early Access — A$7.99/month') }}
           </button>
-          <button type="button" class="btn btn-outline-secondary btn-sm w-100" data-bs-dismiss="modal">Maybe later</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm w-100" data-bs-dismiss="modal">{{ _('Maybe later') }}</button>
           <div id="pro-dev-hatch" class="d-none text-center mt-1">
             <!-- The "Activate/Downgrade Pro (dev)" buttons were removed: they set
                  is_pro directly from the client, which only worked because the
                  Firestore rules let a user write their own paid-tier fields —
                  i.e. they were a free-Pro bypass, not just a dev shortcut. Use
                  the real test subscription below, or set is_pro server-side. -->
-            <button type="button" class="btn btn-link btn-sm d-block mx-auto" style="color:var(--muted);font-size:.75rem" onclick="handleUpgradeClick('protest')">Pro-test — A$0.50/month (test sub)</button>
+            <button type="button" class="btn btn-link btn-sm d-block mx-auto" style="color:var(--muted);font-size:.75rem" onclick="handleUpgradeClick('protest')">{{ _('Pro-test — A$0.50/month (test sub)') }}</button>
           </div>
         </div>
       </div>
@@ -288,12 +288,12 @@
           <div class="d-flex align-items-center flex-wrap gap-2">
             <span id="player-info"></span>
             <div id="loaded-hands-row" class="loaded-hands-row d-none">
-              <span class="val-pill"><strong id="hs-hands">—</strong><span class="val-pill-label">Hands</span></span>
-              <span class="val-pill"><strong id="hs-flop">—</strong><span class="val-pill-label">Flop</span></span>
-              <span class="val-pill"><strong id="hs-turn">—</strong><span class="val-pill-label">Turn</span></span>
-              <span class="val-pill"><strong id="hs-river">—</strong><span class="val-pill-label">River</span></span>
-              <span class="val-pill"><strong id="hs-sd">—</strong><span class="val-pill-label">SD</span></span>
-              <span class="val-pill"><strong id="hs-won">—</strong><span class="val-pill-label">Won</span></span>
+              <span class="val-pill"><strong id="hs-hands">—</strong><span class="val-pill-label">{{ _('Hands') }}</span></span>
+              <span class="val-pill"><strong id="hs-flop">—</strong><span class="val-pill-label">{{ _('Flop') }}</span></span>
+              <span class="val-pill"><strong id="hs-turn">—</strong><span class="val-pill-label">{{ _('Turn') }}</span></span>
+              <span class="val-pill"><strong id="hs-river">—</strong><span class="val-pill-label">{{ _('River') }}</span></span>
+              <span class="val-pill"><strong id="hs-sd">—</strong><span class="val-pill-label">{{ _('SD') }}</span></span>
+              <span class="val-pill"><strong id="hs-won">—</strong><span class="val-pill-label">{{ _('Won') }}</span></span>
             </div>
           </div>
         </div>
@@ -305,8 +305,8 @@
       <div class="section-header">
         <h2 class="d-flex align-items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Export All Hands
-          <button class="info-badge-btn" data-bs-toggle="modal" data-bs-target="#modal-tool" title="About conversion accuracy" aria-label="About conversion accuracy">ⓘ</button>
+          {{ _('Export All Hands') }}
+          <button class="info-badge-btn" data-bs-toggle="modal" data-bs-target="#modal-tool" title="{{ _('About conversion accuracy') }}" aria-label="{{ _('About conversion accuracy') }}">ⓘ</button>
         </h2>
       </div>
       <div id="player-export-all-btns" class="player-export-all-btns p-3"></div>
@@ -330,7 +330,7 @@
       <div class="section-header">
         <h2 class="d-flex align-items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-          Last 3 Hands
+          {{ _('Last 3 Hands') }}
         </h2>
       </div>
       <div class="table-responsive">
@@ -340,13 +340,13 @@
               <!-- Narrow-screen priority (highest first): cards, net p/l,
                    position, street, when, export, replay. Columns drop from
                    the bottom of that list up as the viewport shrinks. -->
-              <th scope="col" data-tz-label="When" class="d-none d-md-table-cell">When</th>
-              <th scope="col">Hole Cards</th>
-              <th scope="col">Position</th>
-              <th scope="col">Street</th>
-              <th scope="col">Net P/L (BB)</th>
-              <th scope="col" class="text-center d-none d-lg-table-cell">Export</th>
-              <th scope="col" class="d-none d-xl-table-cell">Replay</th>
+              <th scope="col" data-tz-label="{{ _('When') }}" class="d-none d-md-table-cell">{{ _('When') }}</th>
+              <th scope="col">{{ _('Hole Cards') }}</th>
+              <th scope="col">{{ _('Position') }}</th>
+              <th scope="col">{{ _('Street') }}</th>
+              <th scope="col">{{ _('Net P/L (BB)') }}</th>
+              <th scope="col" class="text-center d-none d-lg-table-cell">{{ _('Export') }}</th>
+              <th scope="col" class="d-none d-xl-table-cell">{{ _('Replay') }}</th>
             </tr>
           </thead>
           <tbody id="recent-hands-tbody"></tbody>
@@ -359,7 +359,7 @@
       <div class="section-header">
         <h2 class="d-flex align-items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          Last 3 Winning Hands
+          {{ _('Last 3 Winning Hands') }}
         </h2>
       </div>
       <div class="table-responsive">
@@ -369,13 +369,13 @@
               <!-- Narrow-screen priority (highest first): cards, net p/l,
                    position, street, when, export, replay. Columns drop from
                    the bottom of that list up as the viewport shrinks. -->
-              <th scope="col" data-tz-label="When" class="d-none d-md-table-cell">When</th>
-              <th scope="col">Hole Cards</th>
-              <th scope="col">Position</th>
-              <th scope="col">Street</th>
-              <th scope="col">Net P/L (BB)</th>
-              <th scope="col" class="text-center d-none d-lg-table-cell">Export</th>
-              <th scope="col" class="d-none d-xl-table-cell">Replay</th>
+              <th scope="col" data-tz-label="{{ _('When') }}" class="d-none d-md-table-cell">{{ _('When') }}</th>
+              <th scope="col">{{ _('Hole Cards') }}</th>
+              <th scope="col">{{ _('Position') }}</th>
+              <th scope="col">{{ _('Street') }}</th>
+              <th scope="col">{{ _('Net P/L (BB)') }}</th>
+              <th scope="col" class="text-center d-none d-lg-table-cell">{{ _('Export') }}</th>
+              <th scope="col" class="d-none d-xl-table-cell">{{ _('Replay') }}</th>
             </tr>
           </thead>
           <tbody id="recent-won-tbody"></tbody>
@@ -394,11 +394,11 @@
       <div class="section-header d-flex align-items-center justify-content-between flex-wrap gap-2">
         <h2 class="mb-0 d-flex align-items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-          Tournament History
+          {{ _('Tournament History') }}
           <button class="info-badge-btn"
                   data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-container="body"
-                  title="Buy-in, ITM%, and finishing position are not available in the PPPoker API data."
-                  aria-label="Buy-in, ITM%, and finishing position are not available in the PPPoker API data.">ⓘ</button>
+                  title="{{ _('Buy-in, ITM%%, and finishing position are not available in the PPPoker API data.') }}"
+                  aria-label="{{ _('Buy-in, ITM%%, and finishing position are not available in the PPPoker API data.') }}">ⓘ</button>
         </h2>
         <div id="tourney-strip" class="val-strip"></div>
       </div>
@@ -406,13 +406,13 @@
         <table id="tournaments-table" class="table table-dark table-striped table-hover">
           <thead>
             <tr>
-              <th scope="col" style="white-space:nowrap">Date</th>
-              <th scope="col" class="d-none d-sm-table-cell">Room</th>
-              <th scope="col" class="d-none d-lg-table-cell" data-tz-label="Sit Down Time">Sit Down Time</th>
-              <th scope="col" class="d-none d-lg-table-cell">Time Played</th>
-              <th scope="col" class="d-none">Type</th>
-              <th scope="col" class="text-center">Hands</th>
-              <th scope="col" class="text-center export-col">Export Format</th>
+              <th scope="col" style="white-space:nowrap">{{ _('Date') }}</th>
+              <th scope="col" class="d-none d-sm-table-cell">{{ _('Room') }}</th>
+              <th scope="col" class="d-none d-lg-table-cell" data-tz-label="{{ _('Sit Down Time') }}">{{ _('Sit Down Time') }}</th>
+              <th scope="col" class="d-none d-lg-table-cell">{{ _('Time Played') }}</th>
+              <th scope="col" class="d-none">{{ _('Type') }}</th>
+              <th scope="col" class="text-center">{{ _('Hands') }}</th>
+              <th scope="col" class="text-center export-col">{{ _('Export Format') }}</th>
             </tr>
           </thead>
           <tbody id="tournaments-tbody"></tbody>
@@ -430,17 +430,17 @@
         <div class="d-flex align-items-center gap-3 flex-shrink-0">
           <h2 class="mb-0 d-flex align-items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-            Tournament Summary
+            {{ _('Tournament Summary') }}
           </h2>
           <div id="tourney-strip-pro" class="val-strip"></div>
         </div>
         <div class="d-flex align-items-center gap-2 flex-shrink-0">
-          <span class="ts-filter-prefix">Interval</span>
+          <span class="ts-filter-prefix">{{ _('Interval') }}</span>
           <select id="ts-filter-select" class="ts-filter-select" onchange="_setTsFilter(this.value)">
-            <option value="all">All</option>
-            <option value="today">Today</option>
-            <option value="week" selected>This Week</option>
-            <option value="month">This Month</option>
+            <option value="all">{{ _('All') }}</option>
+            <option value="today">{{ _('Today') }}</option>
+            <option value="week" selected>{{ _('This Week') }}</option>
+            <option value="month">{{ _('This Month') }}</option>
           </select>
         </div>
       </div>
@@ -448,18 +448,18 @@
         <table class="table table-dark table-striped table-hover mb-0">
           <thead>
             <tr>
-              <th scope="col" class="sort-th" onclick="_sortTs('name')" data-col="name">Tournament <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center sort-th" onclick="_sortTs('events')" data-col="events">Events <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center d-none sort-th" onclick="_sortTs('type')" data-col="type">Type <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center d-none d-md-table-cell">Seats</th>
-              <th scope="col" class="text-center d-none d-md-table-cell sort-th" onclick="_sortTs('avgHands')" data-col="avgHands">Avg Hands <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center d-none d-md-table-cell sort-th" onclick="_sortTs('avgDur')" data-col="avgDur">Avg Duration <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center d-none d-lg-table-cell sort-th" onclick="_sortTs('handsHr')" data-col="handsHr">Hands/hr <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center sort-th" onclick="_sortTs('last')" data-col="last">Last Played <span class="sort-icon"></span></th>
+              <th scope="col" class="sort-th" onclick="_sortTs('name')" data-col="name">{{ _('Tournament') }} <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center sort-th" onclick="_sortTs('events')" data-col="events">{{ _('Events') }} <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center d-none sort-th" onclick="_sortTs('type')" data-col="type">{{ _('Type') }} <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center d-none d-md-table-cell">{{ _('Seats') }}</th>
+              <th scope="col" class="text-center d-none d-md-table-cell sort-th" onclick="_sortTs('avgHands')" data-col="avgHands">{{ _('Avg Hands') }} <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center d-none d-md-table-cell sort-th" onclick="_sortTs('avgDur')" data-col="avgDur">{{ _('Avg Duration') }} <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center d-none d-lg-table-cell sort-th" onclick="_sortTs('handsHr')" data-col="handsHr">{{ _('Hands/hr') }} <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center sort-th" onclick="_sortTs('last')" data-col="last">{{ _('Last Played') }} <span class="sort-icon"></span></th>
             </tr>
           </thead>
           <tbody id="tourney-summary-tbody">
-            <tr><td colspan="8" class="text-center py-4 text-muted">Loading…</td></tr>
+            <tr><td colspan="8" class="text-center py-4 text-muted">{{ _('Loading…') }}</td></tr>
           </tbody>
         </table>
       </div>
@@ -472,7 +472,7 @@
       <div class="section-header d-flex align-items-center justify-content-between flex-wrap gap-2">
         <h2 class="mb-0 d-flex align-items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-          Tournament Details
+          {{ _('Tournament Details') }}
         </h2>
         <div id="tourney-detail-hint" class="section-hint"></div>
       </div>
@@ -482,16 +482,16 @@
       <div id="tourney-graph-wrap" class="tourney-graph-wrap d-none">
         <div class="tourney-graph-controls">
           <div class="tg-group">
-            <span class="tg-label">Stack</span>
-            <span class="tg-pill active" id="tg-y-chips" onclick="_tgToggleY('chips')">Chips</span>
-            <span class="tg-pill active" id="tg-y-bb"    onclick="_tgToggleY('bb')">BBs</span>
+            <span class="tg-label">{{ _('Stack') }}</span>
+            <span class="tg-pill active" id="tg-y-chips" onclick="_tgToggleY('chips')">{{ _('Chips') }}</span>
+            <span class="tg-pill active" id="tg-y-bb"    onclick="_tgToggleY('bb')">{{ _('BBs') }}</span>
           </div>
           <div id="tourney-graph-title" class="tourney-graph-title"></div>
           <div class="tg-controls-right">
-            <span class="tg-pill" id="tg-played-only-pill" onclick="_tgTogglePlayed()" title="Show played hands only">PH</span>
+            <span class="tg-pill" id="tg-played-only-pill" onclick="_tgTogglePlayed()" title="{{ _('Show played hands only') }}">{{ _('PH') }}</span>
             <div class="tg-group tg-group-xaxis">
-              <span class="tg-label">Duration</span>
-              <span class="tg-pill active" id="tg-x-pill" onclick="_tgToggleX()">Time</span>
+              <span class="tg-label">{{ _('Duration') }}</span>
+              <span class="tg-pill active" id="tg-x-pill" onclick="_tgToggleX()">{{ _('Time') }}</span>
             </div>
           </div>
         </div>
@@ -499,11 +499,11 @@
           <canvas id="tourney-graph-canvas" tabindex="0"></canvas>
           <!-- Hover/pinned hand card. Real DOM rather than a canvas tooltip so
                it can carry the replay link. -->
-          <div id="tg-hand-card" class="tg-hand-card" role="dialog" aria-label="Hand details"></div>
+          <div id="tg-hand-card" class="tg-hand-card" role="dialog" aria-label="{{ _('Hand details') }}"></div>
         </div>
         <!-- What the dots and marks mean. Built from what the chart actually
              drew, so it never advertises a rebuy that never happened. -->
-        <div id="tourney-graph-legend" class="tg-legend" aria-label="Graph legend"></div>
+        <div id="tourney-graph-legend" class="tg-legend" aria-label="{{ _('Graph legend') }}"></div>
       </div>
 
       <div class="table-responsive">
@@ -513,17 +513,17 @@
               <!-- Narrow-screen priority (highest first): cards, net p/l,
                    position, street, when, export, replay. Columns drop from
                    the bottom of that list up as the viewport shrinks. -->
-              <th scope="col" data-tz-label="When" class="d-none d-md-table-cell">When</th>
-              <th scope="col">Hole Cards</th>
-              <th scope="col">Position</th>
-              <th scope="col">Street</th>
-              <th scope="col">Net P/L (BB)</th>
-              <th scope="col" class="text-center d-none d-lg-table-cell">Export</th>
-              <th scope="col" class="d-none d-xl-table-cell">Replay</th>
+              <th scope="col" data-tz-label="{{ _('When') }}" class="d-none d-md-table-cell">{{ _('When') }}</th>
+              <th scope="col">{{ _('Hole Cards') }}</th>
+              <th scope="col">{{ _('Position') }}</th>
+              <th scope="col">{{ _('Street') }}</th>
+              <th scope="col">{{ _('Net P/L (BB)') }}</th>
+              <th scope="col" class="text-center d-none d-lg-table-cell">{{ _('Export') }}</th>
+              <th scope="col" class="d-none d-xl-table-cell">{{ _('Replay') }}</th>
             </tr>
           </thead>
           <tbody id="tourney-detail-tbody">
-            <tr><td colspan="7" class="text-center py-4 text-muted">Select a tournament above to view its hands.</td></tr>
+            <tr><td colspan="7" class="text-center py-4 text-muted">{{ _('Select a tournament above to view its hands.') }}</td></tr>
           </tbody>
         </table>
       </div>
@@ -538,17 +538,17 @@
         <div class="d-flex align-items-center gap-3 flex-shrink-0">
           <h2 class="mb-0 d-flex align-items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-            Cash &amp; Play Money Games
+            {{ _('Cash & Play Money Games') }}
           </h2>
           <div id="cgs-strip" class="val-strip"></div>
         </div>
         <div class="d-flex align-items-center gap-2 flex-shrink-0">
-          <span class="ts-filter-prefix">Interval</span>
+          <span class="ts-filter-prefix">{{ _('Interval') }}</span>
           <select id="cgs-filter-select" class="ts-filter-select" onchange="_setCgsFilter(this.value)">
-            <option value="all">All</option>
-            <option value="today">Today</option>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
+            <option value="all">{{ _('All') }}</option>
+            <option value="today">{{ _('Today') }}</option>
+            <option value="week">{{ _('This Week') }}</option>
+            <option value="month">{{ _('This Month') }}</option>
           </select>
         </div>
       </div>
@@ -556,17 +556,17 @@
         <table class="table table-dark table-striped table-hover mb-0">
           <thead>
             <tr>
-              <th scope="col" class="sort-th" onclick="_sortCgs('name')" data-col="name">Session <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center sort-th" onclick="_sortCgs('events')" data-col="events">Sessions <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center d-none d-md-table-cell">Seats</th>
-              <th scope="col" class="text-center d-none d-md-table-cell sort-th" onclick="_sortCgs('avgHands')" data-col="avgHands">Avg Hands <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center d-none d-md-table-cell sort-th" onclick="_sortCgs('avgDur')" data-col="avgDur">Avg Duration <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center d-none d-lg-table-cell sort-th" onclick="_sortCgs('handsHr')" data-col="handsHr">Hands/hr <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center sort-th" onclick="_sortCgs('last')" data-col="last">Last Played <span class="sort-icon"></span></th>
+              <th scope="col" class="sort-th" onclick="_sortCgs('name')" data-col="name">{{ _('Session') }} <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center sort-th" onclick="_sortCgs('events')" data-col="events">{{ _('Sessions') }} <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center d-none d-md-table-cell">{{ _('Seats') }}</th>
+              <th scope="col" class="text-center d-none d-md-table-cell sort-th" onclick="_sortCgs('avgHands')" data-col="avgHands">{{ _('Avg Hands') }} <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center d-none d-md-table-cell sort-th" onclick="_sortCgs('avgDur')" data-col="avgDur">{{ _('Avg Duration') }} <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center d-none d-lg-table-cell sort-th" onclick="_sortCgs('handsHr')" data-col="handsHr">{{ _('Hands/hr') }} <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center sort-th" onclick="_sortCgs('last')" data-col="last">{{ _('Last Played') }} <span class="sort-icon"></span></th>
             </tr>
           </thead>
           <tbody id="cgs-summary-tbody">
-            <tr><td colspan="7" class="text-center py-4 text-muted">Loading…</td></tr>
+            <tr><td colspan="7" class="text-center py-4 text-muted">{{ _('Loading…') }}</td></tr>
           </tbody>
         </table>
       </div>
@@ -579,7 +579,7 @@
       <div class="section-header d-flex align-items-center justify-content-between flex-wrap gap-2">
         <h2 class="mb-0 d-flex align-items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-          Cash &amp; Play Money Session Details
+          {{ _('Cash & Play Money Session Details') }}
         </h2>
         <div id="cgsd-hint" class="text-muted small"></div>
       </div>
@@ -590,17 +590,17 @@
               <!-- Narrow-screen priority (highest first): cards, net p/l,
                    position, street, when, export, replay. Columns drop from
                    the bottom of that list up as the viewport shrinks. -->
-              <th scope="col" data-tz-label="When" class="d-none d-md-table-cell">When</th>
-              <th scope="col">Hole Cards</th>
-              <th scope="col">Position</th>
-              <th scope="col">Street</th>
-              <th scope="col">Net P/L (BB)</th>
-              <th scope="col" class="text-center d-none d-lg-table-cell">Export</th>
-              <th scope="col" class="d-none d-xl-table-cell">Replay</th>
+              <th scope="col" data-tz-label="{{ _('When') }}" class="d-none d-md-table-cell">{{ _('When') }}</th>
+              <th scope="col">{{ _('Hole Cards') }}</th>
+              <th scope="col">{{ _('Position') }}</th>
+              <th scope="col">{{ _('Street') }}</th>
+              <th scope="col">{{ _('Net P/L (BB)') }}</th>
+              <th scope="col" class="text-center d-none d-lg-table-cell">{{ _('Export') }}</th>
+              <th scope="col" class="d-none d-xl-table-cell">{{ _('Replay') }}</th>
             </tr>
           </thead>
           <tbody id="cgsd-tbody">
-            <tr><td colspan="7" class="text-center py-4 text-muted">Select a cash or play money session above to view its hands.</td></tr>
+            <tr><td colspan="7" class="text-center py-4 text-muted">{{ _('Select a cash or play money session above to view its hands.') }}</td></tr>
           </tbody>
         </table>
       </div>
@@ -614,38 +614,38 @@
   <div class="modal-dialog modal-dialog-centered" style="max-width:380px">
     <div class="modal-content" style="background:var(--panel);border:1px solid var(--border);color:var(--text)">
       <div class="modal-header" style="border-bottom:1px solid var(--border);padding:.75rem 1rem">
-        <h2 class="modal-title" id="modal-date-range-title" style="font-family:var(--font-head);letter-spacing:.08em;font-size:.85rem;color:var(--muted)">DATE RANGE FILTER</h2>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h2 class="modal-title" id="modal-date-range-title" style="font-family:var(--font-head);letter-spacing:.08em;font-size:.85rem;color:var(--muted)">{{ _('DATE RANGE FILTER') }}</h2>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{{ _('Close') }}"></button>
       </div>
       <div class="modal-body" style="padding:1rem">
         <input type="hidden" id="date-range-target" value="ts">
         <div class="mb-3">
-          <label class="form-label" style="font-family:var(--font-head);font-size:.75rem;color:var(--muted);letter-spacing:.5px">FROM</label>
+          <label class="form-label" style="font-family:var(--font-head);font-size:.75rem;color:var(--muted);letter-spacing:.5px">{{ _('FROM') }}</label>
           <input type="date" id="date-range-start" class="form-control"
                  style="background:var(--bg);border-color:var(--border);color:var(--text)"/>
         </div>
         <div class="mb-1">
-          <label class="form-label" style="font-family:var(--font-head);font-size:.75rem;color:var(--muted);letter-spacing:.5px">TO</label>
+          <label class="form-label" style="font-family:var(--font-head);font-size:.75rem;color:var(--muted);letter-spacing:.5px">{{ _('TO') }}</label>
           <input type="date" id="date-range-end" class="form-control"
                  style="background:var(--bg);border-color:var(--border);color:var(--text)"/>
         </div>
         <!-- Quick-range slider -->
         <div class="mt-3">
           <label class="form-label d-flex justify-content-between" style="font-family:var(--font-head);font-size:.73rem;color:var(--muted);letter-spacing:.4px">
-            <span>QUICK RANGE</span><span id="date-range-slider-label" style="color:var(--green)">30 days</span>
+            <span>{{ _('QUICK RANGE') }}</span><span id="date-range-slider-label" style="color:var(--green)">{{ _('30 days') }}</span>
           </label>
           <input type="range" id="date-range-slider" class="form-range" min="7" max="365" step="1" value="30"
                  style="accent-color:var(--green)" oninput="_updateDateRangeSlider(this.value)"/>
           <div class="d-flex justify-content-between" style="font-size:.7rem;color:var(--muted)">
-            <span>1 week</span><span>1 year</span>
+            <span>{{ _('1 week') }}</span><span>{{ _('1 year') }}</span>
           </div>
         </div>
       </div>
       <div class="modal-footer" style="border-top:1px solid var(--border);justify-content:flex-end;gap:8px;padding:.75rem 1rem">
-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
         <button type="button" class="btn btn-sm px-4"
                 style="background:rgba(0,230,118,.12);border:1px solid rgba(0,230,118,.5);color:var(--green);font-family:var(--font-head);font-size:.8rem;letter-spacing:.5px"
-                onclick="_applyDateRange()" data-bs-dismiss="modal">Apply</button>
+                onclick="_applyDateRange()" data-bs-dismiss="modal">{{ _('Apply') }}</button>
       </div>
     </div>
   </div>
@@ -666,14 +666,13 @@
       <div class="modal-header" style="border-bottom:1px solid var(--border)">
         <h2 class="modal-title h5 d-flex align-items-center gap-2" id="survey-modal-title">
           <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          Unlock <span id="survey-kind-label">one more export</span>
+          {{ _('Unlock') }} <span id="survey-kind-label">{{ _('one more export') }}</span>
         </h2>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{{ _('Close') }}"></button>
       </div>
       <div class="modal-body" style="padding:16px 18px">
         <p class="mb-2" style="color:var(--muted);font-size:.84rem">
-          Answer a short survey and your export starts automatically. Nothing is charged,
-          and you can close this at any time.
+          {{ _('Answer a short survey and your export starts automatically. Nothing is charged, and you can close this at any time.') }}
         </p>
         <div id="survey-status" class="mb-2" style="font-size:.84rem;color:var(--muted)" role="status" aria-live="polite"></div>
 
@@ -688,9 +687,9 @@
       <div class="modal-footer" style="border-top:1px solid var(--border);justify-content:space-between;gap:8px">
         <button type="button" id="survey-fallback-btn" class="btn btn-link btn-sm d-none px-0"
                 style="color:var(--muted);font-size:.8rem" onclick="useSurveyFallback()">
-          No surveys available? Answer a few quick questions instead
+          {{ _('No surveys available? Answer a few quick questions instead') }}
         </button>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="closeSurveyModal()">Close</button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeSurveyModal()">{{ _('Close') }}</button>
       </div>
     </div>
   </div>
@@ -703,9 +702,9 @@
       <div class="modal-header" style="border-bottom:1px solid var(--border)">
         <h2 class="modal-title h5 d-flex align-items-center gap-2" id="modal-auth-title">
           <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Sign in
+          {{ _('Sign in') }}
         </h2>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{{ _('Close') }}"></button>
       </div>
       <div class="modal-body" style="padding:20px 22px">
 
@@ -722,25 +721,25 @@
             <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
             <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
           </svg>
-          Continue with Google
+          {{ _('Continue with Google') }}
         </button>
 
         <!-- Divider -->
-        <div class="auth-divider"><span>or</span></div>
+        <div class="auth-divider"><span>{{ _('or') }}</span></div>
 
         <!-- Magic link -->
-        <p class="mb-2" style="color:var(--muted);font-size:.84rem">Email a magic link — no password needed.</p>
+        <p class="mb-2" style="color:var(--muted);font-size:.84rem">{{ _('Email a magic link — no password needed.') }}</p>
         <input type="email" id="auth-email-input" class="form-control" autocomplete="email"
                placeholder="your@email.com"
-               aria-label="Email address"
+               aria-label="{{ _('Email address') }}"
                style="background:var(--panel-alt);border:1px solid var(--border);color:var(--text);font-family:var(--font-body)" />
         <div id="auth-msg" class="mt-2 d-none" style="font-size:.85rem"></div>
       </div>
       <div class="modal-footer" style="border-top:1px solid var(--border);justify-content:flex-end;gap:8px">
-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
         <button type="button" id="auth-send-btn" class="btn btn-sm px-4"
                 style="background:rgba(0,230,118,.12);border:1px solid rgba(0,230,118,.5);color:var(--green);font-family:var(--font-head);font-size:.8rem;letter-spacing:.5px"
-                onclick="sendMagicLink()" disabled>Send Magic Link</button>
+                onclick="sendMagicLink()" disabled>{{ _('Send Magic Link') }}</button>
       </div>
     </div>
   </div>
@@ -752,42 +751,42 @@
 
     <!-- Always-visible bar -->
     <div class="footer-bottom">
-      <span>© 2026 PPPoker Hand Tracker — Built by a punter, for punters</span>
+      <span>{{ _('© 2026 PPPoker Hand Tracker — Built by a punter, for punters') }}</span>
       <span class="footer-sep">·</span>
-      <span>Not affiliated with PPPoker</span>
+      <span>{{ _('Not affiliated with PPPoker') }}</span>
       <span class="footer-sep">·</span>
-      <button class="footer-link-btn" data-bs-toggle="modal" data-bs-target="#modal-about">About me</button>
+      <button class="footer-link-btn" data-bs-toggle="modal" data-bs-target="#modal-about">{{ _('About me') }}</button>
     </div>
 
     <!-- Collapsible legal panel -->
     <details class="footer-legal">
       <summary class="footer-legal-toggle">
-        <span>⚖ Legal, Privacy &amp; Responsible Gambling</span>
+        <span>⚖ {{ _('Legal, Privacy & Responsible Gambling') }}</span>
         <span class="footer-chevron">▾</span>
       </summary>
       <div class="footer-cols">
 
         <div class="footer-col">
-          <div class="footer-heading">Legal &amp; Compliance</div>
-          <p>PPPoker Hand Tracker is an independent tool for educational and study purposes only. It is not affiliated with, endorsed by, or connected to PPPoker or its parent company in any way. Use of this tool is entirely at your own discretion.</p>
-          <p>This tool does not facilitate gambling, accept wagers, or process any financial transactions. It is a hand history converter intended to assist players in reviewing their own gameplay.</p>
+          <div class="footer-heading">{{ _('Legal & Compliance') }}</div>
+          <p>{{ _('PPPoker Hand Tracker is an independent tool for educational and study purposes only. It is not affiliated with, endorsed by, or connected to PPPoker or its parent company in any way. Use of this tool is entirely at your own discretion.') }}</p>
+          <p>{{ _('This tool does not facilitate gambling, accept wagers, or process any financial transactions. It is a hand history converter intended to assist players in reviewing their own gameplay.') }}</p>
         </div>
 
         <div class="footer-col">
-          <div class="footer-heading">Responsible Gambling</div>
-          <p>You must be 18 years of age or older to use poker platforms in Australia. If gambling is causing distress for you or someone you know, free confidential support is available 24/7:</p>
+          <div class="footer-heading">{{ _('Responsible Gambling') }}</div>
+          <p>{{ _('You must be 18 years of age or older to use poker platforms in Australia. If gambling is causing distress for you or someone you know, free confidential support is available 24/7:') }}</p>
           <ul class="footer-links">
-            <li><a href="https://www.gamblinghelponline.org.au" target="_blank" rel="noopener">Gambling Help Online</a> — 1800 858 858</li>
+            <li><a href="https://www.gamblinghelponline.org.au" target="_blank" rel="noopener">{{ _('Gambling Help Online') }}</a> — 1800 858 858</li>
             <li><a href="https://www.lifeline.org.au" target="_blank" rel="noopener">Lifeline</a> — 13 11 14</li>
           </ul>
-          <p style="font-size:.75rem">Online gambling is regulated in Australia under the <em>Interactive Gambling Act 2001</em>. This tool does not constitute a gambling service.</p>
+          <p style="font-size:.75rem">{% trans %}Online gambling is regulated in Australia under the <em>Interactive Gambling Act 2001</em>. This tool does not constitute a gambling service.{% endtrans %}</p>
         </div>
 
         <div class="footer-col">
-          <div class="footer-heading">Data &amp; Security</div>
-          <p>This tool operates in accordance with the <em>Privacy Act 1988 (Cth)</em> and the Australian Privacy Principles. No PPPoker account credentials, passwords, or personal login information are ever requested, stored, or transmitted.</p>
-          <p>The only data processed is the hand history contained in the public replay link you voluntarily provide. An anonymous session ID is stored locally in your browser to track your daily single-hand export usage (5/day on the free tier). No personally identifiable information is collected or sold.</p>
-          <p>Conversion accuracy is 95%+ across tested hand types. Exported files are for study purposes only — not official records.</p>
+          <div class="footer-heading">{{ _('Data & Security') }}</div>
+          <p>{% trans %}This tool operates in accordance with the <em>Privacy Act 1988 (Cth)</em> and the Australian Privacy Principles. No PPPoker account credentials, passwords, or personal login information are ever requested, stored, or transmitted.{% endtrans %}</p>
+          <p>{{ _('The only data processed is the hand history contained in the public replay link you voluntarily provide. An anonymous session ID is stored locally in your browser to track your daily single-hand export usage (5/day on the free tier). No personally identifiable information is collected or sold.') }}</p>
+          <p>{{ _('Conversion accuracy is 95%%+ across tested hand types. Exported files are for study purposes only — not official records.') }}</p>
         </div>
 
       </div>
@@ -805,15 +804,15 @@
       <div class="modal-header info-modal-header">
         <h2 class="modal-title h5" id="modal-about-title">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.2em;margin-right:8px" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          About Me
+          {{ _('About Me') }}
         </h2>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{{ _('Close') }}"></button>
       </div>
       <div class="modal-body info-modal-body">
-        <p>Hey everyone! Just a regular Aussie poker player here who got hooked on PPPoker a while back. The games are good, the action is decent, and the community is there. But there's one thing that's always driven me mad: <strong>you can't study your hands.</strong></p>
-        <p>PokerTracker, DriveHUD, GTO Wizard — all the serious training tools need a hand history file. PPPoker doesn't give you one. Their replay system is locked inside the app, and there's no export button in sight. So if you want to actually improve your game, you're stuck replaying hands one by one in a clunky mobile viewer.</p>
-        <p>I got frustrated enough to do something about it. With the help of AI tools, I built <strong>PPPoker Hand Tracker</strong> — a web app that pulls your hand history straight from PPPoker's API and converts it into a format that actually works with your training software.</p>
-        <p>No poker background in software development. No team. Just a player who wanted better tools and figured out how to build them. If it helps your game even a little, it was worth it. ♠</p>
+        <p>{% trans %}Hey everyone! Just a regular Aussie poker player here who got hooked on PPPoker a while back. The games are good, the action is decent, and the community is there. But there's one thing that's always driven me mad: <strong>you can't study your hands.</strong>{% endtrans %}</p>
+        <p>{{ _("PokerTracker, DriveHUD, GTO Wizard — all the serious training tools need a hand history file. PPPoker doesn't give you one. Their replay system is locked inside the app, and there's no export button in sight. So if you want to actually improve your game, you're stuck replaying hands one by one in a clunky mobile viewer.") }}</p>
+        <p>{% trans %}I got frustrated enough to do something about it. With the help of AI tools, I built <strong>PPPoker Hand Tracker</strong> — a web app that pulls your hand history straight from PPPoker's API and converts it into a format that actually works with your training software.{% endtrans %}</p>
+        <p>{{ _('No poker background in software development. No team. Just a player who wanted better tools and figured out how to build them. If it helps your game even a little, it was worth it. ♠') }}</p>
       </div>
     </div>
   </div>
@@ -826,21 +825,21 @@
       <div class="modal-header info-modal-header">
         <h2 class="modal-title h5" id="modal-tool-title">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.2em;margin-right:8px" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          The Tool
+          {{ _('The Tool') }}
         </h2>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{{ _('Close') }}"></button>
       </div>
       <div class="modal-body info-modal-body">
-        <p><strong>PPPoker Hand Tracker</strong> bridges the gap between PPPoker and your training software. Here's what it does:</p>
+        <p>{% trans %}<strong>PPPoker Hand Tracker</strong> bridges the gap between PPPoker and your training software. Here's what it does:{% endtrans %}</p>
         <ul>
-          <li><strong>Fetches your hands</strong> directly from PPPoker's API using your hand review link — no installs, no file uploads, no screen scraping.</li>
-          <li><strong>Converts to PokerStars format</strong> — the industry-standard hand history format accepted by PokerTracker 4, DriveHUD, and GTO Wizard.</li>
-          <li><strong>Tracks tournaments and cash sessions</strong> — every event you've played with hands logged, session length, and result, plus a per-tournament progress graph you can click through to any hand.</li>
-          <li><strong>Exports on demand</strong> — download all hands, a single hand by ID, or a full tournament in .txt or .json format.</li>
+          <li>{% trans %}<strong>Fetches your hands</strong> directly from PPPoker's API using your hand review link — no installs, no file uploads, no screen scraping.{% endtrans %}</li>
+          <li>{% trans %}<strong>Converts to PokerStars format</strong> — the industry-standard hand history format accepted by PokerTracker 4, DriveHUD, and GTO Wizard.{% endtrans %}</li>
+          <li>{% trans %}<strong>Tracks tournaments and cash sessions</strong> — every event you've played with hands logged, session length, and result, plus a per-tournament progress graph you can click through to any hand.{% endtrans %}</li>
+          <li>{% trans %}<strong>Exports on demand</strong> — download all hands, a single hand by ID, or a full tournament in .txt or .json format.{% endtrans %}</li>
         </ul>
         <hr style="border-color:var(--border);margin:14px 0"/>
-        <p><strong>🔒 Your PPPoker account is never touched.</strong> This tool works entirely through the public hand review link PPPoker generates for you. It does not ask for, store, or transmit your PPPoker username, password, or any account credentials — ever. The only data processed is the hand history contained in the link you provide.</p>
-        <p><strong>Conversion accuracy is 95%+</strong> across the hands tested so far. The vast majority of hand types, bet sizes, and board runouts convert cleanly. That said, edge cases exist — unusual all-in situations, incomplete hands, or rare PPPoker-specific action types may not convert perfectly. Use exported files for study and improvement, not as official records.</p>
+        <p>{% trans %}<strong>🔒 Your PPPoker account is never touched.</strong> This tool works entirely through the public hand review link PPPoker generates for you. It does not ask for, store, or transmit your PPPoker username, password, or any account credentials — ever. The only data processed is the hand history contained in the link you provide.{% endtrans %}</p>
+        <p>{% trans %}<strong>Conversion accuracy is 95%+</strong> across the hands tested so far. The vast majority of hand types, bet sizes, and board runouts convert cleanly. That said, edge cases exist — unusual all-in situations, incomplete hands, or rare PPPoker-specific action types may not convert perfectly. Use exported files for study and improvement, not as official records.{% endtrans %}</p>
       </div>
     </div>
   </div>
@@ -853,45 +852,45 @@
       <div class="modal-header info-modal-header">
         <h2 class="modal-title h5" id="modal-howto-title">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.2em;margin-right:8px" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          How to Use
+          {{ _('How to Use') }}
         </h2>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{{ _('Close') }}"></button>
       </div>
       <div class="modal-body info-modal-body">
         <ol class="howto-steps">
           <li>
             <div class="howto-step-text">
-              <strong>Open PPPoker on your phone or PC</strong>
-              <span>Go to your profile → Hand History. You'll see a list of recent hands.</span>
+              <strong>{{ _('Open PPPoker on your phone or PC') }}</strong>
+              <span>{{ _("Go to your profile → Hand History. You'll see a list of recent hands.") }}</span>
             </div>
           </li>
           <li>
             <div class="howto-step-text">
-              <strong>Tap any hand to open the replay</strong>
-              <span>Inside the replay screen, look for a <em>Share</em> or <em>Copy Link</em> button. It produces a URL that looks like:</span>
+              <strong>{{ _('Tap any hand to open the replay') }}</strong>
+              <span>{% trans %}Inside the replay screen, look for a <em>Share</em> or <em>Copy Link</em> button. It produces a URL that looks like:{% endtrans %}</span>
               <code>http://replay.pppoker.net/...?uid=...&amp;rdkey=...</code>
             </div>
           </li>
           <li>
             <div class="howto-step-text">
-              <strong>Paste the link here</strong>
-              <span>Drop it into the input box at the top of this page and click <strong>IMPORT</strong>. The app fetches up to 200 of your most recent hands — this takes 10–30 seconds.</span>
+              <strong>{{ _('Paste the link here') }}</strong>
+              <span>{% trans %}Drop it into the input box at the top of this page and click <strong>IMPORT</strong>. The app fetches up to 200 of your most recent hands — this takes 10–30 seconds.{% endtrans %}</span>
             </div>
           </li>
           <li>
             <div class="howto-step-text">
-              <strong>Review your stats</strong>
-              <span>Your session stats, recent hands, and tournament history all load automatically. Check your hole cards, position, and results inline.</span>
+              <strong>{{ _('Review your stats') }}</strong>
+              <span>{{ _('Your session stats, recent hands, and tournament history all load automatically. Check your hole cards, position, and results inline.') }}</span>
             </div>
           </li>
           <li>
             <div class="howto-step-text">
-              <strong>Export to your training tool</strong>
-              <span>Hit <strong>PokerTracker</strong>, <strong>DriveHUD</strong>, or <strong>GTO Wizard</strong> to download a PokerStars-format .txt file. Import it into your software and start studying.</span>
+              <strong>{{ _('Export to your training tool') }}</strong>
+              <span>{% trans %}Hit <strong>PokerTracker</strong>, <strong>DriveHUD</strong>, or <strong>GTO Wizard</strong> to download a PokerStars-format .txt file. Import it into your software and start studying.{% endtrans %}</span>
             </div>
           </li>
         </ol>
-        <p style="color:var(--muted);font-size:.83rem;margin-top:12px">⚠️ Links expire after a short time. If you get a "link expired" error, go back to PPPoker and copy a fresh link.</p>
+        <p style="color:var(--muted);font-size:.83rem;margin-top:12px">⚠️ {{ _('Links expire after a short time. If you get a "link expired" error, go back to PPPoker and copy a fresh link.') }}</p>
       </div>
     </div>
   </div>
@@ -904,31 +903,31 @@
       <div class="modal-header info-modal-header">
         <h2 class="modal-title h5" id="modal-tiers-title">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.2em;margin-right:8px" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          Free vs Pro
+          {{ _('Free vs Pro') }}
         </h2>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{{ _('Close') }}"></button>
       </div>
       <div class="modal-body info-modal-body">
-        <p>PPPoker Hand Tracker is free to use with sensible limits. Pro removes those limits and unlocks everything.</p>
+        <p>{{ _('PPPoker Hand Tracker is free to use with sensible limits. Pro removes those limits and unlocks everything.') }}</p>
         <table class="tier-table">
           <thead>
-            <tr><th scope="col">Feature</th><th scope="col">Free</th><th scope="col" style="color:var(--yellow)">Pro</th></tr>
+            <tr><th scope="col">{{ _('Feature') }}</th><th scope="col">{{ _('Free') }}</th><th scope="col" style="color:var(--yellow)">{{ _('Pro') }}</th></tr>
           </thead>
           <tbody>
-            <tr><td>Imports</td><td>3/day</td><td>Unlimited</td></tr>
-            <tr><td>History kept</td><td>7 days</td><td>Forever</td></tr>
-            <tr><td>Hand history displayed</td><td>Last 30</td><td>Unlimited</td></tr>
-            <tr><td>Session stats &amp; graphs</td><td>✓ Full</td><td>✓ Full</td></tr>
-            <tr><td>Tournament Details &amp; progress graph</td><td>✓ Full</td><td>✓ Full</td></tr>
-            <tr><td>Gamification (points, streaks, badges)</td><td>✓</td><td>✓</td></tr>
-            <tr><td>Single-hand exports/day</td><td>5/day<sup>*</sup></td><td>Unlimited</td></tr>
-            <tr><td>Tournament exports/day</td><td>1/day<sup>*</sup></td><td>Unlimited</td></tr>
-            <tr><td>Export a whole session</td><td>✕ Locked</td><td>✓ Unlocked</td></tr>
+            <tr><td>{{ _('Imports') }}</td><td>{{ _('3/day') }}</td><td>{{ _('Unlimited') }}</td></tr>
+            <tr><td>{{ _('History kept') }}</td><td>{{ _('7 days') }}</td><td>{{ _('Forever') }}</td></tr>
+            <tr><td>{{ _('Hand history displayed') }}</td><td>{{ _('Last 30') }}</td><td>{{ _('Unlimited') }}</td></tr>
+            <tr><td>{{ _('Session stats & graphs') }}</td><td>✓ {{ _('Full') }}</td><td>✓ {{ _('Full') }}</td></tr>
+            <tr><td>{{ _('Tournament Details & progress graph') }}</td><td>✓ {{ _('Full') }}</td><td>✓ {{ _('Full') }}</td></tr>
+            <tr><td>{{ _('Gamification (points, streaks, badges)') }}</td><td>✓</td><td>✓</td></tr>
+            <tr><td>{{ _('Single-hand exports/day') }}</td><td>{{ _('5/day') }}<sup>*</sup></td><td>{{ _('Unlimited') }}</td></tr>
+            <tr><td>{{ _('Tournament exports/day') }}</td><td>{{ _('1/day') }}<sup>*</sup></td><td>{{ _('Unlimited') }}</td></tr>
+            <tr><td>{{ _('Export a whole session') }}</td><td>✕ {{ _('Locked') }}</td><td>✓ {{ _('Unlocked') }}</td></tr>
           </tbody>
         </table>
-        <p style="margin-top:10px;font-size:.8rem;color:var(--muted)"><sup>*</sup> Exports need a free account. Beyond the first two hand exports each day, one short survey unlocks the next export — Pro never asks.</p>
-        <p style="margin-top:14px;font-size:.88rem">Pro is <strong style="color:var(--yellow)" data-pricing-price>A$7.99/mo</strong>. <span data-pricing-discount-only><span data-pricing-plan>Early Access</span> pricing is locked in until we launch globally.</span> Cancel any time.</p>
-        <button class="tier-cta mt-2" data-pricing-cta onclick="bootstrap.Modal.getInstance(document.getElementById('modal-tiers')).hide(); showUpgradeModal('banner');">Get Early Access — A$7.99/month</button>
+        <p style="margin-top:10px;font-size:.8rem;color:var(--muted)"><sup>*</sup> {{ _('Exports need a free account. Beyond the first two hand exports each day, one short survey unlocks the next export — Pro never asks.') }}</p>
+        <p style="margin-top:14px;font-size:.88rem">{{ _('Pro is') }} <strong style="color:var(--yellow)" data-pricing-price>A$7.99/mo</strong>. <span data-pricing-discount-only><span data-pricing-plan>{{ _('Early Access') }}</span> {{ _('pricing is locked in until we launch globally.') }}</span> {{ _('Cancel any time.') }}</p>
+        <button class="tier-cta mt-2" data-pricing-cta onclick="bootstrap.Modal.getInstance(document.getElementById('modal-tiers')).hide(); showUpgradeModal('banner');">{{ _('Get Early Access — A$7.99/month') }}</button>
       </div>
     </div>
   </div>
@@ -941,64 +940,64 @@
       <div class="modal-header info-modal-header">
         <h2 class="modal-title h5" id="modal-releases-title">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.2em;margin-right:8px" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          Release Notes
+          {{ _('Release Notes') }}
         </h2>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{{ _('Close') }}"></button>
       </div>
       <div class="modal-body info-modal-body">
 
         <div class="release-block release-latest">
           <div class="release-version">v0.5 — Aug 2026</div>
-          <div class="release-tag">Latest</div>
+          <div class="release-tag">{{ _('Latest') }}</div>
           <ul>
-            <li>🏆 Tournament progress graph — watch your stack rise and crash over a tournament, then click any point on the curve to jump straight to that hand</li>
-            <li>🎮 Points, streaks &amp; weekly leaderboard — every import earns you points and unlocks badges, and there's a fresh leaderboard to climb each week</li>
-            <li>💳 Pro is live — Early Access pricing locked in until we launch globally</li>
+            <li>🏆 {{ _('Tournament progress graph — watch your stack rise and crash over a tournament, then click any point on the curve to jump straight to that hand') }}</li>
+            <li>🎮 {{ _("Points, streaks & weekly leaderboard — every import earns you points and unlocks badges, and there's a fresh leaderboard to climb each week") }}</li>
+            <li>💳 {{ _('Pro is live — Early Access pricing locked in until we launch globally') }}</li>
           </ul>
         </div>
 
         <div class="release-block">
           <div class="release-version">v0.4 — Jul 2026</div>
           <ul>
-            <li>🆓 Free and Pro accounts with sensible daily limits — sign in to keep your history and lift the caps</li>
-            <li>💵 Cash &amp; Play Money Games — cash tables and sit-and-gos now get their own section, separate from real-money tournaments</li>
-            <li>♠ Tournament Summary — buy-in, finish position, and ITM% at a glance across every event you've played</li>
+            <li>🆓 {{ _('Free and Pro accounts with sensible daily limits — sign in to keep your history and lift the caps') }}</li>
+            <li>💵 {{ _('Cash & Play Money Games — cash tables and sit-and-gos now get their own section, separate from real-money tournaments') }}</li>
+            <li>♠ {{ _("Tournament Summary — buy-in, finish position, and ITM%% at a glance across every event you've played") }}</li>
           </ul>
         </div>
 
         <div class="release-block">
           <div class="release-version">v0.3 — Jun 2026</div>
           <ul>
-            <li>🎨 Full UI redesign — gaming dark theme, Oxanium font, neon green accents</li>
-            <li>🆓 Free &amp; Pro tiers introduced — freemium gates, upgrade modal</li>
-            <li>🔥 Firebase Analytics + Firestore session tracking added</li>
-            <li>📦 Platform-specific export filenames (PokerTracker, DriveHUD, GTOWizard)</li>
-            <li>📐 Export buttons redesigned as 2×2 icon grid</li>
-            <li>📱 Mobile-first layout improvements throughout</li>
+            <li>🎨 {{ _('Full UI redesign — gaming dark theme, Oxanium font, neon green accents') }}</li>
+            <li>🆓 {{ _('Free & Pro tiers introduced — freemium gates, upgrade modal') }}</li>
+            <li>🔥 {{ _('Firebase Analytics + Firestore session tracking added') }}</li>
+            <li>📦 {{ _('Platform-specific export filenames (PokerTracker, DriveHUD, GTOWizard)') }}</li>
+            <li>📐 {{ _('Export buttons redesigned as 2×2 icon grid') }}</li>
+            <li>📱 {{ _('Mobile-first layout improvements throughout') }}</li>
           </ul>
         </div>
 
         <div class="release-block">
           <div class="release-version">v0.2 — May 2026</div>
           <ul>
-            <li>♠ Playing card visuals for hole cards with 4-colour suit support</li>
-            <li>🃏 Suit mapping corrected (clubs/hearts/spades/diamonds)</li>
-            <li>📊 Hero-centric validation pills (Flop / Turn / River / Showdown)</li>
-            <li>🏆 Tournament History section with MTT / Satellite / Won pills</li>
-            <li>📤 JSON export endpoints for hands &amp; tournaments</li>
-            <li>🔁 DriveHUD replaces PokerStars branding throughout</li>
-            <li>🌍 Timezone selector for date/time display</li>
+            <li>♠ {{ _('Playing card visuals for hole cards with 4-colour suit support') }}</li>
+            <li>🃏 {{ _('Suit mapping corrected (clubs/hearts/spades/diamonds)') }}</li>
+            <li>📊 {{ _('Hero-centric validation pills (Flop / Turn / River / Showdown)') }}</li>
+            <li>🏆 {{ _('Tournament History section with MTT / Satellite / Won pills') }}</li>
+            <li>📤 {{ _('JSON export endpoints for hands & tournaments') }}</li>
+            <li>🔁 {{ _('DriveHUD replaces PokerStars branding throughout') }}</li>
+            <li>🌍 {{ _('Timezone selector for date/time display') }}</li>
           </ul>
         </div>
 
         <div class="release-block">
           <div class="release-version">v0.1 — Apr 2026</div>
           <ul>
-            <li>🚀 Initial launch — proof of concept</li>
-            <li>🔗 PPPoker API hand fetching via share link</li>
-            <li>📝 PokerStars-format hand history export</li>
-            <li>📈 Basic session stats (VPIP, PFR, hands played)</li>
-            <li>🔄 Replay links to PPPoker hand viewer</li>
+            <li>🚀 {{ _('Initial launch — proof of concept') }}</li>
+            <li>🔗 {{ _('PPPoker API hand fetching via share link') }}</li>
+            <li>📝 {{ _('PokerStars-format hand history export') }}</li>
+            <li>📈 {{ _('Basic session stats (VPIP, PFR, hands played)') }}</li>
+            <li>🔄 {{ _('Replay links to PPPoker hand viewer') }}</li>
           </ul>
         </div>
 
