@@ -24,7 +24,7 @@ service cloud.firestore {
     // daily import/export counters and its survey unlocks. A counter the browser
     // can zero is not a counter, so both are written only by app.py.
     function serverOnlyFields() {
-      return ['is_pro', 'stripe_customer_id', 'quota', 'credits'];
+      return ['is_pro', 'stripe_customer_id', 'subscription_status', 'quota', 'credits'];
     }
     match /users/{uid} {
       allow read: if request.auth != null && request.auth.uid == uid;
@@ -36,7 +36,7 @@ service cloud.firestore {
                     && (!('is_pro' in request.resource.data)
                         || request.resource.data.is_pro == false)
                     && !request.resource.data.keys()
-                          .hasAny(['stripe_customer_id', 'quota', 'credits']);
+                          .hasAny(['stripe_customer_id', 'subscription_status', 'quota', 'credits']);
       allow update: if request.auth != null && request.auth.uid == uid
                     && !request.resource.data.diff(resource.data)
                           .affectedKeys().hasAny(serverOnlyFields());

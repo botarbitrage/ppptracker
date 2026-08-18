@@ -180,12 +180,14 @@ def main():
         'first_seen': datetime(2024, 1, 1, tzinfo=timezone.utc),
         'last_seen': datetime(2024, 6, 1, tzinfo=timezone.utc),
         'quota': {'day': today, 'hand_exports': 2, 'tourney_exports': 1},
+        'subscription_status': 'active',
         'last_payment_at': 1_717_200_000,
     })
     db.put(('users', ADMIN_UID), {
         'is_pro': False,
         'first_seen': datetime(2023, 5, 1, tzinfo=timezone.utc),
         'quota': {'day': '2000-01-01', 'hand_exports': 9, 'tourney_exports': 9},
+        # No stripe_customer_id / subscription_status — never subscribed.
     })
 
     A._get_admin_db = lambda: db
@@ -266,6 +268,12 @@ def main():
           rows[ADMIN_UID]['exports_today'] == 0, str(rows[ADMIN_UID]['exports_today']))
     check('user with no Firestore doc has zero exports today',
           rows[PERM_UID]['exports_today'] == 0, str(rows[PERM_UID]['exports_today']))
+    check('subscription_status surfaced for a Stripe user',
+          rows[PLAIN_UID]['subscription_status'] == 'active', str(rows[PLAIN_UID]))
+    check('subscription_status is null for a never-subscribed user',
+          rows[ADMIN_UID]['subscription_status'] is None, str(rows[ADMIN_UID]))
+    check('subscription_status is null for a user with no Firestore doc',
+          rows[PERM_UID]['subscription_status'] is None, str(rows[PERM_UID]))
     check('last_payment_at surfaced when present',
           rows[PLAIN_UID]['last_payment_at'] == 1_717_200_000, str(rows[PLAIN_UID]['last_payment_at']))
     check('last_payment_at null when never paid',

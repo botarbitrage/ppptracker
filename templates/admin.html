@@ -300,6 +300,7 @@
                     <th>Signed up</th>
                     <th>Last sign-in</th>
                     <th class="text-center">Pro</th>
+                    <th>Subscription</th>
                     <th>Registered</th>
                     <th>Last active</th>
                     <th>Last Payment</th>
@@ -637,6 +638,17 @@
     e.classList.toggle('d-none', !msg);
   }
 
+  // Raw Stripe subscription status, badged for the states that matter and
+  // shown plain otherwise. Blank means never had a Stripe subscription.
+  function subscriptionBadge(status) {
+    if (!status) return '<span class="adm-meta">—</span>';
+    if (status === 'active') return `<span class="adm-pill">${esc(status)}</span>`;
+    if (status === 'canceled' || status === 'unpaid') {
+      return `<span class="adm-pill off">${esc(status)}</span>`;
+    }
+    return `<span class="adm-meta">${esc(status)}</span>`;
+  }
+
   // ── Users table ────────────────────────────────────────────────────────────
   function renderUsers() {
     const q = (document.getElementById('adm-search').value || '').trim().toLowerCase();
@@ -664,6 +676,7 @@
                    ${u.is_pro ? 'checked' : ''}
                    onchange="setPro('${esc(u.uid)}', this)"/>
           </td>
+          <td>${subscriptionBadge(u.subscription_status)}</td>
           <td class="adm-date">${esc(fmtDate(u.first_seen))}</td>
           <td class="adm-date">${esc(fmtDate(u.last_seen))}</td>
           <td class="adm-date">${esc(fmtLastPayment(u))}</td>
