@@ -1939,6 +1939,44 @@ def admin_set_user_admin(target_uid):
     return jsonify({'ok': True, 'uid': target_uid, 'is_admin': make_admin})
 
 
+@app.route('/api/admin/users/<target_uid>/pro', methods=['PATCH'])
+def admin_set_user_pro(target_uid):
+    """Manually grant or revoke Pro access on users/{uid}.is_pro.
+
+    Manually-granted pro users have no stripe_customer_id, so Stripe webhook
+    events (checkout, subscription updates) can never resolve to their uid via
+    _uid_for_customer() and won't silently overwrite this.
+    """
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+
+    body = request.get_json(silent=True) or {}
+    make_pro = body.get('is_pro')
+    if not isinstance(make_pro, bool):
+        return jsonify({'error': 'is_pro must be true or false'}), 400
+
+    try:
+        admin_auth.get_user(target_uid)
+    except admin_auth.UserNotFoundError:
+        return jsonify({'error': 'No such user'}), 404
+    except Exception as exc:
+        print(f"[admin_set_user_pro] get_user failed for {target_uid}: "
+              f"{type(exc).__name__}: {exc}")
+        return jsonify({'error': f'Could not look up user: {exc}'}), 500
+
+    ref = _get_admin_db().collection('users').document(target_uid)
+    # .update() merges without a full-document overwrite, per project convention —
+    # but a user who has never loaded the home page has no users/{uid} doc yet
+    # (see admin_list_users), so fall back to a merge-set rather than 500ing on
+    # what is otherwise a perfectly valid manual grant.
+    if ref.get().exists:
+        ref.update({'is_pro': make_pro})
+    else:
+        ref.set({'is_pro': make_pro}, merge=True)
+    return jsonify({'ok': True, 'uid': target_uid, 'is_pro': make_pro})
+
+
 # ── Pricing plan ─────────────────────────────────────────────────────────────
 # Which plan is on sale lives in /config/pricing.active_plan so it can be flipped
 # from the admin console at launch without a deploy. Each plan's Stripe price and
