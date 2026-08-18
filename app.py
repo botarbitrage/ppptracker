@@ -1819,13 +1819,22 @@ def _ms_to_secs(ms):
         return None
 
 
+def _fs_ts_to_secs(ts):
+    """Firestore server timestamps arrive as tz-aware datetimes; the UI wants secs."""
+    try:
+        return int(ts.timestamp()) if ts else None
+    except (AttributeError, TypeError, ValueError):
+        return None
+
+
 @app.route('/api/admin/users', methods=['GET'])
 def admin_list_users():
     """Every registered Firebase Auth account, flagged with its admin status.
 
     Firebase Auth is the authoritative user list — the Firestore `users`
     collection only gets a doc once someone loads the home page, so it silently
-    misses anyone who has only ever used /tournaments or /leaks.
+    misses anyone who has only ever used /tournaments or /leaks. Those accounts
+    fall back to the is_pro/first_seen/last_seen/exports_today defaults below.
     """
     uid = _verify_bearer(request)
     if not _is_admin(uid):
@@ -1836,6 +1845,22 @@ def admin_list_users():
     allowlist = set(snap.to_dict().get('uids') or []) if snap.exists else set()
     permanent = _permanent_admin_uids()
 
+    # One collection read for every users/{uid} doc, keyed by uid — cheaper than
+    # a per-row lookup, and a miss (no doc yet) just means the defaults below.
+    today = _utc_day()
+    profiles = {}
+    for doc in db.collection('users').stream():
+        d = doc.to_dict() or {}
+        quota = d.get('quota') if isinstance(d.get('quota'), dict) else {}
+        exports_today = (int(quota.get('hand_exports') or 0) + int(quota.get('tourney_exports') or 0)) \
+            if quota.get('day') == today else 0
+        profiles[doc.id] = {
+            'is_pro':        bool(d.get('is_pro')),
+            'first_seen':    _fs_ts_to_secs(d.get('first_seen')),
+            'last_seen':     _fs_ts_to_secs(d.get('last_seen')),
+            'exports_today': exports_today,
+        }
+
     users = []
     try:
         page = admin_auth.list_users()
@@ -1843,14 +1868,19 @@ def admin_list_users():
             for u in page.users:
                 meta = getattr(u, 'user_metadata', None)
                 is_perm = u.uid in permanent
+                profile = profiles.get(u.uid, {})
                 users.append({
-                    'uid':          u.uid,
-                    'email':        u.email or '',
-                    'is_admin':     is_perm or u.uid in allowlist,
-                    'is_permanent': is_perm,
-                    'disabled':     bool(getattr(u, 'disabled', False)),
-                    'created_at':   _ms_to_secs(getattr(meta, 'creation_timestamp', None)),
-                    'last_sign_in': _ms_to_secs(getattr(meta, 'last_sign_in_timestamp', None)),
+                    'uid':           u.uid,
+                    'email':         u.email or '',
+                    'is_admin':      is_perm or u.uid in allowlist,
+                    'is_permanent':  is_perm,
+                    'disabled':      bool(getattr(u, 'disabled', False)),
+                    'created_at':    _ms_to_secs(getattr(meta, 'creation_timestamp', None)),
+                    'last_sign_in':  _ms_to_secs(getattr(meta, 'last_sign_in_timestamp', None)),
+                    'is_pro':        profile.get('is_pro', False),
+                    'first_seen':    profile.get('first_seen'),
+                    'last_seen':     profile.get('last_seen'),
+                    'exports_today': profile.get('exports_today', 0),
                 })
             page = page.get_next_page()
     except Exception as exc:
