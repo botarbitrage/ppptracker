@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-08-18 10:36+0930\n"
+"POT-Creation-Date: 2026-08-18 11:14+0930\n"
 "PO-Revision-Date: 2026-08-18 10:35+0930\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: pt_BR\n"
@@ -552,7 +552,7 @@ msgstr ""
 msgid "No surveys available? Answer a few quick questions instead"
 msgstr "Sem pesquisas disponíveis? Responda a algumas perguntas rápidas"
 
-#: templates/index.html:705
+#: templates/index.html:705 templates/index.html:1022
 msgid "Sign in"
 msgstr "Entrar"
 
@@ -1134,4 +1134,40 @@ msgstr "Estatísticas básicas de sessão (VPIP, PFR, mãos jogadas)"
 #: templates/index.html:1000
 msgid "Replay links to PPPoker hand viewer"
 msgstr "Links de replay para o visualizador de mãos do PPPoker"
+
+#: templates/index.html:1023
+msgid "Sign out"
+msgstr "Sair"
+
+#: templates/index.html:1024
+msgid "Auth service not available. Check Firebase config."
+msgstr "Serviço de autenticação indisponível. Verifique a configuração do Firebase."
+
+#: templates/index.html:1025
+msgid "Please enter your email address."
+msgstr "Por favor, insira seu endereço de e-mail."
+
+#: templates/index.html:1026
+msgid "Sending…"
+msgstr "Enviando…"
+
+#: templates/index.html:1027
+msgid "Link sent to"
+msgstr "Link enviado para"
+
+#: templates/index.html:1028
+msgid "check your inbox."
+msgstr "verifique sua caixa de entrada."
+
+#: templates/index.html:1029
+msgid "Failed to send link."
+msgstr "Falha ao enviar o link."
+
+#: templates/index.html:1030
+msgid "Auth not ready — please wait a moment and try again."
+msgstr "Autenticação não está pronta — aguarde um momento e tente novamente."
+
+#: templates/index.html:1031
+msgid "Google sign-in failed."
+msgstr "Falha ao entrar com o Google."
 
