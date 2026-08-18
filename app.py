@@ -1548,10 +1548,15 @@ def stripe_webhook():
                or _uid_for_customer(db, obj.get('customer', '')))
         if uid:
             status = obj.get('status', '')
+            # subscription_status is written unconditionally (raw Stripe status,
+            # for admin visibility) even on statuses like 'past_due' or 'trialing'
+            # that don't move is_pro either way below.
+            updates = {'subscription_status': status}
             if t == 'customer.subscription.deleted' or status in ('canceled', 'unpaid'):
-                db.collection('users').document(uid).set({'is_pro': False}, merge=True)
+                updates['is_pro'] = False
             elif status == 'active':
-                db.collection('users').document(uid).set({'is_pro': True}, merge=True)
+                updates['is_pro'] = True
+            db.collection('users').document(uid).set(updates, merge=True)
 
     elif t == 'invoice.payment_succeeded':
         if obj.get('subscription'):   # only subscription invoices, not one-off
@@ -1855,10 +1860,11 @@ def admin_list_users():
         exports_today = (int(quota.get('hand_exports') or 0) + int(quota.get('tourney_exports') or 0)) \
             if quota.get('day') == today else 0
         profiles[doc.id] = {
-            'is_pro':        bool(d.get('is_pro')),
-            'first_seen':    _fs_ts_to_secs(d.get('first_seen')),
-            'last_seen':     _fs_ts_to_secs(d.get('last_seen')),
-            'exports_today': exports_today,
+            'is_pro':              bool(d.get('is_pro')),
+            'first_seen':          _fs_ts_to_secs(d.get('first_seen')),
+            'last_seen':           _fs_ts_to_secs(d.get('last_seen')),
+            'exports_today':       exports_today,
+            'subscription_status': d.get('subscription_status') or None,
         }
 
     users = []
@@ -1877,10 +1883,11 @@ def admin_list_users():
                     'disabled':      bool(getattr(u, 'disabled', False)),
                     'created_at':    _ms_to_secs(getattr(meta, 'creation_timestamp', None)),
                     'last_sign_in':  _ms_to_secs(getattr(meta, 'last_sign_in_timestamp', None)),
-                    'is_pro':        profile.get('is_pro', False),
-                    'first_seen':    profile.get('first_seen'),
-                    'last_seen':     profile.get('last_seen'),
-                    'exports_today': profile.get('exports_today', 0),
+                    'is_pro':              profile.get('is_pro', False),
+                    'first_seen':          profile.get('first_seen'),
+                    'last_seen':           profile.get('last_seen'),
+                    'exports_today':       profile.get('exports_today', 0),
+                    'subscription_status': profile.get('subscription_status'),
                 })
             page = page.get_next_page()
     except Exception as exc:

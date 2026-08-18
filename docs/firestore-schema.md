@@ -26,6 +26,7 @@ One document per signed-in account.
 | `last_seen` | timestamp | client | Server timestamp, refreshed on each sign-in. |
 | `is_pro` | bool | **server-only** (Stripe webhook) | The whole Free/Pro split. `true` removes every quota, the history window and the survey gate. |
 | `stripe_customer_id` | string | **server-only** (Stripe webhook) | Fallback lookup key when a subscription event carries no uid metadata. |
+| `subscription_status` | string | **server-only** (Stripe webhook) | Stripe's raw subscription status (`active`, `past_due`, `canceled`, `unpaid`, …), written by `customer.subscription.updated`/`.deleted`. Observability only — `is_pro` is still the field that gates access; this just makes the expiration-demotion logic visible instead of trusted blindly. Unset for users who never had a Stripe subscription. |
 | `quota` | map | **server-only** | Today's usage counters. See below. |
 | `credits` | map | **server-only** | Unspent survey unlocks. See below. |
 
@@ -136,8 +137,8 @@ deleted outright once claimed.
 `firestore.rules` enforces the "server-only" column above. Two properties matter:
 
 1. **`users/{uid}` update** may not touch `is_pro`, `stripe_customer_id`,
-   `quota` or `credits`; **create** may not seed them either, so a
-   delete-and-recreate cannot wash away a spent allowance.
+   `subscription_status`, `quota` or `credits`; **create** may not seed them
+   either, so a delete-and-recreate cannot wash away a spent allowance.
 2. **`ad_jtis` and `survey_completions` are excluded from the blanket
    subcollection grant**, not merely re-matched with a stricter rule. Rule
    matches are OR'd, so a permissive parent rule would outvote a strict child
