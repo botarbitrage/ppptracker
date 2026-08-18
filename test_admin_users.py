@@ -15,6 +15,7 @@ allowlist. Those are the cases that would lock everyone out of the page.
 import json
 import os
 import sys
+from datetime import datetime, timezone
 
 os.environ.setdefault('FIREBASE_STORAGE_BUCKET', 'test-bucket')
 # Set before importing app: _PERMANENT_ADMIN_EMAILS is built at import time.
@@ -64,6 +65,9 @@ class _Col:
     def document(self, doc_id):
         return _Doc(self._store, self._path + (doc_id,))
 
+    def stream(self):
+        return self._store.stream(self._path)
+
 
 class FakeDB:
     """Nested dict keyed by path tuple: ('config', 'admins')."""
@@ -79,6 +83,12 @@ class FakeDB:
 
     def put(self, path, data):
         self._d[path] = data
+
+    def stream(self, path):
+        """Every doc directly under path — mirrors collection.stream()."""
+        depth = len(path) + 1
+        return [_Snap(p[-1], data) for p, data in self._d.items()
+                if len(p) == depth and p[:len(path)] == path]
 
 
 # ── Fake Firebase Auth ───────────────────────────────────────────────────────
@@ -156,6 +166,22 @@ def main():
     db = FakeDB()
     db.put(('config', 'admins'), {'uids': [ADMIN_UID]})
 
+    today = A._utc_day()
+    # PLAIN_UID: Pro, active today. ADMIN_UID: free, quota from a stale day (reads
+    # as 0 today). PERM_UID: no Firestore doc at all — never loaded the home page,
+    # so admin_list_users() must fall back to defaults rather than 500 or KeyError.
+    db.put(('users', PLAIN_UID), {
+        'is_pro': True,
+        'first_seen': datetime(2024, 1, 1, tzinfo=timezone.utc),
+        'last_seen': datetime(2024, 6, 1, tzinfo=timezone.utc),
+        'quota': {'day': today, 'hand_exports': 2, 'tourney_exports': 1},
+    })
+    db.put(('users', ADMIN_UID), {
+        'is_pro': False,
+        'first_seen': datetime(2023, 5, 1, tzinfo=timezone.utc),
+        'quota': {'day': '2000-01-01', 'hand_exports': 9, 'tourney_exports': 9},
+    })
+
     A._get_admin_db = lambda: db
     A.admin_auth = FakeAuth(USERS)
     A._PERM_ADMIN_UID_CACHE = None
@@ -211,6 +237,22 @@ def main():
     check('timestamps in seconds', rows[PLAIN_UID]['created_at'] == 1_700_000_000,
           str(rows[PLAIN_UID]['created_at']))
     check('missing last sign-in is null', rows[ADMIN_UID]['last_sign_in'] is None)
+
+    # ── 3b. Subscription/activity fields from users/{uid} ────────────────────
+    check('pro user flagged', rows[PLAIN_UID]['is_pro'] is True)
+    check('free user not flagged', rows[ADMIN_UID]['is_pro'] is False)
+    check('user with no Firestore doc defaults to not pro',
+          rows[PERM_UID]['is_pro'] is False)
+    check('first_seen converted to epoch secs',
+          rows[PLAIN_UID]['first_seen'] == 1_704_067_200, str(rows[PLAIN_UID]['first_seen']))
+    check('missing first_seen is null', rows[PERM_UID]['first_seen'] is None)
+    check("today's exports summed", rows[PLAIN_UID]['exports_today'] == 3,
+          str(rows[PLAIN_UID]['exports_today']))
+    check('stale-day quota reads as zero exports today',
+          rows[ADMIN_UID]['exports_today'] == 0, str(rows[ADMIN_UID]['exports_today']))
+    check('user with no Firestore doc has zero exports today',
+          rows[PERM_UID]['exports_today'] == 0, str(rows[PERM_UID]['exports_today']))
+
     order = [u['uid'] for u in data['users']]
     check('admins first, then email A-Z', order == [ADMIN_UID, PERM_UID, PLAIN_UID],
           str(order))

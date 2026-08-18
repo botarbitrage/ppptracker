@@ -299,6 +299,9 @@
                     <th>Email</th>
                     <th>Signed up</th>
                     <th>Last sign-in</th>
+                    <th class="text-center">Pro</th>
+                    <th>Registered</th>
+                    <th>Last active</th>
                     <th class="text-center">Admin</th>
                   </tr>
                 </thead>
@@ -632,7 +635,7 @@
     const body = document.getElementById('adm-users-body');
 
     if (!rows.length) {
-      body.innerHTML = `<tr><td colspan="4" class="text-center adm-meta py-4">` +
+      body.innerHTML = `<tr><td colspan="7" class="text-center adm-meta py-4">` +
         (USERS.length ? 'No users match that search.' : 'No registered users yet.') +
         `</td></tr>`;
     } else {
@@ -646,6 +649,11 @@
           </td>
           <td class="adm-date">${esc(fmtDate(u.created_at))}</td>
           <td class="adm-date">${esc(fmtDate(u.last_sign_in))}</td>
+          <td class="text-center">
+            <span class="adm-pill${u.is_pro ? '' : ' off'}">${u.is_pro ? 'Yes' : 'No'}</span>
+          </td>
+          <td class="adm-date">${esc(fmtDate(u.first_seen))}</td>
+          <td class="adm-date">${esc(fmtDate(u.last_seen))}</td>
           <td class="text-center">
             <input type="checkbox" class="form-check-input adm-check"
                    aria-label="Admin"
