@@ -62,23 +62,80 @@ Tests are standalone scripts, run the same way CI does:
 python test_tiering.py
 ```
 
-## Translations (i18n)
+## Internationalization (i18n)
 
-Templates use Flask-Babel (`_('...')` / `{% trans %}` in `templates/*.html`,
-`babel.cfg` lists which files get scanned). After editing translatable
-strings, re-extract and rebuild the compiled catalog:
+The app uses [Flask-Babel](https://python-babel.github.io/flask-babel/) for
+translated strings. Supported locales are listed in `app.config['LANGUAGES']`
+in `app.py` (currently `en`, `pt_BR`).
+
+### Adding a new translated string
+
+Wrap the string in Jinja templates with `_('...')`, or `{% trans %}...{%
+endtrans %}` for multi-line/block text:
+
+```jinja
+<span>{{ _('Points') }}</span>
+```
+
+In `app.py` (Python-side strings, e.g. flash messages), use the same `_('...')`
+call — `flask_babel` provides it. `babel.cfg` lists which files get scanned
+(`app.py` and everything under `templates/`); a string outside those won't be
+picked up by extraction.
+
+### How locale is chosen
+
+`get_locale()` in `app.py` resolves the active locale in this order:
+
+1. An explicit `lang` cookie (set by the language `<select>` in the header,
+   see `static/app.js`) — a user's manual choice always wins.
+2. The browser's `Accept-Language` header, best-matched against
+   `app.config['LANGUAGES']`.
+3. `en` as the final fallback.
+
+This is intentionally **Accept-Language only — no GeoIP or other paid
+geolocation/detection service** is used anywhere in the flow (per the pt-BR
+scope Decision: zero-cost detection only).
+
+### Adding a new locale
+
+1. Add the locale code to `app.config['LANGUAGES']` in `app.py`.
+2. Add an `<option>` for it to the `#lang-select` dropdown in
+   `templates/index.html` (and any other page with the selector).
+3. Generate a catalog for it and translate the extracted strings (see
+   "Compiling translations" below):
+   ```bash
+   pybabel init -i translations/messages.pot -d translations -l <locale_code>
+   ```
+4. Fill in `msgstr` entries in the new
+   `translations/<locale_code>/LC_MESSAGES/messages.po`, then compile.
+
+### Compiling translations
+
+After editing translatable strings or `.po` files, re-extract and rebuild the
+compiled catalog:
 
 ```bash
 pybabel extract -F babel.cfg -o translations/messages.pot .
 pybabel update -i translations/messages.pot -d translations
-# fill in any new/blank msgstr entries in translations/pt_BR/LC_MESSAGES/messages.po
+# fill in any new/blank msgstr entries in translations/<locale>/LC_MESSAGES/messages.po
 pybabel compile -d translations
 ```
 
 `pybabel compile` must run before deploying — the app reads the compiled
-`.mo` file, not the `.po` source. Poker taxonomy (Flop, Turn, River, Street,
-Stack, BB/BBs, MTT, Satellite, etc.) is intentionally left untranslated in
-`pt_BR`; see the header comment in `messages.po` for the full rationale.
+`.mo` file, not the `.po` source.
+
+### Poker taxonomy glossary (pt_BR)
+
+The following terms are intentionally left **untranslated** in `pt_BR` —
+Brazilian poker players use these English terms natively, matching how
+PPPoker itself and other poker training tools present them. This list is
+authoritative in the header comment of
+`translations/pt_BR/LC_MESSAGES/messages.po`; keep the two in sync.
+
+- Street names: Flop, Turn, River, Street
+- Stack/format terms: Stack, BB / BBs, MTT, Satellite
+- Hole-card jargon: hero, board, runout, all-in
+- Stats: VPIP, PFR
 
 ## Environment variables
 
