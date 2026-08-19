@@ -3335,6 +3335,56 @@ async function _loadPricing() {
   _applyPricingCopy();
 }
 
+/* ── Export ads copy ─────────────────────────────────────── */
+
+// Hard/soft export limits, admin-configurable at /admin ("Ad Campaigns" ->
+// "Export Ads"). These are the shipped defaults, kept as the fallback so a
+// failed fetch renders the same copy the page shipped with.
+let _EXPORT_ADS = {
+  hand_hard_limit: 5, hand_soft_limit: 3,      // 2 free, then 3 survey-gated
+  tourney_hard_limit: 1, tourney_soft_limit: 1, // 0 free, fully survey-gated
+};
+
+function _exportAdsFreeCount(kind) {
+  const hard = _EXPORT_ADS[kind + '_hard_limit'], soft = _EXPORT_ADS[kind + '_soft_limit'];
+  return Math.max(hard - soft, 0);
+}
+
+/** Push the live export limits into the tier-comparison table/footnote. */
+function _applyExportAdsCopy() {
+  document.querySelectorAll('[data-exportads-hand-hard]').forEach(el => {
+    el.textContent = `${_EXPORT_ADS.hand_hard_limit}/day`;
+  });
+  document.querySelectorAll('[data-exportads-tourney-hard]').forEach(el => {
+    el.textContent = `${_EXPORT_ADS.tourney_hard_limit}/day`;
+  });
+  // The shipped, translated footnote already says "first two" — only
+  // overwrite it (in English) once an admin actually changes that number,
+  // so the common case keeps its i18n instead of a hardcoded string fighting
+  // Flask-Babel for the same sentence.
+  const handFree = _exportAdsFreeCount('hand');
+  if (handFree !== 2) {
+    document.querySelectorAll('[data-exportads-hand-footnote]').forEach(el => {
+      const plural = handFree === 1 ? '' : 's';
+      el.innerHTML = `<sup>*</sup> Exports need a free account. Beyond the first ` +
+        `${handFree} hand export${plural} each day, one short survey unlocks the ` +
+        `next export — Pro never asks.`;
+    });
+  }
+}
+
+async function _loadExportAdsConfig() {
+  try {
+    const res = await fetch('/api/export-ads-config');
+    if (!res.ok) return;
+    const c = await res.json();
+    if (c && typeof c.hand_hard_limit === 'number') _EXPORT_ADS = c;
+  } catch (e) {
+    console.warn('export ads config fetch failed, using default copy', e);
+  }
+  _applyExportAdsCopy();
+}
+
 /* ── Auth helpers ────────────────────────────────────────── */
 
 // UI hint only — mirrors _PERMANENT_ADMIN_EMAILS in app.py so the Admin button
@@ -3622,7 +3672,7 @@ function _firebaseUnavailable() {
 // Kick off Firebase after the page is interactive (non-blocking). Pricing is
 // fetched independently so the CTAs still show the active plan if Firebase is
 // unavailable.
-function _boot() { _initFirebase(); _loadPricing(); }
+function _boot() { _initFirebase(); _loadPricing(); _loadExportAdsConfig(); }
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', _boot);

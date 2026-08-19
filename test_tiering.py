@@ -428,6 +428,115 @@ def test_export_gates():
               A._quota_state(PRO_UID)['hand_exports'] == 0)
 
 
+# ── 4b. Export ads config (admin-controlled hard/soft survey limits) ────────
+
+def test_export_ads_config():
+    print('export ads config')
+    _reset_user(FREE_UID)
+    _put_tournament(FREE_UID, 'trecent', RECENT_TS)
+    _stub_tournament_records({'trecent': _records('trecent')})
+    DB._d.pop(('config', 'export_ads'), None)
+    DB.put(('config', 'admins'), {'uids': ['uid-admin']})
+
+    DEFAULT_CFG = {
+        'hand_hard_limit':    A.FREE_HAND_EXPORTS_PER_DAY,
+        'hand_soft_limit':    A.FREE_HAND_EXPORTS_PER_DAY - A.FREE_HAND_EXPORTS_UNGATED,
+        'tourney_hard_limit': A.FREE_TOURNEY_EXPORTS_DAY,
+        'tourney_soft_limit': A.FREE_TOURNEY_EXPORTS_DAY,
+    }
+
+    as_user(None)
+    res = CLIENT.get('/api/export-ads-config')
+    check('the public config endpoint needs no account', res.status_code == 200,
+          str(res.status_code))
+    check('and reproduces the hardcoded constants by default',
+          res.get_json() == DEFAULT_CFG, str(res.get_json()))
+    check('the admin config endpoint needs an account',
+          CLIENT.get('/api/admin/export-ads-config').status_code == 403)
+
+    as_user(FREE_UID)  # not an admin
+    check('non-admin cannot read the admin config',
+          CLIENT.get('/api/admin/export-ads-config').status_code == 403)
+    check('non-admin cannot write the config',
+          CLIENT.post('/api/admin/export-ads-config',
+                      json={'hand_hard_limit': 10}).status_code == 403)
+
+    as_user('uid-admin')
+    res = CLIENT.get('/api/admin/export-ads-config')
+    check('admin can read the config', res.status_code == 200, str(res.status_code))
+    check('default config matches the public endpoint',
+          res.get_json() == DEFAULT_CFG, str(res.get_json()))
+
+    for bad in ({'hand_hard_limit': 'five'}, {'hand_soft_limit': -1},
+                {'tourney_hard_limit': True}, {'tourney_soft_limit': 'x'}, {}):
+        res = CLIENT.post('/api/admin/export-ads-config', json=bad)
+        check(f'rejects malformed body {bad}', res.status_code == 400, str(res.status_code))
+
+    # Bullet 1: hard limit 0 blocks the kind outright — quota_exceeded, no
+    # survey ever offered.
+    res = CLIENT.post('/api/admin/export-ads-config', json={'hand_hard_limit': 0})
+    check('setting hand hard limit to 0 200', res.status_code == 200, str(res.status_code))
+    check('other fields untouched', res.get_json()['hand_soft_limit'] == DEFAULT_CFG['hand_soft_limit'])
+
+    as_user(FREE_UID)
+    res = _export_hand()
+    check('hard limit 0 blocks with quota_exceeded, not survey_required',
+          res.status_code == 402 and res.get_json().get('error') == 'quota_exceeded',
+          f'{res.status_code} {res.get_json()}')
+
+    # Bullet 3: soft limit 0 (with a positive hard limit) means every slot up
+    # to the hard cap is free — no survey ever, but the cap still bites.
+    _reset_user(FREE_UID)
+    as_user('uid-admin')
+    res = CLIENT.post('/api/admin/export-ads-config',
+                      json={'hand_hard_limit': 5, 'hand_soft_limit': 0})
+    check('soft limit 0 200', res.status_code == 200, str(res.status_code))
+
+    as_user(FREE_UID)
+    codes = [_export_hand().status_code for _ in range(5)]
+    check('with soft limit 0, all 5 free hand exports need no survey',
+          codes == [200] * 5, str(codes))
+    res = _export_hand()
+    check('the hard cap still applies once soft limit is 0',
+          res.status_code == 402 and res.get_json().get('error') == 'quota_exceeded',
+          f'{res.status_code} {res.get_json()}')
+
+    # Bullet 4: soft limit > 0 sets how many of the hard-limit slots are
+    # survey-gated, counted off the end (free_count = hard - soft).
+    _reset_user(FREE_UID)
+    as_user('uid-admin')
+    res = CLIENT.post('/api/admin/export-ads-config',
+                      json={'hand_hard_limit': 5, 'hand_soft_limit': 1,
+                            'tourney_hard_limit': 2, 'tourney_soft_limit': 1})
+    check('reconfiguring hard/soft limits 200', res.status_code == 200, str(res.status_code))
+
+    as_user(FREE_UID)
+    codes = [_export_hand().status_code for _ in range(4)]
+    check('hand free_count=5-1=4: first 4 exports need no survey',
+          codes == [200] * 4, str(codes))
+    res = _export_hand()
+    check('hand export 5 needs a survey (the last soft_limit=1 slot)',
+          res.status_code == 402 and res.get_json().get('error') == 'survey_required',
+          f'{res.status_code} {res.get_json()}')
+
+    res = _export_tourney()
+    check('tourney free_count=2-1=1: export 1 needs no survey',
+          res.status_code == 200, str(res.status_code))
+    res = _export_tourney()
+    check('tourney export 2 needs a survey (the last soft_limit=1 slot)',
+          res.status_code == 402 and res.get_json().get('error') == 'survey_required',
+          f'{res.status_code} {res.get_json()}')
+
+    # Tourney's default (hard=1, soft=1 -> free_count=0) must still reproduce
+    # today's "always gated" behaviour with no config doc at all.
+    DB._d.pop(('config', 'export_ads'), None)
+    _reset_user(FREE_UID)
+    res = _export_tourney()
+    check('default tourney export still needs a survey immediately',
+          res.status_code == 402 and res.get_json().get('error') == 'survey_required',
+          f'{res.status_code} {res.get_json()}')
+
+
 # ── 5. The 7-day history window ──────────────────────────────────────────────
 
 def test_history_window():
@@ -751,6 +860,7 @@ def test_credit_endpoints():
 
 def main():
     for test in (test_quota, test_credits, test_ad_tokens, test_export_gates,
+                 test_export_ads_config,
                  test_history_window, test_import_quota_and_window,
                  test_free_import_prunes_old_tournaments, test_anon_import_and_claim,
                  test_cpx_postback, test_survey_config_hash, test_tally_callback,

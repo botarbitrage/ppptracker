@@ -931,12 +931,12 @@
             <tr><td>{{ _('Session stats & graphs') }}</td><td>✓ {{ _('Full') }}</td><td>✓ {{ _('Full') }}</td></tr>
             <tr><td>{{ _('Tournament Details & progress graph') }}</td><td>✓ {{ _('Full') }}</td><td>✓ {{ _('Full') }}</td></tr>
             <tr><td>{{ _('Gamification (points, streaks, badges)') }}</td><td>✓</td><td>✓</td></tr>
-            <tr><td>{{ _('Single-hand exports/day') }}</td><td>{{ _('5/day') }}<sup>*</sup></td><td>{{ _('Unlimited') }}</td></tr>
-            <tr><td>{{ _('Tournament exports/day') }}</td><td>{{ _('1/day') }}<sup>*</sup></td><td>{{ _('Unlimited') }}</td></tr>
+            <tr><td>{{ _('Single-hand exports/day') }}</td><td><span data-exportads-hand-hard>{{ _('5/day') }}</span><sup>*</sup></td><td>{{ _('Unlimited') }}</td></tr>
+            <tr><td>{{ _('Tournament exports/day') }}</td><td><span data-exportads-tourney-hard>{{ _('1/day') }}</span><sup>*</sup></td><td>{{ _('Unlimited') }}</td></tr>
             <tr><td>{{ _('Export a whole session') }}</td><td>✕ {{ _('Locked') }}</td><td>✓ {{ _('Unlocked') }}</td></tr>
           </tbody>
         </table>
-        <p style="margin-top:10px;font-size:.8rem;color:var(--muted)"><sup>*</sup> {{ _('Exports need a free account. Beyond the first two hand exports each day, one short survey unlocks the next export — Pro never asks.') }}</p>
+        <p style="margin-top:10px;font-size:.8rem;color:var(--muted)" data-exportads-hand-footnote><sup>*</sup> {{ _('Exports need a free account. Beyond the first two hand exports each day, one short survey unlocks the next export — Pro never asks.') }}</p>
         <p style="margin-top:14px;font-size:.88rem">{{ _('Pro is') }} <strong style="color:var(--yellow)" data-pricing-price>A$7.99/mo</strong>. <span data-pricing-discount-only><span data-pricing-plan>{{ _('Early Access') }}</span> {{ _('pricing is locked in until we launch globally.') }}</span> {{ _('Cancel any time.') }}</p>
         <button class="tier-cta mt-2" data-pricing-cta onclick="bootstrap.Modal.getInstance(document.getElementById('modal-tiers')).hide(); showUpgradeModal('banner');">{{ _('Get Early Access — A$7.99/month') }}</button>
       </div>

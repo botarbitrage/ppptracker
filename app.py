@@ -907,6 +907,41 @@ def _export_uid(req):
     return uid, None
 
 
+_EXPORT_ADS_DEFAULTS = {
+    # hard_limit = the daily cap (0 disables the kind entirely — no exports,
+    # so the survey path is never reached). soft_limit = how many of those
+    # hard_limit slots are survey-gated, counted from the *end*: the first
+    # (hard_limit - soft_limit) exports are free, the rest need a survey.
+    # soft_limit=0 therefore means "every slot up to the hard cap is free" —
+    # no special-casing needed, it falls out of the arithmetic below.
+    'hand_hard_limit':    FREE_HAND_EXPORTS_PER_DAY,                          # 5
+    'hand_soft_limit':    FREE_HAND_EXPORTS_PER_DAY - FREE_HAND_EXPORTS_UNGATED,  # 3 gated
+    'tourney_hard_limit': FREE_TOURNEY_EXPORTS_DAY,                          # 1
+    'tourney_soft_limit': FREE_TOURNEY_EXPORTS_DAY,   # today: the 1 slot is fully gated
+}
+
+
+def _export_ads_config():
+    """Admin-configurable survey-gate limits for hand/tourney exports.
+
+    Read fresh from Firestore on every call, the same as _active_plan() — an
+    admin change takes effect on the very next request, no redeploy or cache to
+    invalidate. Falls back to the defaults (which reproduce today's hardcoded
+    behaviour) on a missing doc or any read failure.
+    """
+    cfg = dict(_EXPORT_ADS_DEFAULTS)
+    try:
+        snap = _get_admin_db().collection('config').document('export_ads').get()
+        stored = snap.to_dict() if snap.exists else {}
+    except Exception as exc:
+        print(f"[_export_ads_config] read failed: {type(exc).__name__}: {exc}")
+        stored = {}
+    for key in _EXPORT_ADS_DEFAULTS:
+        if key in stored:
+            cfg[key] = stored[key]
+    return cfg
+
+
 def _export_gate(req, uid, kind):
     """Quota/survey gate for one export. kind is 'hand' or 'tourney'.
 
@@ -915,25 +950,30 @@ def _export_gate(req, uid, kind):
     and must not consume the day's allowance.
 
     pro  → always allowed, uncounted
-    free → daily cap, then a survey credit or X-Ad-Token for the gated slots
+    free → admin-configured hard_limit/soft_limit (see _EXPORT_ADS_DEFAULTS)
+           decide the daily cap and how many of those slots need a survey
+           credit or X-Ad-Token. hard_limit=0 blocks the kind outright, before
+           any survey is ever offered.
     """
     if _tier(uid) == 'pro':
         return _ExportGate(uid)
 
     state = _quota_state(uid)
+    ads = _export_ads_config()
     if kind == 'tourney':
-        used, cap, quota_key = state['tourney_exports'], FREE_TOURNEY_EXPORTS_DAY, 'tourney_exports'
-        needs_unlock = True
+        used, quota_key = state['tourney_exports'], 'tourney_exports'
+        hard, soft = ads['tourney_hard_limit'], ads['tourney_soft_limit']
     else:
-        used, cap, quota_key = state['hand_exports'], FREE_HAND_EXPORTS_PER_DAY, 'hand_exports'
-        needs_unlock = used >= FREE_HAND_EXPORTS_UNGATED
+        used, quota_key = state['hand_exports'], 'hand_exports'
+        hard, soft = ads['hand_hard_limit'], ads['hand_soft_limit']
 
-    if used >= cap:
+    if used >= hard:
         return _ExportGate(uid, error=(jsonify({
-            'error': 'quota_exceeded', 'kind': kind, 'used': used, 'limit': cap,
+            'error': 'quota_exceeded', 'kind': kind, 'used': used, 'limit': hard,
             'upgrade': True}), 402))
 
-    if not needs_unlock:
+    free_count = max(hard - soft, 0)
+    if used < free_count:
         return _ExportGate(uid, quota_key=quota_key)
 
     if _verify_ad_token(req.headers.get('X-Ad-Token', ''), uid, kind):
@@ -942,7 +982,7 @@ def _export_gate(req, uid, kind):
         return _ExportGate(uid, quota_key=quota_key, credit_kind=kind)
 
     return _ExportGate(uid, error=(jsonify({
-        'error': 'survey_required', 'kind': kind, 'used': used, 'limit': cap}), 402))
+        'error': 'survey_required', 'kind': kind, 'used': used, 'limit': hard}), 402))
 
 
 def _require_pro_export(req, feature):
@@ -2098,6 +2138,52 @@ def admin_pricing_set():
         'updated_by':  uid,
     }, merge=True)
     return jsonify({'ok': True, 'active_plan': key})
+
+
+@app.route('/api/export-ads-config', methods=['GET'])
+def export_ads_config_get():
+    """Public: the live hard/soft export limits, for the tier-comparison copy
+    on the main page (see _applyExportAdsCopy in app.js). No admin gate — these
+    numbers are shown to every visitor already, just not always accurately
+    once an admin changes them here."""
+    return jsonify(_export_ads_config())
+
+
+@app.route('/api/admin/export-ads-config', methods=['GET'])
+def admin_export_ads_config_get():
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+    return jsonify(_export_ads_config())
+
+
+@app.route('/api/admin/export-ads-config', methods=['POST'])
+def admin_export_ads_config_set():
+    """Whole-config replace of the fields present in the body — merge='True'
+    on the Firestore write, so an admin can change one field without resending
+    the others, but each field present is validated on its own type."""
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict):
+        return jsonify({'error': 'Malformed request body'}), 400
+
+    update = {}
+    for key in ('hand_hard_limit', 'hand_soft_limit',
+                'tourney_hard_limit', 'tourney_soft_limit'):
+        if key in body:
+            val = body[key]
+            if isinstance(val, bool) or not isinstance(val, int) or val < 0:
+                return jsonify({'error': f'{key} must be a non-negative integer'}), 400
+            update[key] = val
+    if not update:
+        return jsonify({'error': 'No recognised fields in request body'}), 400
+
+    update['updated_at'] = int(time.time())
+    update['updated_by'] = uid
+    _get_admin_db().collection('config').document('export_ads').set(update, merge=True)
+    return jsonify(_export_ads_config())
 
 
 def _fetch_tournament_records(uid, tourney_id):
