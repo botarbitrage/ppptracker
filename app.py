@@ -1063,11 +1063,11 @@ def _delete_anon_session(session_token):
 # retries are normal and paying twice for one survey is not.
 
 def _verify_cpx_hash(trans_id, provided_hash):
-    """CPX signs each postback as md5(trans_id + secure_hash)."""
+    """CPX signs each postback as md5(trans_id + "-" + secure_hash)."""
     import hashlib, hmac
     if not _CPX_SECURE_HASH or not trans_id or not provided_hash:
         return False
-    expected = hashlib.md5(f'{trans_id}{_CPX_SECURE_HASH}'.encode()).hexdigest()
+    expected = hashlib.md5(f'{trans_id}-{_CPX_SECURE_HASH}'.encode()).hexdigest()
     return hmac.compare_digest(expected, provided_hash.strip().lower())
 
 
@@ -1111,7 +1111,7 @@ def survey_config():
     if _CPX_APP_ID:
         cpx = {'app_id': _CPX_APP_ID, 'ext_user_id': uid}
         if _CPX_SECURE_HASH:
-            cpx['secure_hash'] = hashlib.md5(f'{uid}{_CPX_SECURE_HASH}'.encode()).hexdigest()
+            cpx['secure_hash'] = hashlib.md5(f'{uid}-{_CPX_SECURE_HASH}'.encode()).hexdigest()
     return jsonify({'cpx': cpx, 'tally_form_url': _TALLY_FORM_URL,
                     'caps': CREDIT_CAPS})
 
@@ -1159,6 +1159,7 @@ def cpx_postback():
     trans_id = (args.get('trans_id') or '').strip()
     kind     = (args.get('subid_1') or 'hand').strip()
     status   = (args.get('status') or '1').strip()
+    ev_type  = (args.get('type') or '').strip().lower()
 
     if not _verify_cpx_hash(trans_id, args.get('hash') or ''):
         return jsonify({'error': 'invalid_hash'}), 403
@@ -1180,7 +1181,10 @@ def cpx_postback():
     created, _existing = _record_survey_completion(uid, trans_id, payload)
     if not created:
         return Response('1', mimetype='text/plain')     # already paid out
-    granted = _grant_credit(uid, kind)
+    if ev_type in ('', 'complete'):
+        granted = _grant_credit(uid, kind)
+    else:
+        granted = False
     _user_ref(uid).collection('survey_completions').document(trans_id).update(
         {'credit_granted': bool(granted)})
     return Response('1', mimetype='text/plain')
