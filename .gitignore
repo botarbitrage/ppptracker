@@ -40,4 +40,7 @@ pppoker_collection_output.txt
 Thumbs.db
 
 # Claude session data
-.claude/
+.claude/*
+# ...except versioned, repo-level skills
+!.claude/skills/
+!.claude/skills/**
