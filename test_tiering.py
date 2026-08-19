@@ -607,11 +607,19 @@ def test_cpx_postback():
     print('cpx postback')
     _reset_user(FREE_UID)
     trans = 'trans-1'
-    good  = hashlib.md5(f'{trans}cpx-secret'.encode()).hexdigest()
+    good  = hashlib.md5(f'{trans}-cpx-secret'.encode()).hexdigest()
 
     res = CLIENT.get(f'/api/cpx/postback?user_id={FREE_UID}&trans_id={trans}'
                      f'&subid_1=hand&status=1&hash=nope')
     check('a bad hash is rejected', res.status_code == 403, str(res.status_code))
+    with A.app.test_request_context('/'):
+        check('and grants nothing', A._credits(FREE_UID)['hand'] == 0)
+
+    unhyphenated = hashlib.md5(f'{trans}cpx-secret'.encode()).hexdigest()
+    res = CLIENT.get(f'/api/cpx/postback?user_id={FREE_UID}&trans_id={trans}'
+                     f'&subid_1=hand&status=1&hash={unhyphenated}')
+    check('a hash missing the hyphen separator is rejected',
+          res.status_code == 403, str(res.status_code))
     with A.app.test_request_context('/'):
         check('and grants nothing', A._credits(FREE_UID)['hand'] == 0)
 
@@ -646,7 +654,7 @@ def test_cpx_postback():
 
     # A credit that has already been spent has nothing left to reverse.
     trans2 = 'trans-2'
-    hash2  = hashlib.md5(f'{trans2}cpx-secret'.encode()).hexdigest()
+    hash2  = hashlib.md5(f'{trans2}-cpx-secret'.encode()).hexdigest()
     CLIENT.get(f'/api/cpx/postback?user_id={FREE_UID}&trans_id={trans2}'
                f'&subid_1=tourney&status=1&hash={hash2}')
     with A.app.test_request_context('/'):
@@ -656,6 +664,31 @@ def test_cpx_postback():
     with A.app.test_request_context('/'):
         check('reversing a spent credit leaves the balance alone',
               A._credits(FREE_UID)['tourney'] == 0)
+
+    # Non-complete event types (screen-outs, bonuses) still answer '1' so CPX
+    # doesn't retry, but must not grant a credit.
+    for ev_type in ('out', 'bonus'):
+        trans_ev = f'trans-{ev_type}'
+        hash_ev  = hashlib.md5(f'{trans_ev}-cpx-secret'.encode()).hexdigest()
+        res = CLIENT.get(f'/api/cpx/postback?user_id={FREE_UID}&trans_id={trans_ev}'
+                         f'&subid_1=hand&status=1&type={ev_type}&hash={hash_ev}')
+        check(f'type={ev_type} is accepted',
+              res.status_code == 200 and res.get_data(as_text=True) == '1',
+              res.get_data(as_text=True))
+        with A.app.test_request_context('/'):
+            check(f'but type={ev_type} grants zero credits',
+                  A._credits(FREE_UID)['hand'] == 0)
+
+
+def test_survey_config_hash():
+    print('survey config hash')
+    as_user(FREE_UID)
+    res = CLIENT.get('/api/survey-config')
+    check('survey-config responds ok', res.status_code == 200, str(res.status_code))
+    expected = hashlib.md5(f'{FREE_UID}-cpx-secret'.encode()).hexdigest()
+    check('secure_hash is md5(uid + "-" + secret)',
+          res.get_json()['cpx']['secure_hash'] == expected,
+          res.get_json()['cpx'])
 
 
 def test_tally_callback():
@@ -720,7 +753,8 @@ def main():
     for test in (test_quota, test_credits, test_ad_tokens, test_export_gates,
                  test_history_window, test_import_quota_and_window,
                  test_free_import_prunes_old_tournaments, test_anon_import_and_claim,
-                 test_cpx_postback, test_tally_callback, test_credit_endpoints):
+                 test_cpx_postback, test_survey_config_hash, test_tally_callback,
+                 test_credit_endpoints):
         test()
     print()
     if _FAILURES:
