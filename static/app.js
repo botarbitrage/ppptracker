@@ -230,8 +230,10 @@ async function _downloadExport(url, opts, btn) {
 // the browser's only job is to open the survey and then watch /api/credits until
 // the balance moves.
 
-const _SURVEY_POLL_MS      = 1000;
-const _SURVEY_POLL_TIMEOUT = 60000;
+const _SURVEY_POLL_MS_FAST   = 1000;
+const _SURVEY_POLL_MS_SLOW   = 5000;
+const _SURVEY_POLL_FAST_WINDOW = 60000;   // 1s ticks for the first minute
+const _SURVEY_POLL_TIMEOUT   = 15 * 60 * 1000; // real CPX surveys run 5-15 min incl. screener
 
 let _surveyState = { kind: null, retry: null, baseline: 0, timer: null, deadline: 0 };
 
@@ -351,7 +353,11 @@ async function _fetchCredits() {
  */
 function _surveyStartPolling() {
   clearTimeout(_surveyState.timer);
-  _surveyState.deadline = Date.now() + _SURVEY_POLL_TIMEOUT;
+  const start = Date.now();
+  _surveyState.deadline = start + _SURVEY_POLL_TIMEOUT;
+
+  const nextInterval = () =>
+    Date.now() - start < _SURVEY_POLL_FAST_WINDOW ? _SURVEY_POLL_MS_FAST : _SURVEY_POLL_MS_SLOW;
 
   const tick = async () => {
     if (!_surveyState.kind) return;
@@ -361,13 +367,14 @@ function _surveyStartPolling() {
       return;
     }
     if (Date.now() > _surveyState.deadline) {
-      _surveyStatus('Still waiting on the survey provider. Close this and try the '
-                    + 'export again in a minute — your unlock is not lost.', 'err');
+      _surveyStatus('Still waiting on the survey provider. Your credit is safe — close '
+                    + 'this and retry the export in a bit, it will pick up automatically '
+                    + 'once the survey lands.', 'err');
       return;
     }
-    _surveyState.timer = setTimeout(tick, _SURVEY_POLL_MS);
+    _surveyState.timer = setTimeout(tick, nextInterval());
   };
-  _surveyState.timer = setTimeout(tick, _SURVEY_POLL_MS);
+  _surveyState.timer = setTimeout(tick, nextInterval());
 }
 
 function _surveyEarned() {
