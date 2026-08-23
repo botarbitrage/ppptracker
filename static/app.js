@@ -3067,11 +3067,14 @@ function exportPersistedTournamentJson(tourneyId, btn) {
 /* ── Export Panel ────────────────────────────────────────── */
 
 function renderHandStats(data) {
-  // data.stats / data.validation are scoped to THIS import's records — accurate
-  // for anon (nothing persisted) and for signed-in re-imports of already-saved
-  // hands, where data.new_hands is 0 but real data is still on screen.
-  const s = data.stats || {};
-  const v = data.validation || {};
+  // Prefer new_stats/new_validation — scoped to just the hands this import
+  // actually added — so the card reads "42 hands" alongside "42 new hands
+  // loaded" instead of the full range PPPoker returned (e.g. 200). Falls back
+  // to stats/validation for anon imports (nothing persisted, so everything is
+  // "new") and signed-in re-imports of already-saved hands, where new_hands
+  // is 0 but real data is still on screen.
+  const s = data.new_stats || data.stats || {};
+  const v = data.new_validation || data.validation || {};
   const _set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val ?? '—'; };
   _set('hs-hands', s.total_hands ?? 0);
   _set('hs-flop',  s.hands_hero_saw_flop  ?? 0);
