@@ -146,8 +146,9 @@ def main():
     check('event provider is stub', (rec or {}).get('gate_provider') == 'stub', str(rec))
     check('event completion id mirrors doc id',
           (rec or {}).get('gate_completion_id') == 'c-import-1', str(rec))
-    check('event has an epoch-seconds "at"',
-          isinstance((rec or {}).get('at'), int) and (rec or {}).get('at') > 0, str(rec))
+    from google.cloud import firestore as _gcf
+    check('event carries a server-resolved "at" timestamp',
+          (rec or {}).get('at') == _gcf.SERVER_TIMESTAMP, str(rec))
 
     # ── 5. Happy path — hand_export ─────────────────────────────────────────
     status, body = post({'kind': 'hand_export', 'ts': 1, 'completion_id': 'c-hand-1'})
