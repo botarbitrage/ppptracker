@@ -93,8 +93,13 @@ const _UPGRADE_REASONS = {
 // building it from a module-level constant here would drift the moment an admin
 // changes the config without a redeploy.
 function _quotaReasonText(kind, limit) {
+  // Tourney exports moved from a daily cap to lifetime-free-once + N/week
+  // (see _tourney_export_gate in app.py) — this copy only fires once the
+  // lifetime freebie is spent and the weekly limit is hit, so "a week" is
+  // accurate here even though the export itself may have been free the very
+  // first time.
   return kind === 'tourney'
-    ? `Free accounts get ${limit} tournament export${limit === 1 ? '' : 's'} a day. Upgrade to Pro for unlimited exports.`
+    ? `Free accounts get ${limit} tournament export${limit === 1 ? '' : 's'} a week after your first free one. Upgrade to Pro for unlimited exports.`
     : `That's all ${limit} hand export${limit === 1 ? '' : 's'} for today. Upgrade to Pro for unlimited exports.`;
 }
 
@@ -193,8 +198,15 @@ async function _handleExportFailure(res, kind, retry) {
     return "That's your last one for today";
   }
   if (err === 'survey_required') {
-    openSurveyModal(kind, retry);
-    return 'Unlock with a quick survey';
+    // Tourney exports still go through CPX; hand exports were switched to the
+    // gate-stub modal (see _hand_export_gate in app.py) while ayeT/Wannads
+    // rewarded-video approval is shelved.
+    if (kind === 'tourney') {
+      openSurveyModal(kind, retry);
+      return 'Unlock with a quick survey';
+    }
+    _openGateStub('hand_export', retry, 'hand_quota');
+    return 'Watch to unlock';
   }
   return err || 'Export failed';
 }
@@ -401,6 +413,175 @@ function closeSurveyModal() {
   const frame = document.getElementById('survey-frame');
   if (frame) frame.removeAttribute('src');   // stop the provider's page running
   const modalEl = document.getElementById('survey-modal');
+  if (modalEl) {
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (modal) modal.hide();
+  }
+}
+
+/* ── Gate stub modal ("watch to unlock" ad stand-in) ─────── */
+// ayeT-Studios/Wannads rewarded-video approval is pending, so this is a
+// self-hosted stand-in with the same completion contract a real ad would have:
+// 30s of forced user-visible attention, an OK button that only enables once
+// the timer runs out, and a server-side signal (POST /api/gate/stub-completion)
+// that records the completion for a future gate check to consume.
+//
+// The modal body doubles as a Pro upsell — forced attention is a conversion
+// opportunity while there's no ad revenue at stake yet.
+//
+// When ayeT/Wannads approval lands (separate follow-up Feature), only this
+// function gets swapped for the real SDK — the completion contract (endpoint
+// shape, gate-check code, admin config) stays the same.
+//
+// NOT wired to any gate check yet (that's Task 6) — this is just the reusable
+// modal component + its completion endpoint, callable the same way
+// openSurveyModal()/_surveyShowCpx() are today.
+
+const _GATE_STUB_SECONDS = 30;   // keep in sync with the "wait 30 seconds" copy
+                                  // in templates/index.html's gate-stub-modal
+let _gateStubState = {
+  kind: null, onComplete: null, remaining: 0, timer: null,
+  completionId: null, posted: false,
+};
+
+function _gateStubKindCopy(kind) {
+  const I = window.I18N_GATE_STUB || {};
+  return kind === 'import'
+    ? { kindLabel: I.kindLabelImport, feature: I.featureImport }
+    : { kindLabel: I.kindLabelHandExport, feature: I.featureHandExport };
+}
+
+function _gateStubNewId() {
+  return (window.crypto && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : `gs_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+}
+
+/**
+ * The gate-stub dispatch point for imports and hand exports (AC6/AC8 of the
+ * wire-three-gates task): open the stub modal when GATE_STUB_MODAL_ENABLED,
+ * otherwise fall through to the upgrade prompt instead of silently letting
+ * the gated action through. This is deliberately a thin wrapper around
+ * _showGateStubModal rather than relying on that function's own internal
+ * "flag off → call onComplete() for free" fallback — that fallback exists so
+ * a caller that forgets to check the flag doesn't hard-block on a missing
+ * modal element, but at this call site (the actual gate dispatch) a
+ * disabled flag must mean "no unlock mechanism available", not "let it
+ * through for free". When a real rewarded-video SDK replaces the stub, only
+ * this function's branch needs to change — the gate-check code in app.py
+ * does not.
+ */
+function _openGateStub(stubKind, retry, upgradeReason) {
+  if (window.GATE_STUB_MODAL_ENABLED === false) {
+    showUpgradeModal(upgradeReason);
+    return;
+  }
+  _showGateStubModal(stubKind, retry);
+}
+
+/**
+ * Show the "watch to unlock" stub modal. onComplete fires exactly once, after
+ * the 30s timer has elapsed AND the (by-then-enabled) OK button is clicked.
+ * kind is 'import' or 'hand_export' — it only drives copy, never the timer.
+ */
+function _showGateStubModal(kind, onComplete) {
+  if (window.GATE_STUB_MODAL_ENABLED === false) {
+    // GATE_STUB_MODAL_ENABLED=false server-side — nothing stands in for the ad,
+    // so don't block whatever called this.
+    if (onComplete) onComplete();
+    return;
+  }
+  const modalEl = document.getElementById('gate-stub-modal');
+  if (!modalEl) { if (onComplete) onComplete(); return; }
+
+  clearInterval(_gateStubState.timer);
+  _gateStubState = {
+    kind, onComplete, remaining: _GATE_STUB_SECONDS, timer: null,
+    completionId: _gateStubNewId(), posted: false,
+  };
+
+  const copy = _gateStubKindCopy(kind);
+  const kindLabelEl    = document.getElementById('gate-stub-kind-label');
+  const featureLabelEl = document.getElementById('gate-stub-feature-label');
+  if (kindLabelEl)    kindLabelEl.textContent = copy.kindLabel || '';
+  if (featureLabelEl) featureLabelEl.textContent = copy.feature || '';
+
+  const proBtn = document.getElementById('gate-stub-pro-btn');
+  if (proBtn) {
+    proBtn.onclick = () => {
+      closeGateStubModal();
+      showUpgradeModal(kind === 'import' ? 'import_quota' : 'hand_quota');
+    };
+  }
+
+  const okBtn = document.getElementById('gate-stub-ok-btn');
+  if (okBtn) {
+    okBtn.disabled = true;
+    okBtn.onclick = _gateStubOkClicked;
+  }
+  _gateStubRenderCountdown();
+
+  _trackEvent('gate_stub_modal_shown', { kind });
+  bootstrap.Modal.getOrCreateInstance(modalEl).show();
+
+  _gateStubState.timer = setInterval(() => {
+    _gateStubState.remaining -= 1;
+    _gateStubRenderCountdown();
+    if (_gateStubState.remaining <= 0) {
+      clearInterval(_gateStubState.timer);
+      _gateStubState.timer = null;
+    }
+  }, 1000);
+}
+
+function _gateStubRenderCountdown() {
+  const okBtn = document.getElementById('gate-stub-ok-btn');
+  if (!okBtn) return;
+  const remaining = Math.max(_gateStubState.remaining, 0);
+  const I = window.I18N_GATE_STUB || {};
+  okBtn.disabled = remaining > 0;
+  okBtn.textContent = remaining > 0
+    ? (I.unlockCountdown || 'Unlock in __SECONDS__ seconds…').replace('__SECONDS__', String(remaining))
+    : (I.unlockReady || 'Unlock');
+}
+
+/** OK button handler — only meaningful once the button is enabled (t=0). */
+function _gateStubOkClicked() {
+  // Guards double-click / double-fire: once posted stays true, a second click
+  // (even one queued before the first click's synchronous disable took effect)
+  // is a no-op instead of a second completion POST.
+  if (_gateStubState.remaining > 0 || _gateStubState.posted) return;
+  _gateStubState.posted = true;
+  const okBtn = document.getElementById('gate-stub-ok-btn');
+  if (okBtn) okBtn.disabled = true;
+
+  const { kind, onComplete, completionId } = _gateStubState;
+  _trackEvent('gate_stub_completed', { kind });
+  _postGateStubCompletion(kind, completionId)
+    .catch(err => console.warn('gate stub completion POST failed', err))
+    .then(() => {
+      closeGateStubModal();
+      if (onComplete) onComplete();
+    });
+}
+
+async function _postGateStubCompletion(kind, completionId) {
+  if (!_currentUser) return;
+  const token = await _currentUser.getIdToken();
+  await fetch('/api/gate/stub-completion', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ kind, ts: Date.now(), completion_id: completionId }),
+  });
+}
+
+function closeGateStubModal() {
+  clearInterval(_gateStubState.timer);
+  _gateStubState = {
+    kind: null, onComplete: null, remaining: 0, timer: null,
+    completionId: null, posted: false,
+  };
+  const modalEl = document.getElementById('gate-stub-modal');
   if (modalEl) {
     const modal = bootstrap.Modal.getInstance(modalEl);
     if (modal) modal.hide();
@@ -737,6 +918,13 @@ function handleImport() {
                     + 'Imports reset at midnight UTC.');
           return;
         }
+        if (!ok && data.error === 'survey_required') {
+          // Free import beyond the ungated allowance — watch-to-unlock via the
+          // gate-stub modal (imports never used CPX; see _import_gate in app.py).
+          _openGateStub('import', () => { setLoading(true); _doFetch(idToken); },
+                       'import_quota');
+          return;
+        }
         if (data.error) { showError(data.error); return; }
         _rememberPendingSession(data.session_token);
         applyImportResult(data);
@@ -816,6 +1004,12 @@ async function _claimPendingSession() {
       // Deliberately keeps the ticket: the import is still parked server-side and
       // can be claimed tomorrow, or straight away after upgrading.
       showUpgradeModal('import_quota');
+      return;
+    }
+    if (data.error === 'survey_required') {
+      // Deliberately keeps the ticket too — same reasoning as quota_exceeded
+      // above, just an unlock instead of a wait.
+      _openGateStub('import', () => { _claimPendingSession(); }, 'import_quota');
       return;
     }
     _clearPendingSession();             // expired or already claimed
@@ -3350,46 +3544,81 @@ async function _loadPricing() {
 
 /* ── Export ads copy ─────────────────────────────────────── */
 
-// Hard/soft export limits, admin-configurable at /admin ("Ad Campaigns" ->
-// "Export Ads"). These are the shipped defaults, kept as the fallback so a
-// failed fetch renders the same copy the page shipped with.
+// Import/export limits and gate mechanisms, admin-configurable at /admin
+// ("Ad Campaigns" -> "Export Ads" / "Import Ads"). These are the shipped
+// defaults, kept as the fallback so a failed fetch renders the same copy
+// the page shipped with. Shape mirrors the nested public
+// /api/export-ads-config response (see export_ads_config_get in app.py) —
+// NOT the flat admin config shape.
 let _EXPORT_ADS = {
-  hand_hard_limit: 5, hand_soft_limit: 3,      // 2 free, then 3 survey-gated
-  tourney_hard_limit: 1, tourney_soft_limit: 1, // 0 free, fully survey-gated
+  hand_export:    { hand_hard_limit: 5, hand_soft_limit: 3, gate: 'stub_modal' }, // 2 free, then 3 wait-gated
+  tourney_export: { lifetime_free: 1, weekly_limit: 1, gate: 'cpx_survey' },
+  import:         { free: 1, gated: 2, total: 3, cadence: 'daily', gate: 'stub_modal' },
 };
 
-function _exportAdsFreeCount(kind) {
-  const hard = _EXPORT_ADS[kind + '_hard_limit'], soft = _EXPORT_ADS[kind + '_soft_limit'];
-  return Math.max(hard - soft, 0);
+function _exportAdsHandFreeCount() {
+  const h = _EXPORT_ADS.hand_export;
+  return Math.max(h.hand_hard_limit - h.hand_soft_limit, 0);
 }
 
-/** Push the live export limits into the tier-comparison table/footnote. */
+/** Push the live import/export limits into the page.
+ *
+ * The shipped Jinja copy already spells out the default numbers, fully
+ * translated. Only overwrite it (in English — no live-fetched copy goes
+ * through Flask-Babel) once the live config actually diverges from that
+ * shipped default, same pattern this function has always used.
+ *
+ * Two surfaces read these numbers: the terse tier-compare card list
+ * (data-exportads-*-line) and the detailed "Free vs Pro" comparison table
+ * (data-exportads-*-cell). Kept as separate attributes/selectors so each
+ * surface's copy can differ in verbosity without one JS block clobbering
+ * the other. */
 function _applyExportAdsCopy() {
+  const hand = _EXPORT_ADS.hand_export, tourney = _EXPORT_ADS.tourney_export, imp = _EXPORT_ADS.import;
+  const handFree = _exportAdsHandFreeCount();
+
+  // Privacy-paragraph + card use of the plain hand hard limit ("5/day").
   document.querySelectorAll('[data-exportads-hand-hard]').forEach(el => {
-    el.textContent = `${_EXPORT_ADS.hand_hard_limit}/day`;
+    el.textContent = `${hand.hand_hard_limit}/day`;
   });
-  document.querySelectorAll('[data-exportads-tourney-hard]').forEach(el => {
-    el.textContent = `${_EXPORT_ADS.tourney_hard_limit}/day`;
-  });
-  document.querySelectorAll('[data-exportads-hand-line]').forEach(el => {
-    const n = _EXPORT_ADS.hand_hard_limit;
-    el.textContent = `${n} hand export${n === 1 ? '' : 's'}/day`;
-  });
-  document.querySelectorAll('[data-exportads-tourney-line]').forEach(el => {
-    const n = _EXPORT_ADS.tourney_hard_limit;
-    el.textContent = `${n} tournament export${n === 1 ? '' : 's'}/day`;
-  });
-  // The shipped, translated footnote already says "first two" — only
-  // overwrite it (in English) once an admin actually changes that number,
-  // so the common case keeps its i18n instead of a hardcoded string fighting
-  // Flask-Babel for the same sentence.
-  const handFree = _exportAdsFreeCount('hand');
-  if (handFree !== 2) {
-    document.querySelectorAll('[data-exportads-hand-footnote]').forEach(el => {
-      const plural = handFree === 1 ? '' : 's';
-      el.innerHTML = `<sup>*</sup> Exports need a free account. Beyond the first ` +
-        `${handFree} hand export${plural} each day, one short survey unlocks the ` +
-        `next export — Pro never asks.`;
+
+  // Tier-compare card (short form) — only the tourney/import lines change
+  // shape here; the hand line's "N hand exports/day" phrasing is untouched
+  // by this task, still driven by the same hand_hard_limit as before.
+  if (hand.hand_hard_limit !== 5) {
+    document.querySelectorAll('[data-exportads-hand-line]').forEach(el => {
+      const n = hand.hand_hard_limit;
+      el.textContent = `${n} hand export${n === 1 ? '' : 's'}/day`;
+    });
+  }
+  if (tourney.lifetime_free !== 1 || tourney.weekly_limit !== 1) {
+    document.querySelectorAll('[data-exportads-tourney-line]').forEach(el => {
+      const plural = tourney.lifetime_free === 1 ? '' : 's';
+      el.textContent = `${tourney.lifetime_free} free tournament export${plural}, then ${tourney.weekly_limit}/week`;
+    });
+  }
+  if (imp.total !== 3) {
+    document.querySelectorAll('[data-exportads-import-line]').forEach(el => {
+      el.textContent = `${imp.total} imports/day`;
+    });
+  }
+
+  // "Free vs Pro" comparison table (detailed form, honest about the 30s
+  // wait vs. the survey — per the 2026-08-24 product-owner directive, imports
+  // and hand exports are gated by the self-hosted stub modal, NOT a video ad).
+  if (imp.free !== 1 || imp.total !== 3) {
+    document.querySelectorAll('[data-exportads-import-cell]').forEach(el => {
+      el.textContent = `${imp.free}/day (up to ${imp.total}/day with a 30s wait)`;
+    });
+  }
+  if (handFree !== 2 || hand.hand_hard_limit !== 5) {
+    document.querySelectorAll('[data-exportads-hand-cell]').forEach(el => {
+      el.textContent = `${handFree}/day (up to ${hand.hand_hard_limit}/day with a 30s wait)`;
+    });
+  }
+  if (tourney.lifetime_free !== 1 || tourney.weekly_limit !== 1) {
+    document.querySelectorAll('[data-exportads-tourney-cell]').forEach(el => {
+      el.textContent = `${tourney.lifetime_free} free ever, then ${tourney.weekly_limit}/week (with survey)`;
     });
   }
 }
@@ -3399,7 +3628,7 @@ async function _loadExportAdsConfig() {
     const res = await fetch('/api/export-ads-config');
     if (!res.ok) return;
     const c = await res.json();
-    if (c && typeof c.hand_hard_limit === 'number') _EXPORT_ADS = c;
+    if (c && c.hand_export && c.tourney_export && c.import) _EXPORT_ADS = c;
   } catch (e) {
     console.warn('export ads config fetch failed, using default copy', e);
   }
