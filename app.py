@@ -2612,11 +2612,47 @@ def admin_pricing_set():
 
 @app.route('/api/export-ads-config', methods=['GET'])
 def export_ads_config_get():
-    """Public: the live hard/soft export limits, for the tier-comparison copy
-    on the main page (see _applyExportAdsCopy in app.js). No admin gate — these
-    numbers are shown to every visitor already, just not always accurately
-    once an admin changes them here."""
-    return jsonify(_export_ads_config())
+    """Public: the live import/export limits and gate mechanisms, for the
+    tier-comparison copy on the main page (see _applyExportAdsCopy in
+    app.js). No admin gate — these numbers are shown to every visitor
+    already, just not always accurately once an admin changes them here.
+
+    This is a *reshaped* view of the flat admin config (see
+    _export_ads_config()/_import_ads_config(), still used as-is by the
+    /api/admin/* routes and by _export_gate()) — nested by feature, with a
+    free-form `gate` string naming today's gate mechanism for each. `gate`
+    is deliberately not an enum: a future Feature shipping real Rewarded
+    Video will change these values (e.g. to 'ayet_rewarded_video') with no
+    shape change here.
+
+    hand_export block's shape is unchanged from the admin config (still
+    hand_hard_limit/hand_soft_limit) — only its `gate` value is new.
+    tourney_export is reshaped from the legacy tourney_hard_limit/
+    tourney_soft_limit pair to the new lifetime_free/weekly_limit model
+    (see _EXPORT_ADS_DEFAULTS). import is new, sourced from
+    _import_ads_config().
+    """
+    export_cfg = _export_ads_config()
+    import_cfg = _import_ads_config()
+    return jsonify({
+        'hand_export': {
+            'hand_hard_limit': export_cfg['hand_hard_limit'],
+            'hand_soft_limit': export_cfg['hand_soft_limit'],
+            'gate': 'stub_modal',
+        },
+        'tourney_export': {
+            'lifetime_free': export_cfg['tourney_lifetime_free'],
+            'weekly_limit': export_cfg['tourney_weekly_limit'],
+            'gate': 'cpx_survey',
+        },
+        'import': {
+            'free': import_cfg['free'],
+            'gated': import_cfg['gated'],
+            'total': import_cfg['free'] + import_cfg['gated'],
+            'cadence': 'daily',
+            'gate': 'stub_modal',
+        },
+    })
 
 
 @app.route('/api/admin/export-ads-config', methods=['GET'])

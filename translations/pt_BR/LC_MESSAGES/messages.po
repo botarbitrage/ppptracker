@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-08-24 14:19+0930\n"
+"POT-Creation-Date: 2026-08-24 14:46+0930\n"
 "PO-Revision-Date: 2026-08-18 10:35+0930\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: pt_BR\n"
@@ -24,7 +24,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: app.py:2408
+#: app.py:2694
 msgid ""
 "Graph cannot be displayed because this tournament has no matching "
 "configuration in the tournaments table."
@@ -32,7 +32,7 @@ msgstr ""
 "O gráfico não pode ser exibido porque este torneio não tem uma "
 "configuração correspondente na tabela de torneios."
 
-#: app.py:2414
+#: app.py:2700
 #, python-format
 msgid ""
 "Graph cannot be displayed because this tournament configuration is "
@@ -113,7 +113,7 @@ msgstr "Grátis vs Pro"
 msgid "What's new in each version"
 msgstr "O que há de novo em cada versão"
 
-#: templates/index.html:130 templates/index.html:997
+#: templates/index.html:130 templates/index.html:1002
 msgid "Release Notes"
 msgstr "Notas de Versão"
 
@@ -138,8 +138,8 @@ msgid "5 hand exports/day"
 msgstr "5 Exports de mãos/dia"
 
 #: templates/index.html:149
-msgid "1 tournament export/day"
-msgstr "1 Export de torneio/dia"
+msgid "1 free tournament export, then 1/week"
+msgstr "1 Export de torneio grátis, depois 1/semana"
 
 #: templates/index.html:150 templates/index.html:163
 msgid "Whole-session exports"
@@ -154,7 +154,7 @@ msgid "PRO —"
 msgstr "PRO —"
 
 #: templates/index.html:159 templates/index.html:167 templates/index.html:255
-#: templates/index.html:983
+#: templates/index.html:988
 msgid "Early Access"
 msgstr "Acesso Antecipado"
 
@@ -205,7 +205,7 @@ msgstr "Aviso de Precisão do Export"
 #: templates/index.html:209 templates/index.html:244 templates/index.html:629
 #: templates/index.html:682 templates/index.html:703 templates/index.html:761
 #: templates/index.html:863 templates/index.html:884 templates/index.html:911
-#: templates/index.html:962 templates/index.html:999
+#: templates/index.html:962 templates/index.html:1004
 msgid "Close"
 msgstr "Fechar"
 
@@ -278,7 +278,7 @@ msgstr "Mais recursos em breve…"
 msgid "until we launch globally. Cancel any time."
 msgstr "até o lançamento global. Cancele quando quiser."
 
-#: templates/index.html:264 templates/index.html:984
+#: templates/index.html:264 templates/index.html:989
 msgid "Get Early Access — A$7.99/month"
 msgstr "Obter Acesso Antecipado — A$7,99/mês"
 
@@ -597,7 +597,7 @@ msgstr "1 ano"
 msgid "Apply"
 msgstr "Aplicar"
 
-#: templates/index.html:680 templates/index.html:730 templates/index.html:1102
+#: templates/index.html:680 templates/index.html:730 templates/index.html:1107
 msgid "Unlock"
 msgstr "Desbloquear"
 
@@ -639,7 +639,7 @@ msgstr "Assine o Pro"
 msgid "Or wait 30 seconds to unlock this one."
 msgstr "Ou espere 30 segundos para desbloquear este."
 
-#: templates/index.html:759 templates/index.html:1076
+#: templates/index.html:759 templates/index.html:1081
 msgid "Sign in"
 msgstr "Entrar"
 
@@ -761,7 +761,7 @@ msgstr ""
 "diário de export de mãos avulsas (5/dia no plano grátis). Nenhuma "
 "informação pessoal identificável é coletada ou vendida."
 
-#: templates/index.html:842 templates/index.html:977
+#: templates/index.html:842
 msgid "5/day"
 msgstr "5/dia"
 
@@ -1007,8 +1007,8 @@ msgid "Imports"
 msgstr "Imports"
 
 #: templates/index.html:971
-msgid "3/day"
-msgstr "3/dia"
+msgid "1/day (up to 3/day with a 30s wait)"
+msgstr "1/dia (até 3/dia com espera de 30s)"
 
 #: templates/index.html:971 templates/index.html:973 templates/index.html:977
 #: templates/index.html:978
@@ -1055,13 +1055,17 @@ msgstr "Gamificação (pontos, sequências, emblemas)"
 msgid "Single-hand exports/day"
 msgstr "Exports de mãos avulsas/dia"
 
-#: templates/index.html:978
-msgid "Tournament exports/day"
-msgstr "Exports de torneios/dia"
+#: templates/index.html:977
+msgid "2/day (up to 5/day with a 30s wait)"
+msgstr "2/dia (até 5/dia com espera de 30s)"
 
 #: templates/index.html:978
-msgid "1/day"
-msgstr "1/dia"
+msgid "Tournament exports"
+msgstr "Exports de torneios"
+
+#: templates/index.html:978
+msgid "1 free ever, then 1/week (with survey)"
+msgstr "1 grátis para sempre, depois 1/semana (com pesquisa)"
 
 #: templates/index.html:979
 msgid "Export a whole session"
@@ -1075,32 +1079,41 @@ msgstr "Bloqueado"
 msgid "Unlocked"
 msgstr "Desbloqueado"
 
-#: templates/index.html:982
-msgid ""
-"Exports need a free account. Beyond the first two hand exports each day, "
-"one short survey unlocks the next export — Pro never asks."
-msgstr ""
-"Exports exigem uma conta gratuita. Depois dos dois primeiros exports de "
-"mãos por dia, uma pesquisa rápida desbloqueia o próximo export — o Pro "
-"nunca pede isso."
-
 #: templates/index.html:983
+msgid ""
+"Imports and hand exports need a free account. Beyond the free daily "
+"amount, waiting 30 seconds unlocks the next one — Pro never waits."
+msgstr ""
+"Imports e exports de mãos exigem uma conta gratuita. Depois da cota "
+"gratuita diária, uma espera de 30 segundos desbloqueia o próximo — o Pro "
+"nunca espera."
+
+#: templates/index.html:986
+msgid ""
+"Tournament exports need a free account. After your one lifetime free "
+"export, a short survey unlocks one more each week — Pro never surveys."
+msgstr ""
+"Exports de torneios exigem uma conta gratuita. Depois do seu único export "
+"grátis vitalício, uma pesquisa rápida desbloqueia mais um por semana — o "
+"Pro nunca faz pesquisa."
+
+#: templates/index.html:988
 msgid "Pro is"
 msgstr "O Pro custa"
 
-#: templates/index.html:983
+#: templates/index.html:988
 msgid "pricing is locked in until we launch globally."
 msgstr "o preço fica garantido até o lançamento global."
 
-#: templates/index.html:983
+#: templates/index.html:988
 msgid "Cancel any time."
 msgstr "Cancele quando quiser."
 
-#: templates/index.html:1005
+#: templates/index.html:1010
 msgid "Latest"
 msgstr "Mais recente"
 
-#: templates/index.html:1007
+#: templates/index.html:1012
 msgid ""
 "Tournament progress graph — watch your stack rise and crash over a "
 "tournament, then click any point on the curve to jump straight to that "
@@ -1110,7 +1123,7 @@ msgstr ""
 "longo do torneio, e clique em qualquer ponto da curva para ir direto "
 "àquela mão"
 
-#: templates/index.html:1008
+#: templates/index.html:1013
 msgid ""
 "Points, streaks & weekly leaderboard — every import earns you points and "
 "unlocks badges, and there's a fresh leaderboard to climb each week"
@@ -1118,13 +1131,13 @@ msgstr ""
 "Pontos, sequências e ranking semanal — cada Import rende pontos e "
 "desbloqueia emblemas, e há um novo ranking para subir a cada semana"
 
-#: templates/index.html:1009
+#: templates/index.html:1014
 msgid "Pro is live — Early Access pricing locked in until we launch globally"
 msgstr ""
 "O Pro está no ar — preço de Acesso Antecipado garantido até o lançamento "
 "global"
 
-#: templates/index.html:1016
+#: templates/index.html:1021
 msgid ""
 "Free and Pro accounts with sensible daily limits — sign in to keep your "
 "history and lift the caps"
@@ -1132,7 +1145,7 @@ msgstr ""
 "Contas Grátis e Pro com limites diários razoáveis — entre para manter seu"
 " histórico e remover os limites"
 
-#: templates/index.html:1017
+#: templates/index.html:1022
 msgid ""
 "Cash & Play Money Games — cash tables and sit-and-gos now get their own "
 "section, separate from real-money tournaments"
@@ -1140,7 +1153,7 @@ msgstr ""
 "Cash & Play Money Games — mesas de cash e sit-and-gos agora têm sua "
 "própria seção, separada dos torneios com dinheiro real"
 
-#: templates/index.html:1018
+#: templates/index.html:1023
 #, python-format
 msgid ""
 "Tournament Summary — buy-in, finish position, and ITM%% at a glance "
@@ -1149,140 +1162,146 @@ msgstr ""
 "Resumo de Torneios — buy-in, posição final e %% ITM rapidinho, em todos "
 "os eventos que você jogou"
 
-#: templates/index.html:1025
+#: templates/index.html:1030
 msgid "Full UI redesign — gaming dark theme, Oxanium font, neon green accents"
 msgstr ""
 "Redesign completo da interface — tema escuro gamer, fonte Oxanium, "
 "detalhes em verde neon"
 
-#: templates/index.html:1026
+#: templates/index.html:1031
 msgid "Free & Pro tiers introduced — freemium gates, upgrade modal"
 msgstr "Planos Grátis e Pro introduzidos — barreiras freemium, modal de upgrade"
 
-#: templates/index.html:1027
+#: templates/index.html:1032
 msgid "Firebase Analytics + Firestore session tracking added"
 msgstr "Adicionado Firebase Analytics + rastreamento de sessão via Firestore"
 
-#: templates/index.html:1028
+#: templates/index.html:1033
 msgid "Platform-specific export filenames (PokerTracker, DriveHUD, GTOWizard)"
 msgstr ""
 "Nomes de arquivo de export específicos por plataforma (PokerTracker, "
 "DriveHUD, GTOWizard)"
 
-#: templates/index.html:1029
+#: templates/index.html:1034
 msgid "Export buttons redesigned as 2×2 icon grid"
 msgstr "Botões de Export redesenhados como grade de ícones 2×2"
 
-#: templates/index.html:1030
+#: templates/index.html:1035
 msgid "Mobile-first layout improvements throughout"
 msgstr "Melhorias de layout mobile-first em todo o app"
 
-#: templates/index.html:1037
+#: templates/index.html:1042
 msgid "Playing card visuals for hole cards with 4-colour suit support"
 msgstr ""
 "Visuais de cartas de baralho para as cartas na mão, com suporte a naipes "
 "em 4 cores"
 
-#: templates/index.html:1038
+#: templates/index.html:1043
 msgid "Suit mapping corrected (clubs/hearts/spades/diamonds)"
 msgstr "Correção do mapeamento de naipes (paus/copas/espadas/ouros)"
 
-#: templates/index.html:1039
+#: templates/index.html:1044
 msgid "Hero-centric validation pills (Flop / Turn / River / Showdown)"
 msgstr "Pílulas de validação centradas no hero (Flop / Turn / River / Showdown)"
 
-#: templates/index.html:1040
+#: templates/index.html:1045
 msgid "Tournament History section with MTT / Satellite / Won pills"
 msgstr "Seção de Histórico de Torneios com pílulas MTT / Satellite / Won"
 
-#: templates/index.html:1041
+#: templates/index.html:1046
 msgid "JSON export endpoints for hands & tournaments"
 msgstr "Endpoints de Export JSON para mãos e torneios"
 
-#: templates/index.html:1042
+#: templates/index.html:1047
 msgid "DriveHUD replaces PokerStars branding throughout"
 msgstr "DriveHUD substitui a marca PokerStars em todo o app"
 
-#: templates/index.html:1043
+#: templates/index.html:1048
 msgid "Timezone selector for date/time display"
 msgstr "Seletor de fuso horário para exibição de data/hora"
 
-#: templates/index.html:1050
+#: templates/index.html:1055
 msgid "Initial launch — proof of concept"
 msgstr "Lançamento inicial — prova de conceito"
 
-#: templates/index.html:1051
+#: templates/index.html:1056
 msgid "PPPoker API hand fetching via share link"
 msgstr "Busca de mãos via API do PPPoker usando link de compartilhamento"
 
-#: templates/index.html:1052
+#: templates/index.html:1057
 msgid "PokerStars-format hand history export"
 msgstr "Export de histórico de mãos no formato PokerStars"
 
-#: templates/index.html:1053
+#: templates/index.html:1058
 msgid "Basic session stats (VPIP, PFR, hands played)"
 msgstr "Estatísticas básicas de sessão (VPIP, PFR, mãos jogadas)"
 
-#: templates/index.html:1054
+#: templates/index.html:1059
 msgid "Replay links to PPPoker hand viewer"
 msgstr "Links de replay para o visualizador de mãos do PPPoker"
 
-#: templates/index.html:1077
+#: templates/index.html:1082
 msgid "Sign out"
 msgstr "Sair"
 
-#: templates/index.html:1078
+#: templates/index.html:1083
 msgid "Auth service not available. Check Firebase config."
 msgstr ""
 "Serviço de autenticação indisponível. Verifique a configuração do "
 "Firebase."
 
-#: templates/index.html:1079
+#: templates/index.html:1084
 msgid "Please enter your email address."
 msgstr "Por favor, insira seu endereço de e-mail."
 
-#: templates/index.html:1080
+#: templates/index.html:1085
 msgid "Sending…"
 msgstr "Enviando…"
 
-#: templates/index.html:1081
+#: templates/index.html:1086
 msgid "Link sent to"
 msgstr "Link enviado para"
 
-#: templates/index.html:1082
+#: templates/index.html:1087
 msgid "check your inbox."
 msgstr "verifique sua caixa de entrada."
 
-#: templates/index.html:1083
+#: templates/index.html:1088
 msgid "Failed to send link."
 msgstr "Falha ao enviar o link."
 
-#: templates/index.html:1084
+#: templates/index.html:1089
 msgid "Auth not ready — please wait a moment and try again."
 msgstr "Autenticação não está pronta — aguarde um momento e tente novamente."
 
-#: templates/index.html:1085
+#: templates/index.html:1090
 msgid "Google sign-in failed."
 msgstr "Falha ao entrar com o Google."
 
-#: templates/index.html:1097
+#: templates/index.html:1102
 msgid "this import"
 msgstr "este import"
 
-#: templates/index.html:1098
+#: templates/index.html:1103
 msgid "this hand export"
 msgstr "este export de mãos"
 
-#: templates/index.html:1099
+#: templates/index.html:1104
 msgid "imports"
 msgstr "imports ilimitados"
 
-#: templates/index.html:1100
+#: templates/index.html:1105
 msgid "hand exports"
 msgstr "exports de mãos ilimitados"
 
-#: templates/index.html:1101
+#: templates/index.html:1106
 #, python-format
 msgid "Unlock in %(seconds)s seconds…"
 msgstr "Desbloqueio em %(seconds)s segundos…"
+
+#~ msgid "3/day"
+#~ msgstr "3/dia"
+
+#~ msgid "1/day"
+#~ msgstr "1/dia"
 

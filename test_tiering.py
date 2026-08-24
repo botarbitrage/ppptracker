@@ -623,12 +623,36 @@ def test_export_ads_config():
         'tourney_weekly_limit':  1,
     }
 
+    # The *public* /api/export-ads-config is a reshaped, nested view (see
+    # export_ads_config_get in app.py) — distinct from the flat admin shape
+    # above. Import numbers come from _IMPORT_ADS_DEFAULTS (free=1, gated=2).
+    DEFAULT_PUBLIC_CFG = {
+        'hand_export': {
+            'hand_hard_limit': DEFAULT_CFG['hand_hard_limit'],
+            'hand_soft_limit': DEFAULT_CFG['hand_soft_limit'],
+            'gate': 'stub_modal',
+        },
+        'tourney_export': {
+            'lifetime_free': DEFAULT_CFG['tourney_lifetime_free'],
+            'weekly_limit': DEFAULT_CFG['tourney_weekly_limit'],
+            'gate': 'cpx_survey',
+        },
+        'import': {
+            'free': A._IMPORT_ADS_DEFAULTS['free'],
+            'gated': A._IMPORT_ADS_DEFAULTS['gated'],
+            'total': A._IMPORT_ADS_DEFAULTS['free'] + A._IMPORT_ADS_DEFAULTS['gated'],
+            'cadence': 'daily',
+            'gate': 'stub_modal',
+        },
+    }
+    DB._d.pop(('config', 'import_ads'), None)
+
     as_user(None)
     res = CLIENT.get('/api/export-ads-config')
     check('the public config endpoint needs no account', res.status_code == 200,
           str(res.status_code))
-    check('and reproduces the hardcoded constants by default',
-          res.get_json() == DEFAULT_CFG, str(res.get_json()))
+    check('and reproduces the nested defaults, reshaped from the admin config',
+          res.get_json() == DEFAULT_PUBLIC_CFG, str(res.get_json()))
     check('the admin config endpoint needs an account',
           CLIENT.get('/api/admin/export-ads-config').status_code == 403)
 
@@ -668,9 +692,30 @@ def test_export_ads_config():
 
     as_user(None)
     res = CLIENT.get('/api/export-ads-config')
-    check('public endpoint reflects the saved new tourney fields too',
-          res.get_json()['tourney_lifetime_free'] == 3 and
-          res.get_json()['tourney_weekly_limit'] == 2, str(res.get_json()))
+    check('public endpoint reflects the saved new tourney fields too, nested',
+          res.get_json()['tourney_export']['lifetime_free'] == 3 and
+          res.get_json()['tourney_export']['weekly_limit'] == 2, str(res.get_json()))
+    check('reshaped tourney block keeps its survey gate label',
+          res.get_json()['tourney_export']['gate'] == 'cpx_survey', str(res.get_json()))
+    check('hand-export block keeps its shape but reports the stub-modal gate',
+          res.get_json()['hand_export'] == {
+              'hand_hard_limit': DEFAULT_CFG['hand_hard_limit'],
+              'hand_soft_limit': DEFAULT_CFG['hand_soft_limit'],
+              'gate': 'stub_modal'}, str(res.get_json()))
+    check('import block is present with free/gated/total/cadence/gate',
+          res.get_json()['import'] == DEFAULT_PUBLIC_CFG['import'], str(res.get_json()))
+
+    # Admin-configured import numbers flow through to the public import block too.
+    as_user('uid-admin')
+    res = CLIENT.post('/api/admin/import-ads-config', json={'free': 4, 'gated': 6})
+    check('posting new import numbers 200', res.status_code == 200, str(res.status_code))
+    as_user(None)
+    res = CLIENT.get('/api/export-ads-config')
+    check('public import block reflects admin-configured free/gated/total',
+          res.get_json()['import'] == {
+              'free': 4, 'gated': 6, 'total': 10,
+              'cadence': 'daily', 'gate': 'stub_modal'}, str(res.get_json()))
+    DB._d.pop(('config', 'import_ads'), None)
 
     # Reset back to defaults for the rest of the test.
     DB._d.pop(('config', 'export_ads'), None)

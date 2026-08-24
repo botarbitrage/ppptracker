@@ -142,11 +142,11 @@
       <div class="tier-card tier-free">
         <div class="tier-name">{{ _('FREE') }}</div>
         <ul class="tier-list">
-          <li><span class="tier-check">✓</span> {{ _('3 imports/day') }}</li>
+          <li><span class="tier-check">✓</span> <span data-exportads-import-line>{{ _('3 imports/day') }}</span></li>
           <li><span class="tier-check">✓</span> {{ _('7 days of history') }}</li>
           <li><span class="tier-check">✓</span> {{ _('Full session stats & graphs') }}</li>
           <li><span class="tier-check">✓</span> <span data-exportads-hand-line>{{ _('5 hand exports/day') }}</span></li>
-          <li><span class="tier-check">✓</span> <span data-exportads-tourney-line>{{ _('1 tournament export/day') }}</span></li>
+          <li><span class="tier-check">✓</span> <span data-exportads-tourney-line>{{ _('1 free tournament export, then 1/week') }}</span></li>
           <li><span class="tier-x">✕</span> {{ _('Whole-session exports') }}</li>
         </ul>
       </div>
@@ -968,18 +968,23 @@
             <tr><th scope="col">{{ _('Feature') }}</th><th scope="col">{{ _('Free') }}</th><th scope="col" style="color:var(--yellow)">{{ _('Pro') }}</th></tr>
           </thead>
           <tbody>
-            <tr><td>{{ _('Imports') }}</td><td>{{ _('3/day') }}</td><td>{{ _('Unlimited') }}</td></tr>
+            <tr><td>{{ _('Imports') }}</td><td><span data-exportads-import-cell>{{ _('1/day (up to 3/day with a 30s wait)') }}</span><sup>*</sup></td><td>{{ _('Unlimited') }}</td></tr>
             <tr><td>{{ _('History kept') }}</td><td>{{ _('7 days') }}</td><td>{{ _('Forever') }}</td></tr>
             <tr><td>{{ _('Hand history displayed') }}</td><td>{{ _('Last 30') }}</td><td>{{ _('Unlimited') }}</td></tr>
             <tr><td>{{ _('Session stats & graphs') }}</td><td>✓ {{ _('Full') }}</td><td>✓ {{ _('Full') }}</td></tr>
             <tr><td>{{ _('Tournament Details & progress graph') }}</td><td>✓ {{ _('Full') }}</td><td>✓ {{ _('Full') }}</td></tr>
             <tr><td>{{ _('Gamification (points, streaks, badges)') }}</td><td>✓</td><td>✓</td></tr>
-            <tr><td>{{ _('Single-hand exports/day') }}</td><td><span data-exportads-hand-hard>{{ _('5/day') }}</span><sup>*</sup></td><td>{{ _('Unlimited') }}</td></tr>
-            <tr><td>{{ _('Tournament exports/day') }}</td><td><span data-exportads-tourney-hard>{{ _('1/day') }}</span><sup>*</sup></td><td>{{ _('Unlimited') }}</td></tr>
+            <tr><td>{{ _('Single-hand exports/day') }}</td><td><span data-exportads-hand-cell>{{ _('2/day (up to 5/day with a 30s wait)') }}</span><sup>*</sup></td><td>{{ _('Unlimited') }}</td></tr>
+            <tr><td>{{ _('Tournament exports') }}</td><td><span data-exportads-tourney-cell>{{ _('1 free ever, then 1/week (with survey)') }}</span><sup>&dagger;</sup></td><td>{{ _('Unlimited') }}</td></tr>
             <tr><td>{{ _('Export a whole session') }}</td><td>✕ {{ _('Locked') }}</td><td>✓ {{ _('Unlocked') }}</td></tr>
           </tbody>
         </table>
-        <p style="margin-top:10px;font-size:.8rem;color:var(--muted)" data-exportads-hand-footnote><sup>*</sup> {{ _('Exports need a free account. Beyond the first two hand exports each day, one short survey unlocks the next export — Pro never asks.') }}</p>
+        <p style="margin-top:10px;font-size:.8rem;color:var(--muted)">
+          <sup>*</sup> {{ _('Imports and hand exports need a free account. Beyond the free daily amount, waiting 30 seconds unlocks the next one — Pro never waits.') }}
+        </p>
+        <p style="margin-top:4px;font-size:.8rem;color:var(--muted)">
+          <sup>&dagger;</sup> {{ _('Tournament exports need a free account. After your one lifetime free export, a short survey unlocks one more each week — Pro never surveys.') }}
+        </p>
         <p style="margin-top:14px;font-size:.88rem">{{ _('Pro is') }} <strong style="color:var(--yellow)" data-pricing-price>A$7.99/mo</strong>. <span data-pricing-discount-only><span data-pricing-plan>{{ _('Early Access') }}</span> {{ _('pricing is locked in until we launch globally.') }}</span> {{ _('Cancel any time.') }}</p>
         <button class="tier-cta mt-2" data-pricing-cta onclick="bootstrap.Modal.getInstance(document.getElementById('modal-tiers')).hide(); showUpgradeModal('banner');">{{ _('Get Early Access — A$7.99/month') }}</button>
       </div>

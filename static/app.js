@@ -3544,46 +3544,81 @@ async function _loadPricing() {
 
 /* ── Export ads copy ─────────────────────────────────────── */
 
-// Hard/soft export limits, admin-configurable at /admin ("Ad Campaigns" ->
-// "Export Ads"). These are the shipped defaults, kept as the fallback so a
-// failed fetch renders the same copy the page shipped with.
+// Import/export limits and gate mechanisms, admin-configurable at /admin
+// ("Ad Campaigns" -> "Export Ads" / "Import Ads"). These are the shipped
+// defaults, kept as the fallback so a failed fetch renders the same copy
+// the page shipped with. Shape mirrors the nested public
+// /api/export-ads-config response (see export_ads_config_get in app.py) —
+// NOT the flat admin config shape.
 let _EXPORT_ADS = {
-  hand_hard_limit: 5, hand_soft_limit: 3,      // 2 free, then 3 survey-gated
-  tourney_hard_limit: 1, tourney_soft_limit: 1, // 0 free, fully survey-gated
+  hand_export:    { hand_hard_limit: 5, hand_soft_limit: 3, gate: 'stub_modal' }, // 2 free, then 3 wait-gated
+  tourney_export: { lifetime_free: 1, weekly_limit: 1, gate: 'cpx_survey' },
+  import:         { free: 1, gated: 2, total: 3, cadence: 'daily', gate: 'stub_modal' },
 };
 
-function _exportAdsFreeCount(kind) {
-  const hard = _EXPORT_ADS[kind + '_hard_limit'], soft = _EXPORT_ADS[kind + '_soft_limit'];
-  return Math.max(hard - soft, 0);
+function _exportAdsHandFreeCount() {
+  const h = _EXPORT_ADS.hand_export;
+  return Math.max(h.hand_hard_limit - h.hand_soft_limit, 0);
 }
 
-/** Push the live export limits into the tier-comparison table/footnote. */
+/** Push the live import/export limits into the page.
+ *
+ * The shipped Jinja copy already spells out the default numbers, fully
+ * translated. Only overwrite it (in English — no live-fetched copy goes
+ * through Flask-Babel) once the live config actually diverges from that
+ * shipped default, same pattern this function has always used.
+ *
+ * Two surfaces read these numbers: the terse tier-compare card list
+ * (data-exportads-*-line) and the detailed "Free vs Pro" comparison table
+ * (data-exportads-*-cell). Kept as separate attributes/selectors so each
+ * surface's copy can differ in verbosity without one JS block clobbering
+ * the other. */
 function _applyExportAdsCopy() {
+  const hand = _EXPORT_ADS.hand_export, tourney = _EXPORT_ADS.tourney_export, imp = _EXPORT_ADS.import;
+  const handFree = _exportAdsHandFreeCount();
+
+  // Privacy-paragraph + card use of the plain hand hard limit ("5/day").
   document.querySelectorAll('[data-exportads-hand-hard]').forEach(el => {
-    el.textContent = `${_EXPORT_ADS.hand_hard_limit}/day`;
+    el.textContent = `${hand.hand_hard_limit}/day`;
   });
-  document.querySelectorAll('[data-exportads-tourney-hard]').forEach(el => {
-    el.textContent = `${_EXPORT_ADS.tourney_hard_limit}/day`;
-  });
-  document.querySelectorAll('[data-exportads-hand-line]').forEach(el => {
-    const n = _EXPORT_ADS.hand_hard_limit;
-    el.textContent = `${n} hand export${n === 1 ? '' : 's'}/day`;
-  });
-  document.querySelectorAll('[data-exportads-tourney-line]').forEach(el => {
-    const n = _EXPORT_ADS.tourney_hard_limit;
-    el.textContent = `${n} tournament export${n === 1 ? '' : 's'}/day`;
-  });
-  // The shipped, translated footnote already says "first two" — only
-  // overwrite it (in English) once an admin actually changes that number,
-  // so the common case keeps its i18n instead of a hardcoded string fighting
-  // Flask-Babel for the same sentence.
-  const handFree = _exportAdsFreeCount('hand');
-  if (handFree !== 2) {
-    document.querySelectorAll('[data-exportads-hand-footnote]').forEach(el => {
-      const plural = handFree === 1 ? '' : 's';
-      el.innerHTML = `<sup>*</sup> Exports need a free account. Beyond the first ` +
-        `${handFree} hand export${plural} each day, one short survey unlocks the ` +
-        `next export — Pro never asks.`;
+
+  // Tier-compare card (short form) — only the tourney/import lines change
+  // shape here; the hand line's "N hand exports/day" phrasing is untouched
+  // by this task, still driven by the same hand_hard_limit as before.
+  if (hand.hand_hard_limit !== 5) {
+    document.querySelectorAll('[data-exportads-hand-line]').forEach(el => {
+      const n = hand.hand_hard_limit;
+      el.textContent = `${n} hand export${n === 1 ? '' : 's'}/day`;
+    });
+  }
+  if (tourney.lifetime_free !== 1 || tourney.weekly_limit !== 1) {
+    document.querySelectorAll('[data-exportads-tourney-line]').forEach(el => {
+      const plural = tourney.lifetime_free === 1 ? '' : 's';
+      el.textContent = `${tourney.lifetime_free} free tournament export${plural}, then ${tourney.weekly_limit}/week`;
+    });
+  }
+  if (imp.total !== 3) {
+    document.querySelectorAll('[data-exportads-import-line]').forEach(el => {
+      el.textContent = `${imp.total} imports/day`;
+    });
+  }
+
+  // "Free vs Pro" comparison table (detailed form, honest about the 30s
+  // wait vs. the survey — per the 2026-08-24 product-owner directive, imports
+  // and hand exports are gated by the self-hosted stub modal, NOT a video ad).
+  if (imp.free !== 1 || imp.total !== 3) {
+    document.querySelectorAll('[data-exportads-import-cell]').forEach(el => {
+      el.textContent = `${imp.free}/day (up to ${imp.total}/day with a 30s wait)`;
+    });
+  }
+  if (handFree !== 2 || hand.hand_hard_limit !== 5) {
+    document.querySelectorAll('[data-exportads-hand-cell]').forEach(el => {
+      el.textContent = `${handFree}/day (up to ${hand.hand_hard_limit}/day with a 30s wait)`;
+    });
+  }
+  if (tourney.lifetime_free !== 1 || tourney.weekly_limit !== 1) {
+    document.querySelectorAll('[data-exportads-tourney-cell]').forEach(el => {
+      el.textContent = `${tourney.lifetime_free} free ever, then ${tourney.weekly_limit}/week (with survey)`;
     });
   }
 }
@@ -3593,7 +3628,7 @@ async function _loadExportAdsConfig() {
     const res = await fetch('/api/export-ads-config');
     if (!res.ok) return;
     const c = await res.json();
-    if (c && typeof c.hand_hard_limit === 'number') _EXPORT_ADS = c;
+    if (c && c.hand_export && c.tourney_export && c.import) _EXPORT_ADS = c;
   } catch (e) {
     console.warn('export ads config fetch failed, using default copy', e);
   }
