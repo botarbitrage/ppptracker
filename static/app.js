@@ -93,8 +93,13 @@ const _UPGRADE_REASONS = {
 // building it from a module-level constant here would drift the moment an admin
 // changes the config without a redeploy.
 function _quotaReasonText(kind, limit) {
+  // Tourney exports moved from a daily cap to lifetime-free-once + N/week
+  // (see _tourney_export_gate in app.py) — this copy only fires once the
+  // lifetime freebie is spent and the weekly limit is hit, so "a week" is
+  // accurate here even though the export itself may have been free the very
+  // first time.
   return kind === 'tourney'
-    ? `Free accounts get ${limit} tournament export${limit === 1 ? '' : 's'} a day. Upgrade to Pro for unlimited exports.`
+    ? `Free accounts get ${limit} tournament export${limit === 1 ? '' : 's'} a week after your first free one. Upgrade to Pro for unlimited exports.`
     : `That's all ${limit} hand export${limit === 1 ? '' : 's'} for today. Upgrade to Pro for unlimited exports.`;
 }
 
@@ -193,8 +198,15 @@ async function _handleExportFailure(res, kind, retry) {
     return "That's your last one for today";
   }
   if (err === 'survey_required') {
-    openSurveyModal(kind, retry);
-    return 'Unlock with a quick survey';
+    // Tourney exports still go through CPX; hand exports were switched to the
+    // gate-stub modal (see _hand_export_gate in app.py) while ayeT/Wannads
+    // rewarded-video approval is shelved.
+    if (kind === 'tourney') {
+      openSurveyModal(kind, retry);
+      return 'Unlock with a quick survey';
+    }
+    _openGateStub('hand_export', retry, 'hand_quota');
+    return 'Watch to unlock';
   }
   return err || 'Export failed';
 }
@@ -443,6 +455,28 @@ function _gateStubNewId() {
   return (window.crypto && crypto.randomUUID)
     ? crypto.randomUUID()
     : `gs_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+}
+
+/**
+ * The gate-stub dispatch point for imports and hand exports (AC6/AC8 of the
+ * wire-three-gates task): open the stub modal when GATE_STUB_MODAL_ENABLED,
+ * otherwise fall through to the upgrade prompt instead of silently letting
+ * the gated action through. This is deliberately a thin wrapper around
+ * _showGateStubModal rather than relying on that function's own internal
+ * "flag off → call onComplete() for free" fallback — that fallback exists so
+ * a caller that forgets to check the flag doesn't hard-block on a missing
+ * modal element, but at this call site (the actual gate dispatch) a
+ * disabled flag must mean "no unlock mechanism available", not "let it
+ * through for free". When a real rewarded-video SDK replaces the stub, only
+ * this function's branch needs to change — the gate-check code in app.py
+ * does not.
+ */
+function _openGateStub(stubKind, retry, upgradeReason) {
+  if (window.GATE_STUB_MODAL_ENABLED === false) {
+    showUpgradeModal(upgradeReason);
+    return;
+  }
+  _showGateStubModal(stubKind, retry);
 }
 
 /**
@@ -884,6 +918,13 @@ function handleImport() {
                     + 'Imports reset at midnight UTC.');
           return;
         }
+        if (!ok && data.error === 'survey_required') {
+          // Free import beyond the ungated allowance — watch-to-unlock via the
+          // gate-stub modal (imports never used CPX; see _import_gate in app.py).
+          _openGateStub('import', () => { setLoading(true); _doFetch(idToken); },
+                       'import_quota');
+          return;
+        }
         if (data.error) { showError(data.error); return; }
         _rememberPendingSession(data.session_token);
         applyImportResult(data);
@@ -963,6 +1004,12 @@ async function _claimPendingSession() {
       // Deliberately keeps the ticket: the import is still parked server-side and
       // can be claimed tomorrow, or straight away after upgrading.
       showUpgradeModal('import_quota');
+      return;
+    }
+    if (data.error === 'survey_required') {
+      // Deliberately keeps the ticket too — same reasoning as quota_exceeded
+      // above, just an unlock instead of a wait.
+      _openGateStub('import', () => { _claimPendingSession(); }, 'import_quota');
       return;
     }
     _clearPendingSession();             // expired or already claimed

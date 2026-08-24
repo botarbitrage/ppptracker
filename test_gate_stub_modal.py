@@ -43,7 +43,7 @@ class _Doc:
     def collection(self, name):
         return _Col(self._store, self._path + (name,))
 
-    def get(self):
+    def get(self, transaction=None):
         return _Snap(self._path[-1], self._store.get(self._path))
 
     def create(self, data):
@@ -51,6 +51,16 @@ class _Doc:
         if self._store.get(self._path) is not None:
             raise gexc.AlreadyExists(f'{self._path} exists')
         self._store.put(self._path, dict(data))
+
+    def set(self, data, merge=False):
+        cur = dict(self._store.get(self._path) or {}) if merge else {}
+        cur.update(data)
+        self._store.put(self._path, cur)
+
+    def update(self, data):
+        cur = dict(self._store.get(self._path) or {})
+        cur.update(data)
+        self._store.put(self._path, cur)
 
 
 class _Col:
@@ -61,12 +71,29 @@ class _Col:
         return _Doc(self._store, self._path + (doc_id,))
 
 
+class _Txn:
+    """Applies straight through, same as test_tiering.py's fake — single-
+    threaded, so there's nothing to actually retry."""
+
+    def set(self, ref, data, merge=False):
+        ref.set(data, merge=merge)
+
+    def update(self, ref, data):
+        ref.update(data)
+
+    def create(self, ref, data):
+        ref.create(data)
+
+
 class FakeDB:
     def __init__(self):
         self._d = {}
 
     def collection(self, name):
         return _Col(self, (name,))
+
+    def transaction(self):
+        return _Txn()
 
     def get(self, path):
         return self._d.get(path)
@@ -85,6 +112,9 @@ def _json(res):
 
 
 def main():
+    import google.cloud.firestore as _gcf
+    _gcf.transactional = lambda fn: fn   # the fake transaction needs no retry loop
+
     import app as A
 
     db = FakeDB()
