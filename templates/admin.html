@@ -428,10 +428,20 @@
               </div>
 
               <h3 class="adm-subhead mt-4">Import Ads</h3>
-              <p class="adm-meta mb-0">
-                Placeholder — imports aren't survey-gated yet. Reserved for a future
-                config here if that changes.
+              <p class="adm-meta mb-3">
+                Imports aren't split into hand/tourney kinds — just one daily
+                allowance. <b class="text-white">Free</b> is how many imports a day
+                need no survey; <b class="text-white">Gated</b> is how many more
+                survey-gated imports are available on top of those. These numbers
+                aren't enforced yet — the import survey gate is a future change —
+                but changes here apply immediately once it is, no deploy.
               </p>
+              <div id="adm-imports-error" class="alert alert-danger d-none py-2"></div>
+              <div id="adm-imports-body"></div>
+              <div class="adm-toolbar px-0">
+                <button type="button" class="adm-btn" id="adm-imports-save" onclick="saveImportAds()">Save</button>
+                <span class="adm-meta flex-grow-1" id="adm-imports-status"></span>
+              </div>
             </div>
           </section>
 
@@ -499,6 +509,7 @@
     if (name === 'leaktargets' && !GRID) tgReload();
     if (name === 'gamification' && !GAM) loadGamification();
     if (name === 'adcampaigns' && !ADS) loadExportAds();
+    if (name === 'adcampaigns' && !IMPORTS_ADS) loadImportAds();
   }
 
   // ── Gamification ───────────────────────────────────────────────────────────
@@ -775,6 +786,85 @@
 
   function showAdsError(msg) {
     const e = document.getElementById('adm-ads-error');
+    e.textContent = msg || '';
+    e.classList.toggle('d-none', !msg);
+  }
+
+  // ── Ad Campaigns: Import Ads ──────────────────────────────────────────────
+  let IMPORTS_ADS = null;   // /api/admin/import-ads-config response
+
+  async function loadImportAds() {
+    showImportsAdsError('');
+    const box = document.getElementById('adm-imports-body');
+    box.innerHTML = '<span class="adm-meta">Loading…</span>';
+    try {
+      const res = await authFetch('/api/admin/import-ads-config');
+      if (!res.ok) {
+        box.innerHTML = '';
+        showImportsAdsError(await errorText(res, 'Failed to load import ads config'));
+        return;
+      }
+      IMPORTS_ADS = await res.json();
+      renderImportAds();
+    } catch (e) {
+      box.innerHTML = '';
+      showImportsAdsError('Could not reach the server: ' + e.message);
+    }
+  }
+
+  function renderImportAds() {
+    document.getElementById('adm-imports-body').innerHTML = `
+      <div class="adm-gam-week">
+        <span class="adm-gam-wk">Imports</span>
+        <label class="d-flex align-items-center gap-2" style="font-size:.82rem;color:var(--muted);">
+          Free
+          <input type="number" min="0" step="1" class="form-control form-control-sm"
+                 style="width:70px;" id="adm-imports-free" value="${esc(IMPORTS_ADS.free)}"/>
+        </label>
+        <label class="d-flex align-items-center gap-2" style="font-size:.82rem;color:var(--muted);">
+          Gated
+          <input type="number" min="0" step="1" class="form-control form-control-sm"
+                 style="width:70px;" id="adm-imports-gated" value="${esc(IMPORTS_ADS.gated)}"/>
+        </label>
+      </div>`;
+    document.getElementById('adm-imports-status').textContent = '';
+  }
+
+  async function saveImportAds() {
+    const btn = document.getElementById('adm-imports-save');
+    showImportsAdsError('');
+    const payload = {};
+    for (const field of ['free', 'gated']) {
+      const val = parseInt(document.getElementById(`adm-imports-${field}`).value, 10);
+      if (isNaN(val) || val < 0) {
+        showImportsAdsError(`"${field === 'free' ? 'Free' : 'Gated'}" must be a non-negative number.`);
+        return;
+      }
+      payload[field] = val;
+    }
+    btn.disabled = true;
+    try {
+      const res = await authFetch('/api/admin/import-ads-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        showImportsAdsError(await errorText(res, 'Failed to save import ads config'));
+        return;
+      }
+      IMPORTS_ADS = await res.json();
+      renderImportAds();
+      document.getElementById('adm-imports-status').textContent = 'Saved.';
+    } catch (e) {
+      showImportsAdsError('Could not reach the server: ' + e.message);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function showImportsAdsError(msg) {
+    const e = document.getElementById('adm-imports-error');
     e.textContent = msg || '';
     e.classList.toggle('d-none', !msg);
   }

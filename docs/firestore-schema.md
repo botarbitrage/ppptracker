@@ -116,6 +116,36 @@ redelivered webhook is recognised as a duplicate and pays once.
 
 ---
 
+## `config/import_ads` — server-only
+
+Admin-configured free/gated allowance for the daily import quota, set from
+Admin → Ad Campaigns → Import Ads. Mirrors `config/export_ads` (the Export Ads
+section just above it in that panel), which is not itself split into a
+document — see `_export_ads_config()` / `_EXPORT_ADS_DEFAULTS` in `app.py`.
+
+Read fresh from Firestore on every call via `_import_ads_config()`, so an
+admin's change applies to the next request with no redeploy. A missing doc or
+read failure falls back to `_IMPORT_ADS_DEFAULTS`.
+
+| Field | Type | Written by | Notes |
+| --- | --- | --- | --- |
+| `free` | int | **server-only** (admin) | Imports per day that need no survey. Default **1**. |
+| `gated` | int | **server-only** (admin) | Additional survey-gated imports per day, on top of `free`. Default **2**. |
+| `updated_at` | int (epoch secs) | **server-only** (admin) | Stamped on every admin save. |
+| `updated_by` | string | **server-only** (admin) | uid of the admin who last saved. |
+
+Nothing reads `free`/`gated` yet — no import gate enforces them. This document
+only stores the admin's configured values for a future gate-check task to read
+once it lands; today's import cap is still the hardcoded `FREE_IMPORTS_PER_DAY`
+in `app.py`.
+
+Written via `PATCH`-style `.set(doc, merge=True)` in
+`admin_import_ads_config_set()` — a partial body only touches the fields it
+names, never clobbering the other one or the `config/import_ads` document as a
+whole.
+
+---
+
 ## Storage: `anon_sessions/{token}.json`
 
 Not Firestore, but part of the same flow. An import made while signed out is

@@ -942,6 +942,42 @@ def _export_ads_config():
     return cfg
 
 
+_IMPORT_ADS_DEFAULTS = {
+    # Imports aren't split into kinds the way exports are (hand vs tourney) —
+    # just one daily allowance. 'free' is how many imports a day need no
+    # survey; 'gated' is how many more survey-gated imports are available on
+    # top of those, once the import gate (a future task) starts enforcing it.
+    # Neither field is consulted anywhere yet — see _import_ads_config below.
+    'free':  1,
+    'gated': 2,
+}
+
+
+def _import_ads_config():
+    """Admin-configurable free/gated import allowance.
+
+    Mirrors _export_ads_config(): read fresh from Firestore on every call so
+    an admin change takes effect on the very next request, no redeploy or
+    cache to invalidate. Falls back to the defaults on a missing doc or any
+    read failure.
+
+    Nothing reads this yet — the import gate that will actually enforce
+    these numbers is a separate future task. This only stores the admin's
+    configured values so that task has something to read once it lands.
+    """
+    cfg = dict(_IMPORT_ADS_DEFAULTS)
+    try:
+        snap = _get_admin_db().collection('config').document('import_ads').get()
+        stored = snap.to_dict() if snap.exists else {}
+    except Exception as exc:
+        print(f"[_import_ads_config] read failed: {type(exc).__name__}: {exc}")
+        stored = {}
+    for key in _IMPORT_ADS_DEFAULTS:
+        if key in stored:
+            cfg[key] = stored[key]
+    return cfg
+
+
 def _export_gate(req, uid, kind):
     """Quota/survey gate for one export. kind is 'hand' or 'tourney'.
 
@@ -2184,6 +2220,42 @@ def admin_export_ads_config_set():
     update['updated_by'] = uid
     _get_admin_db().collection('config').document('export_ads').set(update, merge=True)
     return jsonify(_export_ads_config())
+
+
+@app.route('/api/admin/import-ads-config', methods=['GET'])
+def admin_import_ads_config_get():
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+    return jsonify(_import_ads_config())
+
+
+@app.route('/api/admin/import-ads-config', methods=['POST'])
+def admin_import_ads_config_set():
+    """Whole-config replace of the fields present in the body — merge='True'
+    on the Firestore write, so an admin can change one field without resending
+    the other, but each field present is validated on its own type."""
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict):
+        return jsonify({'error': 'Malformed request body'}), 400
+
+    update = {}
+    for key in ('free', 'gated'):
+        if key in body:
+            val = body[key]
+            if isinstance(val, bool) or not isinstance(val, int) or val < 0:
+                return jsonify({'error': f'{key} must be a non-negative integer'}), 400
+            update[key] = val
+    if not update:
+        return jsonify({'error': 'No recognised fields in request body'}), 400
+
+    update['updated_at'] = int(time.time())
+    update['updated_by'] = uid
+    _get_admin_db().collection('config').document('import_ads').set(update, merge=True)
+    return jsonify(_import_ads_config())
 
 
 def _fetch_tournament_records(uid, tourney_id):

@@ -537,6 +537,56 @@ def test_export_ads_config():
           f'{res.status_code} {res.get_json()}')
 
 
+# ── 4c. Import ads config (admin-controlled free/gated allowance) ───────────
+# Nothing enforces these numbers yet (that's a future gate-check task) — this
+# only covers the admin-config plumbing: defaults, persistence, and the
+# admin-only gate, mirroring test_export_ads_config above.
+
+def test_import_ads_config():
+    print('import ads config')
+    DB._d.pop(('config', 'import_ads'), None)
+    DB.put(('config', 'admins'), {'uids': ['uid-admin']})
+
+    DEFAULT_CFG = {'free': A._IMPORT_ADS_DEFAULTS['free'],
+                   'gated': A._IMPORT_ADS_DEFAULTS['gated']}
+    check('defaults are 1 free / 2 gated per the feature spec',
+          DEFAULT_CFG == {'free': 1, 'gated': 2}, str(DEFAULT_CFG))
+
+    check('the admin config endpoint needs an account',
+          CLIENT.get('/api/admin/import-ads-config').status_code == 403)
+
+    as_user(FREE_UID)  # not an admin
+    check('non-admin cannot read the admin config',
+          CLIENT.get('/api/admin/import-ads-config').status_code == 403)
+    check('non-admin cannot write the config',
+          CLIENT.post('/api/admin/import-ads-config',
+                      json={'free': 10}).status_code == 403)
+
+    as_user('uid-admin')
+    res = CLIENT.get('/api/admin/import-ads-config')
+    check('admin can read the config', res.status_code == 200, str(res.status_code))
+    check('default config matches the hardcoded defaults',
+          res.get_json() == DEFAULT_CFG, str(res.get_json()))
+
+    for bad in ({'free': 'one'}, {'gated': -1}, {'free': True}, {}):
+        res = CLIENT.post('/api/admin/import-ads-config', json=bad)
+        check(f'rejects malformed body {bad}', res.status_code == 400, str(res.status_code))
+
+    res = CLIENT.post('/api/admin/import-ads-config', json={'free': 2})
+    check('partial update 200', res.status_code == 200, str(res.status_code))
+    check('free updated', res.get_json()['free'] == 2, str(res.get_json()))
+    check('gated untouched by a partial update',
+          res.get_json()['gated'] == DEFAULT_CFG['gated'], str(res.get_json()))
+
+    res = CLIENT.post('/api/admin/import-ads-config', json={'free': 0, 'gated': 5})
+    check('full update 200', res.status_code == 200, str(res.status_code))
+    check('both fields persisted', res.get_json() == {'free': 0, 'gated': 5}, str(res.get_json()))
+
+    res = CLIENT.get('/api/admin/import-ads-config')
+    check('a fresh GET reflects the persisted config, not the old defaults',
+          res.get_json() == {'free': 0, 'gated': 5}, str(res.get_json()))
+
+
 # ── 5. The 7-day history window ──────────────────────────────────────────────
 
 def test_history_window():
@@ -860,7 +910,7 @@ def test_credit_endpoints():
 
 def main():
     for test in (test_quota, test_credits, test_ad_tokens, test_export_gates,
-                 test_export_ads_config,
+                 test_export_ads_config, test_import_ads_config,
                  test_history_window, test_import_quota_and_window,
                  test_free_import_prunes_old_tournaments, test_anon_import_and_claim,
                  test_cpx_postback, test_survey_config_hash, test_tally_callback,
