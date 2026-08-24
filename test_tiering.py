@@ -110,6 +110,9 @@ class _Txn:
     def update(self, ref, data):
         ref.update(data)
 
+    def create(self, ref, data):
+        ref.create(data)
+
 
 class FakeDB:
     def __init__(self):
@@ -297,6 +300,115 @@ def test_credits():
         left  = A._credits(FREE_UID)
     check('consume spends one credit', spent is True and left['tourney'] == 0)
     check('consume at zero is a no-op', again is False)
+
+
+# ── 2b. Tourney-export: lifetime-free + weekly counter ──────────────────────
+
+def test_tourney_export_state():
+    print('tourney export state')
+    _reset_user(FREE_UID)
+    DB._d.pop(('users', FREE_UID, 'quota', 'tourney_export'), None)
+
+    with A.app.test_request_context('/'):
+        this_week = A._current_iso_week()
+        state = A._tourney_export_state(FREE_UID)
+    check('brand-new user has not used the lifetime freebie',
+          state['lifetime_free_used'] is False, str(state))
+    check('brand-new user has zero weekly usage', state['current_week_used'] == 0, str(state))
+    check('current_week_iso is resolved server-side to this ISO week',
+          state['current_week_iso'] == this_week, str(state))
+    check('reading state performs no write',
+          DB.get(('users', FREE_UID, 'quota', 'tourney_export')) is None)
+
+    with A.app.test_request_context('/'):
+        new_state = A._bump_tourney_export_usage(FREE_UID)
+    check('the first bump spends the lifetime freebie',
+          new_state['lifetime_free_used'] is True, str(new_state))
+    check('spending the freebie does not count against the weekly cap',
+          new_state['current_week_used'] == 0, str(new_state))
+
+    with A.app.test_request_context('/'):
+        state = A._tourney_export_state(FREE_UID)
+    check('lifetime-already-used is reflected on the next read',
+          state['lifetime_free_used'] is True, str(state))
+    check('lifetime_free_used_at was stamped', state['lifetime_free_used_at'] is not None)
+
+    with A.app.test_request_context('/'):
+        second = A._bump_tourney_export_usage(FREE_UID)
+    check('the second bump (freebie spent) increments this week\'s counter',
+          second['current_week_used'] == 1, str(second))
+    check('lifetime_free_used_at is preserved, not re-stamped',
+          second['lifetime_free_used_at'] == new_state['lifetime_free_used_at'])
+
+    # Week rollover: a stored week that isn't the current one must read (and
+    # then bump) as if the counter were freshly zero, without any nightly job.
+    stale = {'lifetime_free_used': True, 'lifetime_free_used_at': 't0',
+             'current_week_iso': '2000-W01', 'current_week_used': 5,
+             'last_reset_at': 't0'}
+    DB.put(('users', FREE_UID, 'quota', 'tourney_export'), stale)
+    with A.app.test_request_context('/'):
+        this_week = A._current_iso_week()
+        rolled = A._tourney_export_state(FREE_UID)
+    check('a stale ISO week reads current_week_used as 0',
+          rolled['current_week_used'] == 0, str(rolled))
+    check('the lifetime flag survives a week rollover',
+          rolled['lifetime_free_used'] is True, str(rolled))
+    check('current_week_iso reported is the current week, not the stale one',
+          rolled['current_week_iso'] == this_week, str(rolled))
+
+    with A.app.test_request_context('/'):
+        bumped = A._bump_tourney_export_usage(FREE_UID)
+    check('a bump after rollover starts this week at 1, not 6',
+          bumped['current_week_used'] == 1, str(bumped))
+    check('and rewrites the stored week to the current one',
+          bumped['current_week_iso'] == this_week, str(bumped))
+
+    # A user who has never been written to Firestore at all must not 500.
+    DB._d.pop(('users', 'uid-fresh-tourney'), None)
+    with A.app.test_request_context('/'):
+        fresh_state = A._tourney_export_state('uid-fresh-tourney')
+        fresh_bump = A._bump_tourney_export_usage('uid-fresh-tourney')
+    check('a never-seen uid reads a clean default state',
+          fresh_state['lifetime_free_used'] is False, str(fresh_state))
+    check('and can still spend its lifetime freebie',
+          fresh_bump is not None and fresh_bump['lifetime_free_used'] is True,
+          str(fresh_bump))
+
+
+# ── 2c. Gate-event history ───────────────────────────────────────────────────
+
+def test_gate_events():
+    print('gate events')
+    _reset_user(FREE_UID)
+    for path in [p for p, _ in DB.items()
+                 if len(p) > 2 and p[0] == 'users' and p[1] == FREE_UID and p[2] == 'gate_events']:
+        DB._d.pop(path, None)
+
+    with A.app.test_request_context('/'):
+        A._record_gate_event(FREE_UID, 'tourney_export', True, provider='stub',
+                             completion_id='cmp-1')
+        A._record_gate_event(FREE_UID, 'hand_export', False)
+        A._record_gate_event(FREE_UID, 'import', True, provider='cpx', completion_id='trans-9')
+
+    events = [data for path, data in DB.items()
+              if len(path) == 4 and path[0] == 'users' and path[1] == FREE_UID
+              and path[2] == 'gate_events']
+    check('three events were recorded', len(events) == 3, str(events))
+
+    by_kind = {e['kind']: e for e in events}
+    tourney_evt = by_kind['tourney_export']
+    check('a gated tourney_export event records its provider and completion id',
+          tourney_evt['gated'] is True and tourney_evt['gate_provider'] == 'stub'
+          and tourney_evt['gate_completion_id'] == 'cmp-1',
+          str(tourney_evt))
+    check('the event carries a written timestamp',
+          tourney_evt.get('at') == _gcf.SERVER_TIMESTAMP, str(tourney_evt.get('at')))
+    check('an ungated event records gated=False with no provider',
+          by_kind['hand_export']['gated'] is False
+          and by_kind['hand_export']['gate_provider'] is None,
+          str(by_kind.get('hand_export')))
+    check('gate_provider is a free-form string, not a fixed set — cpx accepted',
+          by_kind['import']['gate_provider'] == 'cpx', str(by_kind.get('import')))
 
 
 # ── 3. Ad tokens ─────────────────────────────────────────────────────────────
@@ -909,7 +1021,8 @@ def test_credit_endpoints():
 
 
 def main():
-    for test in (test_quota, test_credits, test_ad_tokens, test_export_gates,
+    for test in (test_quota, test_credits, test_tourney_export_state, test_gate_events,
+                 test_ad_tokens, test_export_gates,
                  test_export_ads_config, test_import_ads_config,
                  test_history_window, test_import_quota_and_window,
                  test_free_import_prunes_old_tournaments, test_anon_import_and_claim,

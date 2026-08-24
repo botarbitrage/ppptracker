@@ -1032,6 +1032,161 @@ def _require_pro_export(req, feature):
     return uid, None
 
 
+# ── Tourney-export: lifetime-free + weekly counter ─────────────────────────────
+# The daily quota/credit shape above ("N/day, survey-gated") doesn't fit the new
+# tourney-export model: 1 free EVER (lifetime, not daily), then 1/week. This is
+# a separate counter, in its own users/{uid}/quota/tourney_export subcollection
+# doc, resolved against the server's own clock — never a client-supplied week.
+#
+# Building the read/write helpers now; the actual gate check that decides
+# *when* to block an export and prompt a rewarded-video/survey unlock is a
+# later task. Nothing below is called from any route yet.
+
+def _tourney_export_ref(uid):
+    return _user_ref(uid).collection('quota').document('tourney_export')
+
+
+def _current_iso_week(ts=None):
+    """'YYYY-Www' for the given epoch seconds (default: now), UTC, ISO 8601
+    week numbering (Python's own isocalendar() — Monday-start weeks, week 1 is
+    the week containing the year's first Thursday). Always server-side; a
+    client's timezone or clock is never consulted."""
+    from datetime import datetime as _d, timezone as _tz
+    dt = _d.fromtimestamp(ts if ts is not None else time.time(), tz=_tz.utc)
+    iso_year, iso_week, _ = dt.isocalendar()
+    return f'{iso_year}-W{iso_week:02d}'
+
+
+_EMPTY_TOURNEY_EXPORT_STATE = {
+    'lifetime_free_used': False,
+    'lifetime_free_used_at': None,
+    'current_week_iso': None,
+    'current_week_used': 0,
+    'last_reset_at': None,
+}
+
+
+def _tourney_export_state(uid):
+    """{lifetime_free_used, lifetime_free_used_at, current_week_iso,
+    current_week_used, last_reset_at} for uid.
+
+    Read-only and lazy, the same shape as _quota_state: a stored week that
+    isn't this ISO week reads current_week_used as 0 without anyone having to
+    rewrite the doc first (that happens lazily, on the next bump). The current
+    week is always resolved server-side.
+    """
+    this_week = _current_iso_week()
+    state = dict(_EMPTY_TOURNEY_EXPORT_STATE, current_week_iso=this_week)
+    try:
+        snap = _tourney_export_ref(uid).get()
+        stored = snap.to_dict() if snap.exists else None
+    except Exception as exc:
+        print(f"[_tourney_export_state] read failed for uid={uid}: {type(exc).__name__}: {exc}")
+        stored = None
+    if isinstance(stored, dict):
+        state['lifetime_free_used'] = bool(stored.get('lifetime_free_used'))
+        state['lifetime_free_used_at'] = stored.get('lifetime_free_used_at')
+        state['last_reset_at'] = stored.get('last_reset_at')
+        if stored.get('current_week_iso') == this_week:
+            state['current_week_used'] = int(stored.get('current_week_used') or 0)
+    return state
+
+
+def _bump_tourney_export_usage(uid):
+    """Transactionally record one tourney-export use: spends the lifetime
+    freebie first if it hasn't been spent yet, otherwise +1 on this ISO
+    week's counter (rolling the week over first, mirroring _quota_state's day
+    rollover). Returns the new state dict, or None on failure.
+
+    Not wired to any route yet — the future gate-check task calls this once
+    it has decided the export should count.
+    """
+    if not uid:
+        return None
+    from google.cloud import firestore as gcf
+    db, ref = _get_admin_db(), _tourney_export_ref(uid)
+    this_week = _current_iso_week()
+
+    @gcf.transactional
+    def _txn(transaction):
+        snap = ref.get(transaction=transaction)
+        stored = snap.to_dict() if snap.exists else None
+        stored = stored if isinstance(stored, dict) else {}
+        now = gcf.SERVER_TIMESTAMP
+
+        if not stored.get('lifetime_free_used'):
+            new_state = {
+                'lifetime_free_used': True,
+                'lifetime_free_used_at': now,
+                'current_week_iso': stored.get('current_week_iso') or this_week,
+                'current_week_used': int(stored.get('current_week_used') or 0),
+                'last_reset_at': stored.get('last_reset_at') or now,
+            }
+        else:
+            week_used = (int(stored.get('current_week_used') or 0)
+                         if stored.get('current_week_iso') == this_week else 0)
+            new_state = {
+                'lifetime_free_used': True,
+                'lifetime_free_used_at': stored.get('lifetime_free_used_at'),
+                'current_week_iso': this_week,
+                'current_week_used': week_used + 1,
+                'last_reset_at': now,
+            }
+
+        if snap.exists:
+            transaction.update(ref, new_state)
+        else:
+            transaction.create(ref, new_state)
+        return new_state
+
+    try:
+        return _txn(db.transaction())
+    except Exception as exc:
+        print(f"[_bump_tourney_export_usage] failed for uid={uid}: {type(exc).__name__}: {exc}")
+        return None
+
+
+# ── Gate-event history ──────────────────────────────────────────────────────────
+# One append-only subcollection, shared by every gated action (tourney export,
+# hand export, import), so they all get a history/audit trail "for free" instead
+# of three bespoke logs. gate_provider is deliberately a free-form string, not a
+# fixed enum: today's values are 'stub' (the watch-to-unlock modal) and 'cpx'
+# (the existing CPX Research survey), and a future rewarded-video SDK adds
+# 'ayet' / 'wannads' without touching this schema.
+
+def _record_gate_event(uid, kind, gated, provider=None, completion_id=None):
+    """Append one row to users/{uid}/gate_events.
+
+    kind:      'tourney_export' | 'hand_export' | 'import'
+    gated:     True when the action actually required an unlock (survey, ad,
+               stub modal, …) to proceed; False when it went through free.
+    provider:  free-form string naming who granted the unlock ('stub', 'cpx',
+               …), or None when gated is False / the unlock was a spent credit
+               with no fresh provider event.
+    completion_id: the provider's own transaction/response id, when there is
+               one (e.g. CPX's trans_id), else None.
+
+    Best-effort and append-only — a failure here must never block the export/
+    import it's describing, so it only logs and returns.
+
+    Not called from any route yet; the future gate-wiring task calls this from
+    the tourney-export, hand-export and import gate paths.
+    """
+    import uuid
+    from google.cloud import firestore as gcf
+    event = {
+        'kind': kind,
+        'gated': bool(gated),
+        'gate_provider': provider,
+        'at': gcf.SERVER_TIMESTAMP,
+        'gate_completion_id': completion_id,
+    }
+    try:
+        _user_ref(uid).collection('gate_events').document(uuid.uuid4().hex).create(event)
+    except Exception as exc:
+        print(f"[_record_gate_event] failed for uid={uid} kind={kind}: {type(exc).__name__}: {exc}")
+
+
 # ── Anonymous import sessions ─────────────────────────────────────────────────
 # An anon import is analysed but never persisted to the user's history — it lives
 # in Cloud Storage for an hour so that signing in can claim it. The client holds
