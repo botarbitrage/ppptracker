@@ -63,6 +63,74 @@ while it is still unspent.
 
 ---
 
+## `users/{uid}/quota/tourney_export` — server-only
+
+A single document, keyed by a fixed id (`tourney_export`), holding the
+tourney-export gating state. This is **separate from** the `quota` map field
+on `users/{uid}` above — that map is today's daily hard/soft quota shape
+(`imports`, `hand_exports`, `tourney_exports`) and it does not fit tourney
+export's new rule, which is **lifetime, not daily**: 1 free export ever, then
+1 per ISO week thereafter. Rather than force a lifetime+weekly rule into a
+daily-reset shape, it gets its own doc.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `lifetime_free_used` | bool | Whether the one free-forever tourney export has been spent. Missing/absent reads as `False` — see backfill note below. |
+| `lifetime_free_used_at` | timestamp \| null | When the lifetime freebie was spent. `null`/absent until then. |
+| `current_week_iso` | string | ISO 8601 week of the last write, `'YYYY-Www'` (e.g. `'2026-W34'`), from Python's `datetime.isocalendar()` — **always resolved server-side**, never trusted from the client. |
+| `current_week_used` | int | Exports counted against `current_week_iso`. A stored week that isn't the current one reads as `0` on the next read, the same lazy-rollover pattern `quota.day` uses — no nightly job needed. |
+| `last_reset_at` | timestamp | When the counter was last written (bump or rollover). |
+
+Read by `_tourney_export_state(uid)` (lazy, matches stored data against the
+server-computed current week, never writes). Written by
+`_bump_tourney_export_usage(uid)`, which spends the lifetime freebie first
+and only starts incrementing `current_week_used` once `lifetime_free_used` is
+`True`. Both are plain helpers as of this writing — no route calls
+`_bump_tourney_export_usage` yet; the tourney-export endpoint still enforces
+the old daily `quota.tourney_exports` limit until a later task rewires it to
+this doc.
+
+**Backfill:** existing users have no `quota/tourney_export` doc at all.
+`_tourney_export_state` treats a missing doc as `lifetime_free_used = False`
+— i.e. every existing user gets one fresh free lifetime export the first time
+the new model reads their state, rather than trying to infer "have they
+already benefited from a free tourney export" from the old daily-counter
+history (which can't actually answer that question — the old model gated
+*every* tourney export behind a survey, so "have they exported before" says
+nothing about whether they should get today's specific *lifetime freebie*).
+`backfill_tourney_export_state.py` (one-shot, disposable — see the file
+header) makes this explicit by writing `lifetime_free_used: False` onto every
+user doc that doesn't already have the subdocument, so the state is visible
+in Firestore immediately rather than only appearing lazily on first read.
+
+---
+
+## `users/{uid}/gate_events` — server-only
+
+Append-only history of every gate check across the three actions that can
+require an unlock: tourney export, hand export, and import. One document per
+event, auto-generated id, never updated or deleted after being written — this
+is what makes later reporting/audit possible without replaying quota state.
+Shared shape by design: hand-export and import gates get history for free by
+writing into the same subcollection instead of each inventing their own log.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `kind` | string | `'tourney_export'` \| `'hand_export'` \| `'import'`. |
+| `gated` | bool | `True` when the action actually required an unlock to proceed; `False` when it went through free (inside a free allowance). |
+| `gate_provider` | string \| null | Free-form, **not a fixed enum** — who granted the unlock. Values in use as of this writing: `'stub'` (the watch-to-unlock modal) and `'cpx'` (CPX Research survey). A future rewarded-video SDK adds `'ayet'` and/or `'wannads'` without any schema change here. `null` when `gated` is `False`, or when no fresh provider event applies (e.g. a previously-banked credit). |
+| `at` | timestamp | When the event was recorded. |
+| `gate_completion_id` | string \| null | The provider's own transaction/response id when it has one (e.g. CPX's `trans_id`), else `null`. |
+
+Written by the single shared helper `_record_gate_event(uid, kind, gated,
+provider, completion_id)` — best-effort, failures are logged and swallowed
+rather than blocking the export/import they describe. Not called from any
+route yet; wiring it into the tourney-export, hand-export and import gate
+paths is a later task. Owner-readable like `ad_jtis` and
+`survey_completions`, for the same audit reason.
+
+---
+
 ## `users/{uid}/tournaments/{tourney_id}`
 
 One document per tournament the player has imported; the hands themselves live
@@ -140,11 +208,12 @@ deleted outright once claimed.
 1. **`users/{uid}` update** may not touch `is_pro`, `stripe_customer_id`,
    `subscription_status`, `quota` or `credits`; **create** may not seed them
    either, so a delete-and-recreate cannot wash away a spent allowance.
-2. **`ad_jtis` and `survey_completions` are excluded from the blanket
-   subcollection grant**, not merely re-matched with a stricter rule. Rule
-   matches are OR'd, so a permissive parent rule would outvote a strict child
-   one, and the account that benefits from deleting a spent-unlock record is
-   exactly the account that must not be able to.
+2. **`ad_jtis`, `survey_completions`, `quota` and `gate_events` are excluded
+   from the blanket subcollection grant**, not merely re-matched with a
+   stricter rule. Rule matches are OR'd, so a permissive parent rule would
+   outvote a strict child one, and the account that benefits from deleting a
+   spent-unlock record (or its own gate-event history) is exactly the account
+   that must not be able to.
 
-Both subcollections stay owner-**readable**, so a player can audit their own
-unlocks and payouts.
+All four subcollections stay owner-**readable**, so a player can audit their
+own unlocks, payouts, and tourney-export/gate history.
