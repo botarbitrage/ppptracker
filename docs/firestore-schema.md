@@ -197,12 +197,47 @@ redelivered webhook is recognised as a duplicate and pays once.
 
 ---
 
+## `config/export_ads` — server-only
+
+Admin-configured export limits, set from Admin → Ad Campaigns → Export Ads.
+Read fresh from Firestore on every call via `_export_ads_config()`, so an
+admin's change applies to the next request with no redeploy. A missing doc or
+read failure falls back to `_EXPORT_ADS_DEFAULTS` in `app.py`.
+
+| Field | Type | Written by | Notes |
+| --- | --- | --- | --- |
+| `hand_hard_limit` | int | **server-only** (admin) | Daily cap on hand exports. `0` blocks the kind outright. Default **5** (`FREE_HAND_EXPORTS_PER_DAY`). |
+| `hand_soft_limit` | int | **server-only** (admin) | Of `hand_hard_limit`'s slots, how many (counted from the end) need a survey/credit/ad-token. Default **3**. |
+| `tourney_hard_limit` | int | **legacy — see below** | Old daily hard cap for tourney exports. Default **1**. |
+| `tourney_soft_limit` | int | **legacy — see below** | Old daily soft (survey-gated) cap for tourney exports. Default **1**. |
+| `tourney_lifetime_free` | int | **server-only** (admin) | New tourney-export model: number of exports free for the *lifetime* of the account. Default **1**. |
+| `tourney_weekly_limit` | int | **server-only** (admin) | New tourney-export model: exports allowed per ISO week once the lifetime-free allowance is used up. Default **1**. |
+| `updated_at` | int (epoch secs) | **server-only** (admin) | Stamped on every admin save. |
+| `updated_by` | string | **server-only** (admin) | uid of the admin who last saved. |
+
+**`tourney_hard_limit` / `tourney_soft_limit` are the old daily hard/soft
+pair, kept but not extended.** `_export_gate(kind='tourney')` still reads
+them today — the tourney-export route has not yet been rewired to check
+`tourney_lifetime_free` / `tourney_weekly_limit` against the per-user counters
+in `users/{uid}/quota/tourney_export` (see that section above); that
+enforcement rewiring is a separate, not-yet-started task. Retire this legacy
+pair from `_EXPORT_ADS_DEFAULTS` and from this table once that task lands and
+nothing reads them anymore — until then they are deliberately left in place
+so today's live gating keeps working. `tourney_lifetime_free` /
+`tourney_weekly_limit` are the reverse: fully wired for admin configuration
+(GET/POST, validation, UI), but not yet read by any gate check.
+
+Written via `PATCH`-style `.set(doc, merge=True)` in
+`admin_export_ads_config_set()` — a partial body only touches the fields it
+names.
+
+---
+
 ## `config/import_ads` — server-only
 
 Admin-configured free/gated allowance for the daily import quota, set from
-Admin → Ad Campaigns → Import Ads. Mirrors `config/export_ads` (the Export Ads
-section just above it in that panel), which is not itself split into a
-document — see `_export_ads_config()` / `_EXPORT_ADS_DEFAULTS` in `app.py`.
+Admin → Ad Campaigns → Import Ads. Mirrors `config/export_ads` just above —
+see `_import_ads_config()` / `_IMPORT_ADS_DEFAULTS` in `app.py`.
 
 Read fresh from Firestore on every call via `_import_ads_config()`, so an
 admin's change applies to the next request with no redeploy. A missing doc or

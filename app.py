@@ -928,8 +928,21 @@ _EXPORT_ADS_DEFAULTS = {
     # no special-casing needed, it falls out of the arithmetic below.
     'hand_hard_limit':    FREE_HAND_EXPORTS_PER_DAY,                          # 5
     'hand_soft_limit':    FREE_HAND_EXPORTS_PER_DAY - FREE_HAND_EXPORTS_UNGATED,  # 3 gated
+    # tourney_hard_limit/tourney_soft_limit are the OLD daily hard/soft pair.
+    # They are left in place, unchanged, because _export_gate(kind='tourney')
+    # below still reads them for real enforcement today — the new lifetime+
+    # weekly model these two keys are being replaced by isn't wired into any
+    # gate check yet (that's a separate future task). Retire these once that
+    # rewiring lands and this pair is no longer read anywhere.
     'tourney_hard_limit': FREE_TOURNEY_EXPORTS_DAY,                          # 1
     'tourney_soft_limit': FREE_TOURNEY_EXPORTS_DAY,   # today: the 1 slot is fully gated
+    # New tourney-export admin config: 1 free-for-life export per user, then
+    # 1/week after that (see _tourney_export_state/_bump_tourney_export_usage
+    # above for the per-user counters these numbers will be checked against).
+    # Not read by any gate check yet — that wiring is a later task. Configured
+    # here now so the product owner can tune the numbers ahead of that.
+    'tourney_lifetime_free': 1,
+    'tourney_weekly_limit':  1,
 }
 
 
@@ -2439,7 +2452,8 @@ def admin_export_ads_config_set():
 
     update = {}
     for key in ('hand_hard_limit', 'hand_soft_limit',
-                'tourney_hard_limit', 'tourney_soft_limit'):
+                'tourney_hard_limit', 'tourney_soft_limit',
+                'tourney_lifetime_free', 'tourney_weekly_limit'):
         if key in body:
             val = body[key]
             if isinstance(val, bool) or not isinstance(val, int) or val < 0:

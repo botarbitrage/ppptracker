@@ -551,10 +551,12 @@ def test_export_ads_config():
     DB.put(('config', 'admins'), {'uids': ['uid-admin']})
 
     DEFAULT_CFG = {
-        'hand_hard_limit':    A.FREE_HAND_EXPORTS_PER_DAY,
-        'hand_soft_limit':    A.FREE_HAND_EXPORTS_PER_DAY - A.FREE_HAND_EXPORTS_UNGATED,
-        'tourney_hard_limit': A.FREE_TOURNEY_EXPORTS_DAY,
-        'tourney_soft_limit': A.FREE_TOURNEY_EXPORTS_DAY,
+        'hand_hard_limit':       A.FREE_HAND_EXPORTS_PER_DAY,
+        'hand_soft_limit':       A.FREE_HAND_EXPORTS_PER_DAY - A.FREE_HAND_EXPORTS_UNGATED,
+        'tourney_hard_limit':    A.FREE_TOURNEY_EXPORTS_DAY,
+        'tourney_soft_limit':    A.FREE_TOURNEY_EXPORTS_DAY,
+        'tourney_lifetime_free': 1,
+        'tourney_weekly_limit':  1,
     }
 
     as_user(None)
@@ -580,9 +582,35 @@ def test_export_ads_config():
           res.get_json() == DEFAULT_CFG, str(res.get_json()))
 
     for bad in ({'hand_hard_limit': 'five'}, {'hand_soft_limit': -1},
-                {'tourney_hard_limit': True}, {'tourney_soft_limit': 'x'}, {}):
+                {'tourney_hard_limit': True}, {'tourney_soft_limit': 'x'},
+                {'tourney_lifetime_free': -1}, {'tourney_weekly_limit': -1},
+                {'tourney_lifetime_free': 'one'}, {'tourney_weekly_limit': True},
+                {}):
         res = CLIENT.post('/api/admin/export-ads-config', json=bad)
         check(f'rejects malformed body {bad}', res.status_code == 400, str(res.status_code))
+
+    # Reshaped tourney fields: persist independently of the legacy hard/soft
+    # pair, and round-trip through both the admin GET and the public GET.
+    res = CLIENT.post('/api/admin/export-ads-config',
+                      json={'tourney_lifetime_free': 3, 'tourney_weekly_limit': 2})
+    check('posting the new tourney fields 200', res.status_code == 200, str(res.status_code))
+    check('response reflects the new tourney fields',
+          res.get_json()['tourney_lifetime_free'] == 3 and
+          res.get_json()['tourney_weekly_limit'] == 2, str(res.get_json()))
+    check('legacy tourney hard/soft untouched by the new-field post',
+          res.get_json()['tourney_hard_limit'] == DEFAULT_CFG['tourney_hard_limit'] and
+          res.get_json()['tourney_soft_limit'] == DEFAULT_CFG['tourney_soft_limit'],
+          str(res.get_json()))
+
+    as_user(None)
+    res = CLIENT.get('/api/export-ads-config')
+    check('public endpoint reflects the saved new tourney fields too',
+          res.get_json()['tourney_lifetime_free'] == 3 and
+          res.get_json()['tourney_weekly_limit'] == 2, str(res.get_json()))
+
+    # Reset back to defaults for the rest of the test.
+    DB._d.pop(('config', 'export_ads'), None)
+    as_user('uid-admin')
 
     # Bullet 1: hard limit 0 blocks the kind outright — quota_exceeded, no
     # survey ever offered.
