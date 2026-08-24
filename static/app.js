@@ -407,6 +407,153 @@ function closeSurveyModal() {
   }
 }
 
+/* ── Gate stub modal ("watch to unlock" ad stand-in) ─────── */
+// ayeT-Studios/Wannads rewarded-video approval is pending, so this is a
+// self-hosted stand-in with the same completion contract a real ad would have:
+// 30s of forced user-visible attention, an OK button that only enables once
+// the timer runs out, and a server-side signal (POST /api/gate/stub-completion)
+// that records the completion for a future gate check to consume.
+//
+// The modal body doubles as a Pro upsell — forced attention is a conversion
+// opportunity while there's no ad revenue at stake yet.
+//
+// When ayeT/Wannads approval lands (separate follow-up Feature), only this
+// function gets swapped for the real SDK — the completion contract (endpoint
+// shape, gate-check code, admin config) stays the same.
+//
+// NOT wired to any gate check yet (that's Task 6) — this is just the reusable
+// modal component + its completion endpoint, callable the same way
+// openSurveyModal()/_surveyShowCpx() are today.
+
+const _GATE_STUB_SECONDS = 30;   // keep in sync with the "wait 30 seconds" copy
+                                  // in templates/index.html's gate-stub-modal
+let _gateStubState = {
+  kind: null, onComplete: null, remaining: 0, timer: null,
+  completionId: null, posted: false,
+};
+
+function _gateStubKindCopy(kind) {
+  const I = window.I18N_GATE_STUB || {};
+  return kind === 'import'
+    ? { kindLabel: I.kindLabelImport, feature: I.featureImport }
+    : { kindLabel: I.kindLabelHandExport, feature: I.featureHandExport };
+}
+
+function _gateStubNewId() {
+  return (window.crypto && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : `gs_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+}
+
+/**
+ * Show the "watch to unlock" stub modal. onComplete fires exactly once, after
+ * the 30s timer has elapsed AND the (by-then-enabled) OK button is clicked.
+ * kind is 'import' or 'hand_export' — it only drives copy, never the timer.
+ */
+function _showGateStubModal(kind, onComplete) {
+  if (window.GATE_STUB_MODAL_ENABLED === false) {
+    // GATE_STUB_MODAL_ENABLED=false server-side — nothing stands in for the ad,
+    // so don't block whatever called this.
+    if (onComplete) onComplete();
+    return;
+  }
+  const modalEl = document.getElementById('gate-stub-modal');
+  if (!modalEl) { if (onComplete) onComplete(); return; }
+
+  clearInterval(_gateStubState.timer);
+  _gateStubState = {
+    kind, onComplete, remaining: _GATE_STUB_SECONDS, timer: null,
+    completionId: _gateStubNewId(), posted: false,
+  };
+
+  const copy = _gateStubKindCopy(kind);
+  const kindLabelEl    = document.getElementById('gate-stub-kind-label');
+  const featureLabelEl = document.getElementById('gate-stub-feature-label');
+  if (kindLabelEl)    kindLabelEl.textContent = copy.kindLabel || '';
+  if (featureLabelEl) featureLabelEl.textContent = copy.feature || '';
+
+  const proBtn = document.getElementById('gate-stub-pro-btn');
+  if (proBtn) {
+    proBtn.onclick = () => {
+      closeGateStubModal();
+      showUpgradeModal(kind === 'import' ? 'import_quota' : 'hand_quota');
+    };
+  }
+
+  const okBtn = document.getElementById('gate-stub-ok-btn');
+  if (okBtn) {
+    okBtn.disabled = true;
+    okBtn.onclick = _gateStubOkClicked;
+  }
+  _gateStubRenderCountdown();
+
+  _trackEvent('gate_stub_modal_shown', { kind });
+  bootstrap.Modal.getOrCreateInstance(modalEl).show();
+
+  _gateStubState.timer = setInterval(() => {
+    _gateStubState.remaining -= 1;
+    _gateStubRenderCountdown();
+    if (_gateStubState.remaining <= 0) {
+      clearInterval(_gateStubState.timer);
+      _gateStubState.timer = null;
+    }
+  }, 1000);
+}
+
+function _gateStubRenderCountdown() {
+  const okBtn = document.getElementById('gate-stub-ok-btn');
+  if (!okBtn) return;
+  const remaining = Math.max(_gateStubState.remaining, 0);
+  const I = window.I18N_GATE_STUB || {};
+  okBtn.disabled = remaining > 0;
+  okBtn.textContent = remaining > 0
+    ? (I.unlockCountdown || 'Unlock in __SECONDS__ seconds…').replace('__SECONDS__', String(remaining))
+    : (I.unlockReady || 'Unlock');
+}
+
+/** OK button handler — only meaningful once the button is enabled (t=0). */
+function _gateStubOkClicked() {
+  // Guards double-click / double-fire: once posted stays true, a second click
+  // (even one queued before the first click's synchronous disable took effect)
+  // is a no-op instead of a second completion POST.
+  if (_gateStubState.remaining > 0 || _gateStubState.posted) return;
+  _gateStubState.posted = true;
+  const okBtn = document.getElementById('gate-stub-ok-btn');
+  if (okBtn) okBtn.disabled = true;
+
+  const { kind, onComplete, completionId } = _gateStubState;
+  _trackEvent('gate_stub_completed', { kind });
+  _postGateStubCompletion(kind, completionId)
+    .catch(err => console.warn('gate stub completion POST failed', err))
+    .then(() => {
+      closeGateStubModal();
+      if (onComplete) onComplete();
+    });
+}
+
+async function _postGateStubCompletion(kind, completionId) {
+  if (!_currentUser) return;
+  const token = await _currentUser.getIdToken();
+  await fetch('/api/gate/stub-completion', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ kind, ts: Date.now(), completion_id: completionId }),
+  });
+}
+
+function closeGateStubModal() {
+  clearInterval(_gateStubState.timer);
+  _gateStubState = {
+    kind: null, onComplete: null, remaining: 0, timer: null,
+    completionId: null, posted: false,
+  };
+  const modalEl = document.getElementById('gate-stub-modal');
+  if (modalEl) {
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (modal) modal.hide();
+  }
+}
+
 /* ── Helpers ─────────────────────────────────────────────── */
 
 function fmtChips(n) {

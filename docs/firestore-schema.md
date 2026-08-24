@@ -116,6 +116,41 @@ redelivered webhook is recognised as a duplicate and pays once.
 
 ---
 
+## `users/{uid}/gate_events/{completion_id}` — server-only
+
+One document per gate completion, across every gate mechanism (this doc
+currently covers only the "watch to unlock" stub — see below). Written with
+`create()`, keyed by a client-generated `completion_id`, so a double-clicked
+OK button or a retried request is recognised as a duplicate and does not
+double-grant.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `kind` | string | `import` or `hand_export` — which gate the user hit. |
+| `gated` | bool | Always `true` for a stub completion — present so this shape matches the multi-provider event history a parallel task is standardising (`_record_gate_event`). |
+| `gate_provider` | string | `stub` for this modal. Reserved values for the real ad-network integration (`ayet`, `wannads`) belong to a follow-up Feature, not this one. |
+| `at` | int (epoch secs) | When the completion was recorded. |
+| `gate_completion_id` | string | Mirrors the document id. |
+
+**Known gap (documented, not fixed here):** this endpoint (`POST
+/api/gate/stub-completion`) does not verify that the client's 30s countdown
+actually elapsed — it trusts the browser. A technical user who calls the
+endpoint directly, or edits `_GATE_STUB_SECONDS` in devtools, still gets a
+completion recorded. Acceptable for an MVP stub with no ad revenue on the
+line; will need revisiting if/when this record starts being consumed to
+actually grant something (see "Task 6", not yet built).
+
+**Reconciliation note:** this collection and its four written fields
+(`kind`, `gated`, `gate_provider`, `at`, `gate_completion_id`) are being
+defined in parallel by another in-flight change that adds a shared
+`_record_gate_event(uid, kind, gated, provider, completion_id)` helper on a
+different branch. The write in `app.py`'s `gate_stub_completion()` was kept
+hand-rolled, matching this exact shape, specifically so it becomes a drop-in
+call to that helper once the branches merge — expect a small merge
+reconciliation, not a schema change.
+
+---
+
 ## Storage: `anon_sessions/{token}.json`
 
 Not Firestore, but part of the same flow. An import made while signed out is
@@ -140,11 +175,11 @@ deleted outright once claimed.
 1. **`users/{uid}` update** may not touch `is_pro`, `stripe_customer_id`,
    `subscription_status`, `quota` or `credits`; **create** may not seed them
    either, so a delete-and-recreate cannot wash away a spent allowance.
-2. **`ad_jtis` and `survey_completions` are excluded from the blanket
-   subcollection grant**, not merely re-matched with a stricter rule. Rule
-   matches are OR'd, so a permissive parent rule would outvote a strict child
-   one, and the account that benefits from deleting a spent-unlock record is
-   exactly the account that must not be able to.
+2. **`ad_jtis`, `survey_completions` and `gate_events` are excluded from the
+   blanket subcollection grant**, not merely re-matched with a stricter rule.
+   Rule matches are OR'd, so a permissive parent rule would outvote a strict
+   child one, and the account that benefits from deleting a spent-unlock
+   record is exactly the account that must not be able to.
 
-Both subcollections stay owner-**readable**, so a player can audit their own
-unlocks and payouts.
+All three subcollections stay owner-**readable**, so a player can audit their
+own unlocks, payouts and gate completions.

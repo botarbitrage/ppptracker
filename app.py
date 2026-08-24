@@ -181,7 +181,7 @@ def _fetch_record(uid, rdkey, summary, referer):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", gate_stub_modal_enabled=_GATE_STUB_MODAL_ENABLED)
 
 
 @app.route("/health")
@@ -608,6 +608,18 @@ _TALLY_SIGNING_SECRET = os.getenv('TALLY_SIGNING_SECRET', '')
 # The Tally fallback needs a form to embed; the signing secret alone doesn't say
 # which one. Optional — with it unset the client simply never offers the fallback.
 _TALLY_FORM_URL       = os.getenv('TALLY_FORM_URL', '')
+
+# Self-hosted "watch to unlock" modal that stands in for a real rewarded-video ad
+# while ayeT-Studios/Wannads publisher approvals are pending. Default ON: unset
+# means the stub renders. Only an explicit falsy value turns it off (e.g. once a
+# real ad SDK is swapped in and the stub is no longer wanted at all).
+_GATE_STUB_MODAL_ENABLED = os.getenv('GATE_STUB_MODAL_ENABLED', '1').strip().lower() \
+    not in ('0', 'false', 'no', 'off')
+
+# kind values the gate stub completion endpoint accepts — mirrors the import /
+# hand-export soft-limit gates this modal will eventually stand in front of
+# (Task 6, not part of this change).
+_GATE_STUB_KINDS = ('import', 'hand_export')
 
 _ANON_SESSION_TTL   = 3600          # 1h, matched by the signed token's exp
 _ANON_SESSION_PREFIX = 'anon_sessions/'
@@ -1252,6 +1264,62 @@ def _reverse_survey_credit(uid, doc_id, payload):
     except Exception as exc:
         print(f"[_reverse_survey_credit] failed for uid={uid} {doc_id}: "
               f"{type(exc).__name__}: {exc}")
+
+
+# ── Gate stub modal ("watch to unlock") ────────────────────────────────────
+# Self-hosted stand-in for a real rewarded-video ad while ayeT-Studios/Wannads
+# publisher approvals are pending — see _showGateStubModal in static/app.js.
+#
+# This endpoint only records that the stub ran its course; it does not grant
+# anything and does not verify the 30s elapsed client-side. A technical user
+# who bypasses the JS timer still gets recorded as completed — acceptable for
+# an MVP stub with no real ad revenue at stake, and no gate check consumes
+# these records yet (that wiring is a separate task, "Task 6").
+#
+# The write shape below is deliberately the users/{uid}/gate_events shape a
+# parallel task is defining alongside a shared _record_gate_event(uid, kind,
+# gated, provider, completion_id) helper (on a different branch, not present in
+# this worktree) — gate_provider='stub' is this modal's value in that scheme.
+# Writing it out by hand here means this becomes a drop-in once that helper
+# lands, rather than a second, divergent event shape.
+
+@app.route('/api/gate/stub-completion', methods=['POST'])
+def gate_stub_completion():
+    """POST /api/gate/stub-completion — records one stub-modal completion.
+
+    Idempotent on completion_id (client-generated once per modal open): a
+    double-clicked OK button, or a retried request, replays the same id and
+    ref.create() below refuses the second write rather than recording twice.
+    """
+    uid = _verify_bearer(request)
+    if not uid:
+        return jsonify({'error': 'login_required'}), 401
+
+    data = request.get_json(silent=True) or {}
+    kind = (data.get('kind') or '').strip()
+    if kind not in _GATE_STUB_KINDS:
+        return jsonify({'error': f'kind must be one of {", ".join(_GATE_STUB_KINDS)}'}), 400
+    completion_id = (data.get('completion_id') or '').strip()
+    if not completion_id:
+        return jsonify({'error': 'completion_id is required'}), 400
+
+    from google.api_core import exceptions as gexc
+    ref = _user_ref(uid).collection('gate_events').document(completion_id)
+    payload = {
+        'kind': kind,
+        'gated': True,
+        'gate_provider': 'stub',
+        'at': int(time.time()),
+        'gate_completion_id': completion_id,
+    }
+    try:
+        ref.create(payload)
+        already_recorded = False
+    except gexc.AlreadyExists:
+        already_recorded = True
+
+    return jsonify({'ok': True, 'kind': kind, 'completion_id': completion_id,
+                     'already_recorded': already_recorded})
 
 
 def _tally_field(fields, name):

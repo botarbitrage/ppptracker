@@ -49,13 +49,13 @@ service cloud.firestore {
     // itself, and because rule matches are OR'd that permissive block would
     // silently re-open the server-owned-field hole closed above.
     //
-    // ad_jtis and survey_completions are carved out for the same reason and
-    // must be excluded *here* rather than only re-matched below: rule matches
-    // are OR'd, so a blanket write on the parent would outvote a stricter rule
-    // on the child.
+    // ad_jtis, survey_completions and gate_events are carved out for the same
+    // reason and must be excluded *here* rather than only re-matched below:
+    // rule matches are OR'd, so a blanket write on the parent would outvote a
+    // stricter rule on the child.
     match /users/{uid}/{sub}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == uid
-                         && !(sub in ['ad_jtis', 'survey_completions']);
+                         && !(sub in ['ad_jtis', 'survey_completions', 'gate_events']);
     }
 
     // Spent export unlocks. The whole point of the jti record is that it exists
@@ -70,6 +70,15 @@ service cloud.firestore {
     // makes a redelivered postback pay once. Client-deletable would mean one
     // survey could be cashed in repeatedly.
     match /users/{uid}/survey_completions/{completionId} {
+      allow read:  if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // Gate history (survey/ad-gate completions across providers, incl. the
+    // "watch to unlock" stub in this change — gate_provider: 'stub'). Same
+    // reasoning as survey_completions: a client-writable completion record
+    // would let a gate be cashed in repeatedly.
+    match /users/{uid}/gate_events/{completionId} {
       allow read:  if request.auth != null && request.auth.uid == uid;
       allow write: if false;
     }
