@@ -10,8 +10,6 @@ let _importCount = 0;   // tracks how many times Import has been successfully us
 const FREE_HAND_LIMIT            = 30;   // hands shown per table
 const FREE_HISTORY_DAYS          = 7;
 const FREE_IMPORTS_PER_DAY       = 3;
-const FREE_HAND_EXPORTS_PER_DAY  = 5;
-const FREE_TOURNEY_EXPORTS_DAY   = 1;
 
 const _SESSION_KEY         = 'pppha_session_id';
 // An import made while signed out lives on the server for an hour; this is the
@@ -82,15 +80,27 @@ const _UPGRADE_REASONS = {
   hands:         `Free accounts see only the last ${FREE_HAND_LIMIT} hands. Upgrade to Pro for unlimited history.`,
   tourney:       'Tournament exports are limited on the free plan.',
   import_quota:  `That's all ${FREE_IMPORTS_PER_DAY} imports for today. Upgrade to Pro for unlimited imports.`,
-  hand_quota:    `That's all ${FREE_HAND_EXPORTS_PER_DAY} hand exports for today. Upgrade to Pro for unlimited exports.`,
-  tourney_quota: `Free accounts get ${FREE_TOURNEY_EXPORTS_DAY} tournament export a day. Upgrade to Pro for unlimited exports.`,
+  // Fallbacks only — _handleExportFailure normally passes the live limit as
+  // customText, sourced from the server's response body (see _quotaReasonText).
+  hand_quota:    "You've used your hand exports for today. Upgrade to Pro for unlimited exports.",
+  tourney_quota: "You've used your tournament exports for today. Upgrade to Pro for unlimited exports.",
   full_session:  'Exporting a whole session in one file is a Pro feature.',
   history:       `Free accounts keep ${FREE_HISTORY_DAYS} days of history. Upgrade to Pro to keep everything.`,
 };
 
-function showUpgradeModal(reason) {
+// hand_quota/tourney_quota copy depends on the admin-configured hard limit, which
+// arrives per-request in the quota_exceeded response body (app.py's `limit` field) —
+// building it from a module-level constant here would drift the moment an admin
+// changes the config without a redeploy.
+function _quotaReasonText(kind, limit) {
+  return kind === 'tourney'
+    ? `Free accounts get ${limit} tournament export${limit === 1 ? '' : 's'} a day. Upgrade to Pro for unlimited exports.`
+    : `That's all ${limit} hand export${limit === 1 ? '' : 's'} for today. Upgrade to Pro for unlimited exports.`;
+}
+
+function showUpgradeModal(reason, customText) {
   const reasonEl = document.getElementById('pro-modal-reason');
-  if (reasonEl) reasonEl.textContent = _UPGRADE_REASONS[reason] || '';
+  if (reasonEl) reasonEl.textContent = customText || _UPGRADE_REASONS[reason] || '';
   // Reset coming-soon banner and button
   const cs  = document.getElementById('pro-coming-soon');
   const btn = document.getElementById('pro-upgrade-btn');
@@ -176,7 +186,10 @@ async function _handleExportFailure(res, kind, retry) {
     return `Outside your ${FREE_HISTORY_DAYS}-day history`;
   }
   if (err === 'quota_exceeded') {
-    showUpgradeModal(kind === 'tourney' ? 'tourney_quota' : 'hand_quota');
+    showUpgradeModal(
+      kind === 'tourney' ? 'tourney_quota' : 'hand_quota',
+      typeof body.limit === 'number' ? _quotaReasonText(kind, body.limit) : null
+    );
     return "That's your last one for today";
   }
   if (err === 'survey_required') {
@@ -3357,6 +3370,14 @@ function _applyExportAdsCopy() {
   });
   document.querySelectorAll('[data-exportads-tourney-hard]').forEach(el => {
     el.textContent = `${_EXPORT_ADS.tourney_hard_limit}/day`;
+  });
+  document.querySelectorAll('[data-exportads-hand-line]').forEach(el => {
+    const n = _EXPORT_ADS.hand_hard_limit;
+    el.textContent = `${n} hand export${n === 1 ? '' : 's'}/day`;
+  });
+  document.querySelectorAll('[data-exportads-tourney-line]').forEach(el => {
+    const n = _EXPORT_ADS.tourney_hard_limit;
+    el.textContent = `${n} tournament export${n === 1 ? '' : 's'}/day`;
   });
   // The shipped, translated footnote already says "first two" — only
   // overwrite it (in English) once an admin actually changes that number,
