@@ -411,20 +411,11 @@
             <div class="p-3">
               <h3 class="adm-subhead">Export Ads</h3>
               <p class="adm-meta mb-3">
-                Free users answer a survey to unlock hand-export slots past the free ones
-                each day. <b class="text-white">Hard limit</b> is the daily cap — set it to
-                0 to block the functionality outright (no survey is ever shown, there's
-                just nothing to unlock). <b class="text-white">Soft limit</b> is how many
-                of those slots need a survey, counted off the end: with a hard limit of 5
-                and a soft limit of 3, the first 2 exports are free and the last 3 need a
-                survey each. Soft limit 0 means every slot up to the hard cap is free.
-                Tournament exports use a different model: a fixed number of exports free
-                for the lifetime of the account, then a capped number per week after that.
-                <b class="text-white">Free (lifetime)</b> is that lifetime allowance;
-                <b class="text-white">Weekly limit</b> is the cap once it's used up.
-                Changes apply to the site immediately, no deploy — though the gate that
-                enforces the tournament-export numbers against a user's usage ships in a
-                later change, so those two fields are configuration only for now.
+                Hand exports: <b class="text-white">Free</b> per day need no survey,
+                <b class="text-white">Gated</b> more per day need one. Tournament exports:
+                <b class="text-white">Free (lifetime)</b> once ever, then
+                <b class="text-white">Weekly limit</b> per week via survey. Applies
+                immediately, no deploy.
               </p>
               <div id="adm-ads-error" class="alert alert-danger d-none py-2"></div>
               <div id="adm-ads-body"></div>
@@ -435,12 +426,9 @@
 
               <h3 class="adm-subhead mt-4">Import Ads</h3>
               <p class="adm-meta mb-3">
-                Imports aren't split into hand/tourney kinds — just one daily
-                allowance. <b class="text-white">Free</b> is how many imports a day
-                need no survey; <b class="text-white">Gated</b> is how many more
-                survey-gated imports are available on top of those. These numbers
-                aren't enforced yet — the import survey gate is a future change —
-                but changes here apply immediately once it is, no deploy.
+                <b class="text-white">Free</b> imports per day need no survey,
+                <b class="text-white">Gated</b> more per day need one. Applies
+                immediately, no deploy.
               </p>
               <div id="adm-imports-error" class="alert alert-danger d-none py-2"></div>
               <div id="adm-imports-body"></div>
@@ -715,24 +703,21 @@
 
   function renderExportAds() {
     const hard = ADS['hand_hard_limit'], soft = ADS['hand_soft_limit'];
-    const free = Math.max(hard - soft, 0);
+    const free = Math.max(hard - soft, 0), gated = Math.max(soft, 0);
     const tFree = ADS['tourney_lifetime_free'], tWeekly = ADS['tourney_weekly_limit'];
     document.getElementById('adm-ads-body').innerHTML = `
       <div class="adm-gam-week">
         <span class="adm-gam-wk">Hand exports</span>
         <label class="d-flex align-items-center gap-2" style="font-size:.82rem;color:var(--muted);">
-          Hard limit
+          Free
           <input type="number" min="0" step="1" class="form-control form-control-sm"
-                 style="width:70px;" id="adm-ads-hand-hard" value="${esc(hard)}"
-                 oninput="renderExportAdsFreeCount('hand')"/>
+                 style="width:70px;" id="adm-ads-hand-free" value="${esc(free)}"/>
         </label>
         <label class="d-flex align-items-center gap-2" style="font-size:.82rem;color:var(--muted);">
-          Soft limit
+          Gated
           <input type="number" min="0" step="1" class="form-control form-control-sm"
-                 style="width:70px;" id="adm-ads-hand-soft" value="${esc(soft)}"
-                 oninput="renderExportAdsFreeCount('hand')"/>
+                 style="width:70px;" id="adm-ads-hand-gated" value="${esc(gated)}"/>
         </label>
-        <span class="adm-meta" id="adm-ads-hand-note">${free} free/day, ${Math.max(soft, 0)} survey-gated</span>
       </div>
       <div class="adm-gam-week">
         <span class="adm-gam-wk">Tournament exports</span>
@@ -750,31 +735,21 @@
     document.getElementById('adm-ads-status').textContent = '';
   }
 
-  // Live "N free/day, M survey-gated" readout as the admin edits the two numbers,
-  // so they can see the effect of hard/soft before saving.
-  function renderExportAdsFreeCount(kind) {
-    const hard = parseInt(document.getElementById(`adm-ads-${kind}-hard`).value, 10);
-    const soft = parseInt(document.getElementById(`adm-ads-${kind}-soft`).value, 10);
-    const note = document.getElementById(`adm-ads-${kind}-note`);
-    if (isNaN(hard) || isNaN(soft)) { note.textContent = ''; return; }
-    const free = Math.max(hard - soft, 0);
-    note.textContent = hard === 0
-      ? 'blocked — no exports allowed'
-      : `${free} free/day, ${Math.max(Math.min(soft, hard), 0)} survey-gated`;
-  }
-
   async function saveExportAds() {
     const btn = document.getElementById('adm-ads-save');
     showAdsError('');
     const payload = {};
-    for (const field of ['hard', 'soft']) {
+    const handVals = {};
+    for (const field of ['free', 'gated']) {
       const val = parseInt(document.getElementById(`adm-ads-hand-${field}`).value, 10);
       if (isNaN(val) || val < 0) {
-        showAdsError(`"Hand exports" ${field} limit must be a non-negative number.`);
+        showAdsError(`"Hand exports" ${field === 'free' ? 'Free' : 'Gated'} must be a non-negative number.`);
         return;
       }
-      payload[`hand_${field}_limit`] = val;
+      handVals[field] = val;
     }
+    payload['hand_hard_limit'] = handVals.free + handVals.gated;
+    payload['hand_soft_limit'] = handVals.gated;
     const tFree = parseInt(document.getElementById('adm-ads-tourney-lifetime-free').value, 10);
     if (isNaN(tFree) || tFree < 0) {
       showAdsError('"Tournament exports" free (lifetime) must be a non-negative number.');
