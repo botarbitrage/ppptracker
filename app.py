@@ -181,7 +181,7 @@ def _fetch_record(uid, rdkey, summary, referer):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", gate_stub_modal_enabled=_GATE_STUB_MODAL_ENABLED)
 
 
 @app.route("/health")
@@ -608,6 +608,18 @@ _TALLY_SIGNING_SECRET = os.getenv('TALLY_SIGNING_SECRET', '')
 # The Tally fallback needs a form to embed; the signing secret alone doesn't say
 # which one. Optional — with it unset the client simply never offers the fallback.
 _TALLY_FORM_URL       = os.getenv('TALLY_FORM_URL', '')
+
+# Self-hosted "watch to unlock" modal that stands in for a real rewarded-video ad
+# while ayeT-Studios/Wannads publisher approvals are pending. Default ON: unset
+# means the stub renders. Only an explicit falsy value turns it off (e.g. once a
+# real ad SDK is swapped in and the stub is no longer wanted at all).
+_GATE_STUB_MODAL_ENABLED = os.getenv('GATE_STUB_MODAL_ENABLED', '1').strip().lower() \
+    not in ('0', 'false', 'no', 'off')
+
+# kind values the gate stub completion endpoint accepts — mirrors the import /
+# hand-export soft-limit gates this modal will eventually stand in front of
+# (Task 6, not part of this change).
+_GATE_STUB_KINDS = ('import', 'hand_export')
 
 _ANON_SESSION_TTL   = 3600          # 1h, matched by the signed token's exp
 _ANON_SESSION_PREFIX = 'anon_sessions/'
@@ -1154,7 +1166,7 @@ def _bump_tourney_export_usage(uid):
 # (the existing CPX Research survey), and a future rewarded-video SDK adds
 # 'ayet' / 'wannads' without touching this schema.
 
-def _record_gate_event(uid, kind, gated, provider=None, completion_id=None):
+def _record_gate_event(uid, kind, gated, provider=None, completion_id=None, doc_id=None):
     """Append one row to users/{uid}/gate_events.
 
     kind:      'tourney_export' | 'hand_export' | 'import'
@@ -1164,15 +1176,29 @@ def _record_gate_event(uid, kind, gated, provider=None, completion_id=None):
                …), or None when gated is False / the unlock was a spent credit
                with no fresh provider event.
     completion_id: the provider's own transaction/response id, when there is
-               one (e.g. CPX's trans_id), else None.
+               one (e.g. CPX's trans_id), else None. Stored on the event but
+               NOT used as the document id unless doc_id is also passed.
+    doc_id:    explicit Firestore document id, for callers that need
+               idempotency keyed by a client- or provider-supplied id (e.g.
+               the gate-stub modal keys this by its completion_id so a
+               double-clicked OK button can't double-grant). Defaults to a
+               fresh random id, which makes the write fire-and-forget.
 
-    Best-effort and append-only — a failure here must never block the export/
-    import it's describing, so it only logs and returns.
+    Best-effort and append-only for the default (random-id) case — a failure
+    here must never block the export/import it's describing, so it only logs
+    and returns None. When doc_id is given, an AlreadyExists is the caller's
+    own idempotency signal and is returned as False rather than swallowed;
+    every other failure is still swallowed and logged.
 
-    Not called from any route yet; the future gate-wiring task calls this from
-    the tourney-export, hand-export and import gate paths.
+    Returns True if a new event was written, False if doc_id already existed,
+    None if the write failed for any other reason (or wasn't attempted).
+
+    Only called today from gate_stub_completion(); the future gate-wiring
+    task calls this from the tourney-export, hand-export and import gate
+    paths too.
     """
     import uuid
+    from google.api_core import exceptions as gexc
     from google.cloud import firestore as gcf
     event = {
         'kind': kind,
@@ -1181,10 +1207,15 @@ def _record_gate_event(uid, kind, gated, provider=None, completion_id=None):
         'at': gcf.SERVER_TIMESTAMP,
         'gate_completion_id': completion_id,
     }
+    ref = _user_ref(uid).collection('gate_events').document(doc_id or uuid.uuid4().hex)
     try:
-        _user_ref(uid).collection('gate_events').document(uuid.uuid4().hex).create(event)
+        ref.create(event)
+        return True
+    except gexc.AlreadyExists:
+        return False
     except Exception as exc:
         print(f"[_record_gate_event] failed for uid={uid} kind={kind}: {type(exc).__name__}: {exc}")
+        return None
 
 
 # ── Anonymous import sessions ─────────────────────────────────────────────────
@@ -1443,6 +1474,52 @@ def _reverse_survey_credit(uid, doc_id, payload):
     except Exception as exc:
         print(f"[_reverse_survey_credit] failed for uid={uid} {doc_id}: "
               f"{type(exc).__name__}: {exc}")
+
+
+# ── Gate stub modal ("watch to unlock") ────────────────────────────────────
+# Self-hosted stand-in for a real rewarded-video ad while ayeT-Studios/Wannads
+# publisher approvals are pending — see _showGateStubModal in static/app.js.
+#
+# This endpoint only records that the stub ran its course; it does not grant
+# anything and does not verify the 30s elapsed client-side. A technical user
+# who bypasses the JS timer still gets recorded as completed — acceptable for
+# an MVP stub with no real ad revenue at stake, and no gate check consumes
+# these records yet (that wiring is a separate task, "Task 6").
+#
+# Recorded through the shared _record_gate_event() helper (above), keyed by
+# the client's completion_id via its doc_id param so a double-clicked OK
+# button or a retried request replays the same id and gets refused as a
+# duplicate rather than recorded twice.
+
+@app.route('/api/gate/stub-completion', methods=['POST'])
+def gate_stub_completion():
+    """POST /api/gate/stub-completion — records one stub-modal completion.
+
+    Idempotent on completion_id (client-generated once per modal open).
+    """
+    uid = _verify_bearer(request)
+    if not uid:
+        return jsonify({'error': 'login_required'}), 401
+
+    data = request.get_json(silent=True) or {}
+    kind = (data.get('kind') or '').strip()
+    if kind not in _GATE_STUB_KINDS:
+        return jsonify({'error': f'kind must be one of {", ".join(_GATE_STUB_KINDS)}'}), 400
+    completion_id = (data.get('completion_id') or '').strip()
+    if not completion_id:
+        return jsonify({'error': 'completion_id is required'}), 400
+
+    written = _record_gate_event(uid, kind, gated=True, provider='stub',
+                                  completion_id=completion_id, doc_id=completion_id)
+    if written is None:
+        # A real Firestore failure, not just a duplicate — _record_gate_event
+        # swallows it for its fire-and-forget callers, but this endpoint's
+        # entire job is recording the completion, so surface it rather than
+        # claiming success on a write that didn't happen.
+        return jsonify({'error': 'failed_to_record'}), 500
+
+    return jsonify({'ok': True, 'kind': kind, 'completion_id': completion_id,
+                     'already_recorded': written is False})
 
 
 def _tally_field(fields, name):

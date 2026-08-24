@@ -85,8 +85,10 @@ service cloud.firestore {
     }
 
     // Gate-event history, shared by tourney-export/hand-export/import gate
-    // checks. Append-only and server-written; a client-writable log would be
-    // worthless for the audit/reporting it exists for.
+    // checks (incl. the "watch to unlock" stub — gate_provider: 'stub').
+    // Append-only and server-written; a client-writable log would be
+    // worthless for the audit/reporting it exists for, and would let a gate
+    // be cashed in repeatedly.
     match /users/{uid}/gate_events/{eventId} {
       allow read:  if request.auth != null && request.auth.uid == uid;
       allow write: if false;

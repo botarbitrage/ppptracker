@@ -706,6 +706,49 @@
   </div>
 </div>
 
+<!-- ── Gate Stub Modal ("watch to unlock") ───────────────────
+     Self-hosted stand-in for a real rewarded-video ad while ayeT-Studios and
+     Wannads publisher approvals are pending (see _showGateStubModal in
+     static/app.js). Same completion contract a real ad would have: 30s of
+     forced attention, an OK button that only enables once the timer elapses,
+     and a server-side signal (POST /api/gate/stub-completion) that records the
+     completion so a future gate check — not yet wired, see Task 6 — can grant
+     the next action.
+
+     The body doubles as a Pro upsell: forced attention is a conversion
+     opportunity while there's no ad revenue to lose either way.
+
+     modal-fullscreen-sm-down gives the full-screen-on-mobile /
+     centered-overlay-on-desktop split from a single Bootstrap class, matching
+     how forced-attention gates should feel unmissable on a small screen. -->
+<div class="modal fade" id="gate-stub-modal" tabindex="-1" aria-hidden="true" aria-labelledby="gate-stub-modal-title">
+  <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+    <div class="modal-content" style="background:var(--panel);border:1px solid var(--border);color:var(--text)">
+      <div class="modal-header" style="border-bottom:1px solid var(--border)">
+        <h2 class="modal-title h5 d-flex align-items-center gap-2" id="gate-stub-modal-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          {{ _('Unlock') }} <span id="gate-stub-kind-label"></span>
+        </h2>
+      </div>
+      <div class="modal-body" style="padding:18px 20px">
+        <p class="mb-2" style="font-size:.9rem">
+          {{ _("This app is in Early Access — normally a short ad would play here.") }}
+        </p>
+        <p class="mb-3" style="font-size:.9rem">
+          {{ _('Go Pro for unlimited') }} <span id="gate-stub-feature-label"></span> {{ _('— no ads, no waiting.') }}
+          <button type="button" class="btn btn-link btn-sm px-1 align-baseline" id="gate-stub-pro-btn" style="font-weight:600">
+            {{ _('Go Pro') }}
+          </button>
+        </p>
+        <button type="button" id="gate-stub-ok-btn" class="btn btn-import btn-lg w-100" disabled></button>
+        <p class="mt-2 mb-0 text-center" style="color:var(--muted);font-size:.78rem">
+          {{ _('Or wait 30 seconds to unlock this one.') }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ── Auth Modal ────────────────────────────────────────── -->
 <div class="modal fade" id="modal-auth" tabindex="-1" aria-hidden="true" aria-labelledby="modal-auth-title">
   <div class="modal-dialog modal-dialog-centered" style="max-width:420px">
@@ -1041,8 +1084,26 @@
     authNotReady: "{{ _('Auth not ready — please wait a moment and try again.') }}",
     googleSignInFailed: "{{ _('Google sign-in failed.') }}"
   };
+  {# Same hand-over as I18N_AUTH above, for the gate stub modal's dynamic bits
+     (_showGateStubModal in app.js) — the kind/feature labels and the countdown
+     button text. unlockCountdown keeps a %(seconds)s msgid (so pybabel still
+     flags it python-format and translators can move the placeholder), but we
+     can't leave it unresolved here: Jinja's gettext() always %-formats its
+     result, even with zero kwargs, so an unresolved %(seconds)s would raise
+     KeyError at render time. Passing seconds='__SECONDS__' gives Python
+     something to substitute; app.js then replaces that literal token with the
+     real countdown number every tick. #}
+  window.I18N_GATE_STUB = {
+    kindLabelImport:    "{{ _('this import') }}",
+    kindLabelHandExport: "{{ _('this hand export') }}",
+    featureImport:      "{{ _('imports') }}",
+    featureHandExport:  "{{ _('hand exports') }}",
+    unlockCountdown:    "{{ _('Unlock in %(seconds)s seconds…', seconds='__SECONDS__') }}",
+    unlockReady:        "{{ _('Unlock') }}"
+  };
+  window.GATE_STUB_MODAL_ENABLED = {{ 'true' if gate_stub_modal_enabled else 'false' }};
 </script>
-<script src="/static/app.js?v=59"></script>
+<script src="/static/app.js?v=60"></script>
 <script>
   if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
     navigator.serviceWorker.register('/static/sw.js', { scope: '/' })

@@ -129,6 +129,19 @@ route yet; wiring it into the tourney-export, hand-export and import gate
 paths is a later task. Owner-readable like `ad_jtis` and
 `survey_completions`, for the same audit reason.
 
+The `'stub'` provider is written by `POST /api/gate/stub-completion` (the
+"watch to unlock" modal), keyed by a client-generated `completion_id` via
+`create()` so a double-clicked OK button or a retried request is recognised
+as a duplicate and does not double-grant.
+
+**Known gap (documented, not fixed):** the stub-completion endpoint does not
+verify that the client's 30s countdown actually elapsed — it trusts the
+browser. A technical user who calls the endpoint directly, or edits
+`_GATE_STUB_SECONDS` in devtools, still gets a completion recorded.
+Acceptable for an MVP stub with no ad revenue on the line; will need
+revisiting once this record starts being consumed to actually grant
+something (the gate-wiring task, not yet built).
+
 ---
 
 ## `users/{uid}/tournaments/{tourney_id}`
