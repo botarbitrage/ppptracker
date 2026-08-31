@@ -196,3 +196,4 @@ the unlock kind (`hand` or `tourney`) and is echoed back from the widget URL.
 hidden fields from URL query params of the same name), and a webhook pointed at
 `https://<host>/api/tally/callback` with signing enabled using
 `TALLY_SIGNING_SECRET`.
+# mirror test 2026-08-31T04:55:42Z
