@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="180" viewBox="0 0 1400 180"
+     role="img" aria-label="Go Pro — unlimited imports, history that never expires, whole-session exports, no surveys ever">
+  <title>Go Pro — unlimited imports, no surveys, ever</title>
+  <!-- Placeholder promo art for the horizontal mid-page banner slot (1400x180).
+       Alternate frame: the Pro upsell. Benefit copy mirrors the Free vs Pro
+       table in templates/index.html. The price is deliberately not baked into
+       the art — the live figure comes from the pricing config. -->
+  <defs>
+    <linearGradient id="m2bg" x1="0" y1="0" x2="1" y2="0.6">
+      <stop offset="0" stop-color="#141400"/>
+      <stop offset="0.45" stop-color="#0B161F"/>
+      <stop offset="1" stop-color="#06110b"/>
+    </linearGradient>
+    <linearGradient id="m2cta" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#cccc00"/>
+      <stop offset="1" stop-color="#e0e02a"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1400" height="180" fill="url(#m2bg)"/>
+  <path d="M22 40 V18 H48" fill="none" stroke="#5c5c00" stroke-width="2"/>
+  <path d="M1378 140 V162 H1352" fill="none" stroke="#5c5c00" stroke-width="2"/>
+
+  <!-- lockup -->
+  <text x="58" y="102" font-size="38" fill="#cccc00"
+        font-family="'Segoe UI Symbol', system-ui, sans-serif">&#9733;</text>
+  <g font-family="Oxanium, 'Segoe UI', system-ui, sans-serif" fill="#cccc00">
+    <text x="106" y="88" font-size="34" font-weight="800"
+          textLength="118" lengthAdjust="spacingAndGlyphs">GO PRO</text>
+    <text x="106" y="112" font-size="11" font-weight="600" fill="#8c8c5a"
+          textLength="150" lengthAdjust="spacingAndGlyphs">EARLY ACCESS PRICE</text>
+  </g>
+
+  <line x1="300" y1="46" x2="300" y2="134" stroke="#5c5c00" stroke-width="1"/>
+
+  <!-- benefits, two columns -->
+  <g font-family="'Segoe UI', system-ui, sans-serif" font-size="16" fill="#d0ddd0">
+    <!-- textLength is set per string, roughly proportional to its character
+         count — forcing unequal strings to one width stretches the short ones. -->
+    <text x="342" y="78" fill="#00e676" font-size="17">&#10003;</text>
+    <text x="366" y="78" textLength="150" lengthAdjust="spacingAndGlyphs">Unlimited imports</text>
+
+    <text x="342" y="112" fill="#00e676" font-size="17">&#10003;</text>
+    <text x="366" y="112" textLength="198" lengthAdjust="spacingAndGlyphs">Unlimited daily exports</text>
+
+    <text x="600" y="78" fill="#00e676" font-size="17">&#10003;</text>
+    <text x="624" y="78" textLength="222" lengthAdjust="spacingAndGlyphs">History that never expires</text>
+
+    <text x="600" y="112" fill="#00e676" font-size="17">&#10003;</text>
+    <text x="624" y="112" textLength="140" lengthAdjust="spacingAndGlyphs">No surveys, ever</text>
+  </g>
+
+  <line x1="890" y1="46" x2="890" y2="134" stroke="#5c5c00" stroke-width="1"/>
+
+  <text x="928" y="96" font-size="19" font-weight="600" fill="#8c8c5a"
+        font-family="'Segoe UI', system-ui, sans-serif"
+        textLength="164" lengthAdjust="spacingAndGlyphs">Cancel any time.</text>
+
+  <!-- call to action -->
+  <rect x="1122" y="62" width="216" height="56" rx="10" fill="url(#m2cta)"/>
+  <text x="1230" y="97" text-anchor="middle" font-size="17" font-weight="700" fill="#171700"
+        font-family="Oxanium, 'Segoe UI', system-ui, sans-serif"
+        textLength="132" lengthAdjust="spacingAndGlyphs">UNLOCK PRO</text>
+
+  <text x="1338" y="150" text-anchor="end" font-size="9" fill="#5f5f3f"
+        font-family="'Segoe UI', system-ui, sans-serif"
+        textLength="82" lengthAdjust="spacingAndGlyphs">PLACEHOLDER ART</text>
+</svg>

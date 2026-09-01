@@ -33,3 +33,4 @@ jobs:
           python test_pricing_refs.py
           python test_gamification.py
           python test_tiering.py
+          python test_banners_config.py

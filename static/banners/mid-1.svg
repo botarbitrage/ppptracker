@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="180" viewBox="0 0 1400 180"
+     role="img" aria-label="Paste any PPPoker replay link and get instant stats, graphs and PokerStars-ready exports">
+  <title>PPPoker Hand Tracker — paste a replay link, get instant stats</title>
+  <!-- Placeholder promo art for the horizontal mid-page banner slot (1400x180).
+       The slot renders at width:100% with max-height:180px, so this scales
+       down on narrower screens — type sizes are kept large enough to stay
+       legible at roughly two-thirds scale. -->
+  <defs>
+    <linearGradient id="m1bg" x1="0" y1="0" x2="1" y2="0.6">
+      <stop offset="0" stop-color="#0B161F"/>
+      <stop offset="0.5" stop-color="#0e2018"/>
+      <stop offset="1" stop-color="#071410"/>
+    </linearGradient>
+    <linearGradient id="m1cta" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#3CAC53"/>
+      <stop offset="1" stop-color="#39B577"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1400" height="180" fill="url(#m1bg)"/>
+  <path d="M22 40 V18 H48" fill="none" stroke="#1D5D3D" stroke-width="2"/>
+  <path d="M1378 140 V162 H1352" fill="none" stroke="#1D5D3D" stroke-width="2"/>
+
+  <!-- brand lockup -->
+  <text x="60" y="104" font-size="44" fill="#00e676"
+        font-family="'Segoe UI Symbol', system-ui, sans-serif">&#9824;</text>
+  <g font-family="Oxanium, 'Segoe UI', system-ui, sans-serif" fill="#00e676">
+    <text x="108" y="84" font-size="22" font-weight="800"
+          textLength="236" lengthAdjust="spacingAndGlyphs">PPPOKER HAND TRACKER</text>
+    <text x="108" y="106" font-size="11" font-weight="600" fill="#6b8c6b"
+          textLength="182" lengthAdjust="spacingAndGlyphs">ANALYSE &#183; STUDY &#183; WIN</text>
+  </g>
+
+  <line x1="392" y1="46" x2="392" y2="134" stroke="#1D5D3D" stroke-width="1"/>
+
+  <!-- message -->
+  <g font-family="'Segoe UI', system-ui, sans-serif">
+    <text x="436" y="82" font-size="27" font-weight="700" fill="#d0ddd0"
+          textLength="392" lengthAdjust="spacingAndGlyphs">Paste any PPPoker replay link.</text>
+    <text x="436" y="115" font-size="17" fill="#6b8c6b"
+          textLength="508" lengthAdjust="spacingAndGlyphs">Instant stats, graphs and PokerStars-ready exports &#8212; free to start.</text>
+  </g>
+
+  <!-- call to action -->
+  <rect x="1122" y="62" width="216" height="56" rx="10" fill="url(#m1cta)"/>
+  <text x="1230" y="97" text-anchor="middle" font-size="17" font-weight="700" fill="#04140c"
+        font-family="Oxanium, 'Segoe UI', system-ui, sans-serif"
+        textLength="150" lengthAdjust="spacingAndGlyphs">IMPORT A HAND</text>
+
+  <text x="1338" y="150" text-anchor="end" font-size="9" fill="#3f5f4a"
+        font-family="'Segoe UI', system-ui, sans-serif"
+        textLength="82" lengthAdjust="spacingAndGlyphs">PLACEHOLDER ART</text>
+</svg>
