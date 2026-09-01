@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="480" viewBox="0 0 120 480"
+     role="img" aria-label="PPPoker Hand Tracker — Analyse, Study, Win">
+  <title>PPPoker Hand Tracker — Analyse, Study, Win</title>
+  <!-- Placeholder promo art for the vertical side banner slot (120x480).
+       Brand colours are the same tokens style.css defines. Fonts are pinned
+       with textLength so the layout holds in whatever font the browser falls
+       back to — an SVG loaded through <img> cannot fetch the Google Fonts
+       the rest of the site uses. -->
+  <defs>
+    <linearGradient id="s1bg" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#0B161F"/>
+      <stop offset="0.55" stop-color="#0d1f17"/>
+      <stop offset="1" stop-color="#061410"/>
+    </linearGradient>
+    <linearGradient id="s1cta" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#3CAC53"/>
+      <stop offset="1" stop-color="#39B577"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="120" height="480" fill="url(#s1bg)"/>
+
+  <!-- corner accents -->
+  <path d="M10 26 V10 H30" fill="none" stroke="#1D5D3D" stroke-width="2"/>
+  <path d="M110 454 V470 H90" fill="none" stroke="#1D5D3D" stroke-width="2"/>
+
+  <!-- suit mark -->
+  <text x="60" y="82" font-size="40" text-anchor="middle" fill="#00e676"
+        font-family="'Segoe UI Symbol', system-ui, sans-serif">&#9824;</text>
+
+  <!-- wordmark -->
+  <g font-family="Oxanium, 'Segoe UI', system-ui, sans-serif" font-weight="800"
+     text-anchor="middle" fill="#00e676">
+    <text x="60" y="124" font-size="17" textLength="86" lengthAdjust="spacingAndGlyphs">PPPOKER</text>
+    <text x="60" y="146" font-size="17" textLength="52" lengthAdjust="spacingAndGlyphs">HAND</text>
+    <text x="60" y="168" font-size="17" textLength="84" lengthAdjust="spacingAndGlyphs">TRACKER</text>
+  </g>
+
+  <line x1="30" y1="186" x2="90" y2="186" stroke="#1D5D3D" stroke-width="1"/>
+
+  <!-- vertical tagline -->
+  <text transform="translate(60 300) rotate(-90)" text-anchor="middle"
+        font-family="Oxanium, 'Segoe UI', system-ui, sans-serif" font-weight="600"
+        font-size="12" fill="#6b8c6b" textLength="170" lengthAdjust="spacingAndGlyphs">
+    ANALYSE &#183; STUDY &#183; WIN
+  </text>
+
+  <!-- call to action -->
+  <rect x="14" y="396" width="92" height="34" rx="8" fill="url(#s1cta)"/>
+  <text x="60" y="418" text-anchor="middle" font-size="11" font-weight="700" fill="#04140c"
+        font-family="Oxanium, 'Segoe UI', system-ui, sans-serif"
+        textLength="74" lengthAdjust="spacingAndGlyphs">IMPORT A HAND</text>
+
+  <text x="60" y="450" text-anchor="middle" font-size="8" fill="#3f5f4a"
+        font-family="'Segoe UI', system-ui, sans-serif"
+        textLength="66" lengthAdjust="spacingAndGlyphs">PLACEHOLDER ART</text>
+</svg>

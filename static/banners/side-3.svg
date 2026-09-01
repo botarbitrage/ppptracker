@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="480" viewBox="0 0 120 480"
+     role="img" aria-label="Go Pro — unlimited imports, no surveys, ever">
+  <title>Go Pro — unlimited imports, no surveys, ever</title>
+  <!-- Placeholder promo art for the vertical side banner slot (120x480).
+       Third rotation frame: the Pro upsell. Copy mirrors the Unlock Pro modal
+       in templates/index.html; the price is deliberately NOT baked into the
+       art, since the live figure comes from the pricing config. -->
+  <defs>
+    <linearGradient id="s3bg" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#141400"/>
+      <stop offset="0.5" stop-color="#0B161F"/>
+      <stop offset="1" stop-color="#06110b"/>
+    </linearGradient>
+    <linearGradient id="s3cta" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#cccc00"/>
+      <stop offset="1" stop-color="#e0e02a"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="120" height="480" fill="url(#s3bg)"/>
+  <path d="M10 26 V10 H30" fill="none" stroke="#5c5c00" stroke-width="2"/>
+  <path d="M110 454 V470 H90" fill="none" stroke="#5c5c00" stroke-width="2"/>
+
+  <!-- star mark -->
+  <text x="60" y="84" font-size="34" text-anchor="middle" fill="#cccc00"
+        font-family="'Segoe UI Symbol', system-ui, sans-serif">&#9733;</text>
+
+  <g font-family="Oxanium, 'Segoe UI', system-ui, sans-serif" font-weight="800"
+     text-anchor="middle" fill="#cccc00">
+    <text x="60" y="126" font-size="20" textLength="34" lengthAdjust="spacingAndGlyphs">GO</text>
+    <text x="60" y="152" font-size="26" textLength="60" lengthAdjust="spacingAndGlyphs">PRO</text>
+  </g>
+
+  <line x1="30" y1="170" x2="90" y2="170" stroke="#5c5c00" stroke-width="1"/>
+
+  <!-- benefit ticks, straight from the Unlock Pro modal -->
+  <g font-family="'Segoe UI', system-ui, sans-serif" font-size="9" fill="#d0ddd0">
+    <text x="16" y="196" fill="#00e676" font-size="10">&#10003;</text>
+    <text x="29" y="196" textLength="76" lengthAdjust="spacingAndGlyphs">Unlimited imports</text>
+
+    <text x="16" y="216" fill="#00e676" font-size="10">&#10003;</text>
+    <text x="29" y="216" textLength="76" lengthAdjust="spacingAndGlyphs">History that lasts</text>
+
+    <text x="16" y="236" fill="#00e676" font-size="10">&#10003;</text>
+    <text x="29" y="236" textLength="76" lengthAdjust="spacingAndGlyphs">Session exports</text>
+
+    <text x="16" y="256" fill="#00e676" font-size="10">&#10003;</text>
+    <text x="29" y="256" textLength="76" lengthAdjust="spacingAndGlyphs">No surveys, ever</text>
+  </g>
+
+  <!-- Centred at y=320 with a 110px run: starts below the benefit list
+       (ends y=256) and finishes at y=375, clear of the CTA at y=396. -->
+  <text transform="translate(60 320) rotate(-90)" text-anchor="middle"
+        font-family="Oxanium, 'Segoe UI', system-ui, sans-serif" font-weight="600"
+        font-size="12" fill="#8c8c5a" textLength="110" lengthAdjust="spacingAndGlyphs">
+    EARLY ACCESS PRICE
+  </text>
+
+  <rect x="14" y="396" width="92" height="34" rx="8" fill="url(#s3cta)"/>
+  <text x="60" y="418" text-anchor="middle" font-size="11" font-weight="700" fill="#171700"
+        font-family="Oxanium, 'Segoe UI', system-ui, sans-serif"
+        textLength="66" lengthAdjust="spacingAndGlyphs">UNLOCK PRO</text>
+
+  <text x="60" y="450" text-anchor="middle" font-size="8" fill="#5f5f3f"
+        font-family="'Segoe UI', system-ui, sans-serif"
+        textLength="66" lengthAdjust="spacingAndGlyphs">PLACEHOLDER ART</text>
+</svg>
