@@ -90,16 +90,23 @@ body {
 }
 
 /* ── Side banner (vertical, auto-rotating) ────────────────────
-   Fixed to the right edge. Only shown once the viewport is wide enough
-   to have real gutter beyond the 1400px content column — otherwise it
-   would overlap content, which the Task's AC explicitly forbids. */
+   Fixed to the right edge. The Task's AC forbids overlapping content, and
+   the original 1900px floor bought that by never showing at all: a 1920px
+   monitor is ~1900 CSS px of viewport once chrome and scrollbar are off,
+   so the slot was invisible on everything short of an ultrawide.
+
+   Instead of waiting for a gutter wide enough to appear on its own, the
+   layout now *makes* one: `main` takes a matching padding-right (below) so
+   the fixed banner sits in reserved space rather than over the content
+   column. The column's max-width:1400px is a max, not a fixed width, so it
+   simply narrows on screens too small to keep both at full size. */
 .side-banner {
   position: fixed;
   top: 50%;
   right: 16px;
   transform: translateY(-50%);
-  width: 160px;
-  height: 500px;
+  width: 120px;
+  height: 480px;
   background: var(--color-bg-black);
   border: 1px solid var(--color-accent-green-dark);
   border-radius: 10px;
@@ -116,14 +123,27 @@ body {
   transition: opacity .4s ease;
 }
 
-@media (max-width: 1900px) {
+/* Below this the page has no width to spare: reserving 152px would squeeze
+   the content column harder than a promo slot justifies, so the banner is
+   dropped rather than shown over the content. 1440px keeps it on common
+   laptop screens (1440/1512/1728) and up. */
+@media (max-width: 1439.98px) {
   .side-banner { display: none; }
+}
+
+/* right:16px + 120px wide + 16px breathing gap. Applied only while a banner
+   is actually on screen (`has-side-banner` is set by _initSideBanner once it
+   has at least one image), so the unconfigured default costs no layout.
+   !important overrides Bootstrap's own !important .px-md-5 on <main>. */
+@media (min-width: 1440px) {
+  body.has-side-banner #main-content { padding-right: 152px !important; }
 }
 
 /* ── Mid-page banner (horizontal) ─────────────────────────────
    Static promo slot between the free-vs-pro pitch and the results
-   section. Empty by default (see MID_BANNER_IMAGE in app.js), so it
-   never reserves height or shows a placeholder box with no content. */
+   section. Empty by default (configured at /admin, see _initMidBanner in
+   app.js), so it never reserves height or shows a placeholder box with no
+   content. */
 .mid-banner {
   border: 1px solid var(--color-accent-green-dark);
   border-radius: 10px;

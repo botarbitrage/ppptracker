@@ -829,51 +829,90 @@ function _fmtNum(n) {
   return Number(n || 0).toLocaleString('en-AU');
 }
 
-// TODO(Caio): add real promotional image URLs here (recommended ~160x600
-// vertical "skyscraper" crop). Empty by default — the side banner slot
-// stays hidden until at least one is set (see _initSideBanner).
-const SIDE_BANNER_IMAGES = [];
-const SIDE_BANNER_INTERVAL_MS = 6000; // within the AC's 5-8s default range
+/* ── Promotional banners ─────────────────────────────────────
+   Both slots are admin-configurable at /admin ("Ad Campaigns" -> "Banners"),
+   served by the public /api/banners-config (see banners_config_get in
+   app.py). Empty is the shipped default and a valid state: with no images
+   configured neither slot renders, claims space, or shows a placeholder. */
+
+let _BANNERS = {
+  side_images:      [],    // 0 -> hidden, 1 -> static, 2+ -> auto-rotates
+  side_interval_ms: 6000,  // within the AC's 5-8s default range
+  mid_image:        '',    // '' -> hidden
+};
+
+let _sideBannerTimer = null;
 
 /** Vertical auto-rotating side banner. No-op (stays hidden) with 0 images;
-    shows statically with 1; rotates with 2+. */
+    shows statically with 1; rotates with 2+.
+
+    Reserving the right-hand gutter is tied to the banner actually being
+    shown — the `has-side-banner` body class is what lets the CSS add main's
+    padding-right, so an unconfigured slot costs the layout nothing. */
 function _initSideBanner() {
   const el  = document.getElementById('side-banner');
   const img = document.getElementById('side-banner-img');
-  if (!el || !img || !SIDE_BANNER_IMAGES.length) return;
+  if (!el || !img) return;
+
+  // Re-entrant: a config reload must not leave a second rotation timer running.
+  if (_sideBannerTimer) { clearInterval(_sideBannerTimer); _sideBannerTimer = null; }
+
+  const images = _BANNERS.side_images || [];
+  if (!images.length) {
+    el.classList.add('d-none');
+    document.body.classList.remove('has-side-banner');
+    return;
+  }
 
   let i = 0;
   const show = idx => {
     img.style.opacity = 0;
     setTimeout(() => {
-      img.src = SIDE_BANNER_IMAGES[idx];
+      img.src = images[idx];
       img.style.opacity = 1;
     }, 200);
   };
   show(0);
   el.classList.remove('d-none');
+  document.body.classList.add('has-side-banner');
 
-  if (SIDE_BANNER_IMAGES.length > 1) {
-    setInterval(() => {
-      i = (i + 1) % SIDE_BANNER_IMAGES.length;
+  if (images.length > 1) {
+    _sideBannerTimer = setInterval(() => {
+      i = (i + 1) % images.length;
       show(i);
-    }, SIDE_BANNER_INTERVAL_MS);
+    }, _BANNERS.side_interval_ms || 6000);
   }
 }
-
-// TODO(Caio): set a real promotional image URL here (a wide, short crop
-// works best — the slot caps at 180px tall). Empty by default — the
-// mid-page banner stays hidden until this is set (see _initMidBanner).
-const MID_BANNER_IMAGE = '';
 
 /** Static horizontal mid-page banner. No-op (stays hidden) with no image configured. */
 function _initMidBanner() {
   const el  = document.getElementById('mid-banner');
   const img = document.getElementById('mid-banner-img');
-  if (!el || !img || !MID_BANNER_IMAGE) return;
+  if (!el || !img) return;
 
-  img.src = MID_BANNER_IMAGE;
+  if (!_BANNERS.mid_image) {
+    el.classList.add('d-none');
+    return;
+  }
+  img.src = _BANNERS.mid_image;
   el.classList.remove('d-none');
+}
+
+/** Fetch the live banner config, then render both slots. A failed fetch
+    leaves the defaults in place, which means both slots simply stay hidden —
+    the same state the page ships in, so nothing renders half-configured. */
+async function _loadBannersConfig() {
+  try {
+    const res = await fetch('/api/banners-config');
+    if (res.ok) {
+      const c = await res.json();
+      if (c && typeof c === 'object') _BANNERS = { ..._BANNERS, ...c };
+    }
+  } catch (e) {
+    console.warn('banners config fetch failed, both slots stay hidden', e);
+  }
+  _initSideBanner();
+  _initMidBanner();
 }
 
 /** Simple network connectivity indicator, driven by navigator.onLine + online/offline events. */
@@ -3470,8 +3509,7 @@ function exportTournament(tourneyId, btn) {
 
 document.addEventListener('DOMContentLoaded', () => {
   _initConnStatus();
-  _initSideBanner();
-  _initMidBanner();
+  _loadBannersConfig();   // fetches, then renders both banner slots
 
   document.getElementById('url-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') handleImport();

@@ -1047,6 +1047,82 @@ def _import_ads_config():
     return cfg
 
 
+# Promotional banner slots on the main page (see the "Redesign: Vertical
+# auto-rotating banner" and "Redesign: Horizontal mid-page banner" Tasks).
+# Both slots ship empty and stay hidden until an admin sets an image here —
+# no placeholder box, no reserved space. That empty default is what the
+# banners' ACs call "gracefully degrades when zero images are configured".
+_BANNERS_DEFAULTS = {
+    # 0 images -> the side slot stays hidden; 1 -> shown statically;
+    # 2+ -> auto-rotates at side_interval_ms (see _initSideBanner in app.js).
+    'side_images':      [],
+    'side_interval_ms': 6000,   # within the Task AC's 5-8s default range
+    # Single image; '' -> the mid-page slot stays hidden.
+    'mid_image':        '',
+}
+
+# Caps for the admin POST below. The slot is a hand-curated promo surface,
+# not a feed, so a small list is plenty and keeps the config doc bounded.
+_BANNER_MAX_IMAGES      = 10
+_BANNER_MAX_URL_LEN     = 2000
+_BANNER_MIN_INTERVAL_MS = 1000
+_BANNER_MAX_INTERVAL_MS = 60000
+
+
+def _valid_banner_url(val):
+    """True for a banner image URL we're willing to persist.
+
+    Absolute http(s) or a site-relative path only. These land in an <img src>,
+    where a `javascript:` URL is inert anyway, but the route is a persisted
+    admin surface — keeping it to the two shapes the slot actually uses means
+    a typo fails at save time rather than rendering a broken image to visitors.
+    """
+    if not isinstance(val, str):
+        return False
+    val = val.strip()
+    if not val or len(val) > _BANNER_MAX_URL_LEN:
+        return False
+    return val.startswith(('https://', 'http://', '/'))
+
+
+def _banners_config():
+    """Admin-configurable promo banner images.
+
+    Mirrors _export_ads_config()/_import_ads_config(): read fresh from
+    Firestore on every call so an admin change takes effect on the very next
+    request, no redeploy or cache-bust to invalidate. Falls back to the
+    defaults (both slots empty, so both stay hidden) on a missing doc or any
+    read failure.
+    """
+    cfg = dict(_BANNERS_DEFAULTS)
+    try:
+        snap = _get_admin_db().collection('config').document('banners').get()
+        stored = snap.to_dict() if snap.exists else {}
+    except Exception as exc:
+        print(f"[_banners_config] read failed: {type(exc).__name__}: {exc}")
+        stored = {}
+    for key in _BANNERS_DEFAULTS:
+        if key in stored:
+            cfg[key] = stored[key]
+    # Defend the render path against a hand-edited or part-written doc: the
+    # public route below is unauthenticated and its output drives an <img src>
+    # on every visitor's page, so drop anything that isn't a usable URL rather
+    # than passing it through.
+    cfg['side_images'] = [
+        u.strip() for u in (cfg['side_images'] if isinstance(cfg['side_images'], list) else [])
+        if _valid_banner_url(u)
+    ][:_BANNER_MAX_IMAGES]
+    if not _valid_banner_url(cfg['mid_image']):
+        cfg['mid_image'] = ''
+    else:
+        cfg['mid_image'] = cfg['mid_image'].strip()
+    interval = cfg['side_interval_ms']
+    if isinstance(interval, bool) or not isinstance(interval, int) or not (
+            _BANNER_MIN_INTERVAL_MS <= interval <= _BANNER_MAX_INTERVAL_MS):
+        cfg['side_interval_ms'] = _BANNERS_DEFAULTS['side_interval_ms']
+    return cfg
+
+
 def _export_gate(req, uid, kind):
     """Quota/survey gate for one export. kind is 'hand' or 'tourney'.
 
@@ -2727,6 +2803,87 @@ def admin_import_ads_config_set():
     update['updated_by'] = uid
     _get_admin_db().collection('config').document('import_ads').set(update, merge=True)
     return jsonify(_import_ads_config())
+
+
+@app.route('/api/banners-config', methods=['GET'])
+def banners_config_get():
+    """Public: the live promo banner images, for the two banner slots on the
+    main page (see _loadBannersConfig in app.js). No admin gate, same as
+    /api/export-ads-config — these images are rendered to every visitor.
+
+    Shape is the flat admin config as-is; there is nothing to reshape here.
+    """
+    return jsonify(_banners_config())
+
+
+@app.route('/api/admin/banners-config', methods=['GET'])
+def admin_banners_config_get():
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+    return jsonify(_banners_config())
+
+
+@app.route('/api/admin/banners-config', methods=['POST'])
+def admin_banners_config_set():
+    """Whole-config replace of the fields present in the body — merge=True on
+    the Firestore write, so an admin can change one slot without resending the
+    other, but each field present is validated on its own type.
+
+    side_images is replace-not-append: the list sent becomes the list stored,
+    which is what the admin UI's textarea round-trips.
+    """
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict):
+        return jsonify({'error': 'Malformed request body'}), 400
+
+    update = {}
+    if 'side_images' in body:
+        val = body['side_images']
+        if not isinstance(val, list):
+            return jsonify({'error': 'side_images must be a list of image URLs'}), 400
+        if len(val) > _BANNER_MAX_IMAGES:
+            return jsonify({
+                'error': f'side_images takes at most {_BANNER_MAX_IMAGES} URLs'
+            }), 400
+        for u in val:
+            if not _valid_banner_url(u):
+                return jsonify({
+                    'error': f'"{u}" is not a valid image URL — use https://…, '
+                             f'http://… or a /static/… path'
+                }), 400
+        update['side_images'] = [u.strip() for u in val]
+    if 'side_interval_ms' in body:
+        val = body['side_interval_ms']
+        if isinstance(val, bool) or not isinstance(val, int) or not (
+                _BANNER_MIN_INTERVAL_MS <= val <= _BANNER_MAX_INTERVAL_MS):
+            return jsonify({
+                'error': f'side_interval_ms must be an integer between '
+                         f'{_BANNER_MIN_INTERVAL_MS} and {_BANNER_MAX_INTERVAL_MS}'
+            }), 400
+        update['side_interval_ms'] = val
+    if 'mid_image' in body:
+        val = body['mid_image']
+        if not isinstance(val, str):
+            return jsonify({'error': 'mid_image must be a string'}), 400
+        # '' is the documented way to clear the slot, so it bypasses the
+        # URL check that every non-empty value still has to pass.
+        if val.strip() and not _valid_banner_url(val):
+            return jsonify({
+                'error': f'"{val}" is not a valid image URL — use https://…, '
+                         f'http://… or a /static/… path'
+            }), 400
+        update['mid_image'] = val.strip()
+    if not update:
+        return jsonify({'error': 'No recognised fields in request body'}), 400
+
+    update['updated_at'] = int(time.time())
+    update['updated_by'] = uid
+    _get_admin_db().collection('config').document('banners').set(update, merge=True)
+    return jsonify(_banners_config())
 
 
 def _fetch_tournament_records(uid, tourney_id):
