@@ -3724,6 +3724,39 @@ async function _loadExportAdsConfig() {
 const _PERMANENT_ADMIN_EMAILS = ['caiohn@gmail.com'];
 
 /**
+ * Reads the ?v= cache-busting version off one of the served static assets.
+ * Deliberately parsed from the live DOM node rather than templated in: these
+ * are the two versions a deploy is verified against, and reading what the
+ * browser actually loaded means the hint can't drift from the real bump sites
+ * in the templates — and a stale cached page reports its own stale version
+ * instead of confidently reporting the new one.
+ */
+function _assetVersion(selector, urlAttr) {
+  const el = document.querySelector(selector);
+  if (!el) return '?';
+  try {
+    // el[urlAttr] resolves to an absolute URL, so a bare relative href parses fine.
+    return new URL(el[urlAttr]).searchParams.get('v') || '?';
+  } catch (e) {
+    return '?';
+  }
+}
+
+/**
+ * Tooltip for the Admin pill: the app.js / style.css cache-bust versions that
+ * a deploy is confirmed against, so an admin can check what production is
+ * actually serving without opening view-source. The two move independently —
+ * a CSS-only change bumps style.css and leaves app.js behind — so both are
+ * shown rather than a single "build number".
+ */
+function _deployHint() {
+  const t = window.I18N_ADMIN || {};
+  const js = _assetVersion('script[src*="/static/app.js"]', 'src');
+  const css = _assetVersion('link[href*="/static/style.css"]', 'href');
+  return `${t.deployedAssets || 'Deployed assets'}: app.js?v=${js} · style.css?v=${css}`;
+}
+
+/**
  * Reveal the Admin button for admins. Reads /config/admins (world-readable) the
  * same way the tournaments page does; the server is the actual authority.
  */
@@ -3745,6 +3778,9 @@ async function _checkAdmin(user) {
     console.warn('admin check failed', e);
   }
   btn.classList.toggle('d-none', !isAdmin);
+  // Only set once we know they're an admin — the pill is hidden otherwise, and
+  // the link text stays the accessible name either way (title is only a fallback).
+  if (isAdmin) btn.title = _deployHint();
 }
 
 /** Returns the Firestore doc ref for the current user (auth) or guest (session). */

@@ -1135,8 +1135,13 @@
     unlockReady:        "{{ _('Unlock') }}"
   };
   window.GATE_STUB_MODAL_ENABLED = {{ 'true' if gate_stub_modal_enabled else 'false' }};
+  {# Same hand-over again, for the Admin pill's deploy-version tooltip
+     (_deployHint in app.js). #}
+  window.I18N_ADMIN = {
+    deployedAssets: "{{ _('Deployed assets') }}"
+  };
 </script>
-<script src="/static/app.js?v=63"></script>
+<script src="/static/app.js?v=64"></script>
 <script>
   if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
     navigator.serviceWorker.register('/static/sw.js', { scope: '/' })
