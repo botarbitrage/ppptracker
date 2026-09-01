@@ -4,12 +4,19 @@ APIs (/api/banners-config and /api/admin/banners-config) against a fake
 Firestore, so the handler bodies run without credentials or network.
 
 The interesting logic here is not the read/write itself but what the two slots
-do when the config is empty or wrong. Both banners ship empty and must stay
-hidden in that state (that empty default is what the banners' ACs call
-"gracefully degrades when zero images are configured"), and the public GET is
-unauthenticated and feeds an <img src> on every visitor's page — so a
-hand-edited or part-written doc has to be sanitised on read rather than
-passed through.
+do at the edges.
+
+The shipped defaults point at the placeholder art in static/banners/, so this
+checks those paths are both valid URLs and real files — art renamed without
+_BANNERS_DEFAULTS being updated would otherwise ship broken <img> tags to
+every visitor. Zero images is still a supported state (the banners' ACs call
+it "gracefully degrades when zero images are configured"), but it is now only
+reachable by an admin clearing the fields, so it gets its own coverage: a
+stored empty value must win over the non-empty default.
+
+The public GET is unauthenticated and feeds an <img src> on every visitor's
+page, so a hand-edited or part-written doc has to be sanitised on read rather
+than passed through.
 
     python test_banners_config.py
 """
@@ -96,6 +103,11 @@ def _json(res):
 def main():
     import app as A
 
+    # Every URL the shipped defaults reference, flattened.
+    global _BANNER_DEFAULT_URLS
+    _BANNER_DEFAULT_URLS = (list(A._BANNERS_DEFAULTS['side_images'])
+                            + [A._BANNERS_DEFAULTS['mid_image']])
+
     db = FakeDB()
     A._get_admin_db = lambda: db
     db.put(('config', 'admins'), {'uids': [ADMIN_UID]})
@@ -128,17 +140,31 @@ def main():
     ]:
         check('_valid_banner_url(%r)' % (val,), A._valid_banner_url(val) is want)
 
-    # ── 2. Empty default: both slots off ─────────────────────────────────────
+    # ── 2. Shipped default: both slots point at the placeholder art ──────────
     cfg = A._banners_config()
-    check('default side_images empty', cfg['side_images'] == [], str(cfg['side_images']))
-    check('default mid_image empty', cfg['mid_image'] == '', repr(cfg['mid_image']))
+    check('default rotates 3 side images', len(cfg['side_images']) == 3, str(cfg['side_images']))
+    check('default mid_image set', cfg['mid_image'] != '', repr(cfg['mid_image']))
     check('default interval is 6s', cfg['side_interval_ms'] == 6000, str(cfg['side_interval_ms']))
+
+    # Every default must survive the sanitiser it is fed through on read —
+    # a default that _valid_banner_url rejects would silently vanish.
+    for u in _BANNER_DEFAULT_URLS:
+        check('default URL is valid: ' + u, A._valid_banner_url(u))
+
+    # …and must actually exist on disk. This is the check that catches art
+    # renamed or deleted without _BANNERS_DEFAULTS being updated, which would
+    # otherwise ship broken <img> tags to every visitor.
+    here = os.path.dirname(os.path.abspath(__file__))
+    for u in _BANNER_DEFAULT_URLS:
+        path = os.path.join(here, u.lstrip('/'))
+        check('default art exists: ' + u, os.path.isfile(path), path)
 
     # A failed read must land on those same defaults, not raise.
     A._get_admin_db = lambda: BoomDB()
     cfg = A._banners_config()
     check('read failure falls back to defaults',
-          cfg['side_images'] == [] and cfg['mid_image'] == ''
+          cfg['side_images'] == A._BANNERS_DEFAULTS['side_images']
+          and cfg['mid_image'] == A._BANNERS_DEFAULTS['mid_image']
           and cfg['side_interval_ms'] == 6000, str(cfg))
     A._get_admin_db = lambda: db
 
@@ -146,8 +172,9 @@ def main():
     caller['uid'] = None
     status, body = _json(client.get('/api/banners-config'))
     check('public GET is open', status == 200, str(status))
-    check('public GET shows empty defaults',
-          body['side_images'] == [] and body['mid_image'] == '', str(body))
+    check('public GET serves the shipped defaults',
+          body['side_images'] == A._BANNERS_DEFAULTS['side_images']
+          and body['mid_image'] == A._BANNERS_DEFAULTS['mid_image'], str(body))
     caller['uid'] = ADMIN_UID
 
     # ── 4. Admin routes are gated ────────────────────────────────────────────
@@ -184,6 +211,27 @@ def main():
     check('mid_image cleared', status == 200 and body['mid_image'] == '', str(body))
     check('clearing mid_image left side_images alone',
           body['side_images'] == ['https://x.com/a.png', '/static/b.png'], str(body))
+
+    # ── 6b. An admin can still turn both slots off ───────────────────────────
+    # This is the "gracefully degrades with zero images" AC. It used to be the
+    # shipped default; now that the defaults point at real placeholder art it
+    # is only reachable by an admin clearing the fields, so it needs its own
+    # coverage: a stored empty value must WIN over the non-empty default
+    # rather than falling back to it.
+    status, body = post({'side_images': [], 'mid_image': ''})
+    check('both slots can be cleared',
+          status == 200 and body['side_images'] == [] and body['mid_image'] == '',
+          str(body))
+    cfg = A._banners_config()
+    check('cleared state wins over the defaults on re-read',
+          cfg['side_images'] == [] and cfg['mid_image'] == '', str(cfg))
+    status, body = _json(client.get('/api/banners-config'))
+    check('public GET serves the cleared state',
+          body['side_images'] == [] and body['mid_image'] == '', str(body))
+
+    # Put a real config back for the validation cases below.
+    post({'side_images': ['https://x.com/a.png', '/static/b.png'],
+          'mid_image': 'https://x.com/wide.png'})
 
     # ── 7. Validation ────────────────────────────────────────────────────────
     for label, payload in [

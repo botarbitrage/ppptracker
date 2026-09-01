@@ -133,7 +133,7 @@ body {
 
 /* right:16px + 120px wide + 16px breathing gap. Applied only while a banner
    is actually on screen (`has-side-banner` is set by _initSideBanner once it
-   has at least one image), so the unconfigured default costs no layout.
+   has at least one image), so a slot an admin has cleared costs no layout.
    !important overrides Bootstrap's own !important .px-md-5 on <main>. */
 @media (min-width: 1440px) {
   body.has-side-banner #main-content { padding-right: 152px !important; }
@@ -141,9 +141,9 @@ body {
 
 /* ── Mid-page banner (horizontal) ─────────────────────────────
    Static promo slot between the free-vs-pro pitch and the results
-   section. Empty by default (configured at /admin, see _initMidBanner in
-   app.js), so it never reserves height or shows a placeholder box with no
-   content. */
+   section. Configured at /admin (see _initMidBanner in app.js); when the
+   image is cleared the slot renders nothing and reserves no height, rather
+   than showing an empty box. */
 .mid-banner {
   border: 1px solid var(--color-accent-green-dark);
   border-radius: 10px;

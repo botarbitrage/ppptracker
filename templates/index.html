@@ -25,7 +25,7 @@
     rel="stylesheet"
     crossorigin="anonymous"
   />
-  <link rel="stylesheet" href="/static/style.css?v=66"/>
+  <link rel="stylesheet" href="/static/style.css?v=67"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" crossorigin="anonymous" defer></script>
 </head>
 <body>
@@ -34,13 +34,13 @@
 
 <!-- ── Side banner (vertical, auto-rotating) ─────────────────────
      Right-edge skyscraper slot, fixed to the viewport. Configured at /admin
-     ("Ad Campaigns" -> "Banners") and served by /api/banners-config — empty
-     by default, so it never claims space or shows a placeholder until real
-     images are set. Rotates automatically once 2+ images are configured,
-     shows statically with exactly 1, and stays hidden with 0 (see
-     _initSideBanner). Also hidden below the viewport width where reserving
-     the right-hand gutter would squeeze the content column too hard (see
-     CSS). -->
+     ("Ad Campaigns" -> "Banners") and served by /api/banners-config, which
+     ships pointing at the placeholder art in static/banners/. Rotates
+     automatically once 2+ images are configured, shows statically with
+     exactly 1, and stays hidden with 0 — so clearing the field at /admin
+     hides it again, claiming no space (see _initSideBanner). Also hidden
+     below the viewport width where reserving the right-hand gutter would
+     squeeze the content column too hard (see CSS). -->
 <aside id="side-banner" class="side-banner d-none" aria-label="{{ _('Promotional banner') }}">
   <img id="side-banner-img" class="side-banner-img" alt=""/>
 </aside>
@@ -302,8 +302,9 @@
        real content boundary a visitor reaches (placement to be confirmed
        by Caio in review per the Task description; easy to relocate, it's
        just one flex item in the vertical stack). Configured at /admin
-       ("Ad Campaigns" -> "Banners") and served by /api/banners-config —
-       empty by default, so it claims no space until a real image is set. -->
+       ("Ad Campaigns" -> "Banners") and served by /api/banners-config,
+       which ships pointing at the placeholder art in static/banners/.
+       Clearing the field at /admin hides it again, claiming no space. -->
   <div id="mid-banner" class="mid-banner d-none mb-4" style="max-width:1400px;margin:0 auto" aria-label="{{ _('Promotional banner') }}">
     <img id="mid-banner-img" class="mid-banner-img" alt=""/>
   </div>
@@ -1142,7 +1143,7 @@
     deployedAssets: "{{ _('Deployed assets') }}"
   };
 </script>
-<script src="/static/app.js?v=65"></script>
+<script src="/static/app.js?v=66"></script>
 <script>
   if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
     navigator.serviceWorker.register('/static/sw.js', { scope: '/' })

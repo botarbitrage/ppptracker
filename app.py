@@ -1049,16 +1049,30 @@ def _import_ads_config():
 
 # Promotional banner slots on the main page (see the "Redesign: Vertical
 # auto-rotating banner" and "Redesign: Horizontal mid-page banner" Tasks).
-# Both slots ship empty and stay hidden until an admin sets an image here —
-# no placeholder box, no reserved space. That empty default is what the
-# banners' ACs call "gracefully degrades when zero images are configured".
+#
+# These defaults point at the placeholder art committed in static/banners/
+# (see the README there), so both slots are populated out of the box rather
+# than invisible until someone finds the admin page. The art is marked
+# PLACEHOLDER ART in a corner — swap the files for real artwork, or point
+# these at real URLs, before it matters commercially.
+#
+# Empty is still fully supported and is what the banners' ACs call
+# "gracefully degrades when zero images are configured": an admin who clears
+# the fields at /admin gets an empty list / empty string stored, which wins
+# over these defaults and hides the slot again (no placeholder box, no
+# reserved space). Only the starting value changed, not the behaviour.
 _BANNERS_DEFAULTS = {
     # 0 images -> the side slot stays hidden; 1 -> shown statically;
     # 2+ -> auto-rotates at side_interval_ms (see _initSideBanner in app.js).
-    'side_images':      [],
+    # test_banners_config.py asserts every path below exists on disk, so
+    # renaming the art without updating this dict fails CI rather than
+    # serving broken images.
+    'side_images':      ['/static/banners/side-1.svg',
+                         '/static/banners/side-2.svg',
+                         '/static/banners/side-3.svg'],
     'side_interval_ms': 6000,   # within the Task AC's 5-8s default range
     # Single image; '' -> the mid-page slot stays hidden.
-    'mid_image':        '',
+    'mid_image':        '/static/banners/mid-1.svg',
 }
 
 # Caps for the admin POST below. The slot is a hand-curated promo surface,

@@ -832,13 +832,21 @@ function _fmtNum(n) {
 /* ── Promotional banners ─────────────────────────────────────
    Both slots are admin-configurable at /admin ("Ad Campaigns" -> "Banners"),
    served by the public /api/banners-config (see banners_config_get in
-   app.py). Empty is the shipped default and a valid state: with no images
-   configured neither slot renders, claims space, or shows a placeholder. */
+   app.py). These are the shipped defaults, mirroring _BANNERS_DEFAULTS in
+   app.py and kept as the fallback so a failed fetch renders what the page
+   shipped with — the same pattern _EXPORT_ADS uses below.
+
+   Empty stays a valid state: an admin who clears a field at /admin hides
+   that slot, and it then renders nothing and claims no space. */
 
 let _BANNERS = {
-  side_images:      [],    // 0 -> hidden, 1 -> static, 2+ -> auto-rotates
+  // 0 -> hidden, 1 -> static, 2+ -> auto-rotates. Placeholder art lives in
+  // static/banners/ (see the README there); swap it for real artwork.
+  side_images:      ['/static/banners/side-1.svg',
+                     '/static/banners/side-2.svg',
+                     '/static/banners/side-3.svg'],
   side_interval_ms: 6000,  // within the AC's 5-8s default range
-  mid_image:        '',    // '' -> hidden
+  mid_image:        '/static/banners/mid-1.svg',  // '' -> hidden
 };
 
 let _sideBannerTimer = null;

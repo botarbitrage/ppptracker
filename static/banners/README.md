@@ -4,19 +4,28 @@ Placeholder images for the two promotional banner slots on the main page.
 They exist so the slots can be switched on and reviewed before real artwork
 is commissioned — every one is marked `PLACEHOLDER ART` in the bottom corner.
 
-## Using them
+## They are on by default
 
-Nothing here is wired up automatically. Both slots ship empty and stay hidden
-until an admin sets an image, at **/admin → Ad Campaigns → Banners**:
+`_BANNERS_DEFAULTS` in `app.py` points at these files, so both slots are
+populated on a fresh deploy with no admin action — `side-1/2/3.svg` rotating
+every 6s in the side slot, `mid-1.svg` in the mid-page slot.
 
-| Field | Value |
-| --- | --- |
-| Side (vertical) — one URL per line | `/static/banners/side-1.svg`<br>`/static/banners/side-2.svg`<br>`/static/banners/side-3.svg` |
-| Seconds per image | `6` |
-| Mid-page (horizontal) | `/static/banners/mid-1.svg` (or `mid-2.svg`) |
+Change or turn them off at **/admin → Ad Campaigns → Banners**. Anything
+saved there is stored in Firestore and wins over the defaults above:
 
-The side slot rotates when two or more images are set and shows a single
-image statically when one is. Clearing a field hides that slot again.
+| Field | Default | To turn the slot off |
+| --- | --- | --- |
+| Side (vertical) — one URL per line | `side-1.svg`, `side-2.svg`, `side-3.svg` | empty the textarea |
+| Seconds per image | `6` | — |
+| Mid-page (horizontal) | `mid-1.svg` (`mid-2.svg` is the alternate) | empty the field |
+
+The side slot rotates when two or more images are set, shows a single image
+statically when one is, and disappears entirely at zero.
+
+Note that clearing a field only takes effect once saved: an admin save writes
+every field, so the cleared value persists and the default never comes back
+on its own. To restore the defaults, delete the `config/banners` document in
+Firestore.
 
 ## The files
 
