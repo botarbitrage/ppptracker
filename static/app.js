@@ -255,8 +255,10 @@ async function _downloadExport(url, opts, btn) {
 // the browser's only job is to open the survey and then watch /api/credits until
 // the balance moves.
 
-const _SURVEY_POLL_MS      = 1000;
-const _SURVEY_POLL_TIMEOUT = 60000;
+const _SURVEY_POLL_MS_FAST   = 1000;
+const _SURVEY_POLL_MS_SLOW   = 5000;
+const _SURVEY_POLL_FAST_WINDOW = 60000;   // 1s ticks for the first minute
+const _SURVEY_POLL_TIMEOUT   = 15 * 60 * 1000; // real CPX surveys run 5-15 min incl. screener
 
 let _surveyState = { kind: null, retry: null, baseline: 0, timer: null, deadline: 0 };
 
@@ -376,7 +378,11 @@ async function _fetchCredits() {
  */
 function _surveyStartPolling() {
   clearTimeout(_surveyState.timer);
-  _surveyState.deadline = Date.now() + _SURVEY_POLL_TIMEOUT;
+  const start = Date.now();
+  _surveyState.deadline = start + _SURVEY_POLL_TIMEOUT;
+
+  const nextInterval = () =>
+    Date.now() - start < _SURVEY_POLL_FAST_WINDOW ? _SURVEY_POLL_MS_FAST : _SURVEY_POLL_MS_SLOW;
 
   const tick = async () => {
     if (!_surveyState.kind) return;
@@ -386,13 +392,14 @@ function _surveyStartPolling() {
       return;
     }
     if (Date.now() > _surveyState.deadline) {
-      _surveyStatus('Still waiting on the survey provider. Close this and try the '
-                    + 'export again in a minute — your unlock is not lost.', 'err');
+      _surveyStatus('Still waiting on the survey provider. Your credit is safe — close '
+                    + 'this and retry the export in a bit, it will pick up automatically '
+                    + 'once the survey lands.', 'err');
       return;
     }
-    _surveyState.timer = setTimeout(tick, _SURVEY_POLL_MS);
+    _surveyState.timer = setTimeout(tick, nextInterval());
   };
-  _surveyState.timer = setTimeout(tick, _SURVEY_POLL_MS);
+  _surveyState.timer = setTimeout(tick, nextInterval());
 }
 
 function _surveyEarned() {
@@ -822,11 +829,77 @@ function _fmtNum(n) {
   return Number(n || 0).toLocaleString('en-AU');
 }
 
-/** Refresh the header banner. No-op when signed out — the banner stays hidden. */
+// TODO(Caio): add real promotional image URLs here (recommended ~160x600
+// vertical "skyscraper" crop). Empty by default — the side banner slot
+// stays hidden until at least one is set (see _initSideBanner).
+const SIDE_BANNER_IMAGES = [];
+const SIDE_BANNER_INTERVAL_MS = 6000; // within the AC's 5-8s default range
+
+/** Vertical auto-rotating side banner. No-op (stays hidden) with 0 images;
+    shows statically with 1; rotates with 2+. */
+function _initSideBanner() {
+  const el  = document.getElementById('side-banner');
+  const img = document.getElementById('side-banner-img');
+  if (!el || !img || !SIDE_BANNER_IMAGES.length) return;
+
+  let i = 0;
+  const show = idx => {
+    img.style.opacity = 0;
+    setTimeout(() => {
+      img.src = SIDE_BANNER_IMAGES[idx];
+      img.style.opacity = 1;
+    }, 200);
+  };
+  show(0);
+  el.classList.remove('d-none');
+
+  if (SIDE_BANNER_IMAGES.length > 1) {
+    setInterval(() => {
+      i = (i + 1) % SIDE_BANNER_IMAGES.length;
+      show(i);
+    }, SIDE_BANNER_INTERVAL_MS);
+  }
+}
+
+// TODO(Caio): set a real promotional image URL here (a wide, short crop
+// works best — the slot caps at 180px tall). Empty by default — the
+// mid-page banner stays hidden until this is set (see _initMidBanner).
+const MID_BANNER_IMAGE = '';
+
+/** Static horizontal mid-page banner. No-op (stays hidden) with no image configured. */
+function _initMidBanner() {
+  const el  = document.getElementById('mid-banner');
+  const img = document.getElementById('mid-banner-img');
+  if (!el || !img || !MID_BANNER_IMAGE) return;
+
+  img.src = MID_BANNER_IMAGE;
+  el.classList.remove('d-none');
+}
+
+/** Simple network connectivity indicator, driven by navigator.onLine + online/offline events. */
+function _initConnStatus() {
+  const el    = document.getElementById('conn-status');
+  const label = document.getElementById('conn-status-label');
+  if (!el || !label) return;
+  const onlineText  = el.dataset.onlineLabel  || 'Online';
+  const offlineText = el.dataset.offlineLabel || 'Offline';
+  const update = () => {
+    const online = navigator.onLine;
+    el.classList.toggle('conn-offline', !online);
+    el.classList.toggle('conn-online', online);
+    label.textContent = online ? onlineText : offlineText;
+  };
+  window.addEventListener('online', update);
+  window.addEventListener('offline', update);
+  update();
+}
+
+/** Refresh the two rewards blocks flanking the title. No-op when signed out — they stay hidden. */
 function _loadGamification() {
-  const banner = document.getElementById('gam-banner');
-  if (!banner) return;
-  if (!_currentUser) { banner.classList.add('d-none'); return; }
+  const left  = document.getElementById('gam-block-left');
+  const right = document.getElementById('gam-block-right');
+  if (!left || !right) return;
+  if (!_currentUser) { left.classList.add('d-none'); right.classList.add('d-none'); return; }
 
   _currentUser.getIdToken()
     .then(token => fetch('/api/gamification', { headers: { Authorization: `Bearer ${token}` } }))
@@ -855,9 +928,10 @@ function _loadGamification() {
         ? `<strong>${_fmtNum(next.remaining)}</strong> hands to ${_esc(next.title)}`
         : '';
 
-      banner.classList.remove('d-none');
+      left.classList.remove('d-none');
+      right.classList.remove('d-none');
     })
-    .catch(() => { /* the banner is decoration — never surface a failure here */ });
+    .catch(() => { /* the rewards blocks are decoration — never surface a failure here */ });
 }
 
 /** Floating summary of what an import just earned. */
@@ -3274,11 +3348,14 @@ function exportPersistedTournamentJson(tourneyId, btn) {
 /* ── Export Panel ────────────────────────────────────────── */
 
 function renderHandStats(data) {
-  // data.stats / data.validation are scoped to THIS import's records — accurate
-  // for anon (nothing persisted) and for signed-in re-imports of already-saved
-  // hands, where data.new_hands is 0 but real data is still on screen.
-  const s = data.stats || {};
-  const v = data.validation || {};
+  // Prefer new_stats/new_validation — scoped to just the hands this import
+  // actually added — so the card reads "42 hands" alongside "42 new hands
+  // loaded" instead of the full range PPPoker returned (e.g. 200). Falls back
+  // to stats/validation for anon imports (nothing persisted, so everything is
+  // "new") and signed-in re-imports of already-saved hands, where new_hands
+  // is 0 but real data is still on screen.
+  const s = data.new_stats || data.stats || {};
+  const v = data.new_validation || data.validation || {};
   const _set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val ?? '—'; };
   _set('hs-hands', s.total_hands ?? 0);
   _set('hs-flop',  s.hands_hero_saw_flop  ?? 0);
@@ -3392,6 +3469,10 @@ function exportTournament(tourneyId, btn) {
 /* ── Init ────────────────────────────────────────────────── */
 
 document.addEventListener('DOMContentLoaded', () => {
+  _initConnStatus();
+  _initSideBanner();
+  _initMidBanner();
+
   document.getElementById('url-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') handleImport();
   });
