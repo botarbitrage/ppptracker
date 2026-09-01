@@ -168,7 +168,7 @@ Added by the anon/free/pro tiering work. See
 | `AD_TOKEN_SECRET` | yes | HMAC key for the single-use export unlock in the `X-Ad-Token` header. Without it `POST /api/ad-token` answers 503 and no token ever verifies, so gated exports fall back to spending a credit directly. |
 | `ANON_SESSION_SECRET` | yes | HMAC key for the claim ticket a signed-out import returns. Without it signed-out imports still analyse, but cannot be claimed after signing in. |
 | `CPX_APP_ID` | yes | CPX Research app id, sent to the browser so the survey widget can load. |
-| `CPX_SECURE_HASH` | yes | CPX app secret. Verifies `POST /api/cpx/postback` (`md5(trans_id + secret)`) and derives the per-user `secure_hash`. Never sent to the browser. |
+| `CPX_SECURE_HASH` | yes | CPX app secret. Verifies `POST /api/cpx/postback` (`md5(trans_id + "-" + secret)`) and derives the per-user `secure_hash`. Never sent to the browser. |
 | `TALLY_SIGNING_SECRET` | no | Verifies `POST /api/tally/callback` (base64 HMAC-SHA256 of the raw body). Unset means no Tally submission is ever accepted. |
 | `TALLY_FORM_URL` | no | The Tally form to embed when CPX has no eligible survey. Unset simply means no fallback is offered. |
 | `GATE_STUB_MODAL_ENABLED` | no | Self-hosted "watch to unlock" modal that stands in for a real rewarded-video ad while ayeT-Studios/Wannads publisher approvals are pending (see `_showGateStubModal` in `static/app.js` and `POST /api/gate/stub-completion`). Defaults **on** — set to `0`/`false`/`no`/`off` to disable. Not yet wired to any gate check (that's a separate task); building this now lets the rest of the gating work ship without waiting on ad-network approval. |
