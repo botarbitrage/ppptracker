@@ -117,7 +117,7 @@ Expect `{"error":"survey_required","kind":"tourney", ...}` with status 402.
 
 ```bash
 export TRANS=test-$(date +%s)
-export HASH=$(python -c "import hashlib,os; print(hashlib.md5((os.environ['TRANS']+os.environ['CPX_SECURE_HASH']).encode()).hexdigest())")
+export HASH=$(python -c "import hashlib,os; print(hashlib.md5((os.environ['TRANS']+'-'+os.environ['CPX_SECURE_HASH']).encode()).hexdigest())")
 
 # A wrong hash must be refused outright:
 curl -s -o /dev/null -w 'bad hash: %{http_code}\n' \
