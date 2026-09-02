@@ -1118,7 +1118,19 @@ body {
 }
 .user-btn:hover { background: rgba(0,230,118,.2); box-shadow: 0 0 10px rgba(0,230,118,.3); }
 
+/* Positioned here rather than by Bootstrap's Popper: /admin and /leaks load
+   Bootstrap's CSS but not its JS, and header.js drives the .show class itself
+   so the menu behaves identically on every page. */
+.user-menu { position: relative; }
 .user-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: auto;
+  z-index: 1000;
+  display: none;
+  margin: 6px 0 0;
+  list-style: none;
   min-width: 190px;
   padding: 6px;
   background: var(--panel);
@@ -1126,6 +1138,7 @@ body {
   border-radius: 12px;
   box-shadow: 0 8px 28px rgba(0,0,0,.45);
 }
+.user-dropdown-menu.show { display: block; }
 .user-dropdown-item {
   display: flex;
   align-items: center;
