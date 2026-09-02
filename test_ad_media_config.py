@@ -130,6 +130,9 @@ def main():
     def get_cfg():
         return _json(client.get('/api/admin/ad-media-config'))
 
+    def get_public_cfg():
+        return _json(client.get('/api/ad-media-config'))
+
     def upload(media_type, filename, data, content_type):
         return _json(client.post(
             f'/api/admin/ad-media/{media_type}/upload',
@@ -171,10 +174,18 @@ def main():
           str(cfg))
     A._get_admin_db = lambda: db
 
-    # ── 3. Admin routes are gated ─────────────────────────────────────────────
+    # ── 3. Admin routes are gated; the public config mirror is not ───────────
     caller['uid'] = PLAIN_UID
     status, _ = get_cfg()
     check('non-admin cannot read config', status == 403, str(status))
+
+    caller['uid'] = None   # unauthenticated — same audience as /api/banners-config
+    status, public_cfg = get_public_cfg()
+    check('public config readable while signed out', status == 200, str(status))
+    admin_cfg = A._ad_media_config()
+    check('public config matches the server-side shape', public_cfg == admin_cfg,
+          str((public_cfg, admin_cfg)))
+    caller['uid'] = PLAIN_UID
     status, _ = upload('banner_a', 'a.png', b'\x89PNG-fake-bytes', 'image/png')
     check('non-admin cannot upload', status == 403, str(status))
     status, _ = set_active('banner_a', 'default')

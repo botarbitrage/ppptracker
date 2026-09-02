@@ -1139,9 +1139,10 @@ def _banners_config():
 
 # ── Ad Campaigns: self-hosted media library ───────────────────────────────────
 # Admin-uploaded banners/videos for the import/export gate modals (see the
-# "Build and implement ad services" Feature). This only builds upload/manage
-# + Storage + config, per the Task AC's explicit scope cut — wiring the active
-# file into the gate modals themselves is a separate, later Task.
+# "Build and implement ad services" Feature). This builds upload/manage +
+# Storage + config; the active file is wired into the gate modals themselves
+# via the public ad_media_config_get route below and _showGateStubModal in
+# static/app.js.
 #
 # Firestore doc shape (/config/ad_media), one key per type:
 #   {"banner_a": {"files": [{id, path, filename, content_type, size,
@@ -1243,6 +1244,16 @@ def _video_duration_seconds(file_bytes):
         return MP4(io.BytesIO(file_bytes)).info.length
     except Exception:
         return None
+
+
+@app.route('/api/ad-media-config', methods=['GET'])
+def ad_media_config_get():
+    """Public: which file is active per media type, for the gate stub modal
+    (see _loadAdMediaConfig in app.js). No admin gate, same as
+    /api/banners-config — every free user hitting an import/export gate needs
+    this, not just admins previewing in /admin.
+    """
+    return jsonify(_ad_media_config())
 
 
 @app.route('/api/admin/ad-media-config', methods=['GET'])
@@ -1393,8 +1404,8 @@ def admin_ad_media_delete(media_type, file_id):
 def ad_media_file_get(media_type, file_id):
     """Public, unauthenticated stream of an admin-uploaded banner/video —
     same audience as /static/banners/*.svg, just backed by Cloud Storage
-    instead of the repo. No admin gate: the gate modals (next Task) need to
-    load these for every free user, not just admins previewing in /admin."""
+    instead of the repo. No admin gate: the gate modals need to load these
+    for every free user, not just admins previewing in /admin."""
     if media_type not in _AD_MEDIA_TYPES:
         return jsonify({'error': 'Not found'}), 404
     cfg = _ad_media_config()

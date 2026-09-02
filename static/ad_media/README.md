@@ -17,10 +17,10 @@ The two video types (`video_30`, `video_60`) ship with **no** bundled default
 file — encoding a placeholder 30s/60s MP4 needs tooling this codebase doesn't
 have. Their `default_path` is `None`, and picking `active: "default"` for a
 video type is rejected by the admin API until a real file has been uploaded
-and marked active. The gate-modal wiring Task (next in the "Build and
-implement ad services" Feature) already requires falling back to the
-existing stub behavior when a type has no active video configured — this is
-exactly that state, reachable from day one.
+and marked active. The gate-stub modal (`_showGateStubModal` in
+`static/app.js`) falls back to its countdown-only stub whenever a type has
+no active video configured — this is exactly that state, reachable from day
+one until an admin uploads and activates a real `video_30`/`video_60` file.
 
 ## The files
 
