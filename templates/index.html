@@ -25,7 +25,7 @@
     rel="stylesheet"
     crossorigin="anonymous"
   />
-  <link rel="stylesheet" href="/static/style.css?v=69"/>
+  <link rel="stylesheet" href="/static/style.css?v=70"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" crossorigin="anonymous" defer></script>
 </head>
 <body>
@@ -51,7 +51,9 @@
   <!-- ── Header row: identity (auth + connection) left, settings right ───
        flex-wrap on both clusters keeps every control on its own line
        instead of overlapping as the viewport narrows. -->
-  <div class="header-row" style="max-width:1400px;margin:0 auto">
+  <!-- Spacing lives in .header-row — an inline `margin:0 auto` here would
+       override its margin-bottom and butt the bar against the row below. -->
+  <div class="header-row" style="max-width:1400px">
     <div class="header-row-left">
       <!-- Populated by _renderAuthBar(): a round "User" button (initials or
            Log In) opening a dropdown with My Account / Admin Board / Sign Out. -->
