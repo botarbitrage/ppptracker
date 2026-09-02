@@ -1650,6 +1650,27 @@ button.auth-chip { background: none; }
 .release-block li { margin-bottom: 5px; font-size: .87rem; color: var(--muted); }
 .release-block li::marker { color: var(--border); }
 
+/* Roadmap — shares the Release Notes block layout, own class names since
+   it's timeframes rather than shipped versions */
+.roadmap-block {
+  border-left: 3px solid var(--border);
+  padding: 4px 0 4px 16px;
+  margin-bottom: 20px;
+  position: relative;
+}
+.roadmap-block.roadmap-now { border-left-color: var(--green); }
+.roadmap-period {
+  font-family: var(--font-head);
+  font-size: .88rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: .4px;
+  margin-bottom: 6px;
+}
+.roadmap-block ul { padding-left: 18px; }
+.roadmap-block li { margin-bottom: 5px; font-size: .87rem; color: var(--muted); }
+.roadmap-block li::marker { color: var(--border); }
+
 /* ── Export toast ───────────────────────────────────────────── */
 #export-toast {
   position: fixed;
