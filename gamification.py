@@ -88,6 +88,9 @@ BADGES = {
     'AK':    {'name': 'A-K',             'title': 'Big Slick'},
     'AA':    {'name': 'Pocket Aces',     'title': 'The Legend'},
     'AA88':  {'name': 'A-A-8-8',         'title': "Dead Man's Hand"},
+    'AAAA':  {'name': 'Quad Aces',       'title': 'Untouchable'},
+    'BWAY':  {'name': 'Broadway',        'title': 'Highest Straight'},
+    'NUTS':  {'name': 'The Nuts',        'title': 'Absolute Legend'},
     # Behavioural
     'K9':    {'name': 'K-9',             'title': 'Break Master'},
     'A2345': {'name': 'A-2-3-4-5',       'title': 'Rapid Fire'},
@@ -108,6 +111,7 @@ BADGES = {
 VOLUME_BADGES = (
     (1000, '72o'), (10000, '44'), (25000, 'JJ'), (50000, 'QQ'),
     (100000, 'KK'), (250000, 'AK'), (500000, 'AA'), (1000000, 'AA88'),
+    (2000000, 'AAAA'), (5000000, 'BWAY'), (10000000, 'NUTS'),
 )
 
 # rank → (points, badge code)

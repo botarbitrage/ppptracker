@@ -318,6 +318,24 @@ def test_volume_badges_and_idempotency():
           {'72o', '44', 'JJ'}.issubset(set(codes(r))), str(codes(r)))
 
 
+def test_volume_badges_beyond_a_million():
+    # Crossing 2,000,000 lifetime hands in one huge import earns Quad Aces, and everything
+    # below it that hasn't already been paid.
+    _, r = run({}, 2000000, ts(2026, 3, 2, 12, 0))
+    check('2,000,000 lifetime hands earns Quad Aces', 'AAAA' in codes(r), str(codes(r)))
+
+    st, r = run({}, 5000000, ts(2026, 3, 2, 12, 0))
+    check('5,000,000 lifetime hands earns Broadway', 'BWAY' in codes(r), str(codes(r)))
+    check('Quad Aces already crossed too', 'AAAA' in codes(r), str(codes(r)))
+
+    st, r = run(st, 5000000, ts(2026, 3, 3, 12, 0))    # lifetime 10,000,000
+    check('10,000,000 lifetime hands earns The Nuts', 'NUTS' in codes(r), str(codes(r)))
+
+    st, r = run(st, 1000, ts(2026, 3, 4, 12, 0))
+    check('The Nuts is not awarded twice', 'NUTS' not in codes(r), str(codes(r)))
+    check('it is still held', 'NUTS' in st['badge_codes'], str(st['badge_codes']))
+
+
 # ── 5. Weekly personal track ─────────────────────────────────────────────────
 
 def test_pb_and_target_and_comeback():
