@@ -450,6 +450,16 @@
                 <button type="button" class="adm-btn" id="adm-banners-save" onclick="saveBanners()">Save</button>
                 <span class="adm-meta flex-grow-1" id="adm-banners-status"></span>
               </div>
+
+              <h3 class="adm-subhead mt-4">Admin media library</h3>
+              <p class="adm-meta mb-3">
+                Self-hosted banners/videos for the import/export gate modals. Upload up to
+                4 files per type and mark one active — the hard-saved default can't be deleted.
+                Applies immediately, no deploy. Wiring the active file into the gate modals
+                themselves is a separate Task.
+              </p>
+              <div id="adm-media-error" class="alert alert-danger d-none py-2"></div>
+              <div id="adm-media-body"></div>
             </div>
           </section>
 
@@ -519,6 +529,7 @@
     if (name === 'adcampaigns' && !ADS) loadExportAds();
     if (name === 'adcampaigns' && !IMPORTS_ADS) loadImportAds();
     if (name === 'adcampaigns' && !BANNERS) loadBanners();
+    if (name === 'adcampaigns' && !AD_MEDIA) loadAdMedia();
   }
 
   // ── Gamification ───────────────────────────────────────────────────────────
@@ -997,6 +1008,168 @@
 
   function showBannersError(msg) {
     const e = document.getElementById('adm-banners-error');
+    e.textContent = msg || '';
+    e.classList.toggle('d-none', !msg);
+  }
+
+  // ── Ad Campaigns: Admin media library ─────────────────────────────────────
+  let AD_MEDIA = null;   // /api/admin/ad-media-config response
+  const AD_MEDIA_LABELS = {
+    banner_a: 'Banner A', banner_b: 'Banner B',
+    video_30: 'Video 30s', video_60: 'Video 60s',
+  };
+  const AD_MEDIA_ACCEPT = {
+    banner_a: 'image/png,image/jpeg,image/webp,image/gif,image/svg+xml',
+    banner_b: 'image/png,image/jpeg,image/webp,image/gif,image/svg+xml',
+    video_30: 'video/mp4', video_60: 'video/mp4',
+  };
+
+  async function loadAdMedia() {
+    showMediaError('');
+    const box = document.getElementById('adm-media-body');
+    box.innerHTML = '<span class="adm-meta">Loading…</span>';
+    try {
+      const res = await authFetch('/api/admin/ad-media-config');
+      if (!res.ok) {
+        box.innerHTML = '';
+        showMediaError(await errorText(res, 'Failed to load media library'));
+        return;
+      }
+      AD_MEDIA = await res.json();
+      renderAdMedia();
+    } catch (e) {
+      box.innerHTML = '';
+      showMediaError('Could not reach the server: ' + e.message);
+    }
+  }
+
+  function fmtBytes(n) {
+    if (!n) return '0 B';
+    const units = ['B', 'KB', 'MB'];
+    let i = 0;
+    while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+    return `${n.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+  }
+
+  function renderAdMedia() {
+    document.getElementById('adm-media-body').innerHTML =
+      Object.keys(AD_MEDIA_LABELS).map(renderAdMediaType).join('');
+  }
+
+  function adMediaRow(type, opts) {
+    return `
+      <div class="d-flex align-items-center gap-2" style="font-size:.82rem;color:var(--muted);">
+        <label class="d-flex align-items-center gap-1" style="min-width:0;">
+          <input type="radio" name="adm-media-active-${type}" ${opts.active ? 'checked' : ''}
+                 onchange="setActiveAdMedia('${type}', '${opts.id}')"/>
+          <span class="text-truncate" style="max-width:220px;">${opts.label}</span>
+        </label>
+        ${opts.preview}
+        ${opts.deletable ? `<button type="button" class="adm-btn" style="padding:2px 8px;"
+                                    onclick="deleteAdMedia('${type}', '${opts.id}')">Delete</button>` : ''}
+      </div>`;
+  }
+
+  function renderAdMediaType(type) {
+    const cfg = AD_MEDIA[type];
+    const rows = [];
+    if (cfg.default_path) {
+      rows.push(adMediaRow(type, {
+        id: 'default', label: 'Default', deletable: false, active: cfg.active === 'default',
+        preview: `<a href="${esc(cfg.default_path)}" target="_blank" rel="noopener">preview</a>`,
+      }));
+    } else {
+      rows.push('<div class="adm-meta" style="padding:4px 0;">No default file — falls back to ' +
+                 'the existing stub until an admin uploads one.</div>');
+    }
+    for (const f of cfg.files) {
+      const url = `/api/ad-media/${type}/${f.id}`;
+      const meta = [fmtBytes(f.size), f.duration ? `${f.duration.toFixed(1)}s` : null]
+        .filter(Boolean).join(' · ');
+      rows.push(adMediaRow(type, {
+        id: f.id, label: esc(f.filename) + (meta ? ` (${meta})` : ''), deletable: true,
+        active: cfg.active === f.id,
+        preview: `<a href="${esc(url)}" target="_blank" rel="noopener">preview</a>`,
+      }));
+    }
+    const full = cfg.files.length >= 4;
+    return `
+      <div class="adm-gam-week align-items-start">
+        <span class="adm-gam-wk">${esc(AD_MEDIA_LABELS[type])}</span>
+        <div class="d-flex flex-column gap-2 flex-grow-1">
+          ${rows.join('')}
+          <div class="d-flex align-items-center gap-2">
+            <input type="file" accept="${AD_MEDIA_ACCEPT[type]}" id="adm-media-file-${type}"
+                   class="form-control form-control-sm" style="max-width:320px;" ${full ? 'disabled' : ''}/>
+            <button type="button" class="adm-btn" ${full ? 'disabled' : ''}
+                    onclick="uploadAdMedia('${type}')">Upload</button>
+          </div>
+          ${full ? '<span class="adm-meta">4/4 saved — delete one to upload another.</span>' : ''}
+        </div>
+      </div>`;
+  }
+
+  async function uploadAdMedia(type) {
+    const input = document.getElementById(`adm-media-file-${type}`);
+    const file = input.files && input.files[0];
+    if (!file) {
+      showMediaError('Choose a file first.');
+      return;
+    }
+    showMediaError('');
+    const form = new FormData();
+    form.append('file', file);
+    try {
+      const res = await authFetch(`/api/admin/ad-media/${type}/upload`, { method: 'POST', body: form });
+      if (!res.ok) {
+        showMediaError(await errorText(res, 'Upload failed'));
+        return;
+      }
+      AD_MEDIA = await res.json();
+      renderAdMedia();
+    } catch (e) {
+      showMediaError('Could not reach the server: ' + e.message);
+    }
+  }
+
+  async function setActiveAdMedia(type, fileId) {
+    showMediaError('');
+    try {
+      const res = await authFetch(`/api/admin/ad-media/${type}/active`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ file_id: fileId }),
+      });
+      if (!res.ok) {
+        showMediaError(await errorText(res, 'Failed to set active file'));
+        renderAdMedia();   // revert the radio to the last known-good state
+        return;
+      }
+      AD_MEDIA = await res.json();
+      renderAdMedia();
+    } catch (e) {
+      showMediaError('Could not reach the server: ' + e.message);
+      renderAdMedia();
+    }
+  }
+
+  async function deleteAdMedia(type, fileId) {
+    showMediaError('');
+    try {
+      const res = await authFetch(`/api/admin/ad-media/${type}/${fileId}`, { method: 'DELETE' });
+      if (!res.ok) {
+        showMediaError(await errorText(res, 'Failed to delete file'));
+        return;
+      }
+      AD_MEDIA = await res.json();
+      renderAdMedia();
+    } catch (e) {
+      showMediaError('Could not reach the server: ' + e.message);
+    }
+  }
+
+  function showMediaError(msg) {
+    const e = document.getElementById('adm-media-error');
     e.textContent = msg || '';
     e.classList.toggle('d-none', !msg);
   }
