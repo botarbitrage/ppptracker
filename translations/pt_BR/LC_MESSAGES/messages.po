@@ -121,6 +121,58 @@ msgstr "O que há de novo em cada versão"
 msgid "Release Notes"
 msgstr "Notas de Versão"
 
+#: templates/index.html:146
+msgid "What's coming next"
+msgstr "O que vem a seguir"
+
+#: templates/index.html:148 templates/index.html:1097
+msgid "Roadmap"
+msgstr "Roteiro"
+
+#: templates/index.html:1102
+msgid "Here's what we're building next — high level, subject to change."
+msgstr "Veja o que estamos construindo a seguir — de forma resumida, sujeito a mudanças."
+
+#: templates/index.html:1105
+msgid "Now"
+msgstr "Agora"
+
+#: templates/index.html:1106
+msgid "In progress"
+msgstr "Em andamento"
+
+#: templates/index.html:1108
+msgid ""
+"Leak Finder going site-agnostic — the same leak-spotting analysis, "
+"expanding beyond PPPoker to more platforms"
+msgstr ""
+"Leak Finder ficando independente de plataforma — a mesma análise de "
+"vazamentos, agora se expandindo para além do PPPoker"
+
+#: templates/index.html:1113
+msgid "Next"
+msgstr "Próximo"
+
+#: templates/index.html:1115
+msgid ""
+"AI Poker Coach — personalised, hand-history-driven feedback on your "
+"game, in a few different flavours"
+msgstr ""
+"AI Poker Coach — feedback personalizado sobre seu jogo, baseado no seu "
+"histórico de mãos, em algumas variações diferentes"
+
+#: templates/index.html:1120
+msgid "Later"
+msgstr "Mais adiante"
+
+#: templates/index.html:1122
+msgid ""
+"Solver & training tools — a beginner-friendly way to train ranges and "
+"decisions, built on your own hands"
+msgstr ""
+"Ferramentas de solver e treino — uma forma acessível para iniciantes "
+"treinarem ranges e decisões, com base nas suas próprias mãos"
+
 #: templates/index.html:162
 msgid "FREE"
 msgstr "GRÁTIS"
