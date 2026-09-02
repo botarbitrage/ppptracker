@@ -757,6 +757,18 @@
         <p class="mb-2" style="font-size:.9rem">
           {{ _("This app is in Early Access — normally a short ad would play here.") }}
         </p>
+        {# Real self-hosted video, when the admin has one active for this
+           gate's type (video_30 for import, video_60 for hand_export) —
+           see _AD_MEDIA / _showGateStubModal in app.js. Hidden by default;
+           the countdown-only stub below is the fallback when no video is
+           configured, or if the video fails to load. #}
+        <div id="gate-stub-video-wrap" class="mb-3 d-none">
+          <video id="gate-stub-video" class="w-100 rounded" style="max-height:220px;background:#000" playsinline controls></video>
+        </div>
+        {# Active admin-uploaded banner (banner_a for import, banner_b for
+           hand_export) — same slot the Pro-upsell copy below occupies.
+           Hidden when no banner URL resolves. #}
+        <img id="gate-stub-banner-img" class="img-fluid rounded mb-3 d-none" alt="">
         <p class="mb-3" style="font-size:.9rem">
           {{ _('Go Pro for unlimited') }} <span id="gate-stub-feature-label"></span> {{ _('— no ads, no waiting.') }}
           <button type="button" class="btn btn-link btn-sm px-1 align-baseline" id="gate-stub-pro-btn" style="font-weight:600">
@@ -764,7 +776,7 @@
           </button>
         </p>
         <button type="button" id="gate-stub-ok-btn" class="btn btn-import btn-lg w-100" disabled></button>
-        <p class="mt-2 mb-0 text-center" style="color:var(--muted);font-size:.78rem">
+        <p id="gate-stub-countdown-copy" class="mt-2 mb-0 text-center" style="color:var(--muted);font-size:.78rem">
           {{ _('Or wait 30 seconds to unlock this one.') }}
         </p>
       </div>

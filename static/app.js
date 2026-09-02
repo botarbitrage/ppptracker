@@ -451,6 +451,62 @@ let _gateStubState = {
   completionId: null, posted: false,
 };
 
+/* ── Self-hosted ad media (admin-uploaded video/banners) ─────
+   /config/ad_media, fetched read-only via the public /api/ad-media-config
+   (see ad_media_config_get in app.py). Same shape _ad_media_config()
+   returns server-side: one entry per type, each {files, active, default_path}.
+   These defaults match every type starting on 'active: default' with no
+   uploaded files — video_30/video_60 have no default_path, so they resolve
+   to "nothing configured" until an admin uploads and activates one. */
+let _AD_MEDIA = {
+  banner_a: { files: [], active: 'default', default_path: '/static/ad_media/banner_a_default.svg' },
+  banner_b: { files: [], active: 'default', default_path: '/static/ad_media/banner_b_default.svg' },
+  video_30: { files: [], active: 'default', default_path: null },
+  video_60: { files: [], active: 'default', default_path: null },
+};
+
+/** Fetch the live ad media config. A failed fetch leaves the defaults in
+    place, which for video types means "nothing configured" — the gate stub
+    modal then falls back to its countdown-only behavior, same as day one. */
+async function _loadAdMediaConfig() {
+  try {
+    const res = await fetch('/api/ad-media-config');
+    if (res.ok) {
+      const c = await res.json();
+      if (c && typeof c === 'object') _AD_MEDIA = { ..._AD_MEDIA, ...c };
+    }
+  } catch (e) {
+    console.warn('ad media config fetch failed, gate modals fall back to the stub', e);
+  }
+}
+
+/** Resolved URL for a type's active file, or null if nothing's active
+    (video types with no admin upload yet) — mirrors the admin preview link
+    logic in templates/admin.html. */
+function _adMediaActiveUrl(type, entry) {
+  if (!entry) return null;
+  if (entry.active === 'default') return entry.default_path || null;
+  const has = (entry.files || []).some(f => f.id === entry.active);
+  return has ? `/api/ad-media/${type}/${entry.active}` : null;
+}
+
+/** The active file's own record (for its stored `duration`), or null when
+    the active selection is 'default' (no per-file metadata to read). */
+function _adMediaActiveFile(type, entry) {
+  if (!entry || entry.active === 'default') return null;
+  return (entry.files || []).find(f => f.id === entry.active) || null;
+}
+
+/** Which ad media types back a given gate kind. video_30/banner_a for
+    import, video_60/banner_b for hand_export — the natural 1:1 pairing
+    across the two gate kinds and the two type-pairs the admin library
+    supports. */
+function _gateStubMediaTypes(kind) {
+  return kind === 'import'
+    ? { video: 'video_30', banner: 'banner_a' }
+    : { video: 'video_60', banner: 'banner_b' };
+}
+
 function _gateStubKindCopy(kind) {
   const I = window.I18N_GATE_STUB || {};
   return kind === 'import'
@@ -488,8 +544,16 @@ function _openGateStub(stubKind, retry, upgradeReason) {
 
 /**
  * Show the "watch to unlock" stub modal. onComplete fires exactly once, after
- * the 30s timer has elapsed AND the (by-then-enabled) OK button is clicked.
- * kind is 'import' or 'hand_export' — it only drives copy, never the timer.
+ * the OK button is enabled and clicked. kind is 'import' or 'hand_export'.
+ *
+ * Unlock timing: when the admin has an active video for this kind's type
+ * (video_30/video_60), the OK button is disabled for that video's real
+ * duration (same second-by-second countdown as the plain stub — this also
+ * doubles as the "duration elapses" fallback when autoplay is blocked) and
+ * additionally unlocks the instant the video's 'ended' event fires, so a
+ * user who watches it through doesn't wait out a stale timer. When no video
+ * is active, this falls back to the original _GATE_STUB_SECONDS countdown
+ * unchanged.
  */
 function _showGateStubModal(kind, onComplete) {
   if (window.GATE_STUB_MODAL_ENABLED === false) {
@@ -502,8 +566,18 @@ function _showGateStubModal(kind, onComplete) {
   if (!modalEl) { if (onComplete) onComplete(); return; }
 
   clearInterval(_gateStubState.timer);
+
+  const mediaTypes = _gateStubMediaTypes(kind);
+  const videoUrl  = _adMediaActiveUrl(mediaTypes.video, _AD_MEDIA[mediaTypes.video]);
+  const videoFile = _adMediaActiveFile(mediaTypes.video, _AD_MEDIA[mediaTypes.video]);
+  const nominalSeconds = kind === 'import' ? 30 : 60;
+  const useVideo = !!videoUrl;
+  const seconds = useVideo
+    ? Math.max(1, Math.ceil((videoFile && videoFile.duration) || nominalSeconds))
+    : _GATE_STUB_SECONDS;
+
   _gateStubState = {
-    kind, onComplete, remaining: _GATE_STUB_SECONDS, timer: null,
+    kind, onComplete, remaining: seconds, timer: null,
     completionId: _gateStubNewId(), posted: false,
   };
 
@@ -526,9 +600,66 @@ function _showGateStubModal(kind, onComplete) {
     okBtn.disabled = true;
     okBtn.onclick = _gateStubOkClicked;
   }
+
+  // Active banner for this kind's type — same slot the Pro-upsell copy
+  // occupies. Gracefully hidden when nothing resolves (shouldn't happen for
+  // banner_a/banner_b, which always ship a default, but stay defensive).
+  const bannerEl = document.getElementById('gate-stub-banner-img');
+  if (bannerEl) {
+    const bannerUrl = _adMediaActiveUrl(mediaTypes.banner, _AD_MEDIA[mediaTypes.banner]);
+    if (bannerUrl) {
+      bannerEl.src = bannerUrl;
+      bannerEl.classList.remove('d-none');
+    } else {
+      bannerEl.removeAttribute('src');
+      bannerEl.classList.add('d-none');
+    }
+  }
+
+  // Real video vs. countdown-only stub.
+  const videoWrap      = document.getElementById('gate-stub-video-wrap');
+  const videoEl        = document.getElementById('gate-stub-video');
+  const countdownCopyEl = document.getElementById('gate-stub-countdown-copy');
+  if (videoEl) {
+    videoEl.pause();
+    videoEl.onended = null;
+    videoEl.onerror = null;
+    videoEl.removeAttribute('src');
+    videoEl.load();
+  }
+  if (useVideo && videoWrap && videoEl) {
+    videoWrap.classList.remove('d-none');
+    if (countdownCopyEl) countdownCopyEl.classList.add('d-none');
+    videoEl.muted = false;
+    videoEl.src = videoUrl;
+    videoEl.onended = () => {
+      // Watched all the way through — unlock immediately rather than
+      // waiting out any remainder of the duration-based countdown.
+      _gateStubState.remaining = 0;
+      clearInterval(_gateStubState.timer);
+      _gateStubState.timer = null;
+      _gateStubRenderCountdown();
+    };
+    videoEl.onerror = () => {
+      // Falls back to the countdown-only stub — the timer above is already
+      // running on the same duration, so nothing else needs to change.
+      videoWrap.classList.add('d-none');
+      if (countdownCopyEl) countdownCopyEl.classList.remove('d-none');
+    };
+    const playPromise = videoEl.play();
+    if (playPromise && playPromise.catch) {
+      // Autoplay blocked (no user gesture, or browser policy) — the running
+      // countdown is the fallback unlock; native controls let them play it
+      // manually if they want to actually watch.
+      playPromise.catch(() => {});
+    }
+  } else if (countdownCopyEl) {
+    countdownCopyEl.classList.remove('d-none');
+  }
+
   _gateStubRenderCountdown();
 
-  _trackEvent('gate_stub_modal_shown', { kind });
+  _trackEvent('gate_stub_modal_shown', { kind, media: useVideo ? 'video' : 'stub' });
   bootstrap.Modal.getOrCreateInstance(modalEl).show();
 
   _gateStubState.timer = setInterval(() => {
@@ -588,6 +719,8 @@ function closeGateStubModal() {
     kind: null, onComplete: null, remaining: 0, timer: null,
     completionId: null, posted: false,
   };
+  const videoEl = document.getElementById('gate-stub-video');
+  if (videoEl) videoEl.pause();   // stop audio/playback once the modal closes
   const modalEl = document.getElementById('gate-stub-modal');
   if (modalEl) {
     const modal = bootstrap.Modal.getInstance(modalEl);
@@ -3499,6 +3632,7 @@ function exportTournament(tourneyId, btn) {
 
 document.addEventListener('DOMContentLoaded', () => {
   _loadBannersConfig();   // fetches, then renders both banner slots
+  _loadAdMediaConfig();   // fetches active gate-modal video/banner selections
 
   document.getElementById('url-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') handleImport();
