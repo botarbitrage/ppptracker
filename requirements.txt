@@ -7,3 +7,4 @@ gunicorn==26.0.0
 stripe==15.5.0
 firebase-admin==7.5.0
 eval7==0.1.11
+mutagen==1.47.0

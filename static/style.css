@@ -1048,13 +1048,22 @@ body {
 /* ── Header row (auth + connection status left, settings right) ─────
    flex-wrap on both clusters means a narrow viewport wraps controls onto
    their own line instead of shrinking/overlapping them. */
+/* The header bar sits a tone above the page background so it reads as its own
+   surface rather than floating controls. Shared with .top-bar on the sub-pages
+   (see "Shared page top bar" below) so every page's header matches. */
 .header-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 8px 12px;
-  margin-bottom: .5rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 14px;
+  /* Keeps clear air under the bar. Don't move this to an inline style on the
+     element — `margin:0 auto` there would silently zero it out. */
+  margin: 0 auto 12px;
 }
 .header-row-left,
 .header-row-right {
@@ -1064,32 +1073,31 @@ body {
   gap: 8px;
 }
 
-/* Simple network connectivity indicator, driven by navigator.onLine
-   (see _initConnStatus in app.js). */
-.conn-status {
+/* ── Smart selects (Language / Timezone) ─────────────────────
+   Native <select> elements dressed up as icon-led pill buttons, matching
+   the round "User" button's visual weight in the header. */
+.smart-select {
   display: inline-flex;
   align-items: center;
-  gap: .4rem;
-  font-family: var(--font-head);
-  font-size: .72rem;
-  font-weight: 700;
-  letter-spacing: .3px;
-  color: var(--muted);
-  white-space: nowrap;
+  gap: 6px;
+  background: rgba(0,230,118,.06);
+  border: 1px solid rgba(0,230,118,.2);
+  border-radius: 20px;
+  padding: 4px 10px;
+  cursor: pointer;
 }
-.conn-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-accent-green);
-  box-shadow: 0 0 6px var(--color-accent-green);
-  flex-shrink: 0;
+.smart-select-icon { color: var(--muted); flex-shrink: 0; }
+.smart-select-input {
+  background: none;
+  border: none;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: .78rem;
+  padding: 0;
+  cursor: pointer;
 }
-.conn-status.conn-offline { color: var(--red); }
-.conn-status.conn-offline .conn-dot {
-  background: var(--red);
-  box-shadow: 0 0 6px var(--red);
-}
+.smart-select-input:focus { outline: none; }
+.smart-select-input option { background: var(--panel-alt); color: var(--text); }
 
 /* ── Auth bar ─────────────────────────────────────────────── */
 .auth-bar {
@@ -1097,6 +1105,76 @@ body {
   justify-content: flex-end;
   min-height: 28px;
 }
+
+/* Round "User" button + its dropdown menu (replaces the email pill). */
+.user-btn {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid var(--green);
+  background: rgba(0,230,118,.1);
+  color: var(--green);
+  font-family: var(--font-head);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .15s, box-shadow .15s;
+}
+.user-btn:hover { background: rgba(0,230,118,.2); box-shadow: 0 0 10px rgba(0,230,118,.3); }
+
+/* Positioned here rather than by Bootstrap's Popper: /admin and /leaks load
+   Bootstrap's CSS but not its JS, and header.js drives the .show class itself
+   so the menu behaves identically on every page. */
+.user-menu { position: relative; }
+.user-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  /* Anchored to the button's left edge by default — on the main page the User
+     button sits at the far left of the header, where a right-anchored menu
+     opens off the side of the viewport. The sub-page top bars put the button
+     on the right instead, and flip this below. */
+  left: 0;
+  right: auto;
+  z-index: 1000;
+  display: none;
+  margin: 6px 0 0;
+  list-style: none;
+  min-width: 190px;
+  padding: 6px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 8px 28px rgba(0,0,0,.45);
+}
+.user-dropdown-menu.show { display: block; }
+/* Sub-page top bars (/tournaments, /admin, /leaks) end with the User button, so
+   the menu hangs off its right edge to stay on screen. */
+.top-bar-right .user-dropdown-menu { left: auto; right: 0; }
+.user-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: .84rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .12s;
+}
+.user-dropdown-item svg { flex-shrink: 0; color: var(--muted); }
+.user-dropdown-item:hover { background: rgba(0,230,118,.1); color: var(--text); }
+.user-dropdown-item-danger:hover { background: rgba(255,82,82,.12); }
+.user-dropdown-item-danger:hover svg { color: var(--red); }
 
 .auth-chip {
   display: inline-flex;
@@ -1154,19 +1232,23 @@ button.auth-chip { background: none; }
   border-color: var(--red);
 }
 
-/* Admin entry pill — same shape as the auth chip, green and clickable. */
-.auth-chip.admin-chip {
-  cursor: pointer;
-  color: var(--green);
-  font-family: var(--font-head);
-  font-weight: 600;
-  letter-spacing: .3px;
-  transition: background .18s, border-color .18s;
+/* ── My Account modal ─────────────────────────────────────── */
+.account-info-list {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 14px;
+  margin: 0;
 }
-
-.auth-chip.admin-chip:hover {
-  background: rgba(0,230,118,.14);
-  border-color: rgba(0,230,118,.5);
+.account-info-list dt {
+  color: var(--muted);
+  font-size: .78rem;
+  font-weight: 500;
+}
+.account-info-list dd {
+  margin: 0;
+  color: var(--text);
+  font-size: .84rem;
+  text-align: right;
 }
 
 /* ── Shared page top bar ──────────────────────────────────── */
@@ -1178,8 +1260,12 @@ button.auth-chip { background: none; }
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
+  /* Same raised tone as the main page's .header-row, so the sub-page headers
+     read as the same component. */
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 14px;
   margin-bottom: 16px;
 }
 
@@ -1586,18 +1672,25 @@ button.auth-chip { background: none; }
 }
 
 
-/* ── Header row (title flanked by the two rewards blocks) ────
-   gam-stats (points/streak/rank) sits left of the title, gam-side
-   (badges/next) sits right — each is its own visually distinct panel,
-   toggled independently by _loadGamification() so the title stays put
-   regardless of gamification load state. */
+/* ── Title ────────────────────────────────────────────────────
+   Stays alone in its own row above .header-flanked (Task: "Update layout"). */
+.header-title-block {
+  max-width: 1400px;
+  margin: 0 auto 1rem;
+}
+
+/* ── Header row (info tiles flanked by the two rewards blocks) ──
+   gam-stats (points/streak/rank) sits left, gam-side (badges/next) sits
+   right — each is its own visually distinct panel, toggled independently
+   by _loadGamification() so the tiles stay put regardless of gamification
+   load state. */
 .header-flanked {
   display: grid;
   /* Both flanking tracks share the same minmax() floor so they always end up
      the same width as each other — plain `1fr auto 1fr` lets each track's
      own min-content size (gam-stats needs ~225px, gam-side needs less)
-     override the equal 1fr split, which pushed the title's center off the
-     true page center by ~40px on desktop. */
+     override the equal 1fr split, which pushed the center off true page
+     center by ~40px on desktop. */
   grid-template-columns: minmax(225px, 1fr) auto minmax(225px, 1fr);
   align-items: center;
   gap: 12px;
@@ -1612,7 +1705,7 @@ button.auth-chip { background: none; }
   padding: .6rem 1rem;
 }
 .header-flanked .gam-stats { grid-column: 1; justify-self: start; }
-.header-title-block { grid-column: 2; }
+.header-flanked-tiles { grid-column: 2; }
 .header-flanked .gam-side { grid-column: 3; justify-self: end; }
 
 @media (max-width: 991.98px) {
@@ -1621,8 +1714,8 @@ button.auth-chip { background: none; }
     justify-items: center;
     text-align: center;
   }
+  .header-flanked-tiles { grid-column: 1; grid-row: 1; }
   .header-flanked .gam-stats { grid-column: 1; grid-row: 2; justify-self: center; margin-top: .5rem; }
-  .header-title-block { grid-column: 1; grid-row: 1; }
   .header-flanked .gam-side { grid-column: 1; grid-row: 3; justify-self: center; justify-content: center; margin-top: .5rem; }
 }
 
@@ -2130,6 +2223,13 @@ tr.row-flash > td {
 }
 .tg-pill:not(.active) { opacity: .4; }
 
+/* PH Only + Chips pills share the graph's Chips-line blue instead of green. */
+.tg-pill-blue.active {
+  background: rgba(64,196,255,.15);
+  color: var(--blue);
+  border-color: rgba(64,196,255,.5);
+}
+
 .tourney-graph-canvas-wrap {
   position: relative;
   height: 260px;
@@ -2156,6 +2256,14 @@ tr.row-flash > td {
   font-family: var(--font-body);
   font-size: .7rem;
   color: #9ab39a;
+}
+/* Inside the Legend modal there's nothing above it to separate from. */
+.tg-legend.tg-legend-modal {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+  font-size: .8rem;
+  gap: 10px 16px;
 }
 .tg-lg {
   display: inline-flex;
