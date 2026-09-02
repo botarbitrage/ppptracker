@@ -1137,6 +1137,283 @@ def _banners_config():
     return cfg
 
 
+# ── Ad Campaigns: self-hosted media library ───────────────────────────────────
+# Admin-uploaded banners/videos for the import/export gate modals (see the
+# "Build and implement ad services" Feature). This only builds upload/manage
+# + Storage + config, per the Task AC's explicit scope cut — wiring the active
+# file into the gate modals themselves is a separate, later Task.
+#
+# Firestore doc shape (/config/ad_media), one key per type:
+#   {"banner_a": {"files": [{id, path, filename, content_type, size,
+#                             duration, uploaded_at, uploaded_by}, ...
+#                            up to _AD_MEDIA_MAX_FILES],
+#                 "active": "default" | <file id>},
+#    "banner_b": {...}, "video_30": {...}, "video_60": {...}}
+# Storage path for an uploaded file: ad_media/<type>/<file id><ext>.
+_AD_MEDIA_MAX_FILES = 4   # admin-uploaded slots per type; +1 hard-saved default = 5 total, per AC
+
+_AD_MEDIA_TYPES = {
+    'banner_a': {
+        'kind': 'image', 'max_bytes': 2 * 1024 * 1024,
+        'content_types': {'image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/svg+xml'},
+        'default_path': '/static/ad_media/banner_a_default.svg',
+    },
+    'banner_b': {
+        'kind': 'image', 'max_bytes': 2 * 1024 * 1024,
+        'content_types': {'image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/svg+xml'},
+        'default_path': '/static/ad_media/banner_b_default.svg',
+    },
+    # No bundled default video (default_path stays None): actually encoding a
+    # placeholder 30s/60s MP4 needs tooling this codebase doesn't have. The
+    # next Task's AC already requires "falls back gracefully to the existing
+    # stub behavior if no active video is configured for a type" — this is
+    # exactly that state, reachable from day one until an admin uploads one.
+    'video_30': {
+        'kind': 'video', 'max_bytes': 15 * 1024 * 1024,
+        'content_types': {'video/mp4'},
+        'target_duration': 30, 'duration_tolerance': 3,
+        'default_path': None,
+    },
+    'video_60': {
+        'kind': 'video', 'max_bytes': 15 * 1024 * 1024,
+        'content_types': {'video/mp4'},
+        'target_duration': 60, 'duration_tolerance': 3,
+        'default_path': None,
+    },
+}
+
+
+def _ad_media_config():
+    """Admin-configurable media library: files + active selection per type.
+
+    Mirrors _banners_config(): read fresh from Firestore on every call, fall
+    back to an empty-but-valid shape per type on a missing doc or any read
+    failure, and sanitise a hand-edited/part-written doc on the way out —
+    the streaming/admin routes below trust the file ids and active value this
+    returns.
+    """
+    try:
+        snap = _get_admin_db().collection('config').document('ad_media').get()
+        stored = snap.to_dict() if snap.exists else {}
+    except Exception as exc:
+        print(f"[_ad_media_config] read failed: {type(exc).__name__}: {exc}")
+        stored = {}
+    if not isinstance(stored, dict):
+        stored = {}
+
+    cfg = {}
+    for media_type, spec in _AD_MEDIA_TYPES.items():
+        raw = stored.get(media_type)
+        raw = raw if isinstance(raw, dict) else {}
+        files = raw.get('files')
+        files = files if isinstance(files, list) else []
+        clean_files = []
+        for f in files[:_AD_MEDIA_MAX_FILES]:
+            if not isinstance(f, dict) or not f.get('id') or not f.get('path'):
+                continue
+            clean_files.append({
+                'id':            f['id'],
+                'path':          f['path'],
+                'filename':      f.get('filename', ''),
+                'content_type':  f.get('content_type', ''),
+                'size':          f.get('size', 0),
+                'duration':      f.get('duration'),
+                'uploaded_at':   f.get('uploaded_at', 0),
+                'uploaded_by':   f.get('uploaded_by', ''),
+            })
+        active = raw.get('active', 'default')
+        if active != 'default' and active not in {f['id'] for f in clean_files}:
+            active = 'default'   # a deleted/unknown file id can't stay active
+        cfg[media_type] = {
+            'files':        clean_files,
+            'active':       active,
+            'default_path': spec['default_path'],
+        }
+    return cfg
+
+
+def _video_duration_seconds(file_bytes):
+    """Best-effort MP4 duration in seconds via mutagen (pure Python, no ffmpeg
+    binary needed), or None if it can't be read. The upload route treats None
+    as a rejection for video types, since the AC requires the duration to
+    roughly match the type."""
+    import io
+    from mutagen.mp4 import MP4
+    try:
+        return MP4(io.BytesIO(file_bytes)).info.length
+    except Exception:
+        return None
+
+
+@app.route('/api/admin/ad-media-config', methods=['GET'])
+def admin_ad_media_config_get():
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+    return jsonify(_ad_media_config())
+
+
+@app.route('/api/admin/ad-media/<media_type>/upload', methods=['POST'])
+def admin_ad_media_upload(media_type):
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+    spec = _AD_MEDIA_TYPES.get(media_type)
+    if not spec:
+        return jsonify({'error': f'Unknown media type "{media_type}"'}), 404
+
+    # Fail fast on a declared oversize body before buffering it into memory.
+    # The actual byte-length check below is authoritative (Content-Length is
+    # client-supplied and can be absent or wrong).
+    if request.content_length and request.content_length > spec['max_bytes'] + 4096:
+        mb = spec['max_bytes'] / (1024 * 1024)
+        return jsonify({'error': f'File is larger than the {mb:.0f}MB cap for {media_type}'}), 400
+
+    upload = request.files.get('file')
+    if upload is None or not upload.filename:
+        return jsonify({'error': 'No file in request'}), 400
+
+    content_type = (upload.mimetype or '').lower()
+    if content_type not in spec['content_types']:
+        return jsonify({
+            'error': f'"{content_type or "unknown"}" is not accepted for {media_type} '
+                     f'— use one of: {", ".join(sorted(spec["content_types"]))}'
+        }), 400
+
+    data = upload.read()
+    if not data:
+        return jsonify({'error': 'Uploaded file is empty'}), 400
+    if len(data) > spec['max_bytes']:
+        mb = spec['max_bytes'] / (1024 * 1024)
+        return jsonify({'error': f'File is larger than the {mb:.0f}MB cap for {media_type}'}), 400
+
+    duration = None
+    if spec['kind'] == 'video':
+        duration = _video_duration_seconds(data)
+        if duration is None:
+            return jsonify({'error': 'Could not read video duration — upload a standard MP4 file'}), 400
+        target, tol = spec['target_duration'], spec['duration_tolerance']
+        if abs(duration - target) > tol:
+            return jsonify({
+                'error': f'Video is {duration:.1f}s long — {media_type} needs {target}s (+/- {tol}s)'
+            }), 400
+
+    cfg = _ad_media_config()
+    existing = cfg[media_type]['files']
+    if len(existing) >= _AD_MEDIA_MAX_FILES:
+        return jsonify({
+            'error': f'{media_type} already has {_AD_MEDIA_MAX_FILES} saved files '
+                     f'— delete one before uploading another'
+        }), 400
+
+    bucket = _get_admin_bucket()
+    if not bucket:
+        return jsonify({'error': 'Storage is not configured'}), 503
+
+    import uuid as _uuid
+    ext = os.path.splitext(upload.filename)[1][:10] or ('.jpg' if spec['kind'] == 'image' else '.mp4')
+    file_id = _uuid.uuid4().hex
+    path = f'ad_media/{media_type}/{file_id}{ext}'
+    try:
+        bucket.blob(path).upload_from_string(data, content_type=content_type)
+    except Exception as exc:
+        print(f"[admin_ad_media_upload] upload failed: {type(exc).__name__}: {exc}")
+        return jsonify({'error': 'Upload to storage failed'}), 502
+
+    file_entry = {
+        'id': file_id, 'path': path, 'filename': upload.filename,
+        'content_type': content_type, 'size': len(data), 'duration': duration,
+        'uploaded_at': int(time.time()), 'uploaded_by': uid,
+    }
+    _get_admin_db().collection('config').document('ad_media').set({media_type: {
+        'files':  existing + [file_entry],
+        'active': cfg[media_type]['active'],
+    }}, merge=True)
+    return jsonify(_ad_media_config())
+
+
+@app.route('/api/admin/ad-media/<media_type>/active', methods=['POST'])
+def admin_ad_media_set_active(media_type):
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+    if media_type not in _AD_MEDIA_TYPES:
+        return jsonify({'error': f'Unknown media type "{media_type}"'}), 404
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict) or 'file_id' not in body:
+        return jsonify({'error': 'Malformed request body'}), 400
+    file_id = body['file_id']
+
+    cfg = _ad_media_config()
+    valid_ids = {'default'} | {f['id'] for f in cfg[media_type]['files']}
+    if file_id not in valid_ids:
+        return jsonify({'error': f'"{file_id}" is not a saved file for {media_type}'}), 400
+    if file_id == 'default' and not _AD_MEDIA_TYPES[media_type]['default_path']:
+        return jsonify({'error': f'{media_type} has no default file yet — upload one first'}), 400
+
+    _get_admin_db().collection('config').document('ad_media').set({media_type: {
+        'files':  cfg[media_type]['files'],
+        'active': file_id,
+    }}, merge=True)
+    return jsonify(_ad_media_config())
+
+
+@app.route('/api/admin/ad-media/<media_type>/<file_id>', methods=['DELETE'])
+def admin_ad_media_delete(media_type, file_id):
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+    if media_type not in _AD_MEDIA_TYPES:
+        return jsonify({'error': f'Unknown media type "{media_type}"'}), 404
+    if file_id == 'default':
+        return jsonify({'error': 'The default file cannot be deleted'}), 400
+
+    cfg = _ad_media_config()
+    target = next((f for f in cfg[media_type]['files'] if f['id'] == file_id), None)
+    if target is None:
+        return jsonify({'error': f'"{file_id}" is not a saved file for {media_type}'}), 404
+    remaining = [f for f in cfg[media_type]['files'] if f['id'] != file_id]
+
+    bucket = _get_admin_bucket()
+    if bucket:
+        try:
+            bucket.blob(target['path']).delete()
+        except Exception as exc:
+            print(f"[admin_ad_media_delete] storage delete failed: {type(exc).__name__}: {exc}")
+
+    new_active = 'default' if cfg[media_type]['active'] == file_id else cfg[media_type]['active']
+    _get_admin_db().collection('config').document('ad_media').set({media_type: {
+        'files':  remaining,
+        'active': new_active,
+    }}, merge=True)
+    return jsonify(_ad_media_config())
+
+
+@app.route('/api/ad-media/<media_type>/<file_id>', methods=['GET'])
+def ad_media_file_get(media_type, file_id):
+    """Public, unauthenticated stream of an admin-uploaded banner/video —
+    same audience as /static/banners/*.svg, just backed by Cloud Storage
+    instead of the repo. No admin gate: the gate modals (next Task) need to
+    load these for every free user, not just admins previewing in /admin."""
+    if media_type not in _AD_MEDIA_TYPES:
+        return jsonify({'error': 'Not found'}), 404
+    cfg = _ad_media_config()
+    target = next((f for f in cfg[media_type]['files'] if f['id'] == file_id), None)
+    if target is None:
+        return jsonify({'error': 'Not found'}), 404
+    bucket = _get_admin_bucket()
+    if not bucket:
+        return jsonify({'error': 'Storage is not configured'}), 503
+    try:
+        data = bucket.blob(target['path']).download_as_bytes()
+    except Exception as exc:
+        print(f"[ad_media_file_get] download failed: {type(exc).__name__}: {exc}")
+        return jsonify({'error': 'Not found'}), 404
+    resp = Response(data, mimetype=target['content_type'] or 'application/octet-stream')
+    resp.headers['Cache-Control'] = 'public, max-age=3600'
+    return resp
+
+
 def _export_gate(req, uid, kind):
     """Quota/survey gate for one export. kind is 'hand' or 'tourney'.
 
