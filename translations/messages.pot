@@ -110,6 +110,52 @@ msgstr ""
 msgid "Release Notes"
 msgstr ""
 
+#: templates/index.html:146
+msgid "What's coming next"
+msgstr ""
+
+#: templates/index.html:148 templates/index.html:1097
+msgid "Roadmap"
+msgstr ""
+
+#: templates/index.html:1102
+msgid "Here's what we're building next — high level, subject to change."
+msgstr ""
+
+#: templates/index.html:1105
+msgid "Now"
+msgstr ""
+
+#: templates/index.html:1106
+msgid "In progress"
+msgstr ""
+
+#: templates/index.html:1108
+msgid ""
+"Leak Finder going site-agnostic — the same leak-spotting analysis, "
+"expanding beyond PPPoker to more platforms"
+msgstr ""
+
+#: templates/index.html:1113
+msgid "Next"
+msgstr ""
+
+#: templates/index.html:1115
+msgid ""
+"AI Poker Coach — personalised, hand-history-driven feedback on your "
+"game, in a few different flavours"
+msgstr ""
+
+#: templates/index.html:1120
+msgid "Later"
+msgstr ""
+
+#: templates/index.html:1122
+msgid ""
+"Solver & training tools — a beginner-friendly way to train ranges and "
+"decisions, built on your own hands"
+msgstr ""
+
 #: templates/index.html:162
 msgid "FREE"
 msgstr ""
