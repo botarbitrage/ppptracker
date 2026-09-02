@@ -1048,13 +1048,22 @@ body {
 /* ── Header row (auth + connection status left, settings right) ─────
    flex-wrap on both clusters means a narrow viewport wraps controls onto
    their own line instead of shrinking/overlapping them. */
+/* The header bar sits a tone above the page background so it reads as its own
+   surface rather than floating controls. Shared with .top-bar on the sub-pages
+   (see "Shared page top bar" below) so every page's header matches. */
 .header-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 8px 12px;
-  margin-bottom: .5rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 14px;
+  /* Keeps clear air under the bar. Don't move this to an inline style on the
+     element — `margin:0 auto` there would silently zero it out. */
+  margin: 0 auto 12px;
 }
 .header-row-left,
 .header-row-right {
@@ -1125,8 +1134,12 @@ body {
 .user-dropdown-menu {
   position: absolute;
   top: 100%;
-  right: 0;
-  left: auto;
+  /* Anchored to the button's left edge by default — on the main page the User
+     button sits at the far left of the header, where a right-anchored menu
+     opens off the side of the viewport. The sub-page top bars put the button
+     on the right instead, and flip this below. */
+  left: 0;
+  right: auto;
   z-index: 1000;
   display: none;
   margin: 6px 0 0;
@@ -1139,6 +1152,9 @@ body {
   box-shadow: 0 8px 28px rgba(0,0,0,.45);
 }
 .user-dropdown-menu.show { display: block; }
+/* Sub-page top bars (/tournaments, /admin, /leaks) end with the User button, so
+   the menu hangs off its right edge to stay on screen. */
+.top-bar-right .user-dropdown-menu { left: auto; right: 0; }
 .user-dropdown-item {
   display: flex;
   align-items: center;
@@ -1244,8 +1260,12 @@ button.auth-chip { background: none; }
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
+  /* Same raised tone as the main page's .header-row, so the sub-page headers
+     read as the same component. */
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 14px;
   margin-bottom: 16px;
 }
 
