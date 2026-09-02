@@ -18,7 +18,7 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
@@ -58,26 +58,50 @@
       <!-- Populated by _renderAuthBar(): a round "User" button (initials or
            Log In) opening a dropdown with My Account / Admin Board / Sign Out. -->
       <div id="auth-bar" class="auth-bar"></div>
+
+      <!-- Points/streak/rank, next to the User button (Task: "Layout updates").
+           Same #gam-block-left / _loadGamification() wiring as before — only its
+           position and sizing (via .header-row .gam-stats) changed. -->
+      <div id="gam-block-left" class="gam-stats d-none" aria-live="polite">
+        <div class="gam-stat">
+          <span class="gam-stat-value" id="gam-points">—</span>
+          <span class="gam-stat-label">{{ _('Points') }}</span>
+        </div>
+        <div class="gam-stat">
+          <span class="gam-stat-value" id="gam-streak">—</span>
+          <span class="gam-stat-label">{{ _('Day Streak') }}</span>
+        </div>
+        <div class="gam-stat">
+          <span class="gam-stat-value" id="gam-rank">—</span>
+          <span class="gam-stat-label">{{ _('Weekly Rank') }}</span>
+        </div>
+      </div>
     </div>
     <div class="header-row-right">
       <label class="smart-select" title="{{ _('Language') }}">
         <svg class="smart-select-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         <select id="lang-select" class="smart-select-input" aria-label="{{ _('Language') }}">
           <option value="en" {{ 'selected' if current_locale == 'en' }}>EN</option>
-          <option value="pt_BR" {{ 'selected' if current_locale == 'pt_BR' }}>PT-BR</option>
+          <option value="pt_BR" {{ 'selected' if current_locale == 'pt_BR' }}>PT</option>
         </select>
       </label>
       <label class="smart-select" title="{{ _('Timezone') }}">
         <svg class="smart-select-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         <select id="tz-select" class="smart-select-input" aria-label="{{ _('Timezone') }}">
-          <option value="Australia/Adelaide">ADL</option>
-          <option value="Australia/Brisbane">BNE</option>
-          <option value="Australia/Darwin">DRW</option>
-          <option value="Australia/Melbourne">MEL</option>
-          <option value="Australia/Perth">PER</option>
-          <option value="Australia/Sydney">SYD</option>
-          <option value="America/Sao_Paulo">{{ _('SAO (BRT)') }}</option>
-          <option value="UTC">UTC</option>
+          <optgroup label="{{ _('Australia') }}">
+            <option value="Australia/Adelaide">ADL</option>
+            <option value="Australia/Brisbane">BNE</option>
+            <option value="Australia/Darwin">DRW</option>
+            <option value="Australia/Melbourne">MEL</option>
+            <option value="Australia/Perth">PER</option>
+            <option value="Australia/Sydney">SYD</option>
+          </optgroup>
+          <optgroup label="{{ _('Brazil') }}">
+            <option value="America/Sao_Paulo">{{ _('SAO') }}</option>
+          </optgroup>
+          <optgroup label="{{ _('Global') }}">
+            <option value="UTC">UTC</option>
+          </optgroup>
         </select>
       </label>
     </div>
@@ -92,29 +116,11 @@
     <p class="app-tagline">{{ _('ANALYSE') }} &nbsp;·&nbsp; {{ _('STUDY') }} &nbsp;·&nbsp; {{ _('WIN') }}</p>
   </div>
 
-  <!-- ── Header, flanked by the two rewards blocks ─────────────
-       gam-block-left (points/streak/rank) and gam-block-right (badges/next)
-       are populated by _loadGamification() once auth resolves; each is
-       hidden independently until then so signed-out visitors never see an
-       empty shell of zeroes. The 4 info-tile buttons sit centered between
-       them, replacing the title's old spot in this row. -->
+  <!-- ── Info tiles row (Task: "Layout updates" — gam-block-left moved up
+       into .header-row, gam-block-right moved down above .import-card, so
+       this row is just the centered tiles now). Wrapped in <nav> for
+       landmark (Fix 6). -->
   <div class="header-flanked">
-    <div id="gam-block-left" class="gam-stats d-none" aria-live="polite">
-      <div class="gam-stat">
-        <span class="gam-stat-value" id="gam-points">—</span>
-        <span class="gam-stat-label">{{ _('Points') }}</span>
-      </div>
-      <div class="gam-stat">
-        <span class="gam-stat-value" id="gam-streak">—</span>
-        <span class="gam-stat-label">{{ _('Day Streak') }}</span>
-      </div>
-      <div class="gam-stat">
-        <span class="gam-stat-value" id="gam-rank">—</span>
-        <span class="gam-stat-label">{{ _('Weekly Rank') }}</span>
-      </div>
-    </div>
-
-    <!-- Info tiles row — wrapped in <nav> for landmark (Fix 6) -->
     <nav class="header-flanked-tiles" aria-label="{{ _('Page sections') }}">
     <div class="info-tiles">
 
@@ -152,11 +158,6 @@
 
     </div>
     </nav>
-
-    <div id="gam-block-right" class="gam-side d-none" aria-live="polite">
-      <div class="gam-badges" id="gam-badges"></div>
-      <div class="gam-next" id="gam-next"></div>
-    </div>
   </div>
 
   <!-- ── Feature banner ───────────────────────────────────── -->
@@ -195,6 +196,15 @@
       </div>
     </div>
 
+  </div>
+
+  <!-- ── Reward game card (badges/next-badge) ─────────────────
+       Horizontal card above the import section (Task: "Layout updates").
+       Same #gam-block-right / _loadGamification() wiring as before — only
+       its position and layout (via .reward-card .gam-side) changed. -->
+  <div id="gam-block-right" class="reward-card gam-side d-none mb-4" style="max-width:1400px;margin:0 auto" aria-live="polite">
+    <div class="gam-badges" id="gam-badges"></div>
+    <div class="gam-next" id="gam-next"></div>
   </div>
 
   <!-- ── Import card ──────────────────────────────────────── -->

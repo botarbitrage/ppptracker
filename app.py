@@ -4150,7 +4150,18 @@ def tournaments_page():
 @app.route('/admin')
 def admin_page():
     """Admin console. Unlisted for non-admins — the APIs it calls are the gate."""
-    return render_template('admin.html')
+    volume_badges = [
+        {**gamification.BADGES[code], 'code': code, 'threshold': threshold}
+        for threshold, code in gamification.VOLUME_BADGES
+    ]
+    behavioural_codes = ('K9', 'A2345', 'STEEL', 'T2', 'ROYAL', 'Q7', 'J4', '99', '83', '23o')
+    behavioural_badges = [{**gamification.BADGES[code], 'code': code} for code in behavioural_codes]
+    podium_badges = [
+        {**gamification.BADGES[code], 'code': code, 'rank': rank, 'points': points}
+        for rank, (points, code) in sorted(gamification.PODIUM.items())
+    ]
+    return render_template('admin.html', volume_badges=volume_badges,
+                            behavioural_badges=behavioural_badges, podium_badges=podium_badges)
 
 @app.route('/offline')
 def offline():
