@@ -30,6 +30,94 @@
   --color-brand-green-dark:   #28763A;
   --color-accent-green:       #39B577;
   --color-accent-green-dark:  #1D5D3D;
+
+  /* ── Semantic tokens ─────────────────────────────────────────
+     These carry the values that must FLIP between themes. The dark
+     values live here on :root (the default); the light theme
+     redefines them under [data-theme="light"] below. Everything
+     else (the deck colours, the greens/reds) is themed by
+     redefining the base token, not by adding a new one.
+
+     The overlay tokens are the crux of light mode: on dark they are
+     white-alpha washes; on light they become black-alpha, so the
+     ~40 `#ffffffXX` separators/hovers scattered through the app
+     don't vanish on a pale ground. */
+  color-scheme: dark;
+  --placeholder:  var(--placeholder);
+  --hairline:     rgba(255,255,255,.10);
+  --overlay-lo:   rgba(255,255,255,.04);
+  --overlay-mid:  rgba(255,255,255,.08);
+  --overlay-hi:   rgba(255,255,255,.14);
+  --overlay-max:  rgba(255,255,255,.22);
+  --scrim:        rgba(0,0,0,.62);
+  --shadow-card:  0 4px 24px rgba(0,0,0,.40);
+  --win:          #00e676;
+  --loss:         #ff5252;
+  /* Raised "felt" surface for the hero import card + accent haze */
+  --felt-raise:   #17211a;
+  --accent-glow:  rgba(0,230,118,.30);
+}
+
+/* ── Light theme — "card-room daylight" ──────────────────────────
+   A warm parchment ground under a deep felt green, not a cold grey
+   SaaS light. Bright neon `--green` would fail contrast as text on
+   bone, so in light it becomes a deep emerald that reads both as
+   text and as a button fill; the deck suits and the win/loss greens
+   deepen to stay legible on the pale ground. Applied only when
+   <html data-theme="light"> is set (see the no-flash head snippet in
+   every template). */
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg:          #EFEADC;
+  --panel:       #FBF9F3;
+  --panel-alt:   #F3EEDF;
+  --border:      #D8CFB8;
+  --text:        #16221A;
+  --muted:       #5C6B5A;
+
+  --green:       #147a41;
+  --green-dim:   #0f6636;
+  --red:         #cc2f39;
+  --blue:        #1f7fb8;
+  --yellow:      #8a6d00;
+
+  /* 4-colour deck, deepened for the pale ground */
+  --hearts:      #cc2f39;
+  --spades:      #16221A;
+  --diamonds:    #1f7fb8;
+  --clubs:       #147a41;
+
+  --placeholder: #9a917d;
+  --hairline:    rgba(20,30,20,.14);
+  --overlay-lo:  rgba(20,30,20,.035);
+  --overlay-mid: rgba(20,30,20,.065);
+  --overlay-hi:  rgba(20,30,20,.11);
+  --overlay-max: rgba(20,30,20,.17);
+  --scrim:       rgba(30,40,25,.34);
+  --shadow-card: 0 6px 22px rgba(70,58,24,.14);
+  --win:         #0f8a48;
+  --loss:        #cc2f39;
+  --felt-raise:  #F6F2E6;
+  --accent-glow: rgba(20,122,65,.20);
+}
+
+/* ── Bootstrap compatibility in light theme ──────────────────────
+   Bootstrap components that hard-code a dark look (`.table-dark`,
+   `.btn-close-white`) don't follow our tokens, so they'd stay dark
+   on a light page. Re-point their own CSS variables at our tokens. */
+[data-theme="light"] .table-dark {
+  --bs-table-bg:          var(--panel);
+  --bs-table-color:       var(--text);
+  --bs-table-border-color:var(--border);
+  --bs-table-striped-bg:  var(--overlay-lo);
+  --bs-table-striped-color:var(--text);
+  --bs-table-hover-bg:    var(--overlay-mid);
+  --bs-table-hover-color: var(--text);
+  color: var(--text);
+}
+[data-theme="light"] .btn-close-white {
+  filter: none;
 }
 
 /* ── Skip link (accessibility Fix 4) ───────────────────────── */
@@ -76,7 +164,7 @@ body {
   color: var(--green);
   letter-spacing: clamp(1px, 1vw, 4px);
   text-transform: uppercase;
-  text-shadow: 0 0 24px rgba(0,230,118,.3);
+  text-shadow: 0 0 24px var(--accent-glow);
 }
 
 .app-tagline {
@@ -149,6 +237,16 @@ body {
   border-radius: 10px;
   overflow: hidden;
   background: var(--color-bg-black);
+}
+/* Both banner slots ride on a hardcoded brand-black behind their image;
+   on the light theme a black rectangle among parchment reads as broken
+   layout, so match the ground instead. The image (when set) still sits
+   on top via object-fit: cover. */
+[data-theme="light"] .mid-banner,
+[data-theme="light"] .side-banner {
+  background: var(--panel-alt);
+  border-color: var(--border);
+  box-shadow: var(--shadow-card);
 }
 .mid-banner-img {
   display: block;
@@ -239,6 +337,14 @@ body {
   border: 1px solid var(--yellow);
   box-shadow: 0 0 18px rgba(204,204,0,.1);
 }
+[data-theme="light"] .tier-pro {
+  background: linear-gradient(135deg, #FFF7D6 0%, #FBF3D0 100%);
+  border-color: rgba(138,109,0,.55);
+  box-shadow: 0 0 0 1px rgba(138,109,0,.10), var(--shadow-card);
+}
+[data-theme="light"] .tier-pro .tier-name,
+[data-theme="light"] .tier-pro .tier-early-note,
+[data-theme="light"] .tier-pro .tier-list li { color: var(--text); }
 
 .tier-name {
   font-family: var(--font-head);
@@ -313,17 +419,57 @@ body {
   justify-content: center;
 }
 
-/* ── Import card ──────────────────────────────────────────── */
+/* ── Import card — the hero ───────────────────────────────────
+   This is the page's single job on first load, so it reads as a
+   raised patch of felt with an accent rim rather than just another
+   panel. The eyebrow + hint frame it without competing. */
 .import-card {
-  background: var(--panel);
+  background: var(--felt-raise);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: 0 0 0 1px rgba(0,230,118,.06), 0 4px 24px rgba(0,0,0,.4);
-  padding: 14px 16px;
+  border-radius: 14px;
+  box-shadow: 0 0 0 1px var(--accent-glow), var(--shadow-card);
+  padding: 18px 20px 16px;
+}
+.import-eyebrow {
+  font-family: var(--font-head);
+  font-size: .74rem;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 11px;
+}
+/* A dealt-card tick before the label — the table's own vernacular,
+   not a generic icon. */
+.import-eyebrow::before {
+  content: "";
+  width: 20px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--green), transparent);
 }
 .import-input {
   flex: 1 1 0;
   min-width: 0;
+  font-size: 1.02rem;
+}
+.import-hint {
+  margin: 10px 2px 0;
+  font-size: .8rem;
+  color: var(--muted);
+}
+.import-hint kbd {
+  font-family: var(--font-head);
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--overlay-mid);
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  padding: 1px 6px;
 }
 
 .form-label {
@@ -346,13 +492,13 @@ body {
   border-color: var(--green) !important;
   box-shadow: 0 0 0 0.2rem rgba(0,230,118,.15) !important;
 }
-.form-control::placeholder { color: #3a4a3a; font-size: .88rem; }
+.form-control::placeholder { color: var(--placeholder); font-size: .88rem; }
 
 /* Site-wide hint/ghost-text style (Task: "Layout updates") — every plain
    input/textarea gets the same themed placeholder as .form-control instead
    of falling back to the browser/OS default. */
 input::placeholder,
-textarea::placeholder { color: #3a4a3a; font-size: .88rem; }
+textarea::placeholder { color: var(--placeholder); font-size: .88rem; }
 
 .btn-import {
   background: var(--green);
@@ -546,7 +692,7 @@ textarea::placeholder { color: #3a4a3a; font-size: .88rem; }
   font-family: var(--font-head);
   font-size: .78rem;
   font-weight: 600;
-  color: #b6ccb6;
+  color: var(--muted);
   letter-spacing: .4px;
   white-space: nowrap;
 }
@@ -781,7 +927,7 @@ textarea::placeholder { color: #3a4a3a; font-size: .88rem; }
   padding: 10px 14px;
 }
 .table-dark tbody td {
-  border-color: rgba(30,45,30,.8) !important;
+  border-color: var(--border) !important;
   vertical-align: middle;
   font-size: .88rem;
   padding: 10px 14px;
@@ -906,7 +1052,7 @@ textarea::placeholder { color: #3a4a3a; font-size: .88rem; }
   font-weight: 700;
   letter-spacing: .4px;
 }
-.pro-lock-cell:hover { color: #e6e600; }
+.pro-lock-cell:hover { color: var(--yellow); }
 .pro-lock-cell svg   { vertical-align: middle; margin-right: 4px; }
 
 /* Pro badge section border for tournament export area */
@@ -950,7 +1096,7 @@ textarea::placeholder { color: #3a4a3a; font-size: .88rem; }
   justify-content: center;
   gap: 8px;
   flex-wrap: wrap;
-  background: rgba(13,17,23,.82);
+  background: var(--scrim);
   border: 1px dashed rgba(204,204,0,.45);
   border-radius: 8px;
   backdrop-filter: blur(2px);
@@ -1019,7 +1165,7 @@ textarea::placeholder { color: #3a4a3a; font-size: .88rem; }
   content: '';
   position: absolute; inset: 0;
   backdrop-filter: blur(4px);
-  background: rgba(13,17,23,.55);
+  background: var(--scrim);
   border-radius: inherit;
   pointer-events: none;
 }
@@ -1507,7 +1653,7 @@ button.auth-chip { background: none; }
   margin-bottom: 12px;
 }
 .app-modal-body li { margin-bottom: 7px; }
-.app-modal-body strong { color: #e8f5e8; }
+.app-modal-body strong { color: var(--text); }
 .app-modal-body code {
   background: rgba(0,230,118,.08);
   border: 1px solid rgba(0,230,118,.15);
@@ -1592,7 +1738,7 @@ button.auth-chip { background: none; }
 }
 .tier-table td {
   padding: 9px 10px;
-  border-bottom: 1px solid rgba(30,45,30,.6);
+  border-bottom: 1px solid var(--border);
   color: var(--text);
 }
 .tier-table td:first-child { color: var(--muted); }
@@ -1730,12 +1876,16 @@ button.auth-chip { background: none; }
 }
 .gam-stats { display: flex; align-items: center; gap: 1.5rem; }
 .gam-stat  { display: flex; flex-direction: column; line-height: 1.15; }
+/* Demoted from three glowing green numerals to a quiet, tabular
+   readout — the card-medallion shelf is where the reward system
+   earns attention, not the header counters. */
 .gam-stat-value {
   font-family: var(--font-head);
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: var(--green);
-  letter-spacing: .5px;
+  font-size: .98rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: .3px;
+  font-variant-numeric: tabular-nums;
 }
 .gam-stat-label {
   font-family: var(--font-head);
@@ -2121,7 +2271,7 @@ tr.row-flash > td {
   border-bottom: 1px solid var(--border);
   padding: 12px 18px;
   background: rgba(255, 193, 7, .08);
-  color: #ffd166;
+  color: var(--yellow);
   font-family: var(--font-body);
   font-size: .86rem;
 }
@@ -2229,9 +2379,9 @@ tr.row-flash > td {
   white-space: nowrap;
   cursor: pointer;
   user-select: none;
-  background: #ffffff0a;
+  background: var(--overlay-lo);
   color: var(--muted);
-  border: 1px solid #ffffff20;
+  border: 1px solid var(--overlay-hi);
   transition: opacity .15s, background .15s;
 }
 .tg-pill.active {
@@ -2273,7 +2423,7 @@ tr.row-flash > td {
   border-top: 1px solid var(--border);
   font-family: var(--font-body);
   font-size: .7rem;
-  color: #9ab39a;
+  color: var(--muted);
 }
 /* Inside the Legend modal there's nothing above it to separate from. */
 .tg-legend.tg-legend-modal {
@@ -2294,9 +2444,9 @@ tr.row-flash > td {
   border-radius: 50%;
   flex: 0 0 auto;
 }
-.tg-lg-dot.won  { background: #00e676; }
-.tg-lg-dot.lost { background: #ff5252; }
-.tg-lg-dot.sd   { width: 11px; height: 11px; background: #9ab39a; }
+.tg-lg-dot.won  { background: var(--win); }
+.tg-lg-dot.lost { background: var(--loss); }
+.tg-lg-dot.sd   { width: 11px; height: 11px; background: var(--muted); }
 .tg-lg-mark {
   display: inline-flex;
   align-items: center;
@@ -2313,7 +2463,7 @@ tr.row-flash > td {
 .tg-lg-line {
   width: 12px;
   flex: 0 0 auto;
-  border-top: 1px dashed #9ab39a;
+  border-top: 1px dashed var(--muted);
 }
 .tg-lg-note { color: var(--muted); font-style: italic; }
 
@@ -2336,7 +2486,7 @@ tr.row-flash > td {
   padding: 7px 8px 7px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: rgba(13,17,23,.95);
+  background: var(--panel);
   box-shadow: 0 4px 18px rgba(0,0,0,.55);
   font-family: var(--font-body);
   font-size: .74rem;
@@ -2476,4 +2626,199 @@ tr.row-flash > td {
 }
 tr.hand-jump-flash > td {
   animation: handJumpFlash 1.6s ease-out forwards;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   MAIN-PAGE REDESIGN
+   Empty state, card-medallion badge system, table refinements, the
+   deal-in reveal, and the theme toggle. Appended last so these win
+   over the base component rules above at equal specificity.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Theme toggle (sun/moon) ────────────────────────────────────
+   One button, no JS to keep the icon in sync: the current
+   data-theme decides which glyph shows. It reads as "tap for the
+   other mode" — a sun while you're in the dark, a moon while you're
+   in daylight. */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--overlay-lo);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  cursor: pointer;
+  transition: color .15s, background .15s, border-color .15s;
+}
+.theme-toggle:hover {
+  color: var(--green);
+  border-color: rgba(0,230,118,.45);
+  background: var(--overlay-mid);
+}
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+.theme-toggle svg { width: 16px; height: 16px; }
+.theme-toggle .icon-moon { display: none; }
+.theme-toggle .icon-sun  { display: block; }
+[data-theme="light"] .theme-toggle .icon-sun  { display: none; }
+[data-theme="light"] .theme-toggle .icon-moon { display: block; }
+
+/* ── Empty state — the invitation under the hero import ──────────
+   A quiet, poker-voice three-beat of what actually happens, in the
+   real order it happens. Not a boxed "how it works" marketing strip;
+   it disappears (#empty-hint gets .d-none in app.js) the moment
+   there's a session on screen. */
+.empty-hint {
+  max-width: 1400px;
+  margin: 16px auto 0;
+  padding: 2px 4px;
+}
+.deal-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.deal-step {
+  display: flex;
+  align-items: baseline;
+  gap: 11px;
+  color: var(--muted);
+  font-size: .9rem;
+  line-height: 1.4;
+}
+.deal-step .chev {
+  color: var(--green);
+  font-family: var(--font-head);
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+.deal-step b { color: var(--text); font-weight: 600; }
+
+/* ── The Grind — card-medallion badge shelf ─────────────────────
+   The signature. Each earned badge is drawn as the actual poker hand
+   its code names (7-2 offsuit, Big Slick, pocket aces, a made-hand
+   fan) on little white card faces, so the reward system speaks the
+   subject's own language instead of trophies and stars. Reads at a
+   glance in the row; the same markup scales up in the unlock toast. */
+.reward-card.gam-side {
+  align-items: center;
+  gap: .75rem 1.15rem;
+}
+.grind-title {
+  font-family: var(--font-head);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--green);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.grind-title svg { width: 15px; height: 15px; opacity: .9; }
+.gam-badges { gap: .55rem; align-items: center; }
+
+.medal {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+  cursor: default;
+}
+.medal-cards { display: inline-flex; align-items: flex-start; }
+.mini-card {
+  width: 24px;
+  height: 33px;
+  border-radius: 4px;
+  background: #fff;
+  border: 1px solid #c9c9c9;
+  box-shadow: 0 1px 2px rgba(0,0,0,.28);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: .82rem;
+  line-height: 1;
+  color: #141414;
+}
+/* Held-cards overlap; the fan (made hands) tucks tighter and splays. */
+.mini-card + .mini-card { margin-left: -9px; }
+.mini-card:nth-child(2) { transform: rotate(3.5deg); transform-origin: bottom left; }
+/* The fan is a made hand — every card counts, so overlap is tight but
+   never full: each face keeps a visible slice of its rank + suit. */
+.medal[data-kind="fan"] .mini-card { width: 19px; height: 28px; font-size: .66rem; padding: 0; }
+.medal[data-kind="fan"] .mini-card + .mini-card { margin-left: -9px; }
+.medal[data-kind="fan"] .mini-card .pip { font-size: .68em; }
+.medal[data-kind="fan"] .mini-card:nth-child(1) { transform: rotate(-10deg) translateY(2px); transform-origin: bottom right; }
+.medal[data-kind="fan"] .mini-card:nth-child(2) { transform: rotate(-5deg) translateY(.5px); transform-origin: bottom right; }
+.medal[data-kind="fan"] .mini-card:nth-child(3) { transform: none; }
+.medal[data-kind="fan"] .mini-card:nth-child(4) { transform: rotate(5deg) translateY(.5px); transform-origin: bottom left; }
+.medal[data-kind="fan"] .mini-card:nth-child(5) { transform: rotate(10deg) translateY(2px); transform-origin: bottom left; }
+.mini-card .pip { font-size: .74em; margin-left: .5px; }
+.mini-card[data-suit="hearts"]   { color: #cc0000; }
+.mini-card[data-suit="spades"]   { color: #141414; }
+.mini-card[data-suit="diamonds"] { color: #1155bb; }
+.mini-card[data-suit="clubs"]    { color: #0a8f3c; }
+.medal-label {
+  font-family: var(--font-head);
+  font-size: .55rem;
+  font-weight: 700;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  max-width: 74px;
+  text-align: center;
+  line-height: 1.15;
+}
+/* "+N" overflow chip keeps the old pill look, sized to the medals. */
+.gam-badge-more {
+  align-self: center;
+  height: 33px;
+  display: inline-flex;
+  align-items: center;
+}
+.gam-next strong { font-variant-numeric: tabular-nums; }
+
+/* ── Table refinements ──────────────────────────────────────────
+   Grinders scan numeric columns; tabular figures keep them from
+   dancing as values change. Net P/L reads in win/loss colour. */
+.table td, .table th { font-variant-numeric: tabular-nums; }
+.net-pos { color: var(--win) !important; font-weight: 600; }
+.net-neg { color: var(--loss) !important; font-weight: 600; }
+
+/* Slightly lifted summary rows so the volume tables read as a scan
+   surface rather than a wall of dark stripes. */
+#tourney-summary-tbody tr,
+#cgs-summary-tbody tr { transition: background .12s; }
+
+/* ── Deal-in reveal ─────────────────────────────────────────────
+   When an import lands, the results sections fan onto the table in
+   sequence like dealt streets. Staggered by source order; fully off
+   under reduced-motion. */
+@keyframes dealIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  #results-section:not(.d-none) > .player-badge,
+  #results-section:not(.d-none) > .section-card {
+    animation: dealIn .42s cubic-bezier(.2,.7,.3,1) both;
+  }
+  #results-section:not(.d-none) > *:nth-of-type(1) { animation-delay: .00s; }
+  #results-section:not(.d-none) > *:nth-of-type(2) { animation-delay: .06s; }
+  #results-section:not(.d-none) > *:nth-of-type(3) { animation-delay: .12s; }
+  #results-section:not(.d-none) > *:nth-of-type(4) { animation-delay: .18s; }
+  #results-section:not(.d-none) > *:nth-of-type(5) { animation-delay: .24s; }
+  #results-section:not(.d-none) > *:nth-of-type(6) { animation-delay: .30s; }
 }

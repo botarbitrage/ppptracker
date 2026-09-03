@@ -9,7 +9,24 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous"/>
-  <link rel="stylesheet" href="/static/style.css?v=71"/>
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('theme');
+        if (t !== 'light' && t !== 'dark') {
+          t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        }
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+      window.toggleTheme = function () {
+        var cur = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+        var next = cur === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', next);
+        try { localStorage.setItem('theme', next); } catch (e) {}
+      };
+    })();
+  </script>
+  <link rel="stylesheet" href="/static/style.css?v=73"/>
   <style>
     .page-back {
       display:inline-flex; align-items:center; gap:6px; color:var(--muted);
@@ -23,20 +40,85 @@
     }
     .adm-meta { color:var(--muted); font-size:.85rem; }
 
-    /* ── Rewards Game badge reference (panel-gamification) ──── */
+    /* ── Rewards Game badge reference (panel-gamification) ────
+       Each row shows the actual card medallion the player earns, plus
+       the badge's name, its player-facing title, and the rule. Same
+       hand-strength ladder as the main-page shelf — the admin should
+       recognise every one at a glance without translating a code. */
     .adm-badge-group-title {
-      font-family:var(--font-head); font-size:.82rem; font-weight:700;
-      color:var(--muted); text-transform:uppercase; letter-spacing:.6px;
-      margin:0 0 .5rem;
+      font-family:var(--font-head); font-size:.72rem; font-weight:700;
+      color:var(--muted); text-transform:uppercase; letter-spacing:1.2px;
+      margin:0 0 .55rem;
+      display:flex; align-items:center; gap:10px;
     }
-    .adm-badge-list { display:flex; flex-direction:column; gap:.4rem; }
+    /* Quiet hairline runs out to the right so the 24 rows scan as three
+       distinct groups; the label reads as the eyebrow of that group. */
+    .adm-badge-group-title::after {
+      content:""; flex:1 1 auto; height:1px; background:var(--border);
+    }
+    .adm-badge-list { display:flex; flex-direction:column; gap:.35rem; }
     .adm-badge-row {
-      display:flex; align-items:center; gap:.6rem; flex-wrap:wrap;
-      padding:.35rem .6rem; border:1px solid var(--border); border-radius:8px;
-      background:rgba(255,255,255,.02);
+      display:grid;
+      grid-template-columns: 78px 1fr auto;
+      align-items:center; gap:14px;
+      padding:.4rem .7rem; border:1px solid var(--border); border-radius:8px;
+      background:var(--overlay-lo);
     }
-    .adm-badge-name { font-size:.8rem; color:var(--text); font-weight:600; min-width:110px; }
-    .adm-badge-how { font-size:.78rem; color:var(--muted); }
+    .adm-badge-cards { display:inline-flex; align-items:flex-start; justify-content:center; }
+    .adm-badge-body { display:flex; flex-direction:column; gap:1px; min-width:0; }
+    .adm-badge-title {
+      font-family:var(--font-head); font-size:.82rem; font-weight:700;
+      letter-spacing:.3px; color:var(--green);
+    }
+    .adm-badge-name {
+      font-family:var(--font-body); font-size:.72rem; color:var(--muted);
+      font-weight:500;
+    }
+    .adm-badge-how {
+      font-family:var(--font-body); font-size:.78rem; color:var(--text);
+      justify-self:end; text-align:right; max-width:34ch;
+      font-variant-numeric:tabular-nums;
+    }
+    @media (max-width: 640px) {
+      .adm-badge-row {
+        grid-template-columns: 70px 1fr;
+        row-gap:2px;
+      }
+      .adm-badge-how {
+        grid-column: 2; justify-self:start; text-align:left; font-size:.74rem;
+      }
+    }
+
+    /* Card-medallion mini-styles — mirror the main-page shelf's small
+       size so the admin sees exactly what the player sees. Kept scoped
+       to .adm-badge-cards so this style block never leaks. */
+    .adm-badge-cards .a-card {
+      display:inline-flex; align-items:center; justify-content:center;
+      width:22px; height:30px; border-radius:4px;
+      background:#fff; border:1px solid #c9c9c9;
+      box-shadow:0 1px 2px rgba(0,0,0,.28);
+      font-family:var(--font-head); font-weight:800; font-size:.72rem;
+      line-height:1; color:#141414;
+    }
+    .adm-badge-cards .a-card + .a-card { margin-left:-8px; }
+    .adm-badge-cards .a-card:nth-child(2) {
+      transform:rotate(3.5deg); transform-origin:bottom left;
+    }
+    .adm-badge-cards[data-kind="fan"] .a-card {
+      width:18px; height:26px; font-size:.6rem;
+    }
+    .adm-badge-cards[data-kind="fan"] .a-card + .a-card { margin-left:-8px; }
+    .adm-badge-cards[data-kind="fan"] .a-card .pip { font-size:.62em; }
+    .adm-badge-cards[data-kind="fan"] .a-card:nth-child(1) { transform:rotate(-10deg) translateY(2px); transform-origin:bottom right; }
+    .adm-badge-cards[data-kind="fan"] .a-card:nth-child(2) { transform:rotate(-5deg)  translateY(.5px); transform-origin:bottom right; }
+    .adm-badge-cards[data-kind="fan"] .a-card:nth-child(3) { transform:none; }
+    .adm-badge-cards[data-kind="fan"] .a-card:nth-child(4) { transform:rotate(5deg)   translateY(.5px); transform-origin:bottom left; }
+    .adm-badge-cards[data-kind="fan"] .a-card:nth-child(5) { transform:rotate(10deg)  translateY(2px);  transform-origin:bottom left; }
+    .adm-badge-cards .a-card .pip { font-size:.72em; margin-left:.5px; }
+    .adm-badge-cards .a-card[data-suit="hearts"]   { color:#cc0000; }
+    .adm-badge-cards .a-card[data-suit="spades"]   { color:#141414; }
+    .adm-badge-cards .a-card[data-suit="diamonds"] { color:#1155bb; }
+    .adm-badge-cards .a-card[data-suit="clubs"]    { color:#0a8f3c; }
 
     /* ── Sidebar shell ─────────────────────────────────────── */
     .adm-shell { display:flex; gap:20px; align-items:flex-start; }
@@ -54,10 +136,20 @@
       cursor:pointer; transition:background .15s, color .15s, border-color .15s;
     }
     .adm-nav-item:hover { background:rgba(0,230,118,.07); color:var(--text); }
+    /* Left-edge bar on the active item — a control panel has a lot of
+       look-alike panels, so the current one has to be unmistakable. The
+       green rim plus tint reads even in peripheral vision. */
     .adm-nav-item.active {
       background:rgba(0,230,118,.12); border-color:rgba(0,230,118,.35);
-      color:var(--green);
+      color:var(--green); position:relative;
     }
+    .adm-nav-item.active::before {
+      content:""; position:absolute; left:-1px; top:6px; bottom:6px;
+      width:3px; border-radius:2px; background:var(--green);
+    }
+    /* The section-badge (e.g. Rewards Game "!" flag) always sits far-right
+       so it doesn't jitter as the label wraps or the icon changes. */
+    .adm-nav-item .adm-pill { margin-left:auto; }
     .adm-nav-note {
       color:var(--muted); font-family:var(--font-body); font-size:.72rem;
       padding:10px 12px 4px; border-top:1px solid var(--border); margin-top:8px;
@@ -78,8 +170,35 @@
     .adm-btn:hover:not(:disabled) { background:rgba(0,230,118,.14); border-color:rgba(0,230,118,.4); }
     .adm-btn:disabled { opacity:.5; cursor:default; }
 
-    .adm-email { font-family:var(--font-body); color:var(--text); word-break:break-all; }
-    .adm-uid { font-family:var(--font-body); font-size:.72rem; color:var(--muted); }
+    .adm-email {
+      font-family:var(--font-body); color:var(--text); word-break:break-word;
+    }
+    /* Pills stay on the same visual line as the email at wide widths, and
+       wrap under it on narrow — flex-inline lets the address run first
+       and only pushes pills down once it actually runs out of room. */
+    .adm-email .adm-pill { margin-left:0; margin-inline-start:6px; }
+    .adm-uid {
+      font-family:var(--font-body); font-size:.7rem; color:var(--muted);
+      font-variant-numeric:tabular-nums; letter-spacing:.2px;
+    }
+
+    /* Users-table header — matches the section-card treatment used
+       everywhere else (Rajdhani uppercase eyebrow), so the table reads as
+       part of the same visual system rather than raw Bootstrap output. */
+    #panel-users .table > thead > tr > th {
+      font-family:var(--font-head); font-size:.66rem; font-weight:700;
+      letter-spacing:1.4px; text-transform:uppercase;
+      color:var(--muted); border-bottom:1px solid var(--border);
+      padding-top:10px; padding-bottom:10px; white-space:nowrap;
+    }
+    #panel-users .table > tbody > tr > td {
+      vertical-align:middle;
+      font-variant-numeric:tabular-nums;
+    }
+    /* Number-column feel for the date-heavy cells even though they carry
+       readable dates — tabular-nums keeps them aligned so scrolling the
+       list doesn't shimmy. */
+    .adm-date { font-variant-numeric:tabular-nums; }
     .adm-pill {
       display:inline-block; margin-left:7px; padding:1px 8px; border-radius:20px;
       font-family:var(--font-head); font-size:.62rem; font-weight:700;
@@ -89,6 +208,32 @@
     }
     .adm-pill.off {
       background:rgba(255,82,82,.12); border-color:rgba(255,82,82,.35); color:var(--red);
+    }
+    /* Distinct from .off — a paused/expiring state, not a failure. */
+    .adm-pill.warn {
+      background:rgba(204,204,0,.12); border-color:rgba(204,204,0,.4); color:var(--yellow);
+    }
+    .adm-pill.info {
+      background:rgba(64,196,255,.10); border-color:rgba(64,196,255,.35); color:var(--blue);
+    }
+    .adm-pill.neutral {
+      background:var(--overlay-lo); border-color:var(--border); color:var(--muted);
+    }
+    /* Light-mode pill contrast — bright neon-green tint on parchment has
+       weak text/background contrast for the deepened emerald ink. Bumping
+       the fill and border opacity keeps the pill readable without needing
+       a whole different colour system. */
+    [data-theme="light"] .adm-pill {
+      background:rgba(20,122,65,.15); border-color:rgba(20,122,65,.55);
+    }
+    [data-theme="light"] .adm-pill.off {
+      background:rgba(204,47,57,.14); border-color:rgba(204,47,57,.55);
+    }
+    [data-theme="light"] .adm-pill.warn {
+      background:rgba(138,109,0,.14); border-color:rgba(138,109,0,.55);
+    }
+    [data-theme="light"] .adm-pill.info {
+      background:rgba(31,127,184,.12); border-color:rgba(31,127,184,.5);
     }
     .adm-date { font-family:var(--font-body); font-size:.82rem; color:var(--muted); white-space:nowrap; }
     /* ── Gamification panel ────────────────────────────────── */
@@ -114,13 +259,28 @@
        inside it, so no control can visually drift to a neighbouring section. */
     .fa-section { border-top:1px solid var(--border); margin-top:22px; padding-top:18px; }
     .fa-section:first-child { border-top:none; margin-top:0; padding-top:0; }
+    /* Ordered gates (imports → hand exports → tourney exports → banners)
+       are a real sequence, so a numbered eyebrow before the title reads as
+       an honest anchor rather than decoration on a scroll through five
+       parallel sections. The count is set inline (data-index) rather than
+       auto-generated so the number stays deterministic across CSS reorders. */
+    .fa-eyebrow {
+      display:inline-block; font-family:var(--font-head); font-size:.66rem;
+      font-weight:700; letter-spacing:1.6px; text-transform:uppercase;
+      color:var(--muted); margin:0 0 4px;
+    }
+    .fa-eyebrow-num {
+      display:inline-block; padding:0 6px; margin-right:6px;
+      border-radius:4px; background:var(--overlay-mid); color:var(--text);
+      font-variant-numeric:tabular-nums;
+    }
     .fa-head {
       font-family:var(--font-head); font-size:1.02rem; font-weight:800;
       letter-spacing:.3px; color:var(--green); margin:0 0 5px;
     }
     .fa-note { color:var(--muted); font-size:.82rem; margin:0 0 12px; max-width:72ch; }
     .fa-card {
-      background:var(--panel-alt); border:1px solid var(--border);
+      background:var(--felt-raise); border:1px solid var(--border);
       border-radius:10px; padding:12px 14px;
     }
     .fa-card + .fa-card { margin-top:10px; }
@@ -133,8 +293,16 @@
       display:flex; align-items:center; gap:8px; font-size:.82rem; color:var(--muted);
     }
     .fa-field input[type=number] { width:74px; }
-    .fa-actions { display:flex; align-items:center; gap:12px; margin-top:12px; }
-    .fa-status { font-size:.8rem; color:var(--muted); }
+    .fa-actions {
+      display:flex; align-items:center; gap:12px; margin-top:12px;
+      padding-top:10px; border-top:1px solid var(--hairline);
+    }
+    /* Save-status feedback: green flash on success, red on error, muted
+       for the idle "" state. A daily-use form that stays visually silent
+       when it saves is a form that gets double-clicked. */
+    .fa-status { font-size:.8rem; color:var(--muted); font-family:var(--font-head); font-weight:600; letter-spacing:.3px; }
+    .fa-status.is-saved { color:var(--win); }
+    .fa-status.is-error { color:var(--loss); }
     .fa-input-note { display:block; font-size:.78rem; color:var(--muted); margin-bottom:6px; }
 
     .fa-media-list { display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
@@ -154,15 +322,27 @@
     .fa-upload { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
     .fa-upload input[type=file] { max-width:300px; }
 
-    /* ── Subscription panel ────────────────────────────────── */
+    /* ── Subscription panel ──────────────────────────────────
+       Three parallel choices — a picker, not a comparison. Inactive
+       cards are quiet (panel-alt); the active one gets the felt-raise
+       + accent-glow rim that the main page's import card uses, so
+       "which plan is live" is unambiguous. */
     .adm-plans { display:flex; gap:12px; flex-wrap:wrap; }
     .adm-plan {
       flex:1 1 220px; min-width:200px; text-align:left; padding:14px 16px;
       background:var(--panel-alt); border:1px solid var(--border); border-radius:10px;
-      cursor:pointer; transition:border-color .15s, background .15s;
+      cursor:pointer; transition:border-color .15s, background .15s, box-shadow .15s;
+      position:relative;
     }
-    .adm-plan:hover:not(:disabled) { border-color:rgba(0,230,118,.4); }
-    .adm-plan.active { border-color:var(--green); background:rgba(0,230,118,.08); }
+    .adm-plan:hover:not(:disabled) {
+      border-color:rgba(0,230,118,.4);
+      box-shadow:0 0 0 1px var(--accent-glow);
+    }
+    .adm-plan.active {
+      background:var(--felt-raise);
+      border-color:var(--green);
+      box-shadow:0 0 0 1px var(--accent-glow), var(--shadow-card);
+    }
     .adm-plan:disabled { opacity:.55; cursor:default; }
     .adm-plan-name {
       display:flex; align-items:center; gap:8px;
@@ -172,6 +352,7 @@
     .adm-plan-price {
       font-family:var(--font-head); font-size:1.15rem; font-weight:800;
       color:var(--green); margin-top:6px;
+      font-variant-numeric:tabular-nums;
     }
     .adm-plan-note { font-family:var(--font-body); font-size:.75rem; color:var(--muted); margin-top:6px; }
 
@@ -192,38 +373,38 @@
     .tg-band-track { display:flex; gap:0; }
     .tg-band-step {
       font-family:var(--font-head); font-size:.74rem; font-weight:700;
-      padding:4px 11px; border:1px solid #ffffff2a; border-right-width:0;
-      background:#ffffff0a; color:var(--text); cursor:pointer; white-space:nowrap;
+      padding:4px 11px; border:1px solid var(--overlay-max); border-right-width:0;
+      background:var(--overlay-lo); color:var(--text); cursor:pointer; white-space:nowrap;
     }
     .tg-band-step:first-child { border-radius:20px 0 0 20px; }
     .tg-band-step:last-child  { border-radius:0 20px 20px 0; border-right-width:1px; }
     .tg-band-step.active { background:#00e67622; color:var(--green); border-color:#00e67650; }
-    .tg-band-step:not(.active):hover { background:#ffffff14; }
+    .tg-band-step:not(.active):hover { background:var(--overlay-mid); }
 
     .tg-grid-wrap { overflow-x:auto; }
     table.tg-grid { border-collapse:separate; border-spacing:0; width:100%; min-width:720px; }
     .tg-grid th, .tg-grid td { padding:5px 8px; font-size:.82rem; }
     .tg-grid thead th {
-      position:sticky; top:0; z-index:2; background:var(--card, #12181f);
+      position:sticky; top:0; z-index:2; background:var(--card, var(--panel));
       font-family:var(--font-head); font-weight:800; color:var(--text);
-      text-align:center; border-bottom:1px solid #ffffff1f;
+      text-align:center; border-bottom:1px solid var(--overlay-hi);
     }
     .tg-grid thead th.tg-statcol { text-align:left; }
     .tg-street-row td {
       font-family:var(--font-head); font-size:.7rem; font-weight:700;
       letter-spacing:.6px; text-transform:uppercase; color:var(--muted);
-      background:#ffffff08; padding-top:8px; padding-bottom:4px;
+      background:var(--overlay-lo); padding-top:8px; padding-bottom:4px;
     }
     .tg-statname {
       font-family:var(--font-body); color:var(--text); white-space:nowrap;
-      position:sticky; left:0; background:var(--card, #12181f); z-index:1;
+      position:sticky; left:0; background:var(--card, var(--panel)); z-index:1;
     }
     td.tg-cell {
-      text-align:center; cursor:pointer; border-bottom:1px solid #ffffff10;
+      text-align:center; cursor:pointer; border-bottom:1px solid var(--overlay-mid);
       font-variant-numeric:tabular-nums; transition:background .12s;
     }
-    td.tg-cell:hover { background:#ffffff12; }
-    .tg-cell.na  { color:#4a5560; cursor:default; }
+    td.tg-cell:hover { background:var(--overlay-mid); }
+    .tg-cell.na  { color:var(--muted); cursor:default; opacity:.6; }
     .tg-cell.na:hover { background:transparent; }
     .tg-cell.override { color:var(--green); font-weight:600; }
     .tg-cell.override::after {
@@ -233,9 +414,9 @@
 
     /* Editor popover */
     .tg-pop {
-      position:fixed; z-index:50; width:250px; background:#0d1117f2;
-      border:1px solid #ffffff24; border-radius:12px; padding:14px;
-      box-shadow:0 12px 40px #000a; backdrop-filter:blur(6px);
+      position:fixed; z-index:50; width:250px; background:var(--panel);
+      border:1px solid var(--overlay-max); border-radius:12px; padding:14px;
+      box-shadow:var(--shadow-card); backdrop-filter:blur(6px);
     }
     .tg-pop h6 {
       font-family:var(--font-head); font-weight:800; color:var(--green);
@@ -245,12 +426,12 @@
     .tg-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
     .tg-row label { font-size:.74rem; color:var(--muted); width:64px; flex:none; }
     .tg-pop input[type=number], .tg-pop input[type=text] {
-      background:#ffffff0d; border:1px solid #ffffff24; border-radius:7px;
+      background:var(--overlay-lo); border:1px solid var(--overlay-max); border-radius:7px;
       color:var(--text); padding:4px 8px; font-size:.82rem; width:100%;
     }
     .tg-pop input[type=number] { width:66px; }
     .tg-na-row { display:flex; align-items:center; gap:6px; margin-bottom:8px; font-size:.76rem; color:var(--muted); }
-    .tg-warn { color:#ffb454; font-size:.72rem; margin:4px 0 8px; min-height:1em; }
+    .tg-warn { color:var(--yellow); font-size:.72rem; margin:4px 0 8px; min-height:1em; }
     .tg-pop-actions { display:flex; gap:8px; margin-top:4px; }
     .tg-btn {
       font-family:var(--font-head); font-size:.74rem; font-weight:700;
@@ -258,7 +439,7 @@
     }
     .tg-btn.save  { background:#00e67622; color:var(--green); border-color:#00e67650; }
     .tg-btn.save:hover { background:#00e67635; }
-    .tg-btn.reset { background:#ffffff0a; color:var(--muted); border-color:#ffffff24; }
+    .tg-btn.reset { background:var(--overlay-lo); color:var(--muted); border-color:var(--overlay-max); }
     .tg-btn.reset:hover { color:var(--text); }
     .tg-btn.cancel { background:transparent; color:var(--muted); margin-left:auto; }
     .tg-btn[disabled] { opacity:.4; cursor:not-allowed; }
@@ -299,6 +480,10 @@
         Back to Analyser
       </a>
       <span class="page-title">Admin</span>
+      <button type="button" class="theme-toggle ms-auto" onclick="toggleTheme()" aria-label="Toggle theme" title="Toggle theme">
+        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
     </div>
 
     <div id="adm-status" class="adm-meta py-4"></div>
@@ -419,7 +604,7 @@
 
           <section class="section-card adm-panel d-none" id="panel-subscription">
             <div class="section-header">
-              <h2>Subscription</h2>
+              <h2>Active Plan Price</h2>
             </div>
             <div class="p-3">
               <p class="adm-meta mb-3">
@@ -450,10 +635,13 @@
               <h4 class="adm-badge-group-title">Lifetime volume</h4>
               <div class="adm-badge-list">
                 {% for b in volume_badges %}
-                <div class="adm-badge-row">
-                  <span class="gam-badge">{{ b.title }}</span>
-                  <span class="adm-badge-name">{{ b.name }}</span>
-                  <span class="adm-badge-how">{{ '{:,}'.format(b.threshold) }} lifetime hands imported</span>
+                <div class="adm-badge-row" data-code="{{ b.code }}">
+                  <span class="adm-badge-cards" data-code="{{ b.code }}"></span>
+                  <div class="adm-badge-body">
+                    <span class="adm-badge-title">{{ b.title }}</span>
+                    <span class="adm-badge-name">{{ b.name }}</span>
+                  </div>
+                  <span class="adm-badge-how">{{ '{:,}'.format(b.threshold) }} lifetime hands</span>
                 </div>
                 {% endfor %}
               </div>
@@ -461,9 +649,12 @@
               <h4 class="adm-badge-group-title mt-3">Behavioural</h4>
               <div class="adm-badge-list">
                 {% for b in behavioural_badges %}
-                <div class="adm-badge-row">
-                  <span class="gam-badge">{{ b.title }}</span>
-                  <span class="adm-badge-name">{{ b.name }}</span>
+                <div class="adm-badge-row" data-code="{{ b.code }}">
+                  <span class="adm-badge-cards" data-code="{{ b.code }}"></span>
+                  <div class="adm-badge-body">
+                    <span class="adm-badge-title">{{ b.title }}</span>
+                    <span class="adm-badge-name">{{ b.name }}</span>
+                  </div>
                   <span class="adm-badge-how">{{ b.how }}</span>
                 </div>
                 {% endfor %}
@@ -472,10 +663,13 @@
               <h4 class="adm-badge-group-title mt-3">Weekly podium</h4>
               <div class="adm-badge-list">
                 {% for b in podium_badges %}
-                <div class="adm-badge-row">
-                  <span class="gam-badge">{{ b.title }}</span>
-                  <span class="adm-badge-name">{{ b.name }}</span>
-                  <span class="adm-badge-how">Rank #{{ b.rank }} in weekly points ({{ '{:,}'.format(b.points) }} pts)</span>
+                <div class="adm-badge-row" data-code="{{ b.code }}">
+                  <span class="adm-badge-cards" data-code="{{ b.code }}"></span>
+                  <div class="adm-badge-body">
+                    <span class="adm-badge-title">{{ b.title }}</span>
+                    <span class="adm-badge-name">{{ b.name }}</span>
+                  </div>
+                  <span class="adm-badge-how">Rank #{{ b.rank }} · {{ '{:,}'.format(b.points) }} pts</span>
                 </div>
                 {% endfor %}
               </div>
@@ -513,6 +707,7 @@
             <div class="p-3">
 
               <div class="fa-section">
+                <span class="fa-eyebrow"><span class="fa-eyebrow-num">01</span>Import gate</span>
                 <h3 class="fa-head">Link Import</h3>
                 <p class="fa-note">
                   Daily import allowance. Free imports are ungated; gated imports
@@ -536,6 +731,7 @@
               </div>
 
               <div class="fa-section">
+                <span class="fa-eyebrow"><span class="fa-eyebrow-num">02</span>Export gate · single hand</span>
                 <h3 class="fa-head">Hand Export</h3>
                 <p class="fa-note">
                   Daily hand-export allowance. Free exports are ungated; gated exports
@@ -559,6 +755,7 @@
               </div>
 
               <div class="fa-section">
+                <span class="fa-eyebrow"><span class="fa-eyebrow-num">03</span>Export gate · whole session</span>
                 <h3 class="fa-head">Tourney Export</h3>
                 <p class="fa-note">
                   Tournament export allowance. Free is once per account; gated resets
@@ -576,6 +773,7 @@
               </div>
 
               <div class="fa-section">
+                <span class="fa-eyebrow"><span class="fa-eyebrow-num">04</span>Promo slot · mid-page</span>
                 <h3 class="fa-head">Horizontal Banner</h3>
                 <p class="fa-note">
                   Mid-page promo slot. Upload an image and select it, or pick
@@ -587,6 +785,7 @@
               </div>
 
               <div class="fa-section">
+                <span class="fa-eyebrow"><span class="fa-eyebrow-num">05</span>Promo slot · right edge</span>
                 <h3 class="fa-head">Vertical Banner</h3>
                 <p class="fa-note">
                   Side promo slot. Select each slide you want in the rotation —
@@ -648,6 +847,61 @@
     if (u.last_payment_at) return fmtDate(u.last_payment_at);
     if (u.first_seen) return fmtDate(u.first_seen) + ' (registered)';
     return '—';
+  }
+
+  // ── Badge medallions ───────────────────────────────────────────────
+  // Same code→hand map used by the main-page reward shelf (see
+  // static/app.js:_BADGE_HANDS). Duplicated here rather than imported
+  // because admin loads independently and this is the whole surface
+  // that touches badges — a tiny table is cheaper than a runtime
+  // dependency between the two scripts.
+  const ADM_BADGE_HANDS = {
+    '72o':'7s 2d', '44':'4c 4h', 'JJ':'Js Jh', 'QQ':'Qd Qc',
+    'KK':'Ks Kh', 'AK':'As Kd', 'AA':'As Ah', 'AA88':'As Ac 8s 8c',
+    'AAAA':'As Ah Ad Ac', 'BWAY':'As Kh Qd Jc Ts', 'NUTS':'As Ks Qs Js Ts',
+    'K9':'Ks 9d', 'A2345':'Ad 2c 3h 4s 5d', 'STEEL':'As 2s 3s 4s 5s',
+    'T2':'Ts 2d', 'ROYAL':'Ah Kh Qh Jh Th', 'Q7':'Qs 7d', 'J4':'Js 4d',
+    '99':'9c 9h', '83':'8s 3d', '23o':'2s 3d',
+    'SF':'5c 6c 7c 8c 9c', 'QUADS':'Ks Kh Kd Kc', 'BOAT':'Qs Qh Qd 5c 5s',
+  };
+  const ADM_SUIT_NAME = { s:'spades', h:'hearts', d:'diamonds', c:'clubs' };
+  const ADM_SUIT_PIP  = { s:'♠', h:'♥', d:'♦', c:'♣' };
+  function admMiniCardHtml(card) {
+    const s = card.slice(-1);
+    const rank = card.slice(0, -1);
+    const disp = rank === 'T' ? '10' : rank;
+    return `<span class="a-card" data-suit="${ADM_SUIT_NAME[s] || 'spades'}">`
+         + `${esc(disp)}<span class="pip">${ADM_SUIT_PIP[s] || ''}</span></span>`;
+  }
+  /** Walk the server-rendered .adm-badge-cards[data-code] placeholders
+   *  and fill each with its hand's cards, choosing pair vs fan layout. */
+  function hydrateBadgeMedallions() {
+    document.querySelectorAll('.adm-badge-cards[data-code]').forEach(el => {
+      const hand = ADM_BADGE_HANDS[el.dataset.code];
+      if (!hand) return;
+      const cards = hand.split(' ');
+      el.dataset.kind = cards.length > 2 ? 'fan' : 'pair';
+      el.innerHTML = cards.map(admMiniCardHtml).join('');
+    });
+  }
+
+  // ── Save-status flash ──────────────────────────────────────────────
+  // Every gate section shares the same "Save / status" pair. Flash the
+  // status green on success (and clear after a beat) or red on error;
+  // a form that stays visually silent after Save gets double-clicked.
+  function fadeSaveStatus(elId, msg, kind /* 'saved' | 'error' | '' */) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    el.classList.remove('is-saved', 'is-error');
+    if (kind) el.classList.add('is-' + kind);
+    el.textContent = msg || '';
+    clearTimeout(el._fadeT);
+    if (kind === 'saved' && msg) {
+      el._fadeT = setTimeout(() => {
+        el.classList.remove('is-saved');
+        el.textContent = '';
+      }, 2400);
+    }
   }
 
   // ── Top bar ────────────────────────────────────────────────────────────────
@@ -720,9 +974,12 @@
       const podium = (w.podium || []).length
         ? (w.podium || []).map(p => `${p.rank}. <strong>${esc(p.name)}</strong> (${p.points})`).join(' &nbsp;·&nbsp; ')
         : (w.settled ? 'No entrants' : 'Not settled yet');
+      // A pending settlement isn't an error — it's a to-do item, so it
+      // reads amber ("warn"), not red ("off"), leaving red for actual
+      // failure states like a disabled account.
       return `<div class="adm-gam-week">
         <span class="adm-gam-wk">${esc(w.week_key)}</span>
-        <span class="adm-pill${w.settled ? '' : ' off'}">${w.settled ? 'Settled' : 'Pending'}</span>
+        <span class="adm-pill${w.settled ? '' : ' warn'}">${w.settled ? 'Settled' : 'Pending'}</span>
         <span class="adm-gam-podium">${podium}</span>
         ${w.settled ? '' :
           `<button type="button" class="adm-btn" onclick="settleWeek('${esc(w.week_key)}', this)">Settle now</button>`}
@@ -953,7 +1210,7 @@
       }
       ADS = await res.json();
       renderHandExportAds();
-      document.getElementById('adm-hand-status').textContent = 'Saved.';
+      fadeSaveStatus('adm-hand-status', 'Saved.', 'saved');
     } catch (e) {
       setSectionError('adm-hand-error', 'Could not reach the server: ' + e.message);
     } finally {
@@ -988,7 +1245,7 @@
       }
       ADS = await res.json();
       renderTourneyExportAds();
-      document.getElementById('adm-tourney-status').textContent = 'Saved.';
+      fadeSaveStatus('adm-tourney-status', 'Saved.', 'saved');
     } catch (e) {
       setSectionError('adm-tourney-error', 'Could not reach the server: ' + e.message);
     } finally {
@@ -1049,7 +1306,7 @@
       }
       IMPORTS_ADS = await res.json();
       renderImportAds();
-      document.getElementById('adm-imports-status').textContent = 'Saved.';
+      fadeSaveStatus('adm-imports-status', 'Saved.', 'saved');
     } catch (e) {
       setSectionError('adm-imports-error', 'Could not reach the server: ' + e.message);
     } finally {
@@ -1115,7 +1372,7 @@
       }
       BANNERS = await res.json();
       renderVertBanner();
-      document.getElementById('adm-vertbanner-status').textContent = 'Saved.';
+      fadeSaveStatus('adm-vertbanner-status', 'Saved.', 'saved');
     } catch (e) {
       setSectionError('adm-vertbanner-error', 'Could not reach the server: ' + e.message);
     } finally {
@@ -1349,15 +1606,26 @@
     }
   }
 
-  // Raw Stripe subscription status, badged for the states that matter and
-  // shown plain otherwise. Blank means never had a Stripe subscription.
+  // Raw Stripe subscription status, mapped to a semantic pill so a scan
+  // of the Users table shows at a glance who's paying, who's about to
+  // stop paying, and who's already gone. Any unrecognised status still
+  // renders — as a neutral pill, not as raw text — so a new Stripe state
+  // doesn't disappear into the design.
+  const SUBSCRIPTION_PILL = {
+    active:              'ok',
+    trialing:            'info',
+    past_due:            'warn',
+    incomplete:          'warn',
+    incomplete_expired:  'off',
+    unpaid:              'off',
+    canceled:            'off',
+    paused:              'neutral',
+  };
   function subscriptionBadge(status) {
     if (!status) return '<span class="adm-meta">—</span>';
-    if (status === 'active') return `<span class="adm-pill">${esc(status)}</span>`;
-    if (status === 'canceled' || status === 'unpaid') {
-      return `<span class="adm-pill off">${esc(status)}</span>`;
-    }
-    return `<span class="adm-meta">${esc(status)}</span>`;
+    const kind = SUBSCRIPTION_PILL[status] || 'neutral';
+    const cls  = kind === 'ok' ? '' : ' ' + kind;
+    return `<span class="adm-pill${cls}">${esc(status.replace(/_/g, ' '))}</span>`;
   }
 
   // ── Users table ────────────────────────────────────────────────────────────
@@ -1782,6 +2050,10 @@
     const statusEl = document.getElementById('adm-status');
     statusEl.textContent = 'Loading…';
     document.getElementById('adm-search').addEventListener('input', renderUsers);
+    // The badge reference is fully server-rendered by Jinja — hydrate the
+    // card medallions once, up front, so they're already drawn when the
+    // admin later opens the Rewards Game tab.
+    hydrateBadgeMedallions();
     try {
       const cfg = await (await fetch('/api/firebase-config')).json();
       if (cfg.error) throw new Error('Firebase not configured');
