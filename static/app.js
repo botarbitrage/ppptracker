@@ -287,6 +287,14 @@ async function openSurveyModal(kind, retry) {
   const fallbackBtn = document.getElementById('survey-fallback-btn');
   if (fallbackBtn) fallbackBtn.classList.add('d-none');
 
+  const proBtn = document.getElementById('survey-pro-btn');
+  if (proBtn) {
+    proBtn.onclick = () => {
+      closeSurveyModal();
+      showUpgradeModal(kind === 'tourney' ? 'tourney_quota' : 'hand_quota');
+    };
+  }
+
   _trackEvent('survey_modal_shown', { kind });
   bootstrap.Modal.getOrCreateInstance(modalEl).show();
 

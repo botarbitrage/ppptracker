@@ -718,6 +718,12 @@
         <p class="mb-2" style="color:var(--muted);font-size:.84rem">
           {{ _('Answer a short survey and your export starts automatically. Nothing is charged, and you can close this at any time.') }}
         </p>
+        <p class="mb-2" style="font-size:.9rem">
+          {{ _('Go Pro to skip surveys entirely') }} {{ _('— no ads, no waiting.') }}
+        </p>
+        <button type="button" class="tier-cta mb-3" id="survey-pro-btn">
+          {{ _('Go Pro') }}
+        </button>
         <div id="survey-status" class="mb-2" style="font-size:.84rem;color:var(--muted)" role="status" aria-live="polite"></div>
 
         <!-- Provider container. Both providers render into this one iframe; the
@@ -779,12 +785,12 @@
            hand_export) — same slot the Pro-upsell copy below occupies.
            Hidden when no banner URL resolves. #}
         <img id="gate-stub-banner-img" class="img-fluid rounded mb-3 d-none" alt="">
-        <p class="mb-3" style="font-size:.9rem">
+        <p class="mb-2" style="font-size:.9rem">
           {{ _('Go Pro for unlimited') }} <span id="gate-stub-feature-label"></span> {{ _('— no ads, no waiting.') }}
-          <button type="button" class="btn btn-link btn-sm px-1 align-baseline" id="gate-stub-pro-btn" style="font-weight:600">
-            {{ _('Go Pro') }}
-          </button>
         </p>
+        <button type="button" class="tier-cta mb-3" id="gate-stub-pro-btn">
+          {{ _('Go Pro') }}
+        </button>
         <button type="button" id="gate-stub-ok-btn" class="btn btn-import btn-lg w-100" disabled></button>
         <p id="gate-stub-countdown-copy" class="mt-2 mb-0 text-center" style="color:var(--muted);font-size:.78rem">
           {{ _('Or wait 30 seconds to unlock this one.') }}
