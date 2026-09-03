@@ -284,8 +284,6 @@ async function openSurveyModal(kind, retry) {
   _surveyStatus('Loading a survey…');
   const frame = document.getElementById('survey-frame');
   if (frame) frame.removeAttribute('src');
-  const fallbackBtn = document.getElementById('survey-fallback-btn');
-  if (fallbackBtn) fallbackBtn.classList.add('d-none');
 
   const proBtn = document.getElementById('survey-pro-btn');
   if (proBtn) {
@@ -317,7 +315,6 @@ async function openSurveyModal(kind, retry) {
     _surveyStatus('No surveys are available right now — please try again later.', 'err');
     return;
   }
-  if (cfg.tally_form_url && fallbackBtn) fallbackBtn.classList.remove('d-none');
   _surveyStartPolling();
 }
 
@@ -359,11 +356,6 @@ function _surveyShowTally(formUrl, kind) {
   frame.src = `${formUrl}${sep}uid=${encodeURIComponent(_currentUser.uid)}&kind=${encodeURIComponent(kind)}`;
   _surveyStatus('Answer a few quick questions to unlock your export.');
   _trackEvent('survey_provider_shown', { provider: 'tally', kind });
-}
-
-function useSurveyFallback() {
-  const url = (_surveyState.config || {}).tally_form_url;
-  if (url) _surveyShowTally(url, _surveyState.kind);
 }
 
 async function _fetchCredits() {
@@ -518,8 +510,10 @@ function _gateStubMediaTypes(kind) {
 function _gateStubKindCopy(kind) {
   const I = window.I18N_GATE_STUB || {};
   return kind === 'import'
-    ? { kindLabel: I.kindLabelImport, feature: I.featureImport }
-    : { kindLabel: I.kindLabelHandExport, feature: I.featureHandExport };
+    ? { kindLabel: I.kindLabelImport, feature: I.featureImport,
+        sponsored: I.sponsoredImport || 'Import sponsored by one of our ads' }
+    : { kindLabel: I.kindLabelHandExport, feature: I.featureHandExport,
+        sponsored: I.sponsoredHandExport || 'Export sponsored by one of our ads' };
 }
 
 function _gateStubNewId() {
@@ -592,8 +586,10 @@ function _showGateStubModal(kind, onComplete) {
   const copy = _gateStubKindCopy(kind);
   const kindLabelEl    = document.getElementById('gate-stub-kind-label');
   const featureLabelEl = document.getElementById('gate-stub-feature-label');
+  const sponsoredEl    = document.getElementById('gate-stub-sponsored-copy');
   if (kindLabelEl)    kindLabelEl.textContent = copy.kindLabel || '';
   if (featureLabelEl) featureLabelEl.textContent = copy.feature || '';
+  if (sponsoredEl)    sponsoredEl.textContent = copy.sponsored || '';
 
   const proBtn = document.getElementById('gate-stub-pro-btn');
   if (proBtn) {
@@ -3782,6 +3778,11 @@ function _applyPricingCopy() {
   });
   document.querySelectorAll('[data-pricing-cta]').forEach(el => {
     el.textContent = _pricingCtaLong();
+  });
+  // Compact form, for purchase buttons that sit inside a modal body where the
+  // long "Get <plan> — <price>/month" label would wrap.
+  document.querySelectorAll('[data-pricing-cta-short]').forEach(el => {
+    el.textContent = _pricingCta();
   });
   // With the full price active there's no discount to show, so the struck-through
   // price and the "locked in until launch" line would both be nonsense.
