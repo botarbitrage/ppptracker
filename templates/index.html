@@ -721,9 +721,9 @@
         <p class="mb-2" style="font-size:.9rem">
           {{ _('Go Pro to skip surveys entirely') }} {{ _('— no ads, no waiting.') }}
         </p>
-        <button type="button" class="tier-cta mb-3" id="survey-pro-btn">
-          {{ _('Go Pro') }}
-        </button>
+        {# Label follows the plan on sale (_applyPricingCopy) — the literal
+           below is only what renders before /api/pricing answers. #}
+        <button type="button" class="tier-cta mb-3" id="survey-pro-btn" data-pricing-cta-short>{{ _('Early Access') }} · A$7.99/mo</button>
         <div id="survey-status" class="mb-2" style="font-size:.84rem;color:var(--muted)" role="status" aria-live="polite"></div>
 
         <!-- Provider container. Both providers render into this one iframe; the
@@ -734,11 +734,7 @@
                   referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
       </div>
-      <div class="modal-footer app-modal-footer justify-content-between">
-        <button type="button" id="survey-fallback-btn" class="btn btn-link btn-sm d-none px-0"
-                style="color:var(--muted);font-size:.8rem" onclick="useSurveyFallback()">
-          {{ _('No surveys available? Answer a few quick questions instead') }}
-        </button>
+      <div class="modal-footer app-modal-footer justify-content-end">
         <button type="button" class="btn btn-secondary btn-sm" onclick="closeSurveyModal()">{{ _('Close') }}</button>
       </div>
     </div>
@@ -770,9 +766,10 @@
         </h2>
       </div>
       <div class="modal-body app-modal-body">
-        <p class="mb-2" style="font-size:.9rem">
-          {{ _("This app is in Early Access — normally a short ad would play here.") }}
-        </p>
+        {# Which action this ad is paying for — text set per gate kind by
+           _showGateStubModal (I18N_GATE_STUB.sponsoredImport /
+           .sponsoredHandExport). #}
+        <p class="mb-2" id="gate-stub-sponsored-copy" style="font-size:.9rem"></p>
         {# Real self-hosted video, when the admin has one active for this
            gate's type (video_30 for import, video_60 for hand_export) —
            see _AD_MEDIA / _showGateStubModal in app.js. Hidden by default;
@@ -784,13 +781,13 @@
         {# Active admin-uploaded banner (banner_a for import, banner_b for
            hand_export) — same slot the Pro-upsell copy below occupies.
            Hidden when no banner URL resolves. #}
-        <img id="gate-stub-banner-img" class="img-fluid rounded mb-3 d-none" alt="">
+        <img id="gate-stub-banner-img" class="img-fluid rounded mb-3 d-none w-100 d-block mx-auto" alt="">
         <p class="mb-2" style="font-size:.9rem">
           {{ _('Go Pro for unlimited') }} <span id="gate-stub-feature-label"></span> {{ _('— no ads, no waiting.') }}
         </p>
-        <button type="button" class="tier-cta mb-3" id="gate-stub-pro-btn">
-          {{ _('Go Pro') }}
-        </button>
+        {# Label follows the plan on sale (_applyPricingCopy) — the literal
+           below is only what renders before /api/pricing answers. #}
+        <button type="button" class="tier-cta mb-3" id="gate-stub-pro-btn" data-pricing-cta-short>{{ _('Early Access') }} · A$7.99/mo</button>
         <button type="button" id="gate-stub-ok-btn" class="btn btn-import btn-lg w-100" disabled></button>
         <p id="gate-stub-countdown-copy" class="mt-2 mb-0 text-center" style="color:var(--muted);font-size:.78rem">
           {{ _('Or wait 30 seconds to unlock this one.') }}
@@ -1209,8 +1206,8 @@
           <dd id="account-info-plan">—</dd>
         </dl>
         <button type="button" id="account-upgrade-btn" class="btn btn-import btn-sm w-100 mt-2 d-none"
-                data-bs-dismiss="modal" onclick="showUpgradeModal('account')">
-          {{ _('Upgrade to Pro') }}
+                data-bs-dismiss="modal" onclick="showUpgradeModal('account')" data-pricing-cta>
+          {{ _('Get Early Access — A$7.99/month') }}
         </button>
       </div>
     </div>
@@ -1259,6 +1256,8 @@
     kindLabelHandExport: "{{ _('this hand export') }}",
     featureImport:      "{{ _('imports') }}",
     featureHandExport:  "{{ _('hand exports') }}",
+    sponsoredImport:    "{{ _('Import sponsored by one of our ads') }}",
+    sponsoredHandExport: "{{ _('Export sponsored by one of our ads') }}",
     unlockCountdown:    "{{ _('Unlock in %(seconds)s seconds…', seconds='__SECONDS__') }}",
     unlockReady:        "{{ _('Unlock') }}"
   };
@@ -1270,7 +1269,7 @@
   };
 </script>
 <script src="/static/header.js?v=1"></script>
-<script src="/static/app.js?v=69"></script>
+<script src="/static/app.js?v=70"></script>
 <script>
   if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
     navigator.serviceWorker.register('/static/sw.js', { scope: '/' })
