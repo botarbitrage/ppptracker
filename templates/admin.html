@@ -107,6 +107,53 @@
     }
     .adm-gam-podium { font-size:.78rem; color:var(--muted); flex-grow:1; }
     .adm-gam-podium strong { color:var(--text); font-weight:600; }
+
+    /* ── Freebies / Ads panel ──────────────────────────────── */
+    /* One .fa-section per gate or banner slot. Everything an admin can change
+       for that slot — limits, save button, media uploads — lives in .fa-cards
+       inside it, so no control can visually drift to a neighbouring section. */
+    .fa-section { border-top:1px solid var(--border); margin-top:22px; padding-top:18px; }
+    .fa-section:first-child { border-top:none; margin-top:0; padding-top:0; }
+    .fa-head {
+      font-family:var(--font-head); font-size:1.02rem; font-weight:800;
+      letter-spacing:.3px; color:var(--green); margin:0 0 5px;
+    }
+    .fa-note { color:var(--muted); font-size:.82rem; margin:0 0 12px; max-width:72ch; }
+    .fa-card {
+      background:var(--panel-alt); border:1px solid var(--border);
+      border-radius:10px; padding:12px 14px;
+    }
+    .fa-card + .fa-card { margin-top:10px; }
+    .fa-card-title {
+      font-family:var(--font-head); font-size:.72rem; font-weight:700;
+      letter-spacing:.6px; text-transform:uppercase; color:var(--muted); margin:0 0 9px;
+    }
+    .fa-row { display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
+    .fa-field {
+      display:flex; align-items:center; gap:8px; font-size:.82rem; color:var(--muted);
+    }
+    .fa-field input[type=number] { width:74px; }
+    .fa-actions { display:flex; align-items:center; gap:12px; margin-top:12px; }
+    .fa-status { font-size:.8rem; color:var(--muted); }
+    .fa-input-note { display:block; font-size:.78rem; color:var(--muted); margin-bottom:6px; }
+
+    .fa-media-list { display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
+    .fa-media-item {
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:.8rem;
+      color:var(--muted); padding:5px 9px; border:1px solid var(--border);
+      border-radius:8px; background:rgba(255,255,255,.02);
+    }
+    /* Wide: the radio+name pair takes the slack and preview/delete sit right.
+       Narrow: it holds an 8rem basis and they wrap below rather than crush it. */
+    .fa-media-pick {
+      display:flex; align-items:center; gap:8px; flex:1 1 8rem;
+      min-width:0; margin:0; cursor:pointer;
+    }
+    .fa-media-name { min-width:0; color:var(--text); }
+    .fa-media-empty { font-size:.8rem; color:var(--muted); margin-bottom:10px; }
+    .fa-upload { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .fa-upload input[type=file] { max-width:300px; }
+
     /* ── Subscription panel ────────────────────────────────── */
     .adm-plans { display:flex; gap:12px; flex-wrap:wrap; }
     .adm-plan {
@@ -464,85 +511,104 @@
               <h2>Freebies / Ads</h2>
             </div>
             <div class="p-3">
-              <h3 class="adm-subhead">Link Import</h3>
-              <p class="adm-meta mb-3">
-                <b class="text-white">Free</b> imports per day need no survey,
-                <b class="text-white">Gated</b> more per day need one. Applies
-                immediately, no deploy.
-              </p>
-              <div id="adm-imports-error" class="alert alert-danger d-none py-2"></div>
-              <div id="adm-imports-body"></div>
-              <div class="adm-toolbar px-0">
-                <button type="button" class="adm-btn" id="adm-imports-save" onclick="saveImportAds()">Save</button>
-                <span class="adm-meta flex-grow-1" id="adm-imports-status"></span>
-              </div>
-              <p class="adm-meta mt-3 mb-2">
-                Self-hosted banner/video for this gate's modal. Upload up to 4 files
-                per type and mark one active — the hard-saved default can't be deleted.
-                Applies immediately, no deploy.
-              </p>
-              <div id="adm-media-import-error" class="alert alert-danger d-none py-2"></div>
-              <div id="adm-media-import-body"></div>
 
-              <h3 class="adm-subhead mt-4">Hand Export</h3>
-              <p class="adm-meta mb-3">
-                <b class="text-white">Free</b> hand exports per day need no survey,
-                <b class="text-white">Gated</b> more per day need one. Applies
-                immediately, no deploy.
-              </p>
-              <div id="adm-hand-error" class="alert alert-danger d-none py-2"></div>
-              <div id="adm-hand-body"></div>
-              <div class="adm-toolbar px-0">
-                <button type="button" class="adm-btn" id="adm-hand-save" onclick="saveHandExportAds()">Save</button>
-                <span class="adm-meta flex-grow-1" id="adm-hand-status"></span>
-              </div>
-              <p class="adm-meta mt-3 mb-2">
-                Self-hosted banner/video for this gate's modal. Upload up to 4 files
-                per type and mark one active — the hard-saved default can't be deleted.
-                Applies immediately, no deploy.
-              </p>
-              <div id="adm-media-handexport-error" class="alert alert-danger d-none py-2"></div>
-              <div id="adm-media-handexport-body"></div>
-
-              <h3 class="adm-subhead mt-4">Tourney Export</h3>
-              <p class="adm-meta mb-3">
-                <b class="text-white">Free (lifetime)</b> once ever, then
-                <b class="text-white">Weekly limit</b> per week via survey. Applies
-                immediately, no deploy.
-              </p>
-              <div id="adm-tourney-error" class="alert alert-danger d-none py-2"></div>
-              <div id="adm-tourney-body"></div>
-              <div class="adm-toolbar px-0">
-                <button type="button" class="adm-btn" id="adm-tourney-save" onclick="saveTourneyExportAds()">Save</button>
-                <span class="adm-meta flex-grow-1" id="adm-tourney-status"></span>
+              <div class="fa-section">
+                <h3 class="fa-head">Link Import</h3>
+                <p class="fa-note">
+                  Daily import allowance. Free imports are ungated; gated imports
+                  require a completed survey. Applies immediately, no deploy.
+                </p>
+                <div id="adm-imports-error" class="alert alert-danger d-none py-2"></div>
+                <div class="fa-card">
+                  <div class="fa-card-title">Daily limits</div>
+                  <div id="adm-imports-body"></div>
+                  <div class="fa-actions">
+                    <button type="button" class="adm-btn" id="adm-imports-save" onclick="saveImportAds()">Save</button>
+                    <span class="fa-status" id="adm-imports-status"></span>
+                  </div>
+                </div>
+                <p class="fa-note mt-3 mb-2">
+                  Media served in this gate's modal — up to 4 uploads per slot, the
+                  selected file goes live immediately. The default cannot be deleted.
+                </p>
+                <div id="adm-media-import-error" class="alert alert-danger d-none py-2"></div>
+                <div id="adm-media-import-body"></div>
               </div>
 
-              <h3 class="adm-subhead mt-4">Horz Banner</h3>
-              <p class="adm-meta mb-3">
-                Mid-page promo image. Use a full <b class="text-white">https://…</b> URL
-                or a <b class="text-white">/static/…</b> path. Leave empty to hide it —
-                an empty slot takes up no space on the page. Best fit is a wide, short
-                crop — the slot caps at 180px tall. Applies immediately, no deploy.
-              </p>
-              <div id="adm-horzbanner-error" class="alert alert-danger d-none py-2"></div>
-              <div id="adm-horzbanner-body"></div>
-              <div class="adm-toolbar px-0">
-                <button type="button" class="adm-btn" id="adm-horzbanner-save" onclick="saveHorzBanner()">Save</button>
-                <span class="adm-meta flex-grow-1" id="adm-horzbanner-status"></span>
+              <div class="fa-section">
+                <h3 class="fa-head">Hand Export</h3>
+                <p class="fa-note">
+                  Daily hand-export allowance. Free exports are ungated; gated exports
+                  require a completed survey. Applies immediately, no deploy.
+                </p>
+                <div id="adm-hand-error" class="alert alert-danger d-none py-2"></div>
+                <div class="fa-card">
+                  <div class="fa-card-title">Daily limits</div>
+                  <div id="adm-hand-body"></div>
+                  <div class="fa-actions">
+                    <button type="button" class="adm-btn" id="adm-hand-save" onclick="saveHandExportAds()">Save</button>
+                    <span class="fa-status" id="adm-hand-status"></span>
+                  </div>
+                </div>
+                <p class="fa-note mt-3 mb-2">
+                  Media served in this gate's modal — up to 4 uploads per slot, the
+                  selected file goes live immediately. The default cannot be deleted.
+                </p>
+                <div id="adm-media-handexport-error" class="alert alert-danger d-none py-2"></div>
+                <div id="adm-media-handexport-body"></div>
               </div>
 
-              <h3 class="adm-subhead mt-4">Vert Banner</h3>
-              <p class="adm-meta mb-3">
-                Side promo images on the main page. Use full <b class="text-white">https://…</b>
-                URLs or <b class="text-white">/static/…</b> paths. Leave empty to hide it —
-                an empty slot takes up no space on the page. Applies immediately, no deploy.
-              </p>
-              <div id="adm-vertbanner-error" class="alert alert-danger d-none py-2"></div>
-              <div id="adm-vertbanner-body"></div>
-              <div class="adm-toolbar px-0">
-                <button type="button" class="adm-btn" id="adm-vertbanner-save" onclick="saveVertBanner()">Save</button>
-                <span class="adm-meta flex-grow-1" id="adm-vertbanner-status"></span>
+              <div class="fa-section">
+                <h3 class="fa-head">Tourney Export</h3>
+                <p class="fa-note">
+                  Tournament export allowance. Free is once per account; gated resets
+                  weekly and requires a completed survey. Applies immediately, no deploy.
+                </p>
+                <div id="adm-tourney-error" class="alert alert-danger d-none py-2"></div>
+                <div class="fa-card">
+                  <div class="fa-card-title">Allowance</div>
+                  <div id="adm-tourney-body"></div>
+                  <div class="fa-actions">
+                    <button type="button" class="adm-btn" id="adm-tourney-save" onclick="saveTourneyExportAds()">Save</button>
+                    <span class="fa-status" id="adm-tourney-status"></span>
+                  </div>
+                </div>
               </div>
+
+              <div class="fa-section">
+                <h3 class="fa-head">Horizontal Banner</h3>
+                <p class="fa-note">
+                  Mid-page promo slot. Takes an https:// URL or a /static/… path; leave
+                  it empty to hide the slot. Best fit is a wide crop, capped at 180px tall.
+                </p>
+                <div id="adm-horzbanner-error" class="alert alert-danger d-none py-2"></div>
+                <div class="fa-card">
+                  <div class="fa-card-title">Image</div>
+                  <div id="adm-horzbanner-body"></div>
+                  <div class="fa-actions">
+                    <button type="button" class="adm-btn" id="adm-horzbanner-save" onclick="saveHorzBanner()">Save</button>
+                    <span class="fa-status" id="adm-horzbanner-status"></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="fa-section">
+                <h3 class="fa-head">Vertical Banner</h3>
+                <p class="fa-note">
+                  Side promo slot. Takes https:// URLs or /static/… paths, one per line;
+                  leave it empty to hide the slot. Best fit is a tall ~120&times;480 crop.
+                </p>
+                <div id="adm-vertbanner-error" class="alert alert-danger d-none py-2"></div>
+                <div class="fa-card">
+                  <div class="fa-card-title">Images</div>
+                  <div id="adm-vertbanner-body"></div>
+                  <div class="fa-actions">
+                    <button type="button" class="adm-btn" id="adm-vertbanner-save" onclick="saveVertBanner()">Save</button>
+                    <span class="fa-status" id="adm-vertbanner-status"></span>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </section>
 
@@ -826,42 +892,37 @@
     }
   }
 
+  /** The Free/Gated pair every gate section shows, as one .fa-row. */
+  function freeGatedRow(freeId, freeVal, gatedId, gatedVal) {
+    return `
+      <div class="fa-row">
+        <label class="fa-field">
+          Free
+          <input type="number" min="0" step="1" class="form-control form-control-sm"
+                 id="${freeId}" value="${esc(freeVal)}"/>
+        </label>
+        <label class="fa-field">
+          Gated
+          <input type="number" min="0" step="1" class="form-control form-control-sm"
+                 id="${gatedId}" value="${esc(gatedVal)}"/>
+        </label>
+      </div>`;
+  }
+
   function renderHandExportAds() {
     const hard = ADS['hand_hard_limit'], soft = ADS['hand_soft_limit'];
     const free = Math.max(hard - soft, 0), gated = Math.max(soft, 0);
-    document.getElementById('adm-hand-body').innerHTML = `
-      <div class="adm-gam-week">
-        <span class="adm-gam-wk">Hand exports</span>
-        <label class="d-flex align-items-center gap-2" style="font-size:.82rem;color:var(--muted);">
-          Free
-          <input type="number" min="0" step="1" class="form-control form-control-sm"
-                 style="width:70px;" id="adm-ads-hand-free" value="${esc(free)}"/>
-        </label>
-        <label class="d-flex align-items-center gap-2" style="font-size:.82rem;color:var(--muted);">
-          Gated
-          <input type="number" min="0" step="1" class="form-control form-control-sm"
-                 style="width:70px;" id="adm-ads-hand-gated" value="${esc(gated)}"/>
-        </label>
-      </div>`;
+    document.getElementById('adm-hand-body').innerHTML =
+      freeGatedRow('adm-ads-hand-free', free, 'adm-ads-hand-gated', gated);
     document.getElementById('adm-hand-status').textContent = '';
   }
 
   function renderTourneyExportAds() {
-    const tFree = ADS['tourney_lifetime_free'], tWeekly = ADS['tourney_weekly_limit'];
-    document.getElementById('adm-tourney-body').innerHTML = `
-      <div class="adm-gam-week">
-        <span class="adm-gam-wk">Tournament exports</span>
-        <label class="d-flex align-items-center gap-2" style="font-size:.82rem;color:var(--muted);">
-          Free (lifetime)
-          <input type="number" min="0" step="1" class="form-control form-control-sm"
-                 style="width:70px;" id="adm-ads-tourney-lifetime-free" value="${esc(tFree)}"/>
-        </label>
-        <label class="d-flex align-items-center gap-2" style="font-size:.82rem;color:var(--muted);">
-          Weekly limit
-          <input type="number" min="0" step="1" class="form-control form-control-sm"
-                 style="width:70px;" id="adm-ads-tourney-weekly-limit" value="${esc(tWeekly)}"/>
-        </label>
-      </div>`;
+    // Free is a lifetime count and Gated a weekly one — the section note carries
+    // that; the fields stay Free/Gated so every gate reads the same way.
+    document.getElementById('adm-tourney-body').innerHTML = freeGatedRow(
+      'adm-ads-tourney-lifetime-free', ADS['tourney_lifetime_free'],
+      'adm-ads-tourney-weekly-limit',  ADS['tourney_weekly_limit']);
     document.getElementById('adm-tourney-status').textContent = '';
   }
 
@@ -908,12 +969,12 @@
     setSectionError('adm-tourney-error', '');
     const tFree = parseInt(document.getElementById('adm-ads-tourney-lifetime-free').value, 10);
     if (isNaN(tFree) || tFree < 0) {
-      setSectionError('adm-tourney-error', '"Free (lifetime)" must be a non-negative number.');
+      setSectionError('adm-tourney-error', '"Free" must be a non-negative number.');
       return;
     }
     const tWeekly = parseInt(document.getElementById('adm-ads-tourney-weekly-limit').value, 10);
     if (isNaN(tWeekly) || tWeekly < 0) {
-      setSectionError('adm-tourney-error', '"Weekly limit" must be a non-negative number.');
+      setSectionError('adm-tourney-error', '"Gated" must be a non-negative number.');
       return;
     }
     const payload = { tourney_lifetime_free: tFree, tourney_weekly_limit: tWeekly };
@@ -961,20 +1022,8 @@
   }
 
   function renderImportAds() {
-    document.getElementById('adm-imports-body').innerHTML = `
-      <div class="adm-gam-week">
-        <span class="adm-gam-wk">Imports</span>
-        <label class="d-flex align-items-center gap-2" style="font-size:.82rem;color:var(--muted);">
-          Free
-          <input type="number" min="0" step="1" class="form-control form-control-sm"
-                 style="width:70px;" id="adm-imports-free" value="${esc(IMPORTS_ADS.free)}"/>
-        </label>
-        <label class="d-flex align-items-center gap-2" style="font-size:.82rem;color:var(--muted);">
-          Gated
-          <input type="number" min="0" step="1" class="form-control form-control-sm"
-                 style="width:70px;" id="adm-imports-gated" value="${esc(IMPORTS_ADS.gated)}"/>
-        </label>
-      </div>`;
+    document.getElementById('adm-imports-body').innerHTML = freeGatedRow(
+      'adm-imports-free', IMPORTS_ADS.free, 'adm-imports-gated', IMPORTS_ADS.gated);
     document.getElementById('adm-imports-status').textContent = '';
   }
 
@@ -1042,39 +1091,27 @@
 
   function renderHorzBanner() {
     document.getElementById('adm-horzbanner-body').innerHTML = `
-      <div class="adm-gam-week align-items-start">
-        <span class="adm-gam-wk">Mid-page image</span>
-        <label class="d-flex flex-column gap-1 flex-grow-1" style="font-size:.82rem;color:var(--muted);">
-          <input type="text" class="form-control form-control-sm"
-                 id="adm-banners-mid-image"
-                 placeholder="https://example.com/promo-wide.png"
-                 value="${esc(BANNERS.mid_image || '')}"/>
-        </label>
-      </div>`;
+      <input type="text" class="form-control form-control-sm"
+             id="adm-banners-mid-image"
+             placeholder="https://example.com/promo-wide.png"
+             value="${esc(BANNERS.mid_image || '')}"/>`;
     document.getElementById('adm-horzbanner-status').textContent = '';
   }
 
   function renderVertBanner() {
     // The side slot is a list, so it gets a textarea (one URL per line) rather
-    // than a single input.
+    // than a single input. Order is display order.
     const sideImages = (BANNERS.side_images || []).join('\n');
     document.getElementById('adm-vertbanner-body').innerHTML = `
-      <div class="adm-gam-week align-items-start">
-        <span class="adm-gam-wk">Side images</span>
-        <label class="d-flex flex-column gap-1 flex-grow-1" style="font-size:.82rem;color:var(--muted);">
-          Image URLs — one per line, max 10. Rotates automatically with 2+;
-          shows a single image statically. Best fit is a tall ~120&times;480 crop.
-          <textarea class="form-control form-control-sm" rows="4"
-                    id="adm-banners-side-images"
-                    placeholder="https://example.com/promo-a.png">${esc(sideImages)}</textarea>
-        </label>
-      </div>
-      <div class="adm-gam-week">
-        <span class="adm-gam-wk">Rotation</span>
-        <label class="d-flex align-items-center gap-2" style="font-size:.82rem;color:var(--muted);">
+      <span class="fa-input-note">One URL per line, max 10 — two or more rotate automatically.</span>
+      <textarea class="form-control form-control-sm" rows="4"
+                id="adm-banners-side-images"
+                placeholder="https://example.com/promo-a.png">${esc(sideImages)}</textarea>
+      <div class="fa-row mt-3">
+        <label class="fa-field">
           Seconds per image
           <input type="number" min="1" max="60" step="1" class="form-control form-control-sm"
-                 style="width:70px;" id="adm-banners-side-interval"
+                 id="adm-banners-side-interval"
                  value="${esc(Math.round((BANNERS.side_interval_ms ?? 6000) / 1000))}"/>
         </label>
       </div>`;
@@ -1120,7 +1157,7 @@
     const sideImages = document.getElementById('adm-banners-side-images').value
       .split('\n').map(s => s.trim()).filter(Boolean);
     if (sideImages.length > 10) {
-      setSectionError('adm-vertbanner-error', '"Side images" takes at most 10 image URLs.');
+      setSectionError('adm-vertbanner-error', 'The vertical banner takes at most 10 image URLs.');
       return;
     }
     const bad = sideImages.find(u => !/^(https?:\/\/|\/)/.test(u));
@@ -1161,9 +1198,11 @@
 
   // ── Ad Campaigns: media library (split across Link Import / Hand Export) ──
   let AD_MEDIA = null;   // /api/admin/ad-media-config response
+  // Labels are section-scoped: which gate a type belongs to is already the
+  // section it renders in, so they name the slot, not the pairing.
   const AD_MEDIA_LABELS = {
-    banner_a: 'Banner A', banner_b: 'Banner B',
-    video_30: 'Video 30s', video_60: 'Video 60s',
+    banner_a: 'Gate banner', banner_b: 'Gate banner',
+    video_30: 'Gate video (30s)', video_60: 'Gate video (60s)',
   };
   const AD_MEDIA_ACCEPT = {
     banner_a: 'image/png,image/jpeg,image/webp,image/gif,image/svg+xml',
@@ -1225,11 +1264,11 @@
 
   function adMediaRow(type, opts) {
     return `
-      <div class="d-flex align-items-center gap-2" style="font-size:.82rem;color:var(--muted);">
-        <label class="d-flex align-items-center gap-1" style="min-width:0;">
+      <div class="fa-media-item">
+        <label class="fa-media-pick">
           <input type="radio" name="adm-media-active-${type}" ${opts.active ? 'checked' : ''}
                  onchange="setActiveAdMedia('${type}', '${opts.id}')"/>
-          <span class="text-truncate" style="max-width:220px;">${opts.label}</span>
+          <span class="fa-media-name text-truncate">${opts.label}</span>
         </label>
         ${opts.preview}
         ${opts.deletable ? `<button type="button" class="adm-btn" style="padding:2px 8px;"
@@ -1237,6 +1276,8 @@
       </div>`;
   }
 
+  /** One .fa-card per media type — its own file list and its own upload
+      control, so an upload field always sits under the slot it belongs to. */
   function renderAdMediaType(type) {
     const cfg = AD_MEDIA[type];
     const rows = [];
@@ -1245,9 +1286,6 @@
         id: 'default', label: 'Default', deletable: false, active: cfg.active === 'default',
         preview: `<a href="${esc(cfg.default_path)}" target="_blank" rel="noopener">preview</a>`,
       }));
-    } else {
-      rows.push('<div class="adm-meta" style="padding:4px 0;">No default file — falls back to ' +
-                 'the existing stub until an admin uploads one.</div>');
     }
     for (const f of cfg.files) {
       const url = `/api/ad-media/${type}/${f.id}`;
@@ -1260,18 +1298,20 @@
       }));
     }
     const full = cfg.files.length >= 4;
+    const empty = !cfg.default_path && !cfg.files.length
+      ? '<div class="fa-media-empty">No file yet — the gate falls back to the stub until one is uploaded.</div>'
+      : '';
     return `
-      <div class="adm-gam-week align-items-start">
-        <span class="adm-gam-wk">${esc(AD_MEDIA_LABELS[type])}</span>
-        <div class="d-flex flex-column gap-2 flex-grow-1">
-          ${rows.join('')}
-          <div class="d-flex align-items-center gap-2">
-            <input type="file" accept="${AD_MEDIA_ACCEPT[type]}" id="adm-media-file-${type}"
-                   class="form-control form-control-sm" style="max-width:320px;" ${full ? 'disabled' : ''}/>
-            <button type="button" class="adm-btn" ${full ? 'disabled' : ''}
-                    onclick="uploadAdMedia('${type}')">Upload</button>
-          </div>
-          ${full ? '<span class="adm-meta">4/4 saved — delete one to upload another.</span>' : ''}
+      <div class="fa-card">
+        <div class="fa-card-title">${esc(AD_MEDIA_LABELS[type])}</div>
+        ${empty}
+        ${rows.length ? `<div class="fa-media-list">${rows.join('')}</div>` : ''}
+        <div class="fa-upload">
+          <input type="file" accept="${AD_MEDIA_ACCEPT[type]}" id="adm-media-file-${type}"
+                 class="form-control form-control-sm" ${full ? 'disabled' : ''}/>
+          <button type="button" class="adm-btn" ${full ? 'disabled' : ''}
+                  onclick="uploadAdMedia('${type}')">Upload</button>
+          ${full ? '<span class="fa-status">4 of 4 saved — delete one to upload another.</span>' : ''}
         </div>
       </div>`;
   }
