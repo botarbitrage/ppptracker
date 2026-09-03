@@ -1050,90 +1050,58 @@ def _import_ads_config():
 # Promotional banner slots on the main page (see the "Redesign: Vertical
 # auto-rotating banner" and "Redesign: Horizontal mid-page banner" Tasks).
 #
-# These defaults point at the placeholder art committed in static/banners/
-# (see the README there), so both slots are populated out of the box rather
-# than invisible until someone finds the admin page. The art is marked
-# PLACEHOLDER ART in a corner — swap the files for real artwork, or point
-# these at real URLs, before it matters commercially.
+# The images themselves are no longer configured here as URLs: both slots are
+# backed by the ad media library ('banner_horizontal' and 'banner_vertical' in
+# _AD_MEDIA_TYPES), so an admin uploads a file and selects it rather than
+# typing a path. _banners_config() below resolves the current selection to the
+# {mid_image, side_images} shape the main page has always consumed, and the
+# shipped placeholder art in static/banners/ is each slot's default selection,
+# so both are populated out of the box.
 #
-# Empty is still fully supported and is what the banners' ACs call
-# "gracefully degrades when zero images are configured": an admin who clears
-# the fields at /admin gets an empty list / empty string stored, which wins
-# over these defaults and hides the slot again (no placeholder box, no
-# reserved space). Only the starting value changed, not the behaviour.
+# Empty is still fully supported and is what the banners' ACs call "gracefully
+# degrades when zero images are configured": an admin who deselects everything
+# gets an empty selection stored, which wins over the defaults and hides the
+# slot again (no placeholder box, no reserved space).
 _BANNERS_DEFAULTS = {
-    # 0 images -> the side slot stays hidden; 1 -> shown statically;
-    # 2+ -> auto-rotates at side_interval_ms (see _initSideBanner in app.js).
-    # test_banners_config.py asserts every path below exists on disk, so
-    # renaming the art without updating this dict fails CI rather than
-    # serving broken images.
-    'side_images':      ['/static/banners/side-1.svg',
-                         '/static/banners/side-2.svg',
-                         '/static/banners/side-3.svg'],
     'side_interval_ms': 6000,   # within the Task AC's 5-8s default range
-    # Single image; '' -> the mid-page slot stays hidden.
-    'mid_image':        '/static/banners/mid-1.svg',
 }
 
-# Caps for the admin POST below. The slot is a hand-curated promo surface,
-# not a feed, so a small list is plenty and keeps the config doc bounded.
-_BANNER_MAX_IMAGES      = 10
-_BANNER_MAX_URL_LEN     = 2000
 _BANNER_MIN_INTERVAL_MS = 1000
 _BANNER_MAX_INTERVAL_MS = 60000
 
 
-def _valid_banner_url(val):
-    """True for a banner image URL we're willing to persist.
-
-    Absolute http(s) or a site-relative path only. These land in an <img src>,
-    where a `javascript:` URL is inert anyway, but the route is a persisted
-    admin surface — keeping it to the two shapes the slot actually uses means
-    a typo fails at save time rather than rendering a broken image to visitors.
-    """
-    if not isinstance(val, str):
-        return False
-    val = val.strip()
-    if not val or len(val) > _BANNER_MAX_URL_LEN:
-        return False
-    return val.startswith(('https://', 'http://', '/'))
-
-
 def _banners_config():
-    """Admin-configurable promo banner images.
+    """The main page's promo banner slots, in the shape app.js consumes.
 
-    Mirrors _export_ads_config()/_import_ads_config(): read fresh from
-    Firestore on every call so an admin change takes effect on the very next
-    request, no redeploy or cache-bust to invalidate. Falls back to the
-    defaults (both slots empty, so both stay hidden) on a missing doc or any
-    read failure.
+    The images come from the ad media library — 'banner_horizontal' for the
+    mid-page slot, 'banner_vertical' for the rotating side slot — so this
+    resolves the current selection to URLs rather than reading URLs out of
+    /config/banners. Only the rotation interval is still stored here, and it
+    is read fresh on every call so an admin change takes effect on the very
+    next request, with the default restored on a missing doc, a read failure
+    or an out-of-range stored value.
     """
-    cfg = dict(_BANNERS_DEFAULTS)
+    media = _ad_media_config()
+    mid = _ad_media_selected_urls('banner_horizontal', media['banner_horizontal'])
+    cfg = {
+        'mid_image':   mid[0] if mid else '',
+        'side_images': _ad_media_selected_urls('banner_vertical', media['banner_vertical']),
+    }
+
     try:
         snap = _get_admin_db().collection('config').document('banners').get()
         stored = snap.to_dict() if snap.exists else {}
     except Exception as exc:
         print(f"[_banners_config] read failed: {type(exc).__name__}: {exc}")
         stored = {}
-    for key in _BANNERS_DEFAULTS:
-        if key in stored:
-            cfg[key] = stored[key]
-    # Defend the render path against a hand-edited or part-written doc: the
-    # public route below is unauthenticated and its output drives an <img src>
-    # on every visitor's page, so drop anything that isn't a usable URL rather
-    # than passing it through.
-    cfg['side_images'] = [
-        u.strip() for u in (cfg['side_images'] if isinstance(cfg['side_images'], list) else [])
-        if _valid_banner_url(u)
-    ][:_BANNER_MAX_IMAGES]
-    if not _valid_banner_url(cfg['mid_image']):
-        cfg['mid_image'] = ''
-    else:
-        cfg['mid_image'] = cfg['mid_image'].strip()
-    interval = cfg['side_interval_ms']
+    if not isinstance(stored, dict):
+        stored = {}
+
+    interval = stored.get('side_interval_ms', _BANNERS_DEFAULTS['side_interval_ms'])
     if isinstance(interval, bool) or not isinstance(interval, int) or not (
             _BANNER_MIN_INTERVAL_MS <= interval <= _BANNER_MAX_INTERVAL_MS):
-        cfg['side_interval_ms'] = _BANNERS_DEFAULTS['side_interval_ms']
+        interval = _BANNERS_DEFAULTS['side_interval_ms']
+    cfg['side_interval_ms'] = interval
     return cfg
 
 
@@ -1181,7 +1149,47 @@ _AD_MEDIA_TYPES = {
         'target_duration': 60, 'duration_tolerance': 3,
         'default_path': None,
     },
+    # The two promo slots on the main page. Same upload/select mechanism as the
+    # gate media above — the slots used to take a typed URL or /static path,
+    # and now resolve to a file the admin uploaded (or one of the shipped
+    # defaults) via _banners_config() below.
+    # hideable: a page slot can be turned off entirely (active 'none'), which
+    # the gate media has no use for — a gate modal always shows its banner.
+    # The multi type below hides via an empty selection instead.
+    'banner_horizontal': {
+        'kind': 'image', 'max_bytes': 2 * 1024 * 1024,
+        'content_types': {'image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/svg+xml'},
+        'default_path': '/static/banners/mid-1.svg',
+        'hideable': True,
+    },
+    # multi: the vertical slot is a rotation, so each slide is selected on its
+    # own and 'active' is a list of ids rather than a single one. It ships with
+    # all three placeholder slides selected, which is the rotation the slot had
+    # when its images were hard-coded URLs.
+    'banner_vertical': {
+        'kind': 'image', 'max_bytes': 2 * 1024 * 1024,
+        'content_types': {'image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/svg+xml'},
+        'multi': True,
+        'default_paths': ['/static/banners/side-1.svg',
+                          '/static/banners/side-2.svg',
+                          '/static/banners/side-3.svg'],
+    },
 }
+
+
+def _ad_media_defaults(spec):
+    """The type's shipped defaults as [{'id', 'path'}], newest concept first.
+
+    Single-default types keep the historical 'default' id so stored configs
+    (and app.js's gate-modal lookup) keep resolving; multi types number theirs
+    so each slide can be selected on its own.
+    """
+    paths = spec.get('default_paths')
+    if paths:
+        return [{'id': 'default-%d' % (i + 1), 'path': p} for i, p in enumerate(paths)]
+    if spec.get('default_path'):
+        return [{'id': 'default', 'path': spec['default_path']}]
+    return []
 
 
 def _ad_media_config():
@@ -1222,15 +1230,61 @@ def _ad_media_config():
                 'uploaded_at':   f.get('uploaded_at', 0),
                 'uploaded_by':   f.get('uploaded_by', ''),
             })
-        active = raw.get('active', 'default')
-        if active != 'default' and active not in {f['id'] for f in clean_files}:
-            active = 'default'   # a deleted/unknown file id can't stay active
+        defaults = _ad_media_defaults(spec)
+        default_ids = [d['id'] for d in defaults]
+        file_ids = [f['id'] for f in clean_files]
+
+        if spec.get('multi'):
+            # A stored list wins as-is, including an empty one — that is how an
+            # admin turns the slot off. Only an absent value falls back to "all
+            # defaults selected". Order follows defaults-then-uploads so the
+            # rotation is deterministic regardless of click order.
+            stored_active = raw.get('active')
+            if isinstance(stored_active, list):
+                chosen = {a for a in stored_active if isinstance(a, str)}
+                active = [i for i in default_ids + file_ids if i in chosen]
+            else:
+                active = list(default_ids)
+        else:
+            allowed = set(default_ids) | set(file_ids)
+            if spec.get('hideable'):
+                allowed.add('none')
+            active = raw.get('active', 'default')
+            if active not in allowed:
+                active = 'default'   # a deleted/unknown file id can't stay active
+
         cfg[media_type] = {
             'files':        clean_files,
             'active':       active,
-            'default_path': spec['default_path'],
+            # Kept for app.js's gate-modal lookup, which predates `defaults`.
+            'default_path': spec.get('default_path'),
+            'defaults':     defaults,
+            'multi':        bool(spec.get('multi')),
+            'hideable':     bool(spec.get('hideable')),
         }
     return cfg
+
+
+def _ad_media_url(media_type, entry, item_id):
+    """Public URL for one id within a type — a shipped default's static path,
+    or the stream route for an uploaded file. None if the id resolves to
+    neither."""
+    for d in entry.get('defaults', []):
+        if d['id'] == item_id:
+            return d['path']
+    for f in entry.get('files', []):
+        if f['id'] == item_id:
+            return '/api/ad-media/%s/%s' % (media_type, f['id'])
+    return None
+
+
+def _ad_media_selected_urls(media_type, entry):
+    """Every selected file's URL, in rotation order. Single-select types give
+    at most one; a multi type gives its whole selection."""
+    active = entry.get('active')
+    ids = active if isinstance(active, list) else [active]
+    urls = [_ad_media_url(media_type, entry, i) for i in ids]
+    return [u for u in urls if u]
 
 
 def _video_duration_seconds(file_bytes):
@@ -1351,20 +1405,41 @@ def admin_ad_media_set_active(media_type):
     if media_type not in _AD_MEDIA_TYPES:
         return jsonify({'error': f'Unknown media type "{media_type}"'}), 404
     body = request.get_json(silent=True)
-    if not isinstance(body, dict) or 'file_id' not in body:
+    if not isinstance(body, dict):
         return jsonify({'error': 'Malformed request body'}), 400
-    file_id = body['file_id']
 
+    spec = _AD_MEDIA_TYPES[media_type]
     cfg = _ad_media_config()
-    valid_ids = {'default'} | {f['id'] for f in cfg[media_type]['files']}
-    if file_id not in valid_ids:
-        return jsonify({'error': f'"{file_id}" is not a saved file for {media_type}'}), 400
-    if file_id == 'default' and not _AD_MEDIA_TYPES[media_type]['default_path']:
-        return jsonify({'error': f'{media_type} has no default file yet — upload one first'}), 400
+    entry = cfg[media_type]
+    valid_ids = ({d['id'] for d in entry['defaults']}
+                 | {f['id'] for f in entry['files']})
+
+    if spec.get('multi'):
+        # Each slide is picked on its own, so this takes the whole selection.
+        # [] is meaningful: it turns the slot off.
+        file_ids = body.get('file_ids')
+        if not isinstance(file_ids, list) or not all(isinstance(i, str) for i in file_ids):
+            return jsonify({'error': 'file_ids must be a list of file ids'}), 400
+        unknown = [i for i in file_ids if i not in valid_ids]
+        if unknown:
+            return jsonify({
+                'error': f'"{unknown[0]}" is not a saved file for {media_type}'
+            }), 400
+        active = file_ids
+    else:
+        if 'file_id' not in body:
+            return jsonify({'error': 'Malformed request body'}), 400
+        active = body['file_id']
+        if spec.get('hideable'):
+            valid_ids.add('none')   # 'none' hides the slot entirely
+        if active not in valid_ids:
+            return jsonify({'error': f'"{active}" is not a saved file for {media_type}'}), 400
+        if active == 'default' and not spec.get('default_path'):
+            return jsonify({'error': f'{media_type} has no default file yet — upload one first'}), 400
 
     _get_admin_db().collection('config').document('ad_media').set({media_type: {
-        'files':  cfg[media_type]['files'],
-        'active': file_id,
+        'files':  entry['files'],
+        'active': active,
     }}, merge=True)
     return jsonify(_ad_media_config())
 
@@ -1376,10 +1451,11 @@ def admin_ad_media_delete(media_type, file_id):
         return jsonify({'error': 'Forbidden'}), 403
     if media_type not in _AD_MEDIA_TYPES:
         return jsonify({'error': f'Unknown media type "{media_type}"'}), 404
-    if file_id == 'default':
-        return jsonify({'error': 'The default file cannot be deleted'}), 400
 
     cfg = _ad_media_config()
+    if file_id in {d['id'] for d in cfg[media_type]['defaults']}:
+        return jsonify({'error': 'The default file cannot be deleted'}), 400
+
     target = next((f for f in cfg[media_type]['files'] if f['id'] == file_id), None)
     if target is None:
         return jsonify({'error': f'"{file_id}" is not a saved file for {media_type}'}), 404
@@ -1392,7 +1468,11 @@ def admin_ad_media_delete(media_type, file_id):
         except Exception as exc:
             print(f"[admin_ad_media_delete] storage delete failed: {type(exc).__name__}: {exc}")
 
-    new_active = 'default' if cfg[media_type]['active'] == file_id else cfg[media_type]['active']
+    active = cfg[media_type]['active']
+    if isinstance(active, list):
+        new_active = [i for i in active if i != file_id]
+    else:
+        new_active = 'default' if active == file_id else active
     _get_admin_db().collection('config').document('ad_media').set({media_type: {
         'files':  remaining,
         'active': new_active,
@@ -3128,13 +3208,9 @@ def admin_banners_config_get():
 
 @app.route('/api/admin/banners-config', methods=['POST'])
 def admin_banners_config_set():
-    """Whole-config replace of the fields present in the body — merge=True on
-    the Firestore write, so an admin can change one slot without resending the
-    other, but each field present is validated on its own type.
-
-    side_images is replace-not-append: the list sent becomes the list stored,
-    which is what the admin UI's textarea round-trips.
-    """
+    """Rotation speed only — the images themselves are picked in the media
+    library (POST /api/admin/ad-media/banner_horizontal|banner_vertical/active),
+    so this no longer accepts image URLs."""
     uid = _verify_bearer(request)
     if not _is_admin(uid):
         return jsonify({'error': 'Forbidden'}), 403
@@ -3143,21 +3219,6 @@ def admin_banners_config_set():
         return jsonify({'error': 'Malformed request body'}), 400
 
     update = {}
-    if 'side_images' in body:
-        val = body['side_images']
-        if not isinstance(val, list):
-            return jsonify({'error': 'side_images must be a list of image URLs'}), 400
-        if len(val) > _BANNER_MAX_IMAGES:
-            return jsonify({
-                'error': f'side_images takes at most {_BANNER_MAX_IMAGES} URLs'
-            }), 400
-        for u in val:
-            if not _valid_banner_url(u):
-                return jsonify({
-                    'error': f'"{u}" is not a valid image URL — use https://…, '
-                             f'http://… or a /static/… path'
-                }), 400
-        update['side_images'] = [u.strip() for u in val]
     if 'side_interval_ms' in body:
         val = body['side_interval_ms']
         if isinstance(val, bool) or not isinstance(val, int) or not (
@@ -3167,18 +3228,6 @@ def admin_banners_config_set():
                          f'{_BANNER_MIN_INTERVAL_MS} and {_BANNER_MAX_INTERVAL_MS}'
             }), 400
         update['side_interval_ms'] = val
-    if 'mid_image' in body:
-        val = body['mid_image']
-        if not isinstance(val, str):
-            return jsonify({'error': 'mid_image must be a string'}), 400
-        # '' is the documented way to clear the slot, so it bypasses the
-        # URL check that every non-empty value still has to pass.
-        if val.strip() and not _valid_banner_url(val):
-            return jsonify({
-                'error': f'"{val}" is not a valid image URL — use https://…, '
-                         f'http://… or a /static/… path'
-            }), 400
-        update['mid_image'] = val.strip()
     if not update:
         return jsonify({'error': 'No recognised fields in request body'}), 400
 
