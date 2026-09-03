@@ -3,16 +3,16 @@ test_banners_config.py — shape and guardrail test for the promo banner config
 APIs (/api/banners-config and /api/admin/banners-config) against a fake
 Firestore, so the handler bodies run without credentials or network.
 
-The interesting logic here is not the read/write itself but what the two slots
-do at the edges.
+The images in both slots are no longer stored here as URLs: they come from the
+ad media library ('banner_horizontal' and 'banner_vertical' in
+_AD_MEDIA_TYPES), and _banners_config() resolves the current selection into the
+{mid_image, side_images} shape the main page has always consumed. So what this
+covers is the resolution: shipped defaults render out of the box, an uploaded
+file resolves to its stream URL, and a deselected slot goes empty.
 
-The shipped defaults point at the placeholder art in static/banners/, so this
-checks those paths are both valid URLs and real files — art renamed without
-_BANNERS_DEFAULTS being updated would otherwise ship broken <img> tags to
-every visitor. Zero images is still a supported state (the banners' ACs call
-it "gracefully degrades when zero images are configured"), but it is now only
-reachable by an admin clearing the fields, so it gets its own coverage: a
-stored empty value must win over the non-empty default.
+Zero images is still a supported state (the banners' ACs call it "gracefully
+degrades when zero images are configured"), reachable by an admin deselecting
+every slide, so it gets its own coverage.
 
 The public GET is unauthenticated and feeds an <img src> on every visitor's
 page, so a hand-edited or part-written doc has to be sanitised on read rather
@@ -103,10 +103,9 @@ def _json(res):
 def main():
     import app as A
 
-    # Every URL the shipped defaults reference, flattened.
-    global _BANNER_DEFAULT_URLS
-    _BANNER_DEFAULT_URLS = (list(A._BANNERS_DEFAULTS['side_images'])
-                            + [A._BANNERS_DEFAULTS['mid_image']])
+    HORZ = A._ad_media_defaults(A._AD_MEDIA_TYPES['banner_horizontal'])
+    VERT = A._ad_media_defaults(A._AD_MEDIA_TYPES['banner_vertical'])
+    default_urls = [d['path'] for d in HORZ + VERT]
 
     db = FakeDB()
     A._get_admin_db = lambda: db
@@ -127,126 +126,130 @@ def main():
                                  data=json.dumps(payload),
                                  content_type='application/json'))
 
+    def select(media_type, payload):
+        return _json(client.post(f'/api/admin/ad-media/{media_type}/active',
+                                 data=json.dumps(payload),
+                                 content_type='application/json'))
+
     def stored():
         return dict(db.get(('config', 'banners')) or {})
 
-    # ── 1. _valid_banner_url ─────────────────────────────────────────────────
-    for val, want in [
-        ('https://x.com/a.png', True), ('http://x.com/a.png', True),
-        ('/static/a.png', True), ('  https://x.com/a.png  ', True),
-        ('', False), ('   ', False), (None, False), (123, False), (True, False),
-        ('ftp://x/a.png', False), ('javascript:alert(1)', False),
-        ('a.png', False), ('x' * 2001, False),
-    ]:
-        check('_valid_banner_url(%r)' % (val,), A._valid_banner_url(val) is want)
-
-    # ── 2. Shipped default: both slots point at the placeholder art ──────────
+    # ── 1. Shipped defaults populate both slots out of the box ──────────────
     cfg = A._banners_config()
     check('default rotates 3 side images', len(cfg['side_images']) == 3, str(cfg['side_images']))
     check('default mid_image set', cfg['mid_image'] != '', repr(cfg['mid_image']))
     check('default interval is 6s', cfg['side_interval_ms'] == 6000, str(cfg['side_interval_ms']))
+    check('side_images resolve to the shipped slide art',
+          cfg['side_images'] == [d['path'] for d in VERT], str(cfg['side_images']))
+    check('mid_image resolves to the shipped art',
+          cfg['mid_image'] == HORZ[0]['path'], repr(cfg['mid_image']))
 
-    # Every default must survive the sanitiser it is fed through on read —
-    # a default that _valid_banner_url rejects would silently vanish.
-    for u in _BANNER_DEFAULT_URLS:
-        check('default URL is valid: ' + u, A._valid_banner_url(u))
-
-    # …and must actually exist on disk. This is the check that catches art
-    # renamed or deleted without _BANNERS_DEFAULTS being updated, which would
+    # …and that art must actually exist on disk. This is the check that catches
+    # art renamed or deleted without _AD_MEDIA_TYPES being updated, which would
     # otherwise ship broken <img> tags to every visitor.
     here = os.path.dirname(os.path.abspath(__file__))
-    for u in _BANNER_DEFAULT_URLS:
-        path = os.path.join(here, u.lstrip('/'))
-        check('default art exists: ' + u, os.path.isfile(path), path)
+    for u in default_urls:
+        check('default art exists: ' + u, os.path.isfile(os.path.join(here, u.lstrip('/'))), u)
 
     # A failed read must land on those same defaults, not raise.
     A._get_admin_db = lambda: BoomDB()
     cfg = A._banners_config()
     check('read failure falls back to defaults',
-          cfg['side_images'] == A._BANNERS_DEFAULTS['side_images']
-          and cfg['mid_image'] == A._BANNERS_DEFAULTS['mid_image']
+          cfg['side_images'] == [d['path'] for d in VERT]
+          and cfg['mid_image'] == HORZ[0]['path']
           and cfg['side_interval_ms'] == 6000, str(cfg))
     A._get_admin_db = lambda: db
 
-    # ── 3. Public GET is unauthenticated and mirrors the config ──────────────
+    # ── 2. Public GET is unauthenticated and mirrors the config ─────────────
     caller['uid'] = None
     status, body = _json(client.get('/api/banners-config'))
     check('public GET is open', status == 200, str(status))
     check('public GET serves the shipped defaults',
-          body['side_images'] == A._BANNERS_DEFAULTS['side_images']
-          and body['mid_image'] == A._BANNERS_DEFAULTS['mid_image'], str(body))
+          body['side_images'] == [d['path'] for d in VERT]
+          and body['mid_image'] == HORZ[0]['path'], str(body))
     caller['uid'] = ADMIN_UID
 
-    # ── 4. Admin routes are gated ────────────────────────────────────────────
+    # ── 3. Admin routes are gated ───────────────────────────────────────────
     caller['uid'] = PLAIN_UID
     status, _ = _json(client.get('/api/admin/banners-config'))
     check('non-admin cannot read banners config', status == 403, str(status))
-    status, _ = post({'mid_image': 'https://evil.example/x.png'})
+    status, _ = post({'side_interval_ms': 9000})
     check('non-admin cannot write banners config', status == 403, str(status))
     check('non-admin write did not persist', stored() == {}, str(stored()))
     caller['uid'] = ADMIN_UID
 
-    # ── 5. Happy path ────────────────────────────────────────────────────────
-    status, body = post({
-        'side_images': ['https://x.com/a.png', '/static/b.png'],
-        'side_interval_ms': 8000,
-        'mid_image': 'https://x.com/wide.png',
+    # ── 4. The images follow the media-library selection ────────────────────
+    # An uploaded file resolves to its stream URL rather than a stored path.
+    db.put(('config', 'ad_media'), {
+        'banner_horizontal': {
+            'files': [{'id': 'up1', 'path': 'ad_media/banner_horizontal/up1.png',
+                       'filename': 'wide.png', 'content_type': 'image/png',
+                       'size': 10, 'duration': None, 'uploaded_at': 0, 'uploaded_by': ADMIN_UID}],
+            'active': 'up1',
+        },
     })
-    check('save accepted', status == 200, str(body))
-    check('side_images round-trip',
-          body['side_images'] == ['https://x.com/a.png', '/static/b.png'], str(body))
+    cfg = A._banners_config()
+    check('mid_image resolves an uploaded file to its stream URL',
+          cfg['mid_image'] == '/api/ad-media/banner_horizontal/up1', repr(cfg['mid_image']))
+
+    status, body = select('banner_horizontal', {'file_id': 'default'})
+    check('horizontal can go back to the default', status == 200, str(body))
+    check('mid_image back to the shipped art',
+          A._banners_config()['mid_image'] == HORZ[0]['path'],
+          repr(A._banners_config()['mid_image']))
+
+    # Each slide is selected on its own, and the rotation follows suit.
+    slide_ids = [d['id'] for d in VERT]
+    status, body = select('banner_vertical', {'file_ids': [slide_ids[0], slide_ids[2]]})
+    check('slide subset accepted', status == 200, str(body))
+    check('side_images follow the slide selection',
+          A._banners_config()['side_images'] == [VERT[0]['path'], VERT[2]['path']],
+          str(A._banners_config()['side_images']))
+
+    # ── 4b. An admin can still turn both slots off ──────────────────────────
+    # This is the "gracefully degrades with zero images" AC. It used to be the
+    # shipped default; now that the defaults point at real placeholder art it
+    # is only reachable by an admin deselecting everything, so it needs its own
+    # coverage: an empty selection must WIN over the non-empty default rather
+    # than falling back to it.
+    select('banner_vertical', {'file_ids': []})
+    status, body = select('banner_horizontal', {'file_id': 'none'})
+    check('horizontal slot can be switched off', status == 200, str(body))
+    cfg = A._banners_config()
+    check('side slot can be emptied', cfg['side_images'] == [], str(cfg))
+    check('mid slot can be hidden', cfg['mid_image'] == '', repr(cfg['mid_image']))
+    status, body = _json(client.get('/api/banners-config'))
+    check('public GET serves both slots off',
+          body['side_images'] == [] and body['mid_image'] == '', str(body))
+
+    # 'none' is only offered to the page slots — a gate banner always shows.
+    status, body = select('banner_a', {'file_id': 'none'})
+    check('gate banner cannot be switched off', status == 400, str(body))
+
+    select('banner_vertical', {'file_ids': slide_ids})   # restore for the rest
+    select('banner_horizontal', {'file_id': 'default'})
+
+    # ── 5. Rotation speed is the only thing this route still writes ─────────
+    status, body = post({'side_interval_ms': 8000})
+    check('interval save accepted', status == 200, str(body))
     check('interval round-trip', body['side_interval_ms'] == 8000, str(body))
-    check('mid_image round-trip', body['mid_image'] == 'https://x.com/wide.png', str(body))
     check('write is attributed', 'updated_by' in stored() and 'updated_at' in stored(),
           str(stored()))
 
-    # Public GET now serves what the admin saved.
     status, body = _json(client.get('/api/banners-config'))
-    check('public GET reflects the save',
-          body['mid_image'] == 'https://x.com/wide.png'
-          and len(body['side_images']) == 2, str(body))
+    check('public GET reflects the saved interval', body['side_interval_ms'] == 8000, str(body))
 
-    # ── 6. PATCH-style merge: one field at a time ────────────────────────────
-    status, body = post({'mid_image': ''})
-    check('mid_image cleared', status == 200 and body['mid_image'] == '', str(body))
-    check('clearing mid_image left side_images alone',
-          body['side_images'] == ['https://x.com/a.png', '/static/b.png'], str(body))
-
-    # ── 6b. An admin can still turn both slots off ───────────────────────────
-    # This is the "gracefully degrades with zero images" AC. It used to be the
-    # shipped default; now that the defaults point at real placeholder art it
-    # is only reachable by an admin clearing the fields, so it needs its own
-    # coverage: a stored empty value must WIN over the non-empty default
-    # rather than falling back to it.
-    status, body = post({'side_images': [], 'mid_image': ''})
-    check('both slots can be cleared',
-          status == 200 and body['side_images'] == [] and body['mid_image'] == '',
-          str(body))
-    cfg = A._banners_config()
-    check('cleared state wins over the defaults on re-read',
-          cfg['side_images'] == [] and cfg['mid_image'] == '', str(cfg))
-    status, body = _json(client.get('/api/banners-config'))
-    check('public GET serves the cleared state',
-          body['side_images'] == [] and body['mid_image'] == '', str(body))
-
-    # Put a real config back for the validation cases below.
-    post({'side_images': ['https://x.com/a.png', '/static/b.png'],
-          'mid_image': 'https://x.com/wide.png'})
-
-    # ── 7. Validation ────────────────────────────────────────────────────────
+    # ── 6. Validation ───────────────────────────────────────────────────────
     for label, payload in [
-        ('non-list side_images',      {'side_images': 'https://x.com/a.png'}),
-        ('bad URL scheme in list',    {'side_images': ['javascript:alert(1)']}),
-        ('relative URL in list',      {'side_images': ['a.png']}),
-        ('non-string in list',        {'side_images': [123]}),
-        ('too many images',           {'side_images': ['/a.png'] * 11}),
-        ('bad mid_image URL',         {'mid_image': 'ftp://x/a.png'}),
-        ('non-string mid_image',      {'mid_image': 42}),
         ('interval too small',        {'side_interval_ms': 10}),
         ('interval too large',        {'side_interval_ms': 999999}),
         ('interval not an int',       {'side_interval_ms': '8000'}),
         ('interval bool',             {'side_interval_ms': True}),
         ('no recognised fields',      {'nonsense': 1}),
+        # The image fields moved to the media library — this route must not
+        # quietly accept and store them any more.
+        ('side_images no longer accepted', {'side_images': ['/static/a.png']}),
+        ('mid_image no longer accepted',   {'mid_image': 'https://x.com/wide.png'}),
     ]:
         status, body = post(payload)
         check('rejected: ' + label, status == 400, '%s %s' % (status, body))
@@ -256,35 +259,39 @@ def main():
     check('rejected: malformed body', status == 400, str(status))
 
     # A rejected save must not have touched the stored config.
-    check('rejected saves did not persist',
-          stored()['side_images'] == ['https://x.com/a.png', '/static/b.png'],
-          str(stored()))
+    check('rejected saves did not persist', stored()['side_interval_ms'] == 8000, str(stored()))
 
-    # ── 8. Sanitising a corrupt stored doc on read ───────────────────────────
+    # ── 7. Sanitising a corrupt stored doc on read ──────────────────────────
     # Nothing in the routes above can produce this, but a hand-edited doc can,
     # and the public GET feeds an <img src> for every visitor.
-    db.put(('config', 'banners'), {
-        'side_images': ['https://good.example/a.png', 'javascript:alert(1)',
-                        '', 42, None, '/static/ok.png'],
-        'side_interval_ms': 'soon',
-        'mid_image': 'not-a-url',
+    db.put(('config', 'banners'), {'side_interval_ms': 'soon'})
+    check('bad interval falls back to default',
+          A._banners_config()['side_interval_ms'] == 6000,
+          str(A._banners_config()['side_interval_ms']))
+
+    db.put(('config', 'banners'), {'side_interval_ms': 999999})
+    check('out-of-range interval falls back to default',
+          A._banners_config()['side_interval_ms'] == 6000,
+          str(A._banners_config()['side_interval_ms']))
+
+    # A hand-written selection naming files that no longer exist resolves to
+    # nothing rather than a broken <img src>.
+    db.put(('config', 'ad_media'), {
+        'banner_vertical': {'files': [], 'active': ['no-such-slide']},
+        'banner_horizontal': {'files': [], 'active': 'no-such-file'},
     })
     cfg = A._banners_config()
-    check('bad entries dropped from side_images',
-          cfg['side_images'] == ['https://good.example/a.png', '/static/ok.png'],
+    check('unknown slide ids drop out of the rotation', cfg['side_images'] == [],
           str(cfg['side_images']))
-    check('bad interval falls back to default', cfg['side_interval_ms'] == 6000,
-          str(cfg['side_interval_ms']))
-    check('bad mid_image cleared', cfg['mid_image'] == '', repr(cfg['mid_image']))
+    # A dangling single-select id falls back to the shipped art rather than
+    # blanking the slot — hiding it is an explicit 'none', not a typo.
+    check('unknown horizontal id falls back to the default',
+          cfg['mid_image'] == HORZ[0]['path'], repr(cfg['mid_image']))
 
-    db.put(('config', 'banners'), {'side_images': 'not-a-list'})
-    check('non-list side_images reads as empty', A._banners_config()['side_images'] == [],
+    db.put(('config', 'ad_media'), {'banner_vertical': {'active': 'not-a-list'}})
+    check('non-list slide selection reads as the shipped rotation',
+          A._banners_config()['side_images'] == [d['path'] for d in VERT],
           str(A._banners_config()['side_images']))
-
-    db.put(('config', 'banners'), {'side_images': ['/static/%d.png' % i for i in range(50)]})
-    check('over-long stored list is capped',
-          len(A._banners_config()['side_images']) == A._BANNER_MAX_IMAGES,
-          str(len(A._banners_config()['side_images'])))
 
     for p in problems:
         print('  FAIL', p)

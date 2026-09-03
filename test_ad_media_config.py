@@ -144,35 +144,93 @@ def main():
             f'/api/admin/ad-media/{media_type}/active',
             data=json.dumps({'file_id': file_id}), content_type='application/json'))
 
+    def set_slides(media_type, file_ids):
+        return _json(client.post(
+            f'/api/admin/ad-media/{media_type}/active',
+            data=json.dumps({'file_ids': file_ids}), content_type='application/json'))
+
     def delete(media_type, file_id):
         return _json(client.delete(f'/api/admin/ad-media/{media_type}/{file_id}'))
 
     def stored(media_type):
         return dict((db.get(('config', 'ad_media')) or {}).get(media_type) or {})
 
-    # ── 1. Shipped defaults: banner_a/banner_b default art exists on disk ────
+    # ── 1. Shipped defaults exist on disk ───────────────────────────────────
+    # Every default path any type declares, so art renamed or deleted without
+    # _AD_MEDIA_TYPES being updated fails here rather than shipping a broken
+    # <img> to every visitor (the two banner_* types feed the main page).
     here = os.path.dirname(os.path.abspath(__file__))
-    for media_type in ('banner_a', 'banner_b'):
-        p = A._AD_MEDIA_TYPES[media_type]['default_path']
-        check('default art exists: ' + p, os.path.isfile(os.path.join(here, p.lstrip('/'))), p)
+    for media_type, spec in A._AD_MEDIA_TYPES.items():
+        for d in A._ad_media_defaults(spec):
+            check('default art exists (%s): %s' % (media_type, d['path']),
+                  os.path.isfile(os.path.join(here, d['path'].lstrip('/'))), d['path'])
+    for media_type in ('banner_a', 'banner_b', 'banner_horizontal'):
+        check('%s has one default' % media_type,
+              len(A._ad_media_defaults(A._AD_MEDIA_TYPES[media_type])) == 1)
+    check('banner_vertical ships 3 selectable slides',
+          len(A._ad_media_defaults(A._AD_MEDIA_TYPES['banner_vertical'])) == 3)
     for media_type in ('video_30', 'video_60'):
         check('no bundled default for ' + media_type,
-              A._AD_MEDIA_TYPES[media_type]['default_path'] is None)
+              A._ad_media_defaults(A._AD_MEDIA_TYPES[media_type]) == [])
 
-    # ── 2. Fresh config: every type starts on 'default' with no files ────────
+    # ── 2. Fresh config: every type starts unselected-but-valid, no files ────
+    # Single-select types sit on 'default'; the multi type starts with every
+    # shipped slide selected, which is the rotation the side slot used to
+    # hard-code as URLs.
+    def _fresh_ok(entry, spec):
+        if spec.get('multi'):
+            return entry['active'] == [d['id'] for d in A._ad_media_defaults(spec)]
+        return entry['active'] == 'default'
+
     cfg = A._ad_media_config()
-    for media_type in A._AD_MEDIA_TYPES:
+    for media_type, spec in A._AD_MEDIA_TYPES.items():
         check('fresh %s starts empty' % media_type,
-              cfg[media_type]['files'] == [] and cfg[media_type]['active'] == 'default',
+              cfg[media_type]['files'] == [] and _fresh_ok(cfg[media_type], spec),
               str(cfg[media_type]))
 
     # A failed read must land on that same empty shape, not raise.
     A._get_admin_db = lambda: BoomDB()
     cfg = A._ad_media_config()
     check('read failure falls back to empty shape',
-          all(cfg[t]['files'] == [] and cfg[t]['active'] == 'default' for t in A._AD_MEDIA_TYPES),
+          all(cfg[t]['files'] == [] and _fresh_ok(cfg[t], A._AD_MEDIA_TYPES[t])
+              for t in A._AD_MEDIA_TYPES),
           str(cfg))
     A._get_admin_db = lambda: db
+
+    # ── 2b. Multi-select: each slide is picked on its own ────────────────────
+    slide_ids = [d['id'] for d in A._ad_media_defaults(A._AD_MEDIA_TYPES['banner_vertical'])]
+    status, body = set_slides('banner_vertical', [slide_ids[0], slide_ids[2]])
+    check('slide subset accepted', status == 200, str(body))
+    check('only the picked slides stay selected',
+          body['banner_vertical']['active'] == [slide_ids[0], slide_ids[2]],
+          str(body.get('banner_vertical')))
+
+    # Click order must not change rotation order — it follows the slot's own
+    # defaults-then-uploads order so the carousel is deterministic.
+    status, body = set_slides('banner_vertical', [slide_ids[2], slide_ids[0]])
+    check('selection order is normalised',
+          body['banner_vertical']['active'] == [slide_ids[0], slide_ids[2]],
+          str(body.get('banner_vertical')))
+
+    status, body = set_slides('banner_vertical', [])
+    check('every slide can be deselected',
+          status == 200 and body['banner_vertical']['active'] == [], str(body))
+    check('an empty selection is stored, not treated as unset',
+          A._ad_media_config()['banner_vertical']['active'] == [],
+          str(A._ad_media_config()['banner_vertical']))
+
+    status, body = set_slides('banner_vertical', ['no-such-id'])
+    check('unknown slide id rejected', status == 400, str(body))
+    status, body = set_slides('banner_vertical', 'not-a-list')
+    check('non-list file_ids rejected', status == 400, str(body))
+    status, body = set_active('banner_vertical', slide_ids[0])
+    check('multi type rejects a single file_id', status == 400, str(body))
+
+    # Defaults are not deletable, whichever id shape they use.
+    status, body = delete('banner_vertical', slide_ids[1])
+    check('a default slide cannot be deleted', status == 400, str(body))
+
+    set_slides('banner_vertical', slide_ids)   # back to the shipped rotation
 
     # ── 3. Admin routes are gated; the public config mirror is not ───────────
     caller['uid'] = PLAIN_UID

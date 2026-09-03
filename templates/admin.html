@@ -578,29 +578,26 @@
               <div class="fa-section">
                 <h3 class="fa-head">Horizontal Banner</h3>
                 <p class="fa-note">
-                  Mid-page promo slot. Takes an https:// URL or a /static/… path; leave
-                  it empty to hide the slot. Best fit is a wide crop, capped at 180px tall.
+                  Mid-page promo slot. Upload an image and select it, or pick
+                  None to hide the slot. Best fit is a wide crop, capped at
+                  180px tall.
                 </p>
-                <div id="adm-horzbanner-error" class="alert alert-danger d-none py-2"></div>
-                <div class="fa-card">
-                  <div class="fa-card-title">Image</div>
-                  <div id="adm-horzbanner-body"></div>
-                  <div class="fa-actions">
-                    <button type="button" class="adm-btn" id="adm-horzbanner-save" onclick="saveHorzBanner()">Save</button>
-                    <span class="fa-status" id="adm-horzbanner-status"></span>
-                  </div>
-                </div>
+                <div id="adm-media-horzbanner-error" class="alert alert-danger d-none py-2"></div>
+                <div id="adm-media-horzbanner-body"></div>
               </div>
 
               <div class="fa-section">
                 <h3 class="fa-head">Vertical Banner</h3>
                 <p class="fa-note">
-                  Side promo slot. Takes https:// URLs or /static/… paths, one per line;
-                  leave it empty to hide the slot. Best fit is a tall ~120&times;480 crop.
+                  Side promo slot. Select each slide you want in the rotation —
+                  two or more rotate automatically, one shows statically, none
+                  hides the slot. Best fit is a tall ~120&times;480 crop.
                 </p>
-                <div id="adm-vertbanner-error" class="alert alert-danger d-none py-2"></div>
+                <div id="adm-media-vertbanner-error" class="alert alert-danger d-none py-2"></div>
+                <div id="adm-media-vertbanner-body"></div>
+                <div id="adm-vertbanner-error" class="alert alert-danger d-none py-2 mt-2"></div>
                 <div class="fa-card">
-                  <div class="fa-card-title">Images</div>
+                  <div class="fa-card-title">Rotation</div>
                   <div id="adm-vertbanner-body"></div>
                   <div class="fa-actions">
                     <button type="button" class="adm-btn" id="adm-vertbanner-save" onclick="saveVertBanner()">Save</button>
@@ -1064,50 +1061,29 @@
   let BANNERS = null;   // /api/admin/banners-config response
 
   async function loadBanners() {
-    setSectionError('adm-horzbanner-error', '');
     setSectionError('adm-vertbanner-error', '');
-    const horzBox = document.getElementById('adm-horzbanner-body');
-    const vertBox = document.getElementById('adm-vertbanner-body');
-    horzBox.innerHTML = vertBox.innerHTML = '<span class="adm-meta">Loading…</span>';
+    const box = document.getElementById('adm-vertbanner-body');
+    box.innerHTML = '<span class="adm-meta">Loading…</span>';
     try {
       const res = await authFetch('/api/admin/banners-config');
       if (!res.ok) {
-        horzBox.innerHTML = vertBox.innerHTML = '';
-        const msg = await errorText(res, 'Failed to load banners config');
-        setSectionError('adm-horzbanner-error', msg);
-        setSectionError('adm-vertbanner-error', msg);
+        box.innerHTML = '';
+        setSectionError('adm-vertbanner-error', await errorText(res, 'Failed to load banners config'));
         return;
       }
       BANNERS = await res.json();
-      renderHorzBanner();
       renderVertBanner();
     } catch (e) {
-      horzBox.innerHTML = vertBox.innerHTML = '';
-      const msg = 'Could not reach the server: ' + e.message;
-      setSectionError('adm-horzbanner-error', msg);
-      setSectionError('adm-vertbanner-error', msg);
+      box.innerHTML = '';
+      setSectionError('adm-vertbanner-error', 'Could not reach the server: ' + e.message);
     }
   }
 
-  function renderHorzBanner() {
-    document.getElementById('adm-horzbanner-body').innerHTML = `
-      <input type="text" class="form-control form-control-sm"
-             id="adm-banners-mid-image"
-             placeholder="https://example.com/promo-wide.png"
-             value="${esc(BANNERS.mid_image || '')}"/>`;
-    document.getElementById('adm-horzbanner-status').textContent = '';
-  }
-
+  /** Only the rotation speed lives here now — the images themselves are
+      picked in the banner slots' media cards. */
   function renderVertBanner() {
-    // The side slot is a list, so it gets a textarea (one URL per line) rather
-    // than a single input. Order is display order.
-    const sideImages = (BANNERS.side_images || []).join('\n');
     document.getElementById('adm-vertbanner-body').innerHTML = `
-      <span class="fa-input-note">One URL per line, max 10 — two or more rotate automatically.</span>
-      <textarea class="form-control form-control-sm" rows="4"
-                id="adm-banners-side-images"
-                placeholder="https://example.com/promo-a.png">${esc(sideImages)}</textarea>
-      <div class="fa-row mt-3">
+      <div class="fa-row">
         <label class="fa-field">
           Seconds per image
           <input type="number" min="1" max="60" step="1" class="form-control form-control-sm"
@@ -1118,72 +1094,23 @@
     document.getElementById('adm-vertbanner-status').textContent = '';
   }
 
-  async function saveHorzBanner() {
-    const btn = document.getElementById('adm-horzbanner-save');
-    setSectionError('adm-horzbanner-error', '');
-    const midImage = document.getElementById('adm-banners-mid-image').value.trim();
-    if (midImage && !/^(https?:\/\/|\/)/.test(midImage)) {
-      setSectionError('adm-horzbanner-error',
-        `"${midImage}" is not a valid image URL — use https://…, http://… or a /static/… path.`);
-      return;
-    }
-    btn.disabled = true;
-    try {
-      const res = await authFetch('/api/admin/banners-config', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mid_image: midImage }),
-      });
-      if (!res.ok) {
-        setSectionError('adm-horzbanner-error', await errorText(res, 'Failed to save banner config'));
-        return;
-      }
-      BANNERS = await res.json();
-      renderHorzBanner();
-      document.getElementById('adm-horzbanner-status').textContent = 'Saved.';
-    } catch (e) {
-      setSectionError('adm-horzbanner-error', 'Could not reach the server: ' + e.message);
-    } finally {
-      btn.disabled = false;
-    }
-  }
-
   async function saveVertBanner() {
     const btn = document.getElementById('adm-vertbanner-save');
     setSectionError('adm-vertbanner-error', '');
-
-    // Blank lines are how you naturally end a textarea, so they're stripped
-    // rather than rejected. An all-blank textarea therefore clears the slot.
-    const sideImages = document.getElementById('adm-banners-side-images').value
-      .split('\n').map(s => s.trim()).filter(Boolean);
-    if (sideImages.length > 10) {
-      setSectionError('adm-vertbanner-error', 'The vertical banner takes at most 10 image URLs.');
-      return;
-    }
-    const bad = sideImages.find(u => !/^(https?:\/\/|\/)/.test(u));
-    if (bad) {
-      setSectionError('adm-vertbanner-error',
-        `"${bad}" is not a valid image URL — use https://…, http://… or a /static/… path.`);
-      return;
-    }
     const secs = parseInt(document.getElementById('adm-banners-side-interval').value, 10);
     if (isNaN(secs) || secs < 1 || secs > 60) {
       setSectionError('adm-vertbanner-error', '"Seconds per image" must be a number between 1 and 60.');
       return;
     }
-
     btn.disabled = true;
     try {
       const res = await authFetch('/api/admin/banners-config', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          side_images:      sideImages,
-          side_interval_ms: secs * 1000,
-        }),
+        body: JSON.stringify({ side_interval_ms: secs * 1000 }),
       });
       if (!res.ok) {
-        setSectionError('adm-vertbanner-error', await errorText(res, 'Failed to save banner config'));
+        setSectionError('adm-vertbanner-error', await errorText(res, 'Failed to save rotation speed'));
         return;
       }
       BANNERS = await res.json();
@@ -1203,47 +1130,60 @@
   const AD_MEDIA_LABELS = {
     banner_a: 'Gate banner', banner_b: 'Gate banner',
     video_30: 'Gate video (30s)', video_60: 'Gate video (60s)',
+    banner_horizontal: 'Image', banner_vertical: 'Slides',
   };
+  const IMAGE_ACCEPT = 'image/png,image/jpeg,image/webp,image/gif,image/svg+xml';
   const AD_MEDIA_ACCEPT = {
-    banner_a: 'image/png,image/jpeg,image/webp,image/gif,image/svg+xml',
-    banner_b: 'image/png,image/jpeg,image/webp,image/gif,image/svg+xml',
+    banner_a: IMAGE_ACCEPT, banner_b: IMAGE_ACCEPT,
     video_30: 'video/mp4', video_60: 'video/mp4',
+    banner_horizontal: IMAGE_ACCEPT, banner_vertical: IMAGE_ACCEPT,
   };
-  // video_30/banner_a back the import gate modal, video_60/banner_b back the
-  // hand export gate modal — see getAdMediaTypesFor in static/app.js.
+  // Which media types render into which section. video_30/banner_a back the
+  // import gate modal and video_60/banner_b the hand export one (see
+  // _gateStubMediaTypes in static/app.js); the two banner_* types are the
+  // main page's promo slots (see _banners_config in app.py).
   const AD_MEDIA_GROUPS = {
     import:      ['video_30', 'banner_a'],
     hand_export: ['video_60', 'banner_b'],
+    horzbanner:  ['banner_horizontal'],
+    vertbanner:  ['banner_vertical'],
+  };
+  const AD_MEDIA_GROUP_EL = {
+    import:     'adm-media-import',
+    hand_export:'adm-media-handexport',
+    horzbanner: 'adm-media-horzbanner',
+    vertbanner: 'adm-media-vertbanner',
   };
   function adMediaGroupOf(type) {
-    return AD_MEDIA_GROUPS.import.includes(type) ? 'import' : 'hand_export';
+    return Object.keys(AD_MEDIA_GROUPS).find(g => AD_MEDIA_GROUPS[g].includes(type));
   }
   function adMediaErrorElOf(type) {
-    return adMediaGroupOf(type) === 'import' ? 'adm-media-import-error' : 'adm-media-handexport-error';
+    return AD_MEDIA_GROUP_EL[adMediaGroupOf(type)] + '-error';
+  }
+
+  function eachAdMediaGroup(fn) {
+    for (const group of Object.keys(AD_MEDIA_GROUPS)) fn(group, AD_MEDIA_GROUP_EL[group]);
   }
 
   async function loadAdMedia() {
-    setSectionError('adm-media-import-error', '');
-    setSectionError('adm-media-handexport-error', '');
-    const importBox = document.getElementById('adm-media-import-body');
-    const handBox = document.getElementById('adm-media-handexport-body');
-    importBox.innerHTML = handBox.innerHTML = '<span class="adm-meta">Loading…</span>';
+    eachAdMediaGroup((group, el) => {
+      setSectionError(el + '-error', '');
+      document.getElementById(el + '-body').innerHTML = '<span class="adm-meta">Loading…</span>';
+    });
+    const fail = msg => eachAdMediaGroup((group, el) => {
+      document.getElementById(el + '-body').innerHTML = '';
+      setSectionError(el + '-error', msg);
+    });
     try {
       const res = await authFetch('/api/admin/ad-media-config');
       if (!res.ok) {
-        importBox.innerHTML = handBox.innerHTML = '';
-        const msg = await errorText(res, 'Failed to load media library');
-        setSectionError('adm-media-import-error', msg);
-        setSectionError('adm-media-handexport-error', msg);
+        fail(await errorText(res, 'Failed to load media library'));
         return;
       }
       AD_MEDIA = await res.json();
       renderAdMedia();
     } catch (e) {
-      importBox.innerHTML = handBox.innerHTML = '';
-      const msg = 'Could not reach the server: ' + e.message;
-      setSectionError('adm-media-import-error', msg);
-      setSectionError('adm-media-handexport-error', msg);
+      fail('Could not reach the server: ' + e.message);
     }
   }
 
@@ -1256,18 +1196,30 @@
   }
 
   function renderAdMedia() {
-    document.getElementById('adm-media-import-body').innerHTML =
-      AD_MEDIA_GROUPS.import.map(renderAdMediaType).join('');
-    document.getElementById('adm-media-handexport-body').innerHTML =
-      AD_MEDIA_GROUPS.hand_export.map(renderAdMediaType).join('');
+    eachAdMediaGroup((group, el) => {
+      document.getElementById(el + '-body').innerHTML =
+        AD_MEDIA_GROUPS[group].map(renderAdMediaType).join('');
+    });
+  }
+
+  /** True when this id is currently selected — `active` is a list of ids for
+      a multi-select slot (the vertical banner's rotation) and a single id
+      everywhere else. */
+  function adMediaIsSelected(cfg, id) {
+    return Array.isArray(cfg.active) ? cfg.active.includes(id) : cfg.active === id;
   }
 
   function adMediaRow(type, opts) {
+    const multi = AD_MEDIA[type].multi;
+    const input = multi
+      ? `<input type="checkbox" ${opts.selected ? 'checked' : ''}
+                onchange="toggleAdMediaSlide('${type}', '${opts.id}', this.checked)"/>`
+      : `<input type="radio" name="adm-media-active-${type}" ${opts.selected ? 'checked' : ''}
+                onchange="setActiveAdMedia('${type}', '${opts.id}')"/>`;
     return `
       <div class="fa-media-item">
         <label class="fa-media-pick">
-          <input type="radio" name="adm-media-active-${type}" ${opts.active ? 'checked' : ''}
-                 onchange="setActiveAdMedia('${type}', '${opts.id}')"/>
+          ${input}
           <span class="fa-media-name text-truncate">${opts.label}</span>
         </label>
         ${opts.preview}
@@ -1280,26 +1232,33 @@
       control, so an upload field always sits under the slot it belongs to. */
   function renderAdMediaType(type) {
     const cfg = AD_MEDIA[type];
-    const rows = [];
-    if (cfg.default_path) {
-      rows.push(adMediaRow(type, {
-        id: 'default', label: 'Default', deletable: false, active: cfg.active === 'default',
-        preview: `<a href="${esc(cfg.default_path)}" target="_blank" rel="noopener">preview</a>`,
-      }));
-    }
+    const defaults = cfg.defaults || [];
+    const rows = defaults.map((d, i) => adMediaRow(type, {
+      id: d.id, deletable: false, selected: adMediaIsSelected(cfg, d.id),
+      label: defaults.length > 1 ? `Default ${i + 1}` : 'Default',
+      preview: `<a href="${esc(d.path)}" target="_blank" rel="noopener">preview</a>`,
+    }));
     for (const f of cfg.files) {
       const url = `/api/ad-media/${type}/${f.id}`;
       const meta = [fmtBytes(f.size), f.duration ? `${f.duration.toFixed(1)}s` : null]
         .filter(Boolean).join(' · ');
       rows.push(adMediaRow(type, {
         id: f.id, label: esc(f.filename) + (meta ? ` (${meta})` : ''), deletable: true,
-        active: cfg.active === f.id,
+        selected: adMediaIsSelected(cfg, f.id),
         preview: `<a href="${esc(url)}" target="_blank" rel="noopener">preview</a>`,
       }));
     }
+    // A single-select page slot has no way to hide itself by deselecting, so
+    // it gets an explicit off switch. The multi slot hides by unchecking all.
+    if (cfg.hideable) {
+      rows.push(adMediaRow(type, {
+        id: 'none', label: 'None — hide this slot', deletable: false,
+        selected: adMediaIsSelected(cfg, 'none'), preview: '',
+      }));
+    }
     const full = cfg.files.length >= 4;
-    const empty = !cfg.default_path && !cfg.files.length
-      ? '<div class="fa-media-empty">No file yet — the gate falls back to the stub until one is uploaded.</div>'
+    const empty = !rows.length
+      ? '<div class="fa-media-empty">No file yet — the slot stays hidden until one is uploaded.</div>'
       : '';
     return `
       <div class="fa-card">
@@ -1340,18 +1299,30 @@
     }
   }
 
+  /** Multi-select slots post their whole selection, so this reads the current
+      one out of AD_MEDIA and adds/removes the slide that just changed. */
+  async function toggleAdMediaSlide(type, fileId, on) {
+    const current = Array.isArray(AD_MEDIA[type].active) ? AD_MEDIA[type].active : [];
+    const next = on ? current.concat([fileId]) : current.filter(i => i !== fileId);
+    await postAdMediaSelection(type, { file_ids: next });
+  }
+
   async function setActiveAdMedia(type, fileId) {
+    await postAdMediaSelection(type, { file_id: fileId });
+  }
+
+  async function postAdMediaSelection(type, payload) {
     const errEl = adMediaErrorElOf(type);
     setSectionError(errEl, '');
     try {
       const res = await authFetch(`/api/admin/ad-media/${type}/active`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ file_id: fileId }),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
-        setSectionError(errEl, await errorText(res, 'Failed to set active file'));
-        renderAdMedia();   // revert the radio to the last known-good state
+        setSectionError(errEl, await errorText(res, 'Failed to save the selection'));
+        renderAdMedia();   // revert the control to the last known-good state
         return;
       }
       AD_MEDIA = await res.json();
