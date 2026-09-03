@@ -25,7 +25,32 @@
     rel="stylesheet"
     crossorigin="anonymous"
   />
-  <link rel="stylesheet" href="/static/style.css?v=71"/>
+  <!-- Theme: apply the saved (or OS-preferred) theme before the
+       stylesheet paints, so there's no dark-to-light flash. Self-
+       contained and duplicated verbatim across every template's head
+       (incl. the JS-less ones) so the whole app themes consistently. -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('theme');
+        if (t !== 'light' && t !== 'dark') {
+          t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        }
+        document.documentElement.setAttribute('data-theme', t);
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', t === 'light' ? '#EFEADC' : '#0d1117');
+      } catch (e) {}
+      window.toggleTheme = function () {
+        var cur = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+        var next = cur === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', next);
+        try { localStorage.setItem('theme', next); } catch (e) {}
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', next === 'light' ? '#EFEADC' : '#0d1117');
+      };
+    })();
+  </script>
+  <link rel="stylesheet" href="/static/style.css?v=72"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" crossorigin="anonymous" defer></script>
 </head>
 <body>
@@ -78,6 +103,11 @@
       </div>
     </div>
     <div class="header-row-right">
+      <button type="button" class="theme-toggle" onclick="toggleTheme()"
+              aria-label="{{ _('Toggle light and dark theme') }}" title="{{ _('Toggle theme') }}">
+        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
       <label class="smart-select" title="{{ _('Language') }}">
         <svg class="smart-select-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         <select id="lang-select" class="smart-select-input" aria-label="{{ _('Language') }}">
@@ -160,10 +190,73 @@
     </nav>
   </div>
 
+  <!-- ── Import card — the hero ───────────────────────────────
+       Moved to the top of the content column: pasting a replay link is
+       this page's one job, so it leads on first load rather than sitting
+       below the Free-vs-Pro pitch (which now follows further down). -->
+  <div class="import-card mb-3" style="max-width:1400px;margin:0 auto">
+    <div class="import-eyebrow">{{ _('Bring a hand to the table') }}</div>
+    <div class="d-flex gap-2 align-items-center flex-wrap">
+      <!-- aria-label provides accessible name (Fix 1) -->
+      <input
+        type="text"
+        id="url-input"
+        class="form-control form-control-lg import-input"
+        placeholder="{{ _('Paste a PPPoker replay link or hand text…') }}"
+        aria-label="{{ _('PPPoker replay link') }}"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button
+        id="import-btn"
+        class="btn btn-import btn-lg"
+        onclick="handleImport()"
+      >{{ _('IMPORT') }}</button>
+    </div>
+
+    <p class="import-hint mb-0">{{ _('Paste the replay link from PPPoker — or drop in the raw hand text.') }}</p>
+
+    <!-- Error -->
+    <div id="error-msg" class="alert alert-danger mt-3 mb-0 py-2 d-none"></div>
+
+    <!-- Loading / Success -->
+    <div id="loading-msg" class="d-none mt-3 text-center">
+      <div id="loading-spinner" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></div>
+      <span id="loading-text" style="color:var(--green)">{{ _('Dealing out the session… this can take a few seconds') }}</span>
+    </div>
+  </div>
+
+  <!-- ── Empty-state invitation ───────────────────────────────
+       Three quiet beats in the real order they happen. Hidden by
+       app.js (adds .d-none) as soon as a session is on screen, so it
+       only speaks when the page is otherwise empty. -->
+  <div id="empty-hint" class="empty-hint mb-4">
+    <ol class="deal-steps">
+      <li class="deal-step"><span class="chev" aria-hidden="true">›</span><span><b>{{ _('Copy the replay link') }}</b> {{ _('from your PPPoker hand history.') }}</span></li>
+      <li class="deal-step"><span class="chev" aria-hidden="true">›</span><span><b>{{ _('We deal out every hand') }}</b> {{ _('in that session.') }}</span></li>
+      <li class="deal-step"><span class="chev" aria-hidden="true">›</span><span><b>{{ _('Study your leaks') }}</b> {{ _('by street and position.') }}</span></li>
+    </ol>
+  </div>
+
+  <!-- ── Reward game card (badges/next-badge) ─────────────────
+       The Grind — card-medallion shelf. Sits directly under the import
+       for signed-in players; stays d-none until _loadGamification()
+       has data, so it never competes on a first, empty load. Same
+       #gam-block-right / #gam-badges / #gam-next wiring as before. -->
+  <div id="gam-block-right" class="reward-card gam-side d-none mb-4" style="max-width:1400px;margin:0 auto" aria-live="polite">
+    <span class="grind-title">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+      {{ _('The Grind') }}
+    </span>
+    <div class="gam-badges" id="gam-badges"></div>
+    <div class="gam-next" id="gam-next"></div>
+  </div>
+
   <!-- ── Feature banner ───────────────────────────────────── -->
   <div class="feature-banner mb-4" style="max-width:1400px;margin:0 auto">
 
-    <!-- Free vs Pro comparison row.
+    <!-- Free vs Pro comparison row. Demoted below the import + rewards:
+         still here for conversion, no longer the first thing after the title.
          .tier-pending hides it until _applyTierVisibility() knows the real tier,
          so Pro users don't get a flash of the free-tier upsell on every load. -->
     <div id="tier-compare" class="tier-compare tier-pending">
@@ -196,45 +289,6 @@
       </div>
     </div>
 
-  </div>
-
-  <!-- ── Reward game card (badges/next-badge) ─────────────────
-       Horizontal card above the import section (Task: "Layout updates").
-       Same #gam-block-right / _loadGamification() wiring as before — only
-       its position and layout (via .reward-card .gam-side) changed. -->
-  <div id="gam-block-right" class="reward-card gam-side d-none mb-4" style="max-width:1400px;margin:0 auto" aria-live="polite">
-    <div class="gam-badges" id="gam-badges"></div>
-    <div class="gam-next" id="gam-next"></div>
-  </div>
-
-  <!-- ── Import card ──────────────────────────────────────── -->
-  <div class="import-card mb-4" style="max-width:1400px;margin:0 auto">
-    <div class="d-flex gap-2 align-items-center flex-wrap">
-      <!-- aria-label provides accessible name (Fix 1) -->
-      <input
-        type="text"
-        id="url-input"
-        class="form-control form-control-lg import-input"
-        placeholder="{{ _('Paste PPPoker replay link…') }}"
-        aria-label="{{ _('PPPoker replay link') }}"
-        autocomplete="off"
-        spellcheck="false"
-      />
-      <button
-        id="import-btn"
-        class="btn btn-import btn-lg"
-        onclick="handleImport()"
-      >{{ _('IMPORT') }}</button>
-    </div>
-
-    <!-- Error -->
-    <div id="error-msg" class="alert alert-danger mt-3 mb-0 py-2 d-none"></div>
-
-    <!-- Loading / Success -->
-    <div id="loading-msg" class="d-none mt-3 text-center">
-      <div id="loading-spinner" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></div>
-      <span id="loading-text" style="color:var(--green)">{{ _('Fetching hand history… this may take a few seconds') }}</span>
-    </div>
   </div>
 
   <!-- Export accuracy warning modal -->

@@ -910,7 +910,7 @@ function setLoading(on) {
   if (on) {
     spinner.classList.remove('d-none');
     text.style.color = 'var(--green)';
-    text.textContent = 'Fetching hand history… this may take a few seconds';
+    text.textContent = 'Dealing out the session… this can take a few seconds';
     box.classList.remove('d-none');
   } else {
     box.classList.add('d-none');
@@ -1061,6 +1061,51 @@ async function _loadBannersConfig() {
 }
 
 /** Refresh the two rewards blocks flanking the title. No-op when signed out — they stay hidden. */
+/* ── Badge medallions ────────────────────────────────────────
+   The badge codes from /api/gamification are poker hands (the
+   taxonomy in gamification.py). We draw each one as its actual
+   cards on little white faces, so the reward system speaks the
+   game's language rather than generic trophies. Two-card hands
+   render as held cards; longer ones (two-pair, quads, straights,
+   flushes) fan out. Cards use s/h/d/c suits and T for ten. */
+const _BADGE_HANDS = {
+  // Lifetime volume — the starting-hand ladder
+  '72o': '7s 2d', '44': '4c 4h', 'JJ': 'Js Jh', 'QQ': 'Qd Qc',
+  'KK': 'Ks Kh', 'AK': 'As Kd', 'AA': 'As Ah', 'AA88': 'As Ac 8s 8c',
+  'AAAA': 'As Ah Ad Ac', 'BWAY': 'As Kh Qd Jc Ts', 'NUTS': 'As Ks Qs Js Ts',
+  // Behavioural — famous named hands
+  'K9': 'Ks 9d', 'A2345': 'Ad 2c 3h 4s 5d', 'STEEL': 'As 2s 3s 4s 5s',
+  'T2': 'Ts 2d', 'ROYAL': 'Ah Kh Qh Jh Th', 'Q7': 'Qs 7d', 'J4': 'Js 4d',
+  '99': '9c 9h', '83': '8s 3d', '23o': '2s 3d',
+  // Weekly podium — made hands
+  'SF': '5c 6c 7c 8c 9c', 'QUADS': 'Ks Kh Kd Kc', 'BOAT': 'Qs Qh Qd 5c 5s',
+};
+const _SUIT_NAME = { s: 'spades', h: 'hearts', d: 'diamonds', c: 'clubs' };
+const _SUIT_PIP  = { s: '♠', h: '♥', d: '♦', c: '♣' };
+
+function _miniCard(card) {
+  const s = card.slice(-1);
+  const rank = card.slice(0, -1);
+  const disp = rank === 'T' ? '10' : rank;
+  return `<span class="mini-card" data-suit="${_SUIT_NAME[s] || 'spades'}">`
+       + `${_esc(disp)}<span class="pip">${_SUIT_PIP[s] || ''}</span></span>`;
+}
+
+/** One badge as a card medallion, or the old text pill for an
+ *  unrecognised code (so a new server-side badge still shows). */
+function _medalHtml(b) {
+  const hand = _BADGE_HANDS[b.code];
+  const tip  = `${_esc(b.name)} — ${_esc(b.title)}`;
+  if (!hand) {
+    return `<span class="gam-badge" title="${tip}">${_esc(b.title)}</span>`;
+  }
+  const cards = hand.split(' ');
+  const kind  = cards.length > 2 ? 'fan' : 'pair';
+  return `<span class="medal" data-kind="${kind}" title="${tip}">`
+       + `<span class="medal-cards">${cards.map(_miniCard).join('')}</span>`
+       + `<span class="medal-label">${_esc(b.title)}</span></span>`;
+}
+
 function _loadGamification() {
   const left  = document.getElementById('gam-block-left');
   const right = document.getElementById('gam-block-right');
@@ -1081,9 +1126,7 @@ function _loadGamification() {
       // Newest badges first — the most recent unlock is the interesting one.
       const badges = (g.badges || []).slice().sort((a, b) => (b.ts || 0) - (a.ts || 0));
       const shown  = badges.slice(0, 4);
-      let html = shown.map(b =>
-        `<span class="gam-badge" title="${_esc(b.name)} — ${_esc(b.title)}">${_esc(b.title)}</span>`
-      ).join('');
+      let html = shown.map(_medalHtml).join('');
       if (badges.length > shown.length) {
         html += `<span class="gam-badge gam-badge-more">+${badges.length - shown.length}</span>`;
       }
@@ -1109,9 +1152,7 @@ function showGamificationToast(g) {
   const rows = (g.awards || [])
     .map(a => `<div class="gam-toast-row"><span>${_esc(a.label)}</span><span>+${_fmtNum(a.points)}</span></div>`)
     .join('');
-  const unlocked = (g.badges || [])
-    .map(b => `<span class="gam-toast-unlock" title="${_esc(b.name)}">🏅 ${_esc(b.title)}</span>`)
-    .join('');
+  const unlocked = (g.badges || []).map(_medalHtml).join('');
 
   toast.innerHTML =
     `<div class="gam-toast-head">+${_fmtNum(g.points)} points</div>` +
@@ -1324,6 +1365,8 @@ function renderResults(data) {
   _renderPlayerExportAll();
 
   document.getElementById('results-section').classList.remove('d-none');
+  // The empty-state invitation has done its job once a session is on screen.
+  document.getElementById('empty-hint')?.classList.add('d-none');
   document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -2083,6 +2126,9 @@ async function _loadHistory() {
       [tsSection, tdSection, cgsSection, cgsdSection].forEach(el => el && el.classList.add('d-none'));
       return;
     }
+
+    // Returning player with saved history — retire the empty-state hint.
+    document.getElementById('empty-hint')?.classList.add('d-none');
 
     const hasMtt  = tournaments.some(_isTourneyGame);
     const hasCash = tournaments.some(_isCashOrPlayGame);
