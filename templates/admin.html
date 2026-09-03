@@ -283,7 +283,7 @@
           </button>
           <button type="button" class="adm-nav-item" data-section="adcampaigns" onclick="switchSection('adcampaigns')">
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-            Ad Campaigns
+            Freebies / Ads
           </button>
 
           <!-- Their own pages, so these navigate rather than switch panels. -->
@@ -461,25 +461,10 @@
 
           <section class="section-card adm-panel d-none" id="panel-adcampaigns">
             <div class="section-header">
-              <h2>Ad Campaigns</h2>
+              <h2>Freebies / Ads</h2>
             </div>
             <div class="p-3">
-              <h3 class="adm-subhead">Export Ads</h3>
-              <p class="adm-meta mb-3">
-                Hand exports: <b class="text-white">Free</b> per day need no survey,
-                <b class="text-white">Gated</b> more per day need one. Tournament exports:
-                <b class="text-white">Free (lifetime)</b> once ever, then
-                <b class="text-white">Weekly limit</b> per week via survey. Applies
-                immediately, no deploy.
-              </p>
-              <div id="adm-ads-error" class="alert alert-danger d-none py-2"></div>
-              <div id="adm-ads-body"></div>
-              <div class="adm-toolbar px-0">
-                <button type="button" class="adm-btn" id="adm-ads-save" onclick="saveExportAds()">Save</button>
-                <span class="adm-meta flex-grow-1" id="adm-ads-status"></span>
-              </div>
-
-              <h3 class="adm-subhead mt-4">Import Ads</h3>
+              <h3 class="adm-subhead">Link Import</h3>
               <p class="adm-meta mb-3">
                 <b class="text-white">Free</b> imports per day need no survey,
                 <b class="text-white">Gated</b> more per day need one. Applies
@@ -491,30 +476,73 @@
                 <button type="button" class="adm-btn" id="adm-imports-save" onclick="saveImportAds()">Save</button>
                 <span class="adm-meta flex-grow-1" id="adm-imports-status"></span>
               </div>
-
-              <h3 class="adm-subhead mt-4">Banners</h3>
-              <p class="adm-meta mb-3">
-                Promo images for the two banner slots on the main page. Use full
-                <b class="text-white">https://…</b> URLs or a <b class="text-white">/static/…</b> path.
-                Leave a slot empty to hide it — an empty slot takes up no space on the page.
+              <p class="adm-meta mt-3 mb-2">
+                Self-hosted banner/video for this gate's modal. Upload up to 4 files
+                per type and mark one active — the hard-saved default can't be deleted.
                 Applies immediately, no deploy.
               </p>
-              <div id="adm-banners-error" class="alert alert-danger d-none py-2"></div>
-              <div id="adm-banners-body"></div>
+              <div id="adm-media-import-error" class="alert alert-danger d-none py-2"></div>
+              <div id="adm-media-import-body"></div>
+
+              <h3 class="adm-subhead mt-4">Hand Export</h3>
+              <p class="adm-meta mb-3">
+                <b class="text-white">Free</b> hand exports per day need no survey,
+                <b class="text-white">Gated</b> more per day need one. Applies
+                immediately, no deploy.
+              </p>
+              <div id="adm-hand-error" class="alert alert-danger d-none py-2"></div>
+              <div id="adm-hand-body"></div>
               <div class="adm-toolbar px-0">
-                <button type="button" class="adm-btn" id="adm-banners-save" onclick="saveBanners()">Save</button>
-                <span class="adm-meta flex-grow-1" id="adm-banners-status"></span>
+                <button type="button" class="adm-btn" id="adm-hand-save" onclick="saveHandExportAds()">Save</button>
+                <span class="adm-meta flex-grow-1" id="adm-hand-status"></span>
+              </div>
+              <p class="adm-meta mt-3 mb-2">
+                Self-hosted banner/video for this gate's modal. Upload up to 4 files
+                per type and mark one active — the hard-saved default can't be deleted.
+                Applies immediately, no deploy.
+              </p>
+              <div id="adm-media-handexport-error" class="alert alert-danger d-none py-2"></div>
+              <div id="adm-media-handexport-body"></div>
+
+              <h3 class="adm-subhead mt-4">Tourney Export</h3>
+              <p class="adm-meta mb-3">
+                <b class="text-white">Free (lifetime)</b> once ever, then
+                <b class="text-white">Weekly limit</b> per week via survey. Applies
+                immediately, no deploy.
+              </p>
+              <div id="adm-tourney-error" class="alert alert-danger d-none py-2"></div>
+              <div id="adm-tourney-body"></div>
+              <div class="adm-toolbar px-0">
+                <button type="button" class="adm-btn" id="adm-tourney-save" onclick="saveTourneyExportAds()">Save</button>
+                <span class="adm-meta flex-grow-1" id="adm-tourney-status"></span>
               </div>
 
-              <h3 class="adm-subhead mt-4">Admin media library</h3>
+              <h3 class="adm-subhead mt-4">Horz Banner</h3>
               <p class="adm-meta mb-3">
-                Self-hosted banners/videos for the import/export gate modals. Upload up to
-                4 files per type and mark one active — the hard-saved default can't be deleted.
-                Applies immediately, no deploy. Wiring the active file into the gate modals
-                themselves is a separate Task.
+                Mid-page promo image. Use a full <b class="text-white">https://…</b> URL
+                or a <b class="text-white">/static/…</b> path. Leave empty to hide it —
+                an empty slot takes up no space on the page. Best fit is a wide, short
+                crop — the slot caps at 180px tall. Applies immediately, no deploy.
               </p>
-              <div id="adm-media-error" class="alert alert-danger d-none py-2"></div>
-              <div id="adm-media-body"></div>
+              <div id="adm-horzbanner-error" class="alert alert-danger d-none py-2"></div>
+              <div id="adm-horzbanner-body"></div>
+              <div class="adm-toolbar px-0">
+                <button type="button" class="adm-btn" id="adm-horzbanner-save" onclick="saveHorzBanner()">Save</button>
+                <span class="adm-meta flex-grow-1" id="adm-horzbanner-status"></span>
+              </div>
+
+              <h3 class="adm-subhead mt-4">Vert Banner</h3>
+              <p class="adm-meta mb-3">
+                Side promo images on the main page. Use full <b class="text-white">https://…</b>
+                URLs or <b class="text-white">/static/…</b> paths. Leave empty to hide it —
+                an empty slot takes up no space on the page. Applies immediately, no deploy.
+              </p>
+              <div id="adm-vertbanner-error" class="alert alert-danger d-none py-2"></div>
+              <div id="adm-vertbanner-body"></div>
+              <div class="adm-toolbar px-0">
+                <button type="button" class="adm-btn" id="adm-vertbanner-save" onclick="saveVertBanner()">Save</button>
+                <span class="adm-meta flex-grow-1" id="adm-vertbanner-status"></span>
+              </div>
             </div>
           </section>
 
@@ -583,8 +611,8 @@
     if (name === 'subscription' && !PLANS) loadPlans();
     if (name === 'leaktargets' && !GRID) tgReload();
     if (name === 'gamification' && !GAM) loadGamification();
-    if (name === 'adcampaigns' && !ADS) loadExportAds();
     if (name === 'adcampaigns' && !IMPORTS_ADS) loadImportAds();
+    if (name === 'adcampaigns' && !ADS) loadExportAds();
     if (name === 'adcampaigns' && !BANNERS) loadBanners();
     if (name === 'adcampaigns' && !AD_MEDIA) loadAdMedia();
   }
@@ -762,33 +790,46 @@
     e.classList.toggle('d-none', !msg);
   }
 
-  // ── Ad Campaigns: Export Ads ──────────────────────────────────────────────
-  let ADS = null;   // /api/admin/export-ads-config response
+  // ── Ad Campaigns: shared error helper ─────────────────────────────────────
+  function setSectionError(elId, msg) {
+    const e = document.getElementById(elId);
+    e.textContent = msg || '';
+    e.classList.toggle('d-none', !msg);
+  }
+
+  // ── Ad Campaigns: Hand Export / Tourney Export ────────────────────────────
+  let ADS = null;   // /api/admin/export-ads-config response (hand + tourney fields)
 
   async function loadExportAds() {
-    showAdsError('');
-    const box = document.getElementById('adm-ads-body');
-    box.innerHTML = '<span class="adm-meta">Loading…</span>';
+    setSectionError('adm-hand-error', '');
+    setSectionError('adm-tourney-error', '');
+    const handBox = document.getElementById('adm-hand-body');
+    const tourneyBox = document.getElementById('adm-tourney-body');
+    handBox.innerHTML = tourneyBox.innerHTML = '<span class="adm-meta">Loading…</span>';
     try {
       const res = await authFetch('/api/admin/export-ads-config');
       if (!res.ok) {
-        box.innerHTML = '';
-        showAdsError(await errorText(res, 'Failed to load export ads config'));
+        handBox.innerHTML = tourneyBox.innerHTML = '';
+        const msg = await errorText(res, 'Failed to load export ads config');
+        setSectionError('adm-hand-error', msg);
+        setSectionError('adm-tourney-error', msg);
         return;
       }
       ADS = await res.json();
-      renderExportAds();
+      renderHandExportAds();
+      renderTourneyExportAds();
     } catch (e) {
-      box.innerHTML = '';
-      showAdsError('Could not reach the server: ' + e.message);
+      handBox.innerHTML = tourneyBox.innerHTML = '';
+      const msg = 'Could not reach the server: ' + e.message;
+      setSectionError('adm-hand-error', msg);
+      setSectionError('adm-tourney-error', msg);
     }
   }
 
-  function renderExportAds() {
+  function renderHandExportAds() {
     const hard = ADS['hand_hard_limit'], soft = ADS['hand_soft_limit'];
     const free = Math.max(hard - soft, 0), gated = Math.max(soft, 0);
-    const tFree = ADS['tourney_lifetime_free'], tWeekly = ADS['tourney_weekly_limit'];
-    document.getElementById('adm-ads-body').innerHTML = `
+    document.getElementById('adm-hand-body').innerHTML = `
       <div class="adm-gam-week">
         <span class="adm-gam-wk">Hand exports</span>
         <label class="d-flex align-items-center gap-2" style="font-size:.82rem;color:var(--muted);">
@@ -801,7 +842,13 @@
           <input type="number" min="0" step="1" class="form-control form-control-sm"
                  style="width:70px;" id="adm-ads-hand-gated" value="${esc(gated)}"/>
         </label>
-      </div>
+      </div>`;
+    document.getElementById('adm-hand-status').textContent = '';
+  }
+
+  function renderTourneyExportAds() {
+    const tFree = ADS['tourney_lifetime_free'], tWeekly = ADS['tourney_weekly_limit'];
+    document.getElementById('adm-tourney-body').innerHTML = `
       <div class="adm-gam-week">
         <span class="adm-gam-wk">Tournament exports</span>
         <label class="d-flex align-items-center gap-2" style="font-size:.82rem;color:var(--muted);">
@@ -815,36 +862,26 @@
                  style="width:70px;" id="adm-ads-tourney-weekly-limit" value="${esc(tWeekly)}"/>
         </label>
       </div>`;
-    document.getElementById('adm-ads-status').textContent = '';
+    document.getElementById('adm-tourney-status').textContent = '';
   }
 
-  async function saveExportAds() {
-    const btn = document.getElementById('adm-ads-save');
-    showAdsError('');
-    const payload = {};
+  async function saveHandExportAds() {
+    const btn = document.getElementById('adm-hand-save');
+    setSectionError('adm-hand-error', '');
     const handVals = {};
     for (const field of ['free', 'gated']) {
       const val = parseInt(document.getElementById(`adm-ads-hand-${field}`).value, 10);
       if (isNaN(val) || val < 0) {
-        showAdsError(`"Hand exports" ${field === 'free' ? 'Free' : 'Gated'} must be a non-negative number.`);
+        setSectionError('adm-hand-error',
+          `"${field === 'free' ? 'Free' : 'Gated'}" must be a non-negative number.`);
         return;
       }
       handVals[field] = val;
     }
-    payload['hand_hard_limit'] = handVals.free + handVals.gated;
-    payload['hand_soft_limit'] = handVals.gated;
-    const tFree = parseInt(document.getElementById('adm-ads-tourney-lifetime-free').value, 10);
-    if (isNaN(tFree) || tFree < 0) {
-      showAdsError('"Tournament exports" free (lifetime) must be a non-negative number.');
-      return;
-    }
-    const tWeekly = parseInt(document.getElementById('adm-ads-tourney-weekly-limit').value, 10);
-    if (isNaN(tWeekly) || tWeekly < 0) {
-      showAdsError('"Tournament exports" weekly limit must be a non-negative number.');
-      return;
-    }
-    payload['tourney_lifetime_free'] = tFree;
-    payload['tourney_weekly_limit'] = tWeekly;
+    const payload = {
+      hand_hard_limit: handVals.free + handVals.gated,
+      hand_soft_limit: handVals.gated,
+    };
     btn.disabled = true;
     try {
       const res = await authFetch('/api/admin/export-ads-config', {
@@ -853,44 +890,73 @@
         body: JSON.stringify(payload),
       });
       if (!res.ok) {
-        showAdsError(await errorText(res, 'Failed to save export ads config'));
+        setSectionError('adm-hand-error', await errorText(res, 'Failed to save hand export config'));
         return;
       }
       ADS = await res.json();
-      renderExportAds();
-      document.getElementById('adm-ads-status').textContent = 'Saved.';
+      renderHandExportAds();
+      document.getElementById('adm-hand-status').textContent = 'Saved.';
     } catch (e) {
-      showAdsError('Could not reach the server: ' + e.message);
+      setSectionError('adm-hand-error', 'Could not reach the server: ' + e.message);
     } finally {
       btn.disabled = false;
     }
   }
 
-  function showAdsError(msg) {
-    const e = document.getElementById('adm-ads-error');
-    e.textContent = msg || '';
-    e.classList.toggle('d-none', !msg);
+  async function saveTourneyExportAds() {
+    const btn = document.getElementById('adm-tourney-save');
+    setSectionError('adm-tourney-error', '');
+    const tFree = parseInt(document.getElementById('adm-ads-tourney-lifetime-free').value, 10);
+    if (isNaN(tFree) || tFree < 0) {
+      setSectionError('adm-tourney-error', '"Free (lifetime)" must be a non-negative number.');
+      return;
+    }
+    const tWeekly = parseInt(document.getElementById('adm-ads-tourney-weekly-limit').value, 10);
+    if (isNaN(tWeekly) || tWeekly < 0) {
+      setSectionError('adm-tourney-error', '"Weekly limit" must be a non-negative number.');
+      return;
+    }
+    const payload = { tourney_lifetime_free: tFree, tourney_weekly_limit: tWeekly };
+    btn.disabled = true;
+    try {
+      const res = await authFetch('/api/admin/export-ads-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        setSectionError('adm-tourney-error', await errorText(res, 'Failed to save tourney export config'));
+        return;
+      }
+      ADS = await res.json();
+      renderTourneyExportAds();
+      document.getElementById('adm-tourney-status').textContent = 'Saved.';
+    } catch (e) {
+      setSectionError('adm-tourney-error', 'Could not reach the server: ' + e.message);
+    } finally {
+      btn.disabled = false;
+    }
   }
 
-  // ── Ad Campaigns: Import Ads ──────────────────────────────────────────────
+  // ── Ad Campaigns: Link Import ─────────────────────────────────────────────
   let IMPORTS_ADS = null;   // /api/admin/import-ads-config response
 
   async function loadImportAds() {
-    showImportsAdsError('');
+    setSectionError('adm-imports-error', '');
     const box = document.getElementById('adm-imports-body');
     box.innerHTML = '<span class="adm-meta">Loading…</span>';
     try {
       const res = await authFetch('/api/admin/import-ads-config');
       if (!res.ok) {
         box.innerHTML = '';
-        showImportsAdsError(await errorText(res, 'Failed to load import ads config'));
+        setSectionError('adm-imports-error', await errorText(res, 'Failed to load import ads config'));
         return;
       }
       IMPORTS_ADS = await res.json();
       renderImportAds();
     } catch (e) {
       box.innerHTML = '';
-      showImportsAdsError('Could not reach the server: ' + e.message);
+      setSectionError('adm-imports-error', 'Could not reach the server: ' + e.message);
     }
   }
 
@@ -914,12 +980,12 @@
 
   async function saveImportAds() {
     const btn = document.getElementById('adm-imports-save');
-    showImportsAdsError('');
+    setSectionError('adm-imports-error', '');
     const payload = {};
     for (const field of ['free', 'gated']) {
       const val = parseInt(document.getElementById(`adm-imports-${field}`).value, 10);
       if (isNaN(val) || val < 0) {
-        showImportsAdsError(`"${field === 'free' ? 'Free' : 'Gated'}" must be a non-negative number.`);
+        setSectionError('adm-imports-error', `"${field === 'free' ? 'Free' : 'Gated'}" must be a non-negative number.`);
         return;
       }
       payload[field] = val;
@@ -932,54 +998,69 @@
         body: JSON.stringify(payload),
       });
       if (!res.ok) {
-        showImportsAdsError(await errorText(res, 'Failed to save import ads config'));
+        setSectionError('adm-imports-error', await errorText(res, 'Failed to save import ads config'));
         return;
       }
       IMPORTS_ADS = await res.json();
       renderImportAds();
       document.getElementById('adm-imports-status').textContent = 'Saved.';
     } catch (e) {
-      showImportsAdsError('Could not reach the server: ' + e.message);
+      setSectionError('adm-imports-error', 'Could not reach the server: ' + e.message);
     } finally {
       btn.disabled = false;
     }
   }
 
-  function showImportsAdsError(msg) {
-    const e = document.getElementById('adm-imports-error');
-    e.textContent = msg || '';
-    e.classList.toggle('d-none', !msg);
-  }
-
-  // ── Ad Campaigns: Banners ─────────────────────────────────────────────────
+  // ── Ad Campaigns: Horz Banner / Vert Banner ───────────────────────────────
   let BANNERS = null;   // /api/admin/banners-config response
 
   async function loadBanners() {
-    showBannersError('');
-    const box = document.getElementById('adm-banners-body');
-    box.innerHTML = '<span class="adm-meta">Loading…</span>';
+    setSectionError('adm-horzbanner-error', '');
+    setSectionError('adm-vertbanner-error', '');
+    const horzBox = document.getElementById('adm-horzbanner-body');
+    const vertBox = document.getElementById('adm-vertbanner-body');
+    horzBox.innerHTML = vertBox.innerHTML = '<span class="adm-meta">Loading…</span>';
     try {
       const res = await authFetch('/api/admin/banners-config');
       if (!res.ok) {
-        box.innerHTML = '';
-        showBannersError(await errorText(res, 'Failed to load banners config'));
+        horzBox.innerHTML = vertBox.innerHTML = '';
+        const msg = await errorText(res, 'Failed to load banners config');
+        setSectionError('adm-horzbanner-error', msg);
+        setSectionError('adm-vertbanner-error', msg);
         return;
       }
       BANNERS = await res.json();
-      renderBanners();
+      renderHorzBanner();
+      renderVertBanner();
     } catch (e) {
-      box.innerHTML = '';
-      showBannersError('Could not reach the server: ' + e.message);
+      horzBox.innerHTML = vertBox.innerHTML = '';
+      const msg = 'Could not reach the server: ' + e.message;
+      setSectionError('adm-horzbanner-error', msg);
+      setSectionError('adm-vertbanner-error', msg);
     }
   }
 
-  function renderBanners() {
-    // The side slot is a list, so it gets a textarea (one URL per line) rather
-    // than the numeric inputs the limits above use. Order is display order.
-    const sideImages = (BANNERS.side_images || []).join('\n');
-    document.getElementById('adm-banners-body').innerHTML = `
+  function renderHorzBanner() {
+    document.getElementById('adm-horzbanner-body').innerHTML = `
       <div class="adm-gam-week align-items-start">
-        <span class="adm-gam-wk">Side (vertical)</span>
+        <span class="adm-gam-wk">Mid-page image</span>
+        <label class="d-flex flex-column gap-1 flex-grow-1" style="font-size:.82rem;color:var(--muted);">
+          <input type="text" class="form-control form-control-sm"
+                 id="adm-banners-mid-image"
+                 placeholder="https://example.com/promo-wide.png"
+                 value="${esc(BANNERS.mid_image || '')}"/>
+        </label>
+      </div>`;
+    document.getElementById('adm-horzbanner-status').textContent = '';
+  }
+
+  function renderVertBanner() {
+    // The side slot is a list, so it gets a textarea (one URL per line) rather
+    // than a single input.
+    const sideImages = (BANNERS.side_images || []).join('\n');
+    document.getElementById('adm-vertbanner-body').innerHTML = `
+      <div class="adm-gam-week align-items-start">
+        <span class="adm-gam-wk">Side images</span>
         <label class="d-flex flex-column gap-1 flex-grow-1" style="font-size:.82rem;color:var(--muted);">
           Image URLs — one per line, max 10. Rotates automatically with 2+;
           shows a single image statically. Best fit is a tall ~120&times;480 crop.
@@ -996,45 +1077,61 @@
                  style="width:70px;" id="adm-banners-side-interval"
                  value="${esc(Math.round((BANNERS.side_interval_ms ?? 6000) / 1000))}"/>
         </label>
-      </div>
-      <div class="adm-gam-week align-items-start">
-        <span class="adm-gam-wk">Mid-page (horizontal)</span>
-        <label class="d-flex flex-column gap-1 flex-grow-1" style="font-size:.82rem;color:var(--muted);">
-          Single image URL. Best fit is a wide, short crop — the slot caps at 180px tall.
-          <input type="text" class="form-control form-control-sm"
-                 id="adm-banners-mid-image"
-                 placeholder="https://example.com/promo-wide.png"
-                 value="${esc(BANNERS.mid_image || '')}"/>
-        </label>
       </div>`;
-    document.getElementById('adm-banners-status').textContent = '';
+    document.getElementById('adm-vertbanner-status').textContent = '';
   }
 
-  async function saveBanners() {
-    const btn = document.getElementById('adm-banners-save');
-    showBannersError('');
+  async function saveHorzBanner() {
+    const btn = document.getElementById('adm-horzbanner-save');
+    setSectionError('adm-horzbanner-error', '');
+    const midImage = document.getElementById('adm-banners-mid-image').value.trim();
+    if (midImage && !/^(https?:\/\/|\/)/.test(midImage)) {
+      setSectionError('adm-horzbanner-error',
+        `"${midImage}" is not a valid image URL — use https://…, http://… or a /static/… path.`);
+      return;
+    }
+    btn.disabled = true;
+    try {
+      const res = await authFetch('/api/admin/banners-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mid_image: midImage }),
+      });
+      if (!res.ok) {
+        setSectionError('adm-horzbanner-error', await errorText(res, 'Failed to save banner config'));
+        return;
+      }
+      BANNERS = await res.json();
+      renderHorzBanner();
+      document.getElementById('adm-horzbanner-status').textContent = 'Saved.';
+    } catch (e) {
+      setSectionError('adm-horzbanner-error', 'Could not reach the server: ' + e.message);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  async function saveVertBanner() {
+    const btn = document.getElementById('adm-vertbanner-save');
+    setSectionError('adm-vertbanner-error', '');
 
     // Blank lines are how you naturally end a textarea, so they're stripped
     // rather than rejected. An all-blank textarea therefore clears the slot.
     const sideImages = document.getElementById('adm-banners-side-images').value
       .split('\n').map(s => s.trim()).filter(Boolean);
     if (sideImages.length > 10) {
-      showBannersError('"Side (vertical)" takes at most 10 image URLs.');
+      setSectionError('adm-vertbanner-error', '"Side images" takes at most 10 image URLs.');
       return;
     }
     const bad = sideImages.find(u => !/^(https?:\/\/|\/)/.test(u));
     if (bad) {
-      showBannersError(`"${bad}" is not a valid image URL — use https://…, http://… or a /static/… path.`);
+      setSectionError('adm-vertbanner-error',
+        `"${bad}" is not a valid image URL — use https://…, http://… or a /static/… path.`);
       return;
     }
     const secs = parseInt(document.getElementById('adm-banners-side-interval').value, 10);
     if (isNaN(secs) || secs < 1 || secs > 60) {
-      showBannersError('"Seconds per image" must be a number between 1 and 60.');
-      return;
-    }
-    const midImage = document.getElementById('adm-banners-mid-image').value.trim();
-    if (midImage && !/^(https?:\/\/|\/)/.test(midImage)) {
-      showBannersError(`"${midImage}" is not a valid image URL — use https://…, http://… or a /static/… path.`);
+      setSectionError('adm-vertbanner-error', '"Seconds per image" must be a number between 1 and 60.');
       return;
     }
 
@@ -1046,30 +1143,23 @@
         body: JSON.stringify({
           side_images:      sideImages,
           side_interval_ms: secs * 1000,
-          mid_image:        midImage,
         }),
       });
       if (!res.ok) {
-        showBannersError(await errorText(res, 'Failed to save banners config'));
+        setSectionError('adm-vertbanner-error', await errorText(res, 'Failed to save banner config'));
         return;
       }
       BANNERS = await res.json();
-      renderBanners();
-      document.getElementById('adm-banners-status').textContent = 'Saved.';
+      renderVertBanner();
+      document.getElementById('adm-vertbanner-status').textContent = 'Saved.';
     } catch (e) {
-      showBannersError('Could not reach the server: ' + e.message);
+      setSectionError('adm-vertbanner-error', 'Could not reach the server: ' + e.message);
     } finally {
       btn.disabled = false;
     }
   }
 
-  function showBannersError(msg) {
-    const e = document.getElementById('adm-banners-error');
-    e.textContent = msg || '';
-    e.classList.toggle('d-none', !msg);
-  }
-
-  // ── Ad Campaigns: Admin media library ─────────────────────────────────────
+  // ── Ad Campaigns: media library (split across Link Import / Hand Export) ──
   let AD_MEDIA = null;   // /api/admin/ad-media-config response
   const AD_MEDIA_LABELS = {
     banner_a: 'Banner A', banner_b: 'Banner B',
@@ -1080,23 +1170,41 @@
     banner_b: 'image/png,image/jpeg,image/webp,image/gif,image/svg+xml',
     video_30: 'video/mp4', video_60: 'video/mp4',
   };
+  // video_30/banner_a back the import gate modal, video_60/banner_b back the
+  // hand export gate modal — see getAdMediaTypesFor in static/app.js.
+  const AD_MEDIA_GROUPS = {
+    import:      ['video_30', 'banner_a'],
+    hand_export: ['video_60', 'banner_b'],
+  };
+  function adMediaGroupOf(type) {
+    return AD_MEDIA_GROUPS.import.includes(type) ? 'import' : 'hand_export';
+  }
+  function adMediaErrorElOf(type) {
+    return adMediaGroupOf(type) === 'import' ? 'adm-media-import-error' : 'adm-media-handexport-error';
+  }
 
   async function loadAdMedia() {
-    showMediaError('');
-    const box = document.getElementById('adm-media-body');
-    box.innerHTML = '<span class="adm-meta">Loading…</span>';
+    setSectionError('adm-media-import-error', '');
+    setSectionError('adm-media-handexport-error', '');
+    const importBox = document.getElementById('adm-media-import-body');
+    const handBox = document.getElementById('adm-media-handexport-body');
+    importBox.innerHTML = handBox.innerHTML = '<span class="adm-meta">Loading…</span>';
     try {
       const res = await authFetch('/api/admin/ad-media-config');
       if (!res.ok) {
-        box.innerHTML = '';
-        showMediaError(await errorText(res, 'Failed to load media library'));
+        importBox.innerHTML = handBox.innerHTML = '';
+        const msg = await errorText(res, 'Failed to load media library');
+        setSectionError('adm-media-import-error', msg);
+        setSectionError('adm-media-handexport-error', msg);
         return;
       }
       AD_MEDIA = await res.json();
       renderAdMedia();
     } catch (e) {
-      box.innerHTML = '';
-      showMediaError('Could not reach the server: ' + e.message);
+      importBox.innerHTML = handBox.innerHTML = '';
+      const msg = 'Could not reach the server: ' + e.message;
+      setSectionError('adm-media-import-error', msg);
+      setSectionError('adm-media-handexport-error', msg);
     }
   }
 
@@ -1109,8 +1217,10 @@
   }
 
   function renderAdMedia() {
-    document.getElementById('adm-media-body').innerHTML =
-      Object.keys(AD_MEDIA_LABELS).map(renderAdMediaType).join('');
+    document.getElementById('adm-media-import-body').innerHTML =
+      AD_MEDIA_GROUPS.import.map(renderAdMediaType).join('');
+    document.getElementById('adm-media-handexport-body').innerHTML =
+      AD_MEDIA_GROUPS.hand_export.map(renderAdMediaType).join('');
   }
 
   function adMediaRow(type, opts) {
@@ -1169,28 +1279,30 @@
   async function uploadAdMedia(type) {
     const input = document.getElementById(`adm-media-file-${type}`);
     const file = input.files && input.files[0];
+    const errEl = adMediaErrorElOf(type);
     if (!file) {
-      showMediaError('Choose a file first.');
+      setSectionError(errEl, 'Choose a file first.');
       return;
     }
-    showMediaError('');
+    setSectionError(errEl, '');
     const form = new FormData();
     form.append('file', file);
     try {
       const res = await authFetch(`/api/admin/ad-media/${type}/upload`, { method: 'POST', body: form });
       if (!res.ok) {
-        showMediaError(await errorText(res, 'Upload failed'));
+        setSectionError(errEl, await errorText(res, 'Upload failed'));
         return;
       }
       AD_MEDIA = await res.json();
       renderAdMedia();
     } catch (e) {
-      showMediaError('Could not reach the server: ' + e.message);
+      setSectionError(errEl, 'Could not reach the server: ' + e.message);
     }
   }
 
   async function setActiveAdMedia(type, fileId) {
-    showMediaError('');
+    const errEl = adMediaErrorElOf(type);
+    setSectionError(errEl, '');
     try {
       const res = await authFetch(`/api/admin/ad-media/${type}/active`, {
         method: 'POST',
@@ -1198,37 +1310,32 @@
         body: JSON.stringify({ file_id: fileId }),
       });
       if (!res.ok) {
-        showMediaError(await errorText(res, 'Failed to set active file'));
+        setSectionError(errEl, await errorText(res, 'Failed to set active file'));
         renderAdMedia();   // revert the radio to the last known-good state
         return;
       }
       AD_MEDIA = await res.json();
       renderAdMedia();
     } catch (e) {
-      showMediaError('Could not reach the server: ' + e.message);
+      setSectionError(errEl, 'Could not reach the server: ' + e.message);
       renderAdMedia();
     }
   }
 
   async function deleteAdMedia(type, fileId) {
-    showMediaError('');
+    const errEl = adMediaErrorElOf(type);
+    setSectionError(errEl, '');
     try {
       const res = await authFetch(`/api/admin/ad-media/${type}/${fileId}`, { method: 'DELETE' });
       if (!res.ok) {
-        showMediaError(await errorText(res, 'Failed to delete file'));
+        setSectionError(errEl, await errorText(res, 'Failed to delete file'));
         return;
       }
       AD_MEDIA = await res.json();
       renderAdMedia();
     } catch (e) {
-      showMediaError('Could not reach the server: ' + e.message);
+      setSectionError(errEl, 'Could not reach the server: ' + e.message);
     }
-  }
-
-  function showMediaError(msg) {
-    const e = document.getElementById('adm-media-error');
-    e.textContent = msg || '';
-    e.classList.toggle('d-none', !msg);
   }
 
   // Raw Stripe subscription status, badged for the states that matter and
