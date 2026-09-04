@@ -75,37 +75,51 @@ function currentTier() {
 // Daily counters used to live here, in localStorage and a client-written
 // Firestore field. They are server-side now (users/{uid}.quota): a counter the
 // browser owns is a counter the browser can reset.
-const _UPGRADE_REASONS = {
-  export:        "You've used your exports for today. Upgrade to Pro for unlimited daily exports.",
-  hands:         `Free accounts see only the last ${FREE_HAND_LIMIT} hands. Upgrade to Pro for unlimited history.`,
-  tourney:       'Tournament exports are limited on the free plan.',
-  import_quota:  `That's all ${FREE_IMPORTS_PER_DAY} imports for today. Upgrade to Pro for unlimited imports.`,
-  // Fallbacks only — _handleExportFailure normally passes the live limit as
-  // customText, sourced from the server's response body (see _quotaReasonText).
-  hand_quota:    "You've used your hand exports for today. Upgrade to Pro for unlimited exports.",
-  tourney_quota: "You've used your tournament exports for today. Upgrade to Pro for unlimited exports.",
-  full_session:  'Exporting a whole session in one file is a Pro feature.',
-  history:       `Free accounts keep ${FREE_HISTORY_DAYS} days of history. Upgrade to Pro to keep everything.`,
-};
+// Lazily built (not a module-level const) so it reads window.I18N_UPGRADE —
+// defined in a <script> earlier in index.html, but safer not to depend on
+// script-tag ordering at module-eval time.
+function _upgradeReasons() {
+  const I = window.I18N_UPGRADE || {};
+  return {
+    export:        I.exportReason || "You've used your exports for today. Upgrade to Pro for unlimited daily exports.",
+    hands:          _fillTemplate(I.handsReason || '__N__ hands: Free accounts see only the last, Upgrade to Pro for unlimited history.', { N: FREE_HAND_LIMIT }),
+    tourney:        I.tourneyReason || 'Tournament exports are limited on the free plan.',
+    import_quota:  _fillTemplate(I.importQuotaReason || "That's all __N__ imports for today. Upgrade to Pro for unlimited imports.", { N: FREE_IMPORTS_PER_DAY }),
+    // Fallbacks only — _handleExportFailure normally passes the live limit as
+    // customText, sourced from the server's response body (see _quotaReasonText).
+    hand_quota:    I.handQuotaReason || "You've used your hand exports for today. Upgrade to Pro for unlimited exports.",
+    tourney_quota: I.tourneyQuotaReason || "You've used your tournament exports for today. Upgrade to Pro for unlimited exports.",
+    full_session:  I.fullSessionReason || 'Exporting a whole session in one file is a Pro feature.',
+    history:        _fillTemplate(I.historyReason || 'Free accounts keep __N__ days of history. Upgrade to Pro to keep everything.', { N: FREE_HISTORY_DAYS }),
+  };
+}
 
 // hand_quota/tourney_quota copy depends on the admin-configured hard limit, which
 // arrives per-request in the quota_exceeded response body (app.py's `limit` field) —
 // building it from a module-level constant here would drift the moment an admin
 // changes the config without a redeploy.
 function _quotaReasonText(kind, limit) {
+  const I = window.I18N_UPGRADE || {};
   // Tourney exports moved from a daily cap to lifetime-free-once + N/week
   // (see _tourney_export_gate in app.py) — this copy only fires once the
   // lifetime freebie is spent and the weekly limit is hit, so "a week" is
   // accurate here even though the export itself may have been free the very
   // first time.
-  return kind === 'tourney'
-    ? `Free accounts get ${limit} tournament export${limit === 1 ? '' : 's'} a week after your first free one. Upgrade to Pro for unlimited exports.`
-    : `That's all ${limit} hand export${limit === 1 ? '' : 's'} for today. Upgrade to Pro for unlimited exports.`;
+  if (kind === 'tourney') {
+    const tpl = limit === 1
+      ? (I.tourneyQuotaOne  || 'Free accounts get __LIMIT__ tournament export a week after your first free one. Upgrade to Pro for unlimited exports.')
+      : (I.tourneyQuotaMany || 'Free accounts get __LIMIT__ tournament exports a week after your first free one. Upgrade to Pro for unlimited exports.');
+    return _fillTemplate(tpl, { LIMIT: limit });
+  }
+  const tpl = limit === 1
+    ? (I.handQuotaOne  || "That's all __LIMIT__ hand export for today. Upgrade to Pro for unlimited exports.")
+    : (I.handQuotaMany || "That's all __LIMIT__ hand exports for today. Upgrade to Pro for unlimited exports.");
+  return _fillTemplate(tpl, { LIMIT: limit });
 }
 
 function showUpgradeModal(reason, customText) {
   const reasonEl = document.getElementById('pro-modal-reason');
-  if (reasonEl) reasonEl.textContent = customText || _UPGRADE_REASONS[reason] || '';
+  if (reasonEl) reasonEl.textContent = customText || _upgradeReasons()[reason] || '';
   // Reset coming-soon banner and button
   const cs  = document.getElementById('pro-coming-soon');
   const btn = document.getElementById('pro-upgrade-btn');
@@ -122,9 +136,10 @@ function showUpgradeModal(reason, customText) {
 }
 
 function handleUpgradeClick(tier = 'pro') {
+  const I = window.I18N_UPGRADE || {};
   _trackEvent('pro_upgrade_clicked');
   const btn = document.getElementById('pro-upgrade-btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Redirecting…'; }
+  if (btn) { btn.disabled = true; btn.textContent = I.redirecting || 'Redirecting…'; }
   const fail = (msg) => {
     // Must match the button's initial label in index.html, or a failed checkout
     // silently relabels the CTA and drops the price from it.
@@ -134,7 +149,7 @@ function handleUpgradeClick(tier = 'pro') {
   };
   // uid/email are derived server-side from this token and are no longer sent in
   // the body — the server refuses the call without it.
-  if (!_currentUser) { fail('Please sign in before upgrading.'); return; }
+  if (!_currentUser) { fail(I.pleaseSignInBeforeUpgrading || 'Please sign in before upgrading.'); return; }
   _currentUser.getIdToken()
     .then(token => fetch('/api/create-checkout-session', {
       method: 'POST',
@@ -144,7 +159,7 @@ function handleUpgradeClick(tier = 'pro') {
     .then(r => r.json())
     .then(d => {
       if (d.url) { window.location.href = d.url; }
-      else throw new Error(d.error || 'Could not start checkout');
+      else throw new Error(d.error || I.couldNotStartCheckout || 'Could not start checkout');
     })
     .catch(err => fail(err.message));
 }
@@ -175,27 +190,28 @@ function showSignInModal(note) {
  * must pass a closure that repeats the exact same export.
  */
 async function _handleExportFailure(res, kind, retry) {
+  const I = window.I18N_UPGRADE || {};
   const body = await res.json().catch(() => ({}));
   const err  = body.error || '';
 
   if (res.status === 401 || err === 'login_required') {
-    showSignInModal('Sign in to export your hands — it takes a few seconds and it stays free.');
-    return 'Sign in to export';
+    showSignInModal(I.signInToExportHands || 'Sign in to export your hands — it takes a few seconds and it stays free.');
+    return I.signInToExportShort || 'Sign in to export';
   }
   if (err === 'upgrade_required') {
     showUpgradeModal(body.feature === 'full_session_export' ? 'full_session' : 'export');
-    return 'Pro feature';
+    return I.proFeatureBadge || 'Pro feature';
   }
   if (err === 'history_expired') {
     showUpgradeModal('history');
-    return `Outside your ${FREE_HISTORY_DAYS}-day history`;
+    return _fillTemplate(I.outsideHistoryWindow || 'Outside your __N__-day history', { N: FREE_HISTORY_DAYS });
   }
   if (err === 'quota_exceeded') {
     showUpgradeModal(
       kind === 'tourney' ? 'tourney_quota' : 'hand_quota',
       typeof body.limit === 'number' ? _quotaReasonText(kind, body.limit) : null
     );
-    return "That's your last one for today";
+    return I.lastOneToday || "That's your last one for today";
   }
   if (err === 'survey_required') {
     // Tourney exports still go through CPX; hand exports were switched to the
@@ -203,12 +219,12 @@ async function _handleExportFailure(res, kind, retry) {
     // rewarded-video approval is shelved.
     if (kind === 'tourney') {
       openSurveyModal(kind, retry);
-      return 'Unlock with a quick survey';
+      return I.unlockWithSurvey || 'Unlock with a quick survey';
     }
     _openGateStub('hand_export', retry, 'hand_quota');
-    return 'Watch to unlock';
+    return I.watchToUnlock || 'Watch to unlock';
   }
-  return err || 'Export failed';
+  return err || I.exportFailedGeneric || 'Export failed';
 }
 
 /**
@@ -234,11 +250,12 @@ async function _runExport(url, { kind, body, headers, fallbackName }) {
 
 /** _runExport plus the browser download and the status toast. */
 async function _downloadExport(url, opts, btn) {
-  _rowExportStatus(btn, 'loading', opts.loadingText || 'Exporting…');
+  const I = window.I18N_UPGRADE || {};
+  _rowExportStatus(btn, 'loading', opts.loadingText || I.exportingEllipsis || 'Exporting…');
   try {
     const { blob, filename } = await _runExport(url, opts);
     _triggerDownload(blob, filename);
-    _rowExportStatus(btn, 'ok', `Saved as ${filename}`, 5000);
+    _rowExportStatus(btn, 'ok', _fillTemplate(I.savedAs || 'Saved as __FILENAME__', { FILENAME: filename }), 5000);
     return true;
   } catch (err) {
     _rowExportStatus(btn, 'err', err.message, 6000);
@@ -271,7 +288,7 @@ function _surveyStatus(msg, tone) {
 }
 
 async function openSurveyModal(kind, retry) {
-  if (!_currentUser) { showSignInModal('Sign in to unlock exports.'); return; }
+  if (!_currentUser) { showSignInModal((window.I18N_UPGRADE || {}).signInToUnlockExports || 'Sign in to unlock exports.'); return; }
   _surveyState = { kind, retry, baseline: 0, timer: null, deadline: 0 };
 
   const modalEl = document.getElementById('survey-modal');
@@ -763,9 +780,10 @@ function renderCard(card) {
 }
 
 function resultBadge(result) {
-  if (result === 'Won')  return '<span class="badge-won">Won</span>';
-  if (result === 'Lost') return '<span class="badge-lost">Lost</span>';
-  return '<span class="badge-break">Break even</span>';
+  const I = window.I18N_RESULTS || {};
+  if (result === 'Won')  return `<span class="badge-won">${I.won || 'Won'}</span>`;
+  if (result === 'Lost') return `<span class="badge-lost">${I.lost || 'Lost'}</span>`;
+  return `<span class="badge-break">${I.breakEven || 'Break even'}</span>`;
 }
 
 function posBadge(pos) {
@@ -906,6 +924,15 @@ function clearError() {
   el.textContent = '';
 }
 
+// Captured once, before any import can overwrite it: the server-rendered,
+// correctly localized string already sitting in #loading-text (see
+// templates/index.html). setLoading() restores this rather than hardcoding
+// an English literal, so a second import after a success message doesn't
+// regress a non-English page back to English.
+const _LOADING_TEXT_DEFAULT =
+  document.getElementById('loading-text')?.textContent
+  || 'Dealing out the session… this can take a few seconds';
+
 function setLoading(on) {
   const box      = document.getElementById('loading-msg');
   const spinner  = document.getElementById('loading-spinner');
@@ -913,7 +940,7 @@ function setLoading(on) {
   if (on) {
     spinner.classList.remove('d-none');
     text.style.color = 'var(--green)';
-    text.textContent = 'Dealing out the session… this can take a few seconds';
+    text.textContent = _LOADING_TEXT_DEFAULT;
     box.classList.remove('d-none');
   } else {
     box.classList.add('d-none');
@@ -922,6 +949,7 @@ function setLoading(on) {
 }
 
 function showImportSuccess(data) {
+  const I       = window.I18N_IMPORT_RESULT || {};
   const box     = document.getElementById('loading-msg');
   const spinner = document.getElementById('loading-spinner');
   const text    = document.getElementById('loading-text');
@@ -932,23 +960,30 @@ function showImportSuccess(data) {
   spinner.classList.add('d-none');
   text.style.color = 'var(--green)';
   _importCount++;
-  const tourFrag = tourCount
-    ? ` across <strong>${tourCount}</strong> tournament${tourCount !== 1 ? 's' : ''}`
-    : '';
+
+  // The translator places __TOURFRAG__ anywhere in the sentence — this
+  // builds the fragment, not its position (see I18N_IMPORT_RESULT in
+  // templates/index.html).
+  let tourFrag = '';
+  if (tourCount) {
+    const tpl = tourCount === 1
+      ? (I.tourFragOne  || ' across __COUNT__ tournament')
+      : (I.tourFragMany || ' across __COUNT__ tournaments');
+    tourFrag = _fillTemplate(tpl, { COUNT: `<strong>${tourCount}</strong>` });
+  }
 
   let html;
   if (data.tier === 'anon') {
-    html =
-      `✓ Analysed <strong>${total}</strong> hands${tourFrag}. ` +
-      `<button class="btn-link-inline" onclick="showSignInModal('Sign in to save your hands.')">Sign in to save them.</button>`;
+    const signInBtn = `<button class="btn-link-inline" onclick="showSignInModal('${(window.I18N_UPGRADE || {}).signInToSaveHands || 'Sign in to save your hands.'}')">`
+      + `${(window.I18N_UPGRADE || {}).signInToSaveThem || 'Sign in to save them.'}</button>`;
+    html = _fillTemplate(I.anonSuccess || '✓ Analysed __TOTAL__ hands__TOURFRAG__. ',
+      { TOTAL: `<strong>${total}</strong>`, TOURFRAG: tourFrag }) + signInBtn;
   } else if (newHands > 0) {
-    html =
-      `✓ Welcome, <strong>${name}</strong>! ` +
-      `<strong>${newHands}</strong> new hands loaded${tourFrag}.`;
+    html = _fillTemplate(I.welcomeNew || '✓ Welcome, __NAME__! __NEWHANDS__ new hands loaded__TOURFRAG__.',
+      { NAME: `<strong>${_esc(name)}</strong>`, NEWHANDS: `<strong>${newHands}</strong>`, TOURFRAG: tourFrag });
   } else {
-    html =
-      `✓ Welcome back, <strong>${name}</strong>! ` +
-      `<strong>${total}</strong> hands re-analysed (all already saved).`;
+    html = _fillTemplate(I.welcomeBack || '✓ Welcome back, __NAME__! __TOTAL__ hands re-analysed (all already saved).',
+      { NAME: `<strong>${_esc(name)}</strong>`, TOTAL: `<strong>${total}</strong>` });
   }
   text.innerHTML = html;
   box.classList.remove('d-none');
@@ -1176,7 +1211,7 @@ function handleImport() {
   document.getElementById('results-section').classList.add('d-none');
 
   if (!url) {
-    showError('Please enter a PPPoker Hand Review URL.');
+    showError((window.I18N_UPGRADE || {}).pleaseEnterUrl || 'Please enter a PPPoker Hand Review URL.');
     return;
   }
 
@@ -1197,9 +1232,11 @@ function handleImport() {
       .then(({ ok, data }) => {
         setLoading(false);
         if (!ok && data.error === 'quota_exceeded') {
+          const I = window.I18N_UPGRADE || {};
           showUpgradeModal('import_quota');
-          showError(`You've used all ${data.limit ?? FREE_IMPORTS_PER_DAY} imports for today. `
-                    + 'Imports reset at midnight UTC.');
+          showError(_fillTemplate(I.usedAllImports || "You've used all __N__ imports for today. ",
+                    { N: data.limit ?? FREE_IMPORTS_PER_DAY })
+                    + (I.importsResetMidnight || 'Imports reset at midnight UTC.'));
           return;
         }
         if (!ok && data.error === 'survey_required') {
@@ -1215,7 +1252,7 @@ function handleImport() {
       })
       .catch(err => {
         setLoading(false);
-        showError('Network error: ' + err.message);
+        showError(((window.I18N_UPGRADE || {}).networkErrorPrefix || 'Network error:') + ' ' + err.message);
       });
   };
 
@@ -1376,12 +1413,14 @@ function renderResults(data) {
 /* ── Shared hand table renderer ──────────────────────────── */
 
 function renderHandsTable(hands, tbodyId, options = {}) {
+  const R = window.I18N_RESULTS || {};
+  const U = window.I18N_UPGRADE || {};
   if (!isPro() && hands.length > FREE_HAND_LIMIT) {
     hands = hands.slice(-FREE_HAND_LIMIT);
   }
   const tbody = document.getElementById(tbodyId);
   if (!hands.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">No hands available</td></tr>';
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">${R.noHandsAvailable || 'No hands available'}</td></tr>`;
     return;
   }
 
@@ -1391,8 +1430,9 @@ function renderHandsTable(hands, tbodyId, options = {}) {
 
   tbody.innerHTML = hands.map(h => {
     const cards = (h.hole_cards || []).map(renderCard).join('');
+    const handIdTip = _fillTemplate(R.handIdTip || 'Hand ID: __N__', { N: h.hand_num || '' });
     const copyBtn = h.hand_num
-      ? `<button class="copy-hand-btn" onclick="copyHandId(this)" data-hand-num="${h.hand_num}" title="Hand ID: ${h.hand_num}">
+      ? `<button class="copy-hand-btn" onclick="copyHandId(this)" data-hand-num="${h.hand_num}" title="${handIdTip}">
            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
          </button>`
       : '';
@@ -1407,10 +1447,10 @@ function renderHandsTable(hands, tbodyId, options = {}) {
         // Signed out, every export needs an account first — so say that instead
         // of offering four buttons that all answer 401.
         : !isSignedIn()
-        ? `<button class="btn export-icon-btn signin-export-btn" title="Sign in to export"
-                   onclick="showSignInModal('Sign in to export your hands — it stays free.')">
+        ? `<button class="btn export-icon-btn signin-export-btn" title="${U.signInToExportShort || 'Sign in to export'}"
+                   onclick="showSignInModal('${U.signInToExportHandsShort || 'Sign in to export your hands — it stays free.'}')">
              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-             <span>Sign in to export</span>
+             <span>${U.signInToExportShort || 'Sign in to export'}</span>
            </button>`
         : `<div class="d-flex gap-1 flex-wrap justify-content-center">
             <button class="btn export-icon-btn" data-platform="PokerTracker" title="Export PT4" onclick="exportHandFromRow('${hn}','PokerTracker',this,'${tid}')">
@@ -1446,7 +1486,7 @@ function renderHandsTable(hands, tbodyId, options = {}) {
       ${cols56}
       <td class="d-none d-xl-table-cell">
         ${h.replay_url && h.replay_url !== '#'
-          ? `<a class="replay-link" href="${h.replay_url}" target="_blank" rel="noopener" title="Watch replay">▶</a>`
+          ? `<a class="replay-link" href="${h.replay_url}" target="_blank" rel="noopener" title="${(window.I18N_RESULTS || {}).watchReplay || 'Watch replay'}">▶</a>`
           : '<span class="text-muted">—</span>'}
       </td>
     </tr>`;
@@ -1517,6 +1557,7 @@ function _gameTypeBadge(t) {
 /* ── Table 3: Tournaments ────────────────────────────────── */
 
 function renderTournaments(tournaments) {
+  const R = window.I18N_RESULTS || {};
   const tbody = document.getElementById('tournaments-tbody');
 
   // Populate tourney strip
@@ -1527,11 +1568,11 @@ function renderTournaments(tournaments) {
     const satCount  = tournaments.filter(t => (t.room_name || '').toLowerCase().includes('sat')).length;
     const wonCount  = tournaments.filter(t => (t.net || 0) > 0).length;
     const items = [
-      ['Games',      tournaments.length],
-      ['MTT',        mttCount],
-      ['Play money', playCount],
-      ['Satellite',  satCount],
-      ['Won',        wonCount],
+      [R.games || 'Games',          tournaments.length],
+      ['MTT',                        mttCount],
+      [R.playMoney || 'Play money', playCount],
+      ['Satellite',                  satCount],
+      [R.won   || 'Won',            wonCount],
     ];
     strip.innerHTML = items.map(([label, value]) =>
       `<span class="val-pill"><strong>${value}</strong><span class="val-pill-label">${label}</span></span>`
@@ -1539,7 +1580,7 @@ function renderTournaments(tournaments) {
   }
 
   if (!tournaments.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">No tournaments detected</td></tr>';
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">${R.noTournamentsDetected || 'No tournaments detected'}</td></tr>`;
     return;
   }
 
@@ -1579,7 +1620,7 @@ function renderTournaments(tournaments) {
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
               </button>
             </div>`
-          : _SIGNIN_TO_EXPORT_GATE
+          : _signinToExportGate()
         }
       </td>
     </tr>`;
@@ -1588,9 +1629,11 @@ function renderTournaments(tournaments) {
 }
 
 // Signed-out export column: the buttons are shown but inert, because the offer
-// is "sign in and these work", not "pay us".
-const _SIGNIN_TO_EXPORT_GATE =
-  `<div class="tourney-gate-wrap">
+// is "sign in and these work", not "pay us". A function (not a module-level
+// const) so it re-reads window.I18N_UPGRADE/I18N_RESULTS at render time.
+function _signinToExportGate() {
+  const U = window.I18N_UPGRADE || {};
+  return `<div class="tourney-gate-wrap">
     <div class="tourney-gate-blur" aria-hidden="true">
       <div class="d-flex gap-2 flex-wrap justify-content-center">
         <button class="btn export-icon-btn" tabindex="-1" disabled>
@@ -1609,20 +1652,23 @@ const _SIGNIN_TO_EXPORT_GATE =
     </div>
     <div class="tourney-gate-overlay">
       <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      <span class="tourney-gate-label">Sign in to export</span>
-      <button class="tourney-gate-btn" onclick="event.stopPropagation();showSignInModal('Sign in to export your hands — it stays free.')">Sign in</button>
+      <span class="tourney-gate-label">${U.signInToExportShort || 'Sign in to export'}</span>
+      <button class="tourney-gate-btn" onclick="event.stopPropagation();showSignInModal('${U.signInToExportHandsShort || 'Sign in to export your hands — it stays free.'}')">${U.signInBtnLabel || 'Sign in'}</button>
     </div>
   </div>`;
+}
 
 /** Banner for tournaments the free tier's 7-day window dropped from an import. */
 function _showHistoryCapNotice(count) {
   const box = document.getElementById('history-cap-notice');
   if (!box) return;
+  const U = window.I18N_UPGRADE || {};
+  const tpl = count === 1
+    ? (U.historyCapOne  || "__COUNT__ tournament from this link is older than __DAYS__ days and wasn't saved. ")
+    : (U.historyCapMany || "__COUNT__ tournaments from this link are older than __DAYS__ days and weren't saved. ");
   box.innerHTML =
-    `${count} tournament${count === 1 ? '' : 's'} from this link ` +
-    `${count === 1 ? 'is' : 'are'} older than ${FREE_HISTORY_DAYS} days and ` +
-    `${count === 1 ? "wasn't" : "weren't"} saved. ` +
-    `<button class="btn-link-inline" onclick="showUpgradeModal('history')">Upgrade to keep everything</button>`;
+    _fillTemplate(tpl, { COUNT: count, DAYS: FREE_HISTORY_DAYS }) +
+    `<button class="btn-link-inline" onclick="showUpgradeModal('history')">${U.upgradeToKeepEverything || 'Upgrade to keep everything'}</button>`;
   box.classList.remove('d-none');
 }
 
@@ -1648,15 +1694,18 @@ const _LOCK_ICON_SVG =
   `<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
 
 // Signed-in-wall for the Export All Hands section — same visual treatment as the
-// Pro-only wall, but the pitch is "sign in" rather than "upgrade".
-const _SIGNIN_EXPORT_ALL_WRAP_HTML =
-  `<div class="export-gate-wrap signin-export-all-wrap">` +
-  `<div class="tourney-gate-blur" aria-hidden="true">${_EXPORT_ALL_BTNS_HTML}</div>` +
-  `<div class="tourney-gate-overlay">` +
-  _LOCK_ICON_SVG +
-  `<span class="tourney-gate-label">Sign in to export</span>` +
-  `<button class="tourney-gate-btn" onclick="showSignInModal('Sign in to export your hands — it stays free.')">Sign in</button>` +
-  `</div></div>`;
+// Pro-only wall, but the pitch is "sign in" rather than "upgrade". A function
+// (not a module-level const) so it re-reads window.I18N_UPGRADE at render time.
+function _signinExportAllWrapHtml() {
+  const U = window.I18N_UPGRADE || {};
+  return `<div class="export-gate-wrap signin-export-all-wrap">` +
+    `<div class="tourney-gate-blur" aria-hidden="true">${_EXPORT_ALL_BTNS_HTML}</div>` +
+    `<div class="tourney-gate-overlay">` +
+    _LOCK_ICON_SVG +
+    `<span class="tourney-gate-label">${U.signInToExportShort || 'Sign in to export'}</span>` +
+    `<button class="tourney-gate-btn" onclick="showSignInModal('${U.signInToExportHandsShort || 'Sign in to export your hands — it stays free.'}')">${U.signInBtnLabel || 'Sign in'}</button>` +
+    `</div></div>`;
+}
 
 /** Renders the Export All Hands container — real buttons for Pro, sign-in wall for anon, Pro upsell for signed-in free. */
 function _renderExportAllSection() {
@@ -1670,11 +1719,11 @@ function _renderExportAllSection() {
       `<div class="tourney-gate-blur" aria-hidden="true">${_EXPORT_ALL_BTNS_HTML}</div>` +
       `<div class="tourney-gate-overlay">` +
       _LOCK_ICON_SVG +
-      `<span class="tourney-gate-label">Export All Hands — Pro only</span>` +
+      `<span class="tourney-gate-label">${(window.I18N_UPGRADE || {}).exportAllProOnly || 'Export All Hands — Pro only'}</span>` +
       `<button class="tourney-gate-btn" onclick="showUpgradeModal('export')">${_pricingCta()}</button>` +
       `</div></div>`;
   } else {
-    el.innerHTML = _SIGNIN_EXPORT_ALL_WRAP_HTML;
+    el.innerHTML = _signinExportAllWrapHtml();
   }
 }
 
@@ -1881,6 +1930,9 @@ function _sortGroups(rows, col, dir) {
 // play-money sit-and-gos get a row each.
 function _cashGroupName(t) {
   if (t && t.is_play_money) {
+    // "Play Money" / "Sit & Go" are PPPoker's own product/format names — kept
+    // untranslated, same treatment as MTT/Satellite (see the poker-jargon note
+    // in translations/pt_BR/LC_MESSAGES/messages.po).
     return t.is_mtt ? 'Play Money — MTT' : 'Play Money — Sit & Go';
   }
   return (t && t.room_name) || '(Unknown)';
@@ -1899,7 +1951,8 @@ function _renderCashGamesSummary(tournaments) {
   // Stats strip
   const strip = document.getElementById('cgs-strip');
   if (strip) {
-    const items = [['Sessions', filtered.length], ['Total Hands', filtered.reduce((s, t) => s + (t.hands || 0), 0)]];
+    const R = window.I18N_RESULTS || {};
+    const items = [[R.sessions || 'Sessions', filtered.length], [R.totalHandsShort || 'Total Hands', filtered.reduce((s, t) => s + (t.hands || 0), 0)]];
     strip.innerHTML = items.map(([label, value]) =>
       `<span class="val-pill"><strong>${value}</strong><span class="val-pill-label">${label}</span></span>`
     ).join('<span class="val-sep">·</span>');
@@ -1920,7 +1973,7 @@ function _renderCashGamesSummary(tournaments) {
   _updateCgsSortIcons(_cgsSortCol, _cgsSortDir);
 
   if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">No cash or play money data in selected range.</td></tr>';
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">${(window.I18N_RESULTS || {}).noCashOrPlayData || 'No cash or play money data in selected range.'}</td></tr>`;
     return;
   }
 
@@ -1989,7 +2042,7 @@ let _selectedCgsId = null;
 
 function _resetCgsd() {
   const tbody = document.getElementById('cgsd-tbody');
-  if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Select a cash or play money session above to view its hands.</td></tr>';
+  if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">${(window.I18N_RESULTS || {}).selectCashSession || 'Select a cash or play money session above to view its hands.'}</td></tr>`;
   const hint = document.getElementById('cgsd-hint');
   if (hint) hint.textContent = '';
   document.querySelectorAll('.tsum-event-card.selected').forEach(c => c.classList.remove('selected'));
@@ -2008,7 +2061,7 @@ async function _selectCgsdDetail(tid, cardEl) {
   const tbody   = document.getElementById('cgsd-tbody');
   const hint    = document.getElementById('cgsd-hint');
   const section = document.getElementById('cash-game-detail-section');
-  if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Loading hands…</td></tr>';
+  if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">${(window.I18N_RESULTS || {}).loadingHands || 'Loading hands…'}</td></tr>`;
   if (section) section.classList.remove('d-none');
 
   if (!_currentUser) return;
@@ -2019,7 +2072,7 @@ async function _selectCgsdDetail(tid, cardEl) {
     const r = await fetch(`/api/tournaments/${tid}/hands`, { headers: { 'Authorization': `Bearer ${token}` } });
     if (_selectedCgsId !== tid) return;
     if (!r.ok) {
-      if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Could not load hands.</td></tr>';
+      if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">${(window.I18N_RESULTS || {}).couldNotLoadHands || 'Could not load hands.'}</td></tr>`;
       return;
     }
     const data  = await r.json();
@@ -2031,14 +2084,14 @@ async function _selectCgsdDetail(tid, cardEl) {
     }
     if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (e) {
-    if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Could not load hands.</td></tr>';
+    if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">${(window.I18N_RESULTS || {}).couldNotLoadHands || 'Could not load hands.'}</td></tr>`;
   }
 }
 
 // ── Per-row hand export (TD + CGSD) ──────────────────────────────────────────
 function exportHandFromRow(handNum, platform, btn, tid) {
   if (!_currentUser) {
-    showSignInModal('Sign in to export this hand — it takes a few seconds and it stays free.');
+    showSignInModal((window.I18N_UPGRADE || {}).signInToExportThisHand || 'Sign in to export this hand — it takes a few seconds and it stays free.');
     return;
   }
   const isJson = !platform;
@@ -2047,7 +2100,7 @@ function exportHandFromRow(handNum, platform, btn, tid) {
   // the caller didn't pass one (rows rendered from a fresh import).
   const tourneyId = tid || _tidFromHandId(handNum);
   if (!tourneyId) {
-    _rowExportStatus(btn, 'err', 'Could not tell which tournament this hand belongs to', 6000);
+    _rowExportStatus(btn, 'err', (window.I18N_UPGRADE || {}).couldNotTellTournament || 'Could not tell which tournament this hand belongs to', 6000);
     return;
   }
   const endpoint = isJson
@@ -2074,11 +2127,11 @@ function _renderPlayerExportAll() {
       `<div class="tourney-gate-blur" aria-hidden="true">${_EXPORT_ALL_BTNS_HTML}</div>` +
       `<div class="tourney-gate-overlay">` +
       _LOCK_ICON_SVG +
-      `<span class="tourney-gate-label">Pro only</span>` +
+      `<span class="tourney-gate-label">${(window.I18N_UPGRADE || {}).proOnlyLabel || 'Pro only'}</span>` +
       `<button class="tourney-gate-btn" onclick="showUpgradeModal('export')">${_pricingCta()}</button>` +
       `</div></div>`;
   } else {
-    btns.innerHTML = _SIGNIN_EXPORT_ALL_WRAP_HTML;
+    btns.innerHTML = _signinExportAllWrapHtml();
   }
   wrap.classList.remove('d-none');
 }
@@ -2164,7 +2217,7 @@ function _tsumStatPills(hands, vpip, pfr, perHr) {
   const vpipR = Math.round(vpip);
   const pfrR  = Math.round(pfr);
   return `
-    <span class="tsum-stat-item" title="Total hands">
+    <span class="tsum-stat-item" title="${(window.I18N_RESULTS || {}).totalHandsTip || 'Total hands'}">
       ${_TSUM_ICON_HANDS}
       <span class="tsum-stat-pill tsum-stat-stacked">
         <span class="tsum-stat-full">${hands} hands</span>
@@ -2178,7 +2231,7 @@ function _tsumStatPills(hands, vpip, pfr, perHr) {
         <span class="tsum-stat-short">${vpipR}/${pfrR}</span>
       </span>
     </span>
-    <span class="tsum-stat-item" title="Hands per hour">
+    <span class="tsum-stat-item" title="${(window.I18N_RESULTS || {}).handsPerHourTip || 'Hands per hour'}">
       ${_TSUM_ICON_CLOCK}
       <span class="tsum-stat-pill tsum-stat-stacked">
         <span class="tsum-stat-full">${perHr.toFixed(1)}/hr</span>
@@ -2233,7 +2286,7 @@ function _renderTournamentSummary(tournaments) {
   _updateTsSortIcons(_tsSortCol, _tsSortDir);
 
   if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">No tournament data in selected range.</td></tr>';
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted">${(window.I18N_RESULTS || {}).noTournamentData || 'No tournament data in selected range.'}</td></tr>`;
     return;
   }
 
@@ -2264,8 +2317,8 @@ function _renderTournamentSummary(tournaments) {
       return `<div class="tsum-event-card${isCardNew ? ' card-flash' : ''}" data-tid="${t.tourney_id}" onclick="event.stopPropagation();_dismissImportHighlight(this);_selectTourneyDetail('${t.tourney_id}', this)">
         <div class="tsum-event-top">
           <span class="tsum-event-date">${d}</span>
-          <span class="tsum-stat-pill" title="Sit down time">${fmtTime(t.earliest_ts, tz)}</span>
-          <span class="tsum-stat-pill" title="Time played">${_fmtDuration(t.duration_secs)}</span>
+          <span class="tsum-stat-pill" title="${(window.I18N_RESULTS || {}).sitDownTime || 'Sit down time'}">${fmtTime(t.earliest_ts, tz)}</span>
+          <span class="tsum-stat-pill" title="${(window.I18N_RESULTS || {}).timePlayed || 'Time played'}">${_fmtDuration(t.duration_secs)}</span>
         </div>
         <div class="tsum-event-stats">${_tsumStatPills(t.hands || 0, t.vpip_pct || 0, t.pfr_pct || 0, evPerHr)}</div>
         <div class="tsum-event-actions">${_TSUM_EXPORT_ICONS(t.tourney_id)}</div>
@@ -2986,7 +3039,7 @@ function _tgBuildChart() {
     data: {
       datasets: [
         {
-          label: 'Chip Stack',
+          label: (window.I18N_RESULTS || {}).chipStackLabel || 'Stack (chips)',
           data: chipDataset,
           borderColor: chipColor,
           backgroundColor: 'rgba(64,196,255,0.07)',
@@ -3004,7 +3057,7 @@ function _tgBuildChart() {
           order: 1,
         },
         {
-          label: 'BB Count',
+          label: (window.I18N_RESULTS || {}).bbCountLabel || 'Stack (BB)',
           data: bbDataset,
           borderColor: bbColor,
           backgroundColor: 'rgba(0,230,118,0.05)',
@@ -3295,7 +3348,7 @@ function _tgCardHtml(idx, pinned) {
       <span class="tg-card-hand">#${s.handNums[idx]}</span>
       ${lvl ? `<span class="tg-card-meta">L${lvl}</span>` : ''}
     </div>
-    ${pinned ? '<button type="button" class="tg-card-close" data-tg-close title="Close (Esc)">✕</button>' : ''}`;
+    ${pinned ? `<button type="button" class="tg-card-close" data-tg-close title="${(window.I18N_RESULTS || {}).closeEsc || 'Close (Esc)'}">✕</button>` : ''}`;
 
   // Position earns its place — it is what the cards mean. Street does not: the
   // dot's size already says whether the hand reached showdown, and the exact
@@ -3318,7 +3371,7 @@ function _tgCardHtml(idx, pinned) {
 
   const replay = h.replay_url && h.replay_url !== '#'
     ? `<a class="tg-card-btn" href="${h.replay_url}" target="_blank" rel="noopener">▶ Replay</a>`
-    : `<span class="tg-card-btn is-disabled" title="No replay available for this hand">▶ Replay</span>`;
+    : `<span class="tg-card-btn is-disabled" title="${(window.I18N_RESULTS || {}).noReplayAvailable || 'No replay available for this hand'}">▶ Replay</span>`;
 
   // The table is capped at the last 30 hands for free accounts while the graph
   // plots every one, so the row this would jump to often is not rendered.
@@ -3369,7 +3422,11 @@ function _tgToggleY(which) {
 function _tgToggleX() {
   _tgXMode = _tgXMode === 'time' ? 'level' : 'time';
   const pill = document.getElementById('tg-x-pill');
-  if (pill) { pill.textContent = _tgXMode === 'time' ? 'Time' : 'Level'; pill.classList.toggle('active', _tgXMode === 'time'); }
+  if (pill) {
+    const R = window.I18N_RESULTS || {};
+    pill.textContent = _tgXMode === 'time' ? (R.timeToggle || 'Time') : (R.levelToggle || 'Level');
+    pill.classList.toggle('active', _tgXMode === 'time');
+  }
   if (!_tgChart || !_tgState) return;
   _tgChart.update();
 }
@@ -3407,7 +3464,7 @@ function _tgDestroy() {
   const phPill = document.getElementById('tg-played-only-pill');
   if (chipPill) chipPill.classList.add('active');
   if (bbPill) bbPill.classList.add('active');
-  if (xPill) { xPill.textContent = 'Time'; xPill.classList.add('active'); }
+  if (xPill) { xPill.textContent = (window.I18N_RESULTS || {}).timeToggle || 'Time'; xPill.classList.add('active'); }
   if (phPill) phPill.classList.remove('active');
   _tgSetGraphWarning('');
   const wrap = document.getElementById('tourney-graph-wrap');
@@ -3422,7 +3479,7 @@ let _selectedTourneyId = null;
 function _resetTournamentDetails() {
   const tbody = document.getElementById('tourney-detail-tbody');
   if (tbody) {
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Select a tournament above to view its hands.</td></tr>';
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">${(window.I18N_RESULTS || {}).selectTournament || 'Select a tournament above to view its hands.'}</td></tr>`;
   }
   const hint = document.getElementById('tourney-detail-hint');
   if (hint) hint.textContent = '';
@@ -3492,7 +3549,7 @@ async function _selectTourneyDetail(tid, cardEl) {
   const tbody   = document.getElementById('tourney-detail-tbody');
   const hint    = document.getElementById('tourney-detail-hint');
   const section = document.getElementById('tournament-history-pro-section');
-  if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Loading hands…</td></tr>';
+  if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">${(window.I18N_RESULTS || {}).loadingHands || 'Loading hands…'}</td></tr>`;
   _tgDestroy();
 
   if (!_currentUser) return;
@@ -3511,7 +3568,7 @@ async function _selectTourneyDetail(tid, cardEl) {
         showUpgradeModal('history');
         return;
       }
-      if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Could not load hands.</td></tr>';
+      if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">${(window.I18N_RESULTS || {}).couldNotLoadHands || 'Could not load hands.'}</td></tr>`;
       return;
     }
     const data  = await r.json();
@@ -3538,12 +3595,12 @@ async function _selectTourneyDetail(tid, cardEl) {
       }
     }
   } catch (e) {
-    if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Could not load hands.</td></tr>';
+    if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">${(window.I18N_RESULTS || {}).couldNotLoadHands || 'Could not load hands.'}</td></tr>`;
   }
 }
 
 function exportPersistedTournament(tourneyId, btn) {
-  if (!_currentUser) { showSignInModal('Sign in to export this tournament.'); return; }
+  if (!_currentUser) { showSignInModal((window.I18N_UPGRADE || {}).signInToExportThisTournament || 'Sign in to export this tournament.'); return; }
   _downloadExport(`/api/tournaments/${tourneyId}/export`, {
     kind: 'tourney',
     body: { platform: (btn && btn.dataset.platform) || '' },
@@ -3552,7 +3609,7 @@ function exportPersistedTournament(tourneyId, btn) {
 }
 
 function exportPersistedTournamentJson(tourneyId, btn) {
-  if (!_currentUser) { showSignInModal('Sign in to export this tournament.'); return; }
+  if (!_currentUser) { showSignInModal((window.I18N_UPGRADE || {}).signInToExportThisTournament || 'Sign in to export this tournament.'); return; }
   _downloadExport(`/api/tournaments/${tourneyId}/export/json`, {
     kind: 'tourney',
     body: {},
@@ -3611,7 +3668,7 @@ function exportAllHandsJson(btn) {
     kind: 'session',
     body: { tourney_ids: _sessionTourneyIds() },
     fallbackName: 'pppoker_all.json',
-    loadingText: 'Building JSON…',
+    loadingText: (window.I18N_UPGRADE || {}).buildingJson || 'Building JSON…',
   }, btn);
 }
 
@@ -3621,7 +3678,7 @@ function exportAllHands(btn) {
     body: { platform: (btn && btn.dataset.platform) || '',
             tourney_ids: _sessionTourneyIds() },
     fallbackName: 'pppoker_export.txt',
-    loadingText: 'Generating export…',
+    loadingText: (window.I18N_UPGRADE || {}).generatingExport || 'Generating export…',
   }, btn);
 }
 
@@ -3812,7 +3869,8 @@ function _pricingCta() {
 
 /** Long CTA label used on the upgrade buttons. */
 function _pricingCtaLong() {
-  return `Get ${_PRICING.label} — ${_PRICING.price_label.replace('/mo', '/month')}`;
+  const tpl = (window.I18N_UPGRADE || {}).getPricingCta || 'Get __PLAN__ — __PRICE__';
+  return _fillTemplate(tpl, { PLAN: _PRICING.label, PRICE: _PRICING.price_label.replace('/mo', '/month') });
 }
 
 /** Push the active plan's wording into the static copy on the page. */
@@ -4268,7 +4326,7 @@ async function _initFirebase() {
     // ── Handle magic-link redirect (must run before onAuthStateChanged) ──
     if (_auth && _auth.isSignInWithEmailLink(window.location.href)) {
       let email = localStorage.getItem('emailForSignIn');
-      if (!email) email = window.prompt('Please confirm your email to complete sign-in:') || '';
+      if (!email) email = window.prompt((window.I18N_AUTH || {}).confirmEmailPrompt || 'Please confirm your email to complete sign-in:') || '';
       if (email) {
         try {
           await _auth.signInWithEmailLink(email, window.location.href);

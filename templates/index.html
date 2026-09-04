@@ -1293,7 +1293,8 @@
     checkYourInbox: "{{ _('check your inbox.') }}",
     failedToSendLink: "{{ _('Failed to send link.') }}",
     authNotReady: "{{ _('Auth not ready — please wait a moment and try again.') }}",
-    googleSignInFailed: "{{ _('Google sign-in failed.') }}"
+    googleSignInFailed: "{{ _('Google sign-in failed.') }}",
+    confirmEmailPrompt: "{{ _('Please confirm your email to complete sign-in:') }}"
   };
   {# Same hand-over as I18N_AUTH above, for the gate stub modal's dynamic bits
      (_showGateStubModal in app.js) — the kind/feature labels and the countdown
@@ -1351,6 +1352,102 @@
     importLine:        "{{ _('%(n)s imports/day', n='__N__') }}",
     freeUpToCell:      "{{ _('%(free)s/day (up to %(total)s/day with a 30s wait)', free='__FREE__', total='__TOTAL__') }}",
     tourneyCell:      "{{ _('%(n)s free ever, then %(weekly)s/week (with survey)', n='__N__', weekly='__WEEKLY__') }}"
+  };
+  {# Same hand-over pattern — Pro-upgrade reasons, quota/export-gate messages,
+     and other assorted status text in static/app.js that was still hardcoded
+     English (found in a follow-up i18n audit of the home page + its modals).
+     %(n)s/%(limit)s/%(filename)s/%(plan)s/%(price)s follow the same
+     __TOKEN__-substitution trick as I18N_EXPORT_ADS above. #}
+  window.I18N_UPGRADE = {
+    exportReason:        "{{ _('You\'ve used your exports for today. Upgrade to Pro for unlimited daily exports.') }}",
+    handsReason:         "{{ _('Free accounts see only the last %(n)s hands. Upgrade to Pro for unlimited history.', n='__N__') }}",
+    tourneyReason:        "{{ _('Tournament exports are limited on the free plan.') }}",
+    importQuotaReason:  "{{ _('That\'s all %(n)s imports for today. Upgrade to Pro for unlimited imports.', n='__N__') }}",
+    usedAllImports:      "{{ _('You\'ve used all %(n)s imports for today. ', n='__N__') }}",
+    handQuotaReason:      "{{ _('You\'ve used your hand exports for today. Upgrade to Pro for unlimited exports.') }}",
+    tourneyQuotaReason: "{{ _('You\'ve used your tournament exports for today. Upgrade to Pro for unlimited exports.') }}",
+    fullSessionReason:  "{{ _('Exporting a whole session in one file is a Pro feature.') }}",
+    historyReason:        "{{ _('Free accounts keep %(n)s days of history. Upgrade to Pro to keep everything.', n='__N__') }}",
+    tourneyQuotaOne:      "{{ _('Free accounts get %(limit)s tournament export a week after your first free one. Upgrade to Pro for unlimited exports.', limit='__LIMIT__') }}",
+    tourneyQuotaMany:  "{{ _('Free accounts get %(limit)s tournament exports a week after your first free one. Upgrade to Pro for unlimited exports.', limit='__LIMIT__') }}",
+    handQuotaOne:        "{{ _('That\'s all %(limit)s hand export for today. Upgrade to Pro for unlimited exports.', limit='__LIMIT__') }}",
+    handQuotaMany:        "{{ _('That\'s all %(limit)s hand exports for today. Upgrade to Pro for unlimited exports.', limit='__LIMIT__') }}",
+    redirecting:          "{{ _('Redirecting…') }}",
+    pleaseSignInBeforeUpgrading: "{{ _('Please sign in before upgrading.') }}",
+    couldNotStartCheckout: "{{ _('Could not start checkout') }}",
+    signInToExportHands: "{{ _('Sign in to export your hands — it takes a few seconds and it stays free.') }}",
+    signInToExportHandsShort: "{{ _('Sign in to export your hands — it stays free.') }}",
+    signInToExportShort: "{{ _('Sign in to export') }}",
+    proFeatureBadge:      "{{ _('Pro feature') }}",
+    outsideHistoryWindow: "{{ _('Outside your %(n)s-day history', n='__N__') }}",
+    lastOneToday:        "{{ _('That\'s your last one for today') }}",
+    unlockWithSurvey:    "{{ _('Unlock with a quick survey') }}",
+    watchToUnlock:        "{{ _('Watch to unlock') }}",
+    exportFailedGeneric: "{{ _('Export failed') }}",
+    signInToUnlockExports: "{{ _('Sign in to unlock exports.') }}",
+    signInToSaveHands:    "{{ _('Sign in to save your hands.') }}",
+    signInToSaveThem:    "{{ _('Sign in to save them.') }}",
+    signInToExportThisHand: "{{ _('Sign in to export this hand — it takes a few seconds and it stays free.') }}",
+    signInToExportThisTournament: "{{ _('Sign in to export this tournament.') }}",
+    networkErrorPrefix: "{{ _('Network error:') }}",
+    pleaseEnterUrl:      "{{ _('Please enter a PPPoker Hand Review URL.') }}",
+    importsResetMidnight: "{{ _('Imports reset at midnight UTC.') }}",
+    couldNotTellTournament: "{{ _('Could not tell which tournament this hand belongs to') }}",
+    savedAs:              "{{ _('Saved as %(filename)s', filename='__FILENAME__') }}",
+    exportingEllipsis:  "{{ _('Exporting…') }}",
+    buildingJson:        "{{ _('Building JSON…') }}",
+    generatingExport:    "{{ _('Generating export…') }}",
+    getPricingCta:        "{{ _('Get %(plan)s — %(price)s', plan='__PLAN__', price='__PRICE__') }}",
+    signInBtnLabel:      "{{ _('Sign in') }}",
+    proOnlyLabel:          "{{ _('Pro only') }}",
+    exportAllProOnly:    "{{ _('Export All Hands — Pro only') }}",
+    upgradeToKeepEverything: "{{ _('Upgrade to keep everything') }}",
+    historyCapOne:        "{{ _('%(count)s tournament from this link is older than %(days)s days and wasn\'t saved. ', count='__COUNT__', days='__DAYS__') }}",
+    historyCapMany:      "{{ _('%(count)s tournaments from this link are older than %(days)s days and weren\'t saved. ', count='__COUNT__', days='__DAYS__') }}"
+  };
+  {# Same pattern, for the import-result banner (showImportSuccess in app.js) —
+     the "Welcome!" / "Analysed N hands" text shown after every import.
+     __TOURFRAG__ is a pre-built HTML fragment (see tourFragOne/tourFragMany)
+     the translator can place anywhere in the sentence, rather than forcing
+     English word order ("... hands across N tournaments"). #}
+  window.I18N_IMPORT_RESULT = {
+    anonSuccess:  "{{ _('✓ Analysed %(total)s hands%(tourfrag)s. ', total='__TOTAL__', tourfrag='__TOURFRAG__') }}",
+    welcomeNew:    "{{ _('✓ Welcome, %(name)s! %(newhands)s new hands loaded%(tourfrag)s.', name='__NAME__', newhands='__NEWHANDS__', tourfrag='__TOURFRAG__') }}",
+    welcomeBack:  "{{ _('✓ Welcome back, %(name)s! %(total)s hands re-analysed (all already saved).', name='__NAME__', total='__TOTAL__') }}",
+    tourFragOne:  "{{ _(' across %(count)s tournament', count='__COUNT__') }}",
+    tourFragMany: "{{ _(' across %(count)s tournaments', count='__COUNT__') }}"
+  };
+  {# Same pattern, for result badges / table empty-states / stat tooltips
+     scattered across the results tables (renderHandsTable, tournament
+     summary, cash-games summary, tourney graph controls). #}
+  window.I18N_RESULTS = {
+    won:      "{{ _('Won') }}",
+    lost:      "{{ _('Lost') }}",
+    breakEven: "{{ _('Break even') }}",
+    games:    "{{ _('Games') }}",
+    playMoney: "{{ _('Play money') }}",
+    noHandsAvailable:      "{{ _('No hands available') }}",
+    noTournamentsDetected: "{{ _('No tournaments detected') }}",
+    noCashOrPlayData:      "{{ _('No cash or play money data in selected range.') }}",
+    selectCashSession:    "{{ _('Select a cash or play money session above to view its hands.') }}",
+    selectTournament:      "{{ _('Select a tournament above to view its hands.') }}",
+    loadingHands:          "{{ _('Loading hands…') }}",
+    couldNotLoadHands:    "{{ _('Could not load hands.') }}",
+    noTournamentData:      "{{ _('No tournament data in selected range.') }}",
+    totalHandsShort:      "{{ _('Total Hands') }}",
+    sessions:              "{{ _('Sessions') }}",
+    totalHandsTip:        "{{ _('Total hands') }}",
+    handsPerHourTip:      "{{ _('Hands per hour') }}",
+    sitDownTime:          "{{ _('Sit down time') }}",
+    timePlayed:            "{{ _('Time played') }}",
+    watchReplay:          "{{ _('Watch replay') }}",
+    handIdTip:            "{{ _('Hand ID: %(n)s', n='__N__') }}",
+    closeEsc:              "{{ _('Close (Esc)') }}",
+    noReplayAvailable:    "{{ _('No replay available for this hand') }}",
+    chipStackLabel:        "{{ _('Stack (chips)') }}",
+    bbCountLabel:          "{{ _('Stack (BB)') }}",
+    timeToggle:            "{{ _('Time') }}",
+    levelToggle:          "{{ _('Level') }}"
   };
 </script>
 <script src="/static/header.js?v=1"></script>
