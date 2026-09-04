@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-04 09:49+0930\n"
+"POT-Creation-Date: 2026-09-04 10:45+0930\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -364,7 +364,7 @@ msgstr ""
 msgid "SD"
 msgstr ""
 
-#: templates/index.html:387
+#: templates/index.html:387 templates/index.html:1424
 msgid "Won"
 msgstr ""
 
@@ -547,7 +547,7 @@ msgstr ""
 msgid "Duration"
 msgstr ""
 
-#: templates/index.html:596
+#: templates/index.html:596 templates/index.html:1449
 msgid "Time"
 msgstr ""
 
@@ -555,7 +555,7 @@ msgstr ""
 msgid "Hand details"
 msgstr ""
 
-#: templates/index.html:625
+#: templates/index.html:625 templates/index.html:1433
 msgid "Select a tournament above to view its hands."
 msgstr ""
 
@@ -567,7 +567,7 @@ msgstr ""
 msgid "Session"
 msgstr ""
 
-#: templates/index.html:659
+#: templates/index.html:659 templates/index.html:1438
 msgid "Sessions"
 msgstr ""
 
@@ -575,7 +575,7 @@ msgstr ""
 msgid "Cash & Play Money Session Details"
 msgstr ""
 
-#: templates/index.html:702
+#: templates/index.html:702 templates/index.html:1432
 msgid "Select a cash or play money session above to view its hands."
 msgstr ""
 
@@ -611,7 +611,7 @@ msgstr ""
 msgid "Apply"
 msgstr ""
 
-#: templates/index.html:767 templates/index.html:819 templates/index.html:1315
+#: templates/index.html:767 templates/index.html:819 templates/index.html:1316
 msgid "Unlock"
 msgstr ""
 
@@ -641,7 +641,7 @@ msgstr ""
 msgid "Or wait 30 seconds to unlock this one."
 msgstr ""
 
-#: templates/index.html:861
+#: templates/index.html:861 templates/index.html:1401
 msgid "Sign in"
 msgstr ""
 
@@ -1264,114 +1264,443 @@ msgstr ""
 msgid "Google sign-in failed."
 msgstr ""
 
-#: templates/index.html:1308
-msgid "this import"
+#: templates/index.html:1297
+msgid "Please confirm your email to complete sign-in:"
 msgstr ""
 
 #: templates/index.html:1309
-msgid "this hand export"
+msgid "this import"
 msgstr ""
 
 #: templates/index.html:1310
-msgid "imports"
+msgid "this hand export"
 msgstr ""
 
 #: templates/index.html:1311
-msgid "hand exports"
+msgid "imports"
 msgstr ""
 
 #: templates/index.html:1312
-msgid "Import sponsored by one of our ads"
+msgid "hand exports"
 msgstr ""
 
 #: templates/index.html:1313
-msgid "Export sponsored by one of our ads"
+msgid "Import sponsored by one of our ads"
 msgstr ""
 
 #: templates/index.html:1314
+msgid "Export sponsored by one of our ads"
+msgstr ""
+
+#: templates/index.html:1315
 #, python-format
 msgid "Unlock in %(seconds)s seconds…"
 msgstr ""
 
-#: templates/index.html:1321
+#: templates/index.html:1322
 msgid "Deployed assets"
 msgstr ""
 
-#: templates/index.html:1328
+#: templates/index.html:1329
 msgid "one tournament export"
 msgstr ""
 
-#: templates/index.html:1329
+#: templates/index.html:1330
 msgid "one more hand export"
 msgstr ""
 
-#: templates/index.html:1330
+#: templates/index.html:1331
 msgid "Loading a survey…"
 msgstr ""
 
-#: templates/index.html:1331
+#: templates/index.html:1332
 msgid "No surveys are available right now — please try again later."
 msgstr ""
 
-#: templates/index.html:1332
+#: templates/index.html:1333
 msgid "No surveys available right now — here are a few quick questions instead."
 msgstr ""
 
-#: templates/index.html:1333
+#: templates/index.html:1334
 msgid "Complete the survey to unlock your export."
 msgstr ""
 
-#: templates/index.html:1334
+#: templates/index.html:1335
 msgid "Answer a few quick questions to unlock your export."
 msgstr ""
 
-#: templates/index.html:1335
+#: templates/index.html:1336
 msgid ""
 "Still waiting on the survey provider. Your credit is safe — close this "
 "and retry the export in a bit, it will pick up automatically once the "
 "survey lands."
 msgstr ""
 
-#: templates/index.html:1336
+#: templates/index.html:1337
 msgid "Unlocked — starting your export…"
 msgstr ""
 
-#: templates/index.html:1337
+#: templates/index.html:1338
 msgid "Checking your unlock…"
-msgstr ""
-
-#: templates/index.html:1347
-#, python-format
-msgid "%(n)s hand export/day"
 msgstr ""
 
 #: templates/index.html:1348
 #, python-format
-msgid "%(n)s hand exports/day"
+msgid "%(n)s hand export/day"
 msgstr ""
 
 #: templates/index.html:1349
 #, python-format
-msgid "%(n)s free tournament export, then %(weekly)s/week"
+msgid "%(n)s hand exports/day"
 msgstr ""
 
 #: templates/index.html:1350
 #, python-format
-msgid "%(n)s free tournament exports, then %(weekly)s/week"
+msgid "%(n)s free tournament export, then %(weekly)s/week"
 msgstr ""
 
 #: templates/index.html:1351
 #, python-format
-msgid "%(n)s imports/day"
+msgid "%(n)s free tournament exports, then %(weekly)s/week"
 msgstr ""
 
 #: templates/index.html:1352
 #, python-format
-msgid "%(free)s/day (up to %(total)s/day with a 30s wait)"
+msgid "%(n)s imports/day"
 msgstr ""
 
 #: templates/index.html:1353
 #, python-format
+msgid "%(free)s/day (up to %(total)s/day with a 30s wait)"
+msgstr ""
+
+#: templates/index.html:1354
+#, python-format
 msgid "%(n)s free ever, then %(weekly)s/week (with survey)"
+msgstr ""
+
+#: templates/index.html:1362
+msgid ""
+"You've used your exports for today. Upgrade to Pro for unlimited daily "
+"exports."
+msgstr ""
+
+#: templates/index.html:1363
+#, python-format
+msgid ""
+"Free accounts see only the last %(n)s hands. Upgrade to Pro for unlimited"
+" history."
+msgstr ""
+
+#: templates/index.html:1364
+msgid "Tournament exports are limited on the free plan."
+msgstr ""
+
+#: templates/index.html:1365
+#, python-format
+msgid "That's all %(n)s imports for today. Upgrade to Pro for unlimited imports."
+msgstr ""
+
+#: templates/index.html:1366
+#, python-format
+msgid "You've used all %(n)s imports for today. "
+msgstr ""
+
+#: templates/index.html:1367
+msgid ""
+"You've used your hand exports for today. Upgrade to Pro for unlimited "
+"exports."
+msgstr ""
+
+#: templates/index.html:1368
+msgid ""
+"You've used your tournament exports for today. Upgrade to Pro for "
+"unlimited exports."
+msgstr ""
+
+#: templates/index.html:1369
+msgid "Exporting a whole session in one file is a Pro feature."
+msgstr ""
+
+#: templates/index.html:1370
+#, python-format
+msgid ""
+"Free accounts keep %(n)s days of history. Upgrade to Pro to keep "
+"everything."
+msgstr ""
+
+#: templates/index.html:1371
+#, python-format
+msgid ""
+"Free accounts get %(limit)s tournament export a week after your first "
+"free one. Upgrade to Pro for unlimited exports."
+msgstr ""
+
+#: templates/index.html:1372
+#, python-format
+msgid ""
+"Free accounts get %(limit)s tournament exports a week after your first "
+"free one. Upgrade to Pro for unlimited exports."
+msgstr ""
+
+#: templates/index.html:1373
+#, python-format
+msgid ""
+"That's all %(limit)s hand export for today. Upgrade to Pro for unlimited "
+"exports."
+msgstr ""
+
+#: templates/index.html:1374
+#, python-format
+msgid ""
+"That's all %(limit)s hand exports for today. Upgrade to Pro for unlimited"
+" exports."
+msgstr ""
+
+#: templates/index.html:1375
+msgid "Redirecting…"
+msgstr ""
+
+#: templates/index.html:1376
+msgid "Please sign in before upgrading."
+msgstr ""
+
+#: templates/index.html:1377
+msgid "Could not start checkout"
+msgstr ""
+
+#: templates/index.html:1378
+msgid "Sign in to export your hands — it takes a few seconds and it stays free."
+msgstr ""
+
+#: templates/index.html:1379
+msgid "Sign in to export your hands — it stays free."
+msgstr ""
+
+#: templates/index.html:1380
+msgid "Sign in to export"
+msgstr ""
+
+#: templates/index.html:1381
+msgid "Pro feature"
+msgstr ""
+
+#: templates/index.html:1382
+#, python-format
+msgid "Outside your %(n)s-day history"
+msgstr ""
+
+#: templates/index.html:1383
+msgid "That's your last one for today"
+msgstr ""
+
+#: templates/index.html:1384
+msgid "Unlock with a quick survey"
+msgstr ""
+
+#: templates/index.html:1385
+msgid "Watch to unlock"
+msgstr ""
+
+#: templates/index.html:1386
+msgid "Export failed"
+msgstr ""
+
+#: templates/index.html:1387
+msgid "Sign in to unlock exports."
+msgstr ""
+
+#: templates/index.html:1388
+msgid "Sign in to save your hands."
+msgstr ""
+
+#: templates/index.html:1389
+msgid "Sign in to save them."
+msgstr ""
+
+#: templates/index.html:1390
+msgid "Sign in to export this hand — it takes a few seconds and it stays free."
+msgstr ""
+
+#: templates/index.html:1391
+msgid "Sign in to export this tournament."
+msgstr ""
+
+#: templates/index.html:1392
+msgid "Network error:"
+msgstr ""
+
+#: templates/index.html:1393
+msgid "Please enter a PPPoker Hand Review URL."
+msgstr ""
+
+#: templates/index.html:1394
+msgid "Imports reset at midnight UTC."
+msgstr ""
+
+#: templates/index.html:1395
+msgid "Could not tell which tournament this hand belongs to"
+msgstr ""
+
+#: templates/index.html:1396
+#, python-format
+msgid "Saved as %(filename)s"
+msgstr ""
+
+#: templates/index.html:1397
+msgid "Exporting…"
+msgstr ""
+
+#: templates/index.html:1398
+msgid "Building JSON…"
+msgstr ""
+
+#: templates/index.html:1399
+msgid "Generating export…"
+msgstr ""
+
+#: templates/index.html:1400
+#, python-format
+msgid "Get %(plan)s — %(price)s"
+msgstr ""
+
+#: templates/index.html:1402
+msgid "Pro only"
+msgstr ""
+
+#: templates/index.html:1403
+msgid "Export All Hands — Pro only"
+msgstr ""
+
+#: templates/index.html:1404
+msgid "Upgrade to keep everything"
+msgstr ""
+
+#: templates/index.html:1405
+#, python-format
+msgid ""
+"%(count)s tournament from this link is older than %(days)s days and "
+"wasn't saved. "
+msgstr ""
+
+#: templates/index.html:1406
+#, python-format
+msgid ""
+"%(count)s tournaments from this link are older than %(days)s days and "
+"weren't saved. "
+msgstr ""
+
+#: templates/index.html:1414
+#, python-format
+msgid "✓ Analysed %(total)s hands%(tourfrag)s. "
+msgstr ""
+
+#: templates/index.html:1415
+#, python-format
+msgid "✓ Welcome, %(name)s! %(newhands)s new hands loaded%(tourfrag)s."
+msgstr ""
+
+#: templates/index.html:1416
+#, python-format
+msgid "✓ Welcome back, %(name)s! %(total)s hands re-analysed (all already saved)."
+msgstr ""
+
+#: templates/index.html:1417
+#, python-format
+msgid " across %(count)s tournament"
+msgstr ""
+
+#: templates/index.html:1418
+#, python-format
+msgid " across %(count)s tournaments"
+msgstr ""
+
+#: templates/index.html:1425
+msgid "Lost"
+msgstr ""
+
+#: templates/index.html:1426
+msgid "Break even"
+msgstr ""
+
+#: templates/index.html:1427
+msgid "Games"
+msgstr ""
+
+#: templates/index.html:1428
+msgid "Play money"
+msgstr ""
+
+#: templates/index.html:1429
+msgid "No hands available"
+msgstr ""
+
+#: templates/index.html:1430
+msgid "No tournaments detected"
+msgstr ""
+
+#: templates/index.html:1431
+msgid "No cash or play money data in selected range."
+msgstr ""
+
+#: templates/index.html:1434
+msgid "Loading hands…"
+msgstr ""
+
+#: templates/index.html:1435
+msgid "Could not load hands."
+msgstr ""
+
+#: templates/index.html:1436
+msgid "No tournament data in selected range."
+msgstr ""
+
+#: templates/index.html:1437
+msgid "Total Hands"
+msgstr ""
+
+#: templates/index.html:1439
+msgid "Total hands"
+msgstr ""
+
+#: templates/index.html:1440
+msgid "Hands per hour"
+msgstr ""
+
+#: templates/index.html:1441
+msgid "Sit down time"
+msgstr ""
+
+#: templates/index.html:1442
+msgid "Time played"
+msgstr ""
+
+#: templates/index.html:1443
+msgid "Watch replay"
+msgstr ""
+
+#: templates/index.html:1444
+#, python-format
+msgid "Hand ID: %(n)s"
+msgstr ""
+
+#: templates/index.html:1445
+msgid "Close (Esc)"
+msgstr ""
+
+#: templates/index.html:1446
+msgid "No replay available for this hand"
+msgstr ""
+
+#: templates/index.html:1447
+msgid "Stack (chips)"
+msgstr ""
+
+#: templates/index.html:1448
+msgid "Stack (BB)"
+msgstr ""
+
+#: templates/index.html:1450
+msgid "Level"
 msgstr ""
 
