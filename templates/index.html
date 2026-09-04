@@ -283,7 +283,7 @@
           <li><span class="tier-check">✓</span> {{ _('History that never expires') }}</li>
           <li><span class="tier-check">✓</span> {{ _('Whole-session exports') }}</li>
           <li><span class="tier-check">✓</span> {{ _('Unlimited daily exports') }}</li>
-          <li><span class="tier-check">✓</span> {{ _('No surveys, ever') }}</li>
+          <li><span class="tier-check">✓</span> {{ _('No ads, ever') }}</li>
         </ul>
         <button class="tier-cta" onclick="showUpgradeModal('banner')">{{ _('Get') }} <span data-pricing-plan>{{ _('Early Access') }}</span></button>
       </div>
@@ -1071,7 +1071,6 @@
           <tbody>
             <tr><td>{{ _('Imports') }}</td><td><span data-exportads-import-cell>{{ _('1/day (up to 3/day with a 30s wait)') }}</span><sup>*</sup></td><td>{{ _('Unlimited') }}</td></tr>
             <tr><td>{{ _('History kept') }}</td><td>{{ _('7 days') }}</td><td>{{ _('Forever') }}</td></tr>
-            <tr><td>{{ _('Hand history displayed') }}</td><td>{{ _('Last 30') }}</td><td>{{ _('Unlimited') }}</td></tr>
             <tr><td>{{ _('Session stats & graphs') }}</td><td>✓ {{ _('Full') }}</td><td>✓ {{ _('Full') }}</td></tr>
             <tr><td>{{ _('Tournament Details & progress graph') }}</td><td>✓ {{ _('Full') }}</td><td>✓ {{ _('Full') }}</td></tr>
             <tr><td>{{ _('Gamification (points, streaks, badges)') }}</td><td>✓</td><td>✓</td></tr>
@@ -1321,9 +1320,41 @@
   window.I18N_ADMIN = {
     deployedAssets: "{{ _('Deployed assets') }}"
   };
+  {# Same hand-over pattern, for the survey-unlock modal's dynamic bits
+     (openSurveyModal / _surveyStatus / _surveyShowCpx / _surveyShowTally in
+     app.js) — these were previously hardcoded English literals, so the
+     pt-BR modal mixed languages. #}
+  window.I18N_SURVEY = {
+    kindLabelTourney:      "{{ _('one tournament export') }}",
+    kindLabelHand:          "{{ _('one more hand export') }}",
+    loadingSurvey:          "{{ _('Loading a survey…') }}",
+    noSurveysAvailable:      "{{ _('No surveys are available right now — please try again later.') }}",
+    noSurveysFallback:      "{{ _('No surveys available right now — here are a few quick questions instead.') }}",
+    completeTheSurvey:      "{{ _('Complete the survey to unlock your export.') }}",
+    answerAFewQuestions:    "{{ _('Answer a few quick questions to unlock your export.') }}",
+    stillWaitingOnProvider: "{{ _('Still waiting on the survey provider. Your credit is safe — close this and retry the export in a bit, it will pick up automatically once the survey lands.') }}",
+    unlockedStarting:      "{{ _('Unlocked — starting your export…') }}",
+    checkingYourUnlock:    "{{ _('Checking your unlock…') }}"
+  };
+  {# Same hand-over pattern, for the Free-vs-Pro comparison table's dynamic
+     cells (_applyExportAdsCopy in app.js) — those overwrite the shipped,
+     translated Jinja copy with English whenever the live admin-configured
+     limits diverge from the shipped default, same mixed-language bug as
+     I18N_SURVEY above. __N__/__TOTAL__/__FREE__/__WEEKLY__ are literal
+     tokens app.js substitutes with the real numbers, same trick as
+     I18N_GATE_STUB.unlockCountdown's __SECONDS__ above. #}
+  window.I18N_EXPORT_ADS = {
+    handLineOne:       "{{ _('%(n)s hand export/day', n='__N__') }}",
+    handLineMany:      "{{ _('%(n)s hand exports/day', n='__N__') }}",
+    tourneyLineOne:    "{{ _('%(n)s free tournament export, then %(weekly)s/week', n='__N__', weekly='__WEEKLY__') }}",
+    tourneyLineMany:  "{{ _('%(n)s free tournament exports, then %(weekly)s/week', n='__N__', weekly='__WEEKLY__') }}",
+    importLine:        "{{ _('%(n)s imports/day', n='__N__') }}",
+    freeUpToCell:      "{{ _('%(free)s/day (up to %(total)s/day with a 30s wait)', free='__FREE__', total='__TOTAL__') }}",
+    tourneyCell:      "{{ _('%(n)s free ever, then %(weekly)s/week (with survey)', n='__N__', weekly='__WEEKLY__') }}"
+  };
 </script>
 <script src="/static/header.js?v=1"></script>
-<script src="/static/app.js?v=70"></script>
+<script src="/static/app.js?v=71"></script>
 <script>
   if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
     navigator.serviceWorker.register('/static/sw.js', { scope: '/' })

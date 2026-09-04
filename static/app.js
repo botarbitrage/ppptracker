@@ -276,12 +276,14 @@ async function openSurveyModal(kind, retry) {
 
   const modalEl = document.getElementById('survey-modal');
   if (!modalEl) return;
+  const I = window.I18N_SURVEY || {};
   const label = document.getElementById('survey-kind-label');
   if (label) {
     label.textContent = kind === 'tourney'
-      ? 'one tournament export' : 'one more hand export';
+      ? (I.kindLabelTourney || 'one tournament export')
+      : (I.kindLabelHand || 'one more hand export');
   }
-  _surveyStatus('Loading a survey…');
+  _surveyStatus(I.loadingSurvey || 'Loading a survey…');
   const frame = document.getElementById('survey-frame');
   if (frame) frame.removeAttribute('src');
 
@@ -312,7 +314,7 @@ async function openSurveyModal(kind, retry) {
   } else if (cfg.tally_form_url) {
     _surveyShowTally(cfg.tally_form_url, kind);
   } else {
-    _surveyStatus('No surveys are available right now — please try again later.', 'err');
+    _surveyStatus(I.noSurveysAvailable || 'No surveys are available right now — please try again later.', 'err');
     return;
   }
   _surveyStartPolling();
@@ -337,7 +339,7 @@ function _surveyShowCpx(cpx, kind) {
   });
   if (cpx.secure_hash) params.set('secure_hash', cpx.secure_hash);
   frame.src = `https://offers.cpx-research.com/index.php?${params.toString()}`;
-  _surveyStatus('Complete the survey to unlock your export.');
+  _surveyStatus((window.I18N_SURVEY || {}).completeTheSurvey || 'Complete the survey to unlock your export.');
   _trackEvent('survey_provider_shown', { provider: 'cpx', kind });
 }
 
@@ -354,7 +356,7 @@ function _surveyShowTally(formUrl, kind) {
   if (!frame) return;
   const sep = formUrl.includes('?') ? '&' : '?';
   frame.src = `${formUrl}${sep}uid=${encodeURIComponent(_currentUser.uid)}&kind=${encodeURIComponent(kind)}`;
-  _surveyStatus('Answer a few quick questions to unlock your export.');
+  _surveyStatus((window.I18N_SURVEY || {}).answerAFewQuestions || 'Answer a few quick questions to unlock your export.');
   _trackEvent('survey_provider_shown', { provider: 'tally', kind });
 }
 
@@ -392,7 +394,8 @@ function _surveyStartPolling() {
       return;
     }
     if (Date.now() > _surveyState.deadline) {
-      _surveyStatus('Still waiting on the survey provider. Your credit is safe — close '
+      _surveyStatus((window.I18N_SURVEY || {}).stillWaitingOnProvider ||
+                    'Still waiting on the survey provider. Your credit is safe — close '
                     + 'this and retry the export in a bit, it will pick up automatically '
                     + 'once the survey lands.', 'err');
       return;
@@ -406,7 +409,7 @@ function _surveyEarned() {
   const retry = _surveyState.retry;
   const kind  = _surveyState.kind;
   clearTimeout(_surveyState.timer);
-  _surveyStatus('Unlocked — starting your export…', 'ok');
+  _surveyStatus((window.I18N_SURVEY || {}).unlockedStarting || 'Unlocked — starting your export…', 'ok');
   _trackEvent('survey_completed', { kind });
   setTimeout(() => {
     closeSurveyModal();
@@ -3746,16 +3749,17 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('message', (ev) => {
     if (!_surveyState.kind) return;
     const raw = typeof ev.data === 'string' ? ev.data : JSON.stringify(ev.data || '');
+    const I = window.I18N_SURVEY || {};
     if (/no[_\s-]?surveys|no_offers|noSurveysAvailable/i.test(raw)) {
       const url = (_surveyState.config || {}).tally_form_url;
       if (url) {
-        _surveyStatus('No surveys available right now — here are a few quick questions instead.');
+        _surveyStatus(I.noSurveysFallback || 'No surveys available right now — here are a few quick questions instead.');
         _surveyShowTally(url, _surveyState.kind);
       } else {
-        _surveyStatus('No surveys are available right now — please try again later.', 'err');
+        _surveyStatus(I.noSurveysAvailable || 'No surveys are available right now — please try again later.', 'err');
       }
     } else if (/complete|finished|success/i.test(raw)) {
-      _surveyStatus('Checking your unlock…');
+      _surveyStatus(I.checkingYourUnlock || 'Checking your unlock…');
       _surveyStartPolling();
     }
   });
@@ -3867,12 +3871,26 @@ function _exportAdsHandFreeCount() {
   return Math.max(h.hand_hard_limit - h.hand_soft_limit, 0);
 }
 
+/** Fill a translated template that carries literal __TOKEN__ placeholders
+ *  (the same substitution trick as I18N_GATE_STUB.unlockCountdown's
+ *  __SECONDS__) with real values. `vars` maps token name (without the
+ *  underscores) to its replacement, e.g. {N: 5, TOTAL: 3}. */
+function _fillTemplate(tpl, vars) {
+  let out = tpl;
+  for (const [key, val] of Object.entries(vars)) {
+    out = out.split(`__${key}__`).join(String(val));
+  }
+  return out;
+}
+
 /** Push the live import/export limits into the page.
  *
  * The shipped Jinja copy already spells out the default numbers, fully
- * translated. Only overwrite it (in English — no live-fetched copy goes
- * through Flask-Babel) once the live config actually diverges from that
- * shipped default, same pattern this function has always used.
+ * translated. Only overwrite it once the live config actually diverges from
+ * that shipped default, same pattern this function has always used — but
+ * now through the window.I18N_EXPORT_ADS templates (see templates/index.html)
+ * instead of a hardcoded English literal, so a pt-BR page doesn't mix
+ * languages the moment an admin changes a limit away from the default.
  *
  * Two surfaces read these numbers: the terse tier-compare card list
  * (data-exportads-*-line) and the detailed "Free vs Pro" comparison table
@@ -3882,6 +3900,7 @@ function _exportAdsHandFreeCount() {
 function _applyExportAdsCopy() {
   const hand = _EXPORT_ADS.hand_export, tourney = _EXPORT_ADS.tourney_export, imp = _EXPORT_ADS.import;
   const handFree = _exportAdsHandFreeCount();
+  const I = window.I18N_EXPORT_ADS || {};
 
   // Privacy-paragraph + card use of the plain hand hard limit ("5/day").
   document.querySelectorAll('[data-exportads-hand-hard]').forEach(el => {
@@ -3894,18 +3913,24 @@ function _applyExportAdsCopy() {
   if (hand.hand_hard_limit !== 5) {
     document.querySelectorAll('[data-exportads-hand-line]').forEach(el => {
       const n = hand.hand_hard_limit;
-      el.textContent = `${n} hand export${n === 1 ? '' : 's'}/day`;
+      const tpl = n === 1
+        ? (I.handLineOne  || '__N__ hand export/day')
+        : (I.handLineMany || '__N__ hand exports/day');
+      el.textContent = _fillTemplate(tpl, { N: n });
     });
   }
   if (tourney.lifetime_free !== 1 || tourney.weekly_limit !== 1) {
     document.querySelectorAll('[data-exportads-tourney-line]').forEach(el => {
-      const plural = tourney.lifetime_free === 1 ? '' : 's';
-      el.textContent = `${tourney.lifetime_free} free tournament export${plural}, then ${tourney.weekly_limit}/week`;
+      const tpl = tourney.lifetime_free === 1
+        ? (I.tourneyLineOne  || '__N__ free tournament export, then __WEEKLY__/week')
+        : (I.tourneyLineMany || '__N__ free tournament exports, then __WEEKLY__/week');
+      el.textContent = _fillTemplate(tpl, { N: tourney.lifetime_free, WEEKLY: tourney.weekly_limit });
     });
   }
   if (imp.total !== 3) {
     document.querySelectorAll('[data-exportads-import-line]').forEach(el => {
-      el.textContent = `${imp.total} imports/day`;
+      const tpl = I.importLine || '__N__ imports/day';
+      el.textContent = _fillTemplate(tpl, { N: imp.total });
     });
   }
 
@@ -3914,17 +3939,20 @@ function _applyExportAdsCopy() {
   // and hand exports are gated by the self-hosted stub modal, NOT a video ad).
   if (imp.free !== 1 || imp.total !== 3) {
     document.querySelectorAll('[data-exportads-import-cell]').forEach(el => {
-      el.textContent = `${imp.free}/day (up to ${imp.total}/day with a 30s wait)`;
+      const tpl = I.freeUpToCell || '__FREE__/day (up to __TOTAL__/day with a 30s wait)';
+      el.textContent = _fillTemplate(tpl, { FREE: imp.free, TOTAL: imp.total });
     });
   }
   if (handFree !== 2 || hand.hand_hard_limit !== 5) {
     document.querySelectorAll('[data-exportads-hand-cell]').forEach(el => {
-      el.textContent = `${handFree}/day (up to ${hand.hand_hard_limit}/day with a 30s wait)`;
+      const tpl = I.freeUpToCell || '__FREE__/day (up to __TOTAL__/day with a 30s wait)';
+      el.textContent = _fillTemplate(tpl, { FREE: handFree, TOTAL: hand.hand_hard_limit });
     });
   }
   if (tourney.lifetime_free !== 1 || tourney.weekly_limit !== 1) {
     document.querySelectorAll('[data-exportads-tourney-cell]').forEach(el => {
-      el.textContent = `${tourney.lifetime_free} free ever, then ${tourney.weekly_limit}/week (with survey)`;
+      const tpl = I.tourneyCell || '__N__ free ever, then __WEEKLY__/week (with survey)';
+      el.textContent = _fillTemplate(tpl, { N: tourney.lifetime_free, WEEKLY: tourney.weekly_limit });
     });
   }
 }
