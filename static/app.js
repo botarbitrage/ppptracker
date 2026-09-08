@@ -1101,46 +1101,32 @@ async function _loadBannersConfig() {
 /** Refresh the two rewards blocks flanking the title. No-op when signed out — they stay hidden. */
 /* ── Badge medallions ────────────────────────────────────────
    The badge codes from /api/gamification are poker hands (the
-   taxonomy in gamification.py). We draw each one as its actual
-   cards on little white faces, so the reward system speaks the
-   game's language rather than generic trophies. Two-card hands
-   render as held cards; longer ones (two-pair, quads, straights,
-   flushes) fan out. Cards use s/h/d/c suits and T for ten. */
-const _BADGE_HANDS = {
+   taxonomy in gamification.py). Each one has a hand-drawn medallion
+   in static/badges/<code>.png, so the reward system shows real art
+   instead of generic trophies. */
+const _BADGE_ICON = {
   // Lifetime volume — the starting-hand ladder
-  '72o': '7s 2d', '44': '4c 4h', 'JJ': 'Js Jh', 'QQ': 'Qd Qc',
-  'KK': 'Ks Kh', 'AK': 'As Kd', 'AA': 'As Ah', 'AA88': 'As Ac 8s 8c',
-  'AAAA': 'As Ah Ad Ac', 'BWAY': 'As Kh Qd Jc Ts', 'NUTS': 'As Ks Qs Js Ts',
+  '72o': '72o', '44': '44', 'JJ': 'JJ', 'QQ': 'QQ',
+  'KK': 'KK', 'AK': 'AK', 'AA': 'AA', 'AA88': 'AA88',
+  'AAAA': 'AAAA', 'BWAY': 'BWAY', 'NUTS': 'NUTS',
   // Behavioural — famous named hands
-  'K9': 'Ks 9d', 'A2345': 'Ad 2c 3h 4s 5d', 'STEEL': 'As 2s 3s 4s 5s',
-  'T2': 'Ts 2d', 'ROYAL': 'Ah Kh Qh Jh Th', 'Q7': 'Qs 7d', 'J4': 'Js 4d',
-  '99': '9c 9h', '83': '8s 3d', '23o': '2s 3d',
+  'K9': 'K9', 'A2345': 'A2345', 'STEEL': 'STEEL',
+  'T2': 'T2', 'ROYAL': 'ROYAL', 'Q7': 'Q7', 'J4': 'J4',
+  '99': '99', '83': '83', '23o': '23o',
   // Weekly podium — made hands
-  'SF': '5c 6c 7c 8c 9c', 'QUADS': 'Ks Kh Kd Kc', 'BOAT': 'Qs Qh Qd 5c 5s',
+  'SF': 'SF', 'QUADS': 'QUADS', 'BOAT': 'BOAT',
 };
-const _SUIT_NAME = { s: 'spades', h: 'hearts', d: 'diamonds', c: 'clubs' };
-const _SUIT_PIP  = { s: '♠', h: '♥', d: '♦', c: '♣' };
 
-function _miniCard(card) {
-  const s = card.slice(-1);
-  const rank = card.slice(0, -1);
-  const disp = rank === 'T' ? '10' : rank;
-  return `<span class="mini-card" data-suit="${_SUIT_NAME[s] || 'spades'}">`
-       + `${_esc(disp)}<span class="pip">${_SUIT_PIP[s] || ''}</span></span>`;
-}
-
-/** One badge as a card medallion, or the old text pill for an
+/** One badge as an art medallion, or the old text pill for an
  *  unrecognised code (so a new server-side badge still shows). */
 function _medalHtml(b) {
-  const hand = _BADGE_HANDS[b.code];
+  const icon = _BADGE_ICON[b.code];
   const tip  = `${_esc(b.name)} — ${_esc(b.title)}`;
-  if (!hand) {
+  if (!icon) {
     return `<span class="gam-badge" title="${tip}">${_esc(b.title)}</span>`;
   }
-  const cards = hand.split(' ');
-  const kind  = cards.length > 2 ? 'fan' : 'pair';
-  return `<span class="medal" data-kind="${kind}" title="${tip}">`
-       + `<span class="medal-cards">${cards.map(_miniCard).join('')}</span>`
+  return `<span class="medal" title="${tip}">`
+       + `<img class="medal-art" src="/static/badges/${icon}.png" alt="" loading="lazy"/>`
        + `<span class="medal-label">${_esc(b.title)}</span></span>`;
 }
 
