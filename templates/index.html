@@ -13,7 +13,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="PPPokerHA"/>
   <link rel="apple-touch-icon" href="/static/icons/icon-192.png"/>
-  <link rel="icon" type="image/svg+xml" href="/static/icons/icon.svg"/>
+  <link rel="icon" type="image/png" href="/static/icons/icon-32.png"/>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -141,8 +141,9 @@
        Stays alone in its own row (Task: "Update layout") — the two
        gamification blocks and the 4 info-tile buttons share the row below. -->
   <div class="header-title-block text-center">
-    <!-- Decorative emoji hidden from screen readers (Fix 12) -->
-    <h1 class="app-title"><span aria-hidden="true">♠</span> PPPoker Hand Tracker <span aria-hidden="true">♣</span></h1>
+    <h1 class="app-title">
+      <img class="app-title-wordmark" src="/static/icons/wordmark.png" alt="PPPoker Hand Tracker"/>
+    </h1>
     <p class="app-tagline">{{ _('ANALYSE') }} &nbsp;·&nbsp; {{ _('STUDY') }} &nbsp;·&nbsp; {{ _('WIN') }}</p>
   </div>
 

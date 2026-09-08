@@ -158,13 +158,16 @@ body {
 
 /* ── App header ───────────────────────────────────────────── */
 .app-title {
-  font-family: var(--font-head);
-  font-size: clamp(1rem, 5.5vw, 2.2rem);
-  font-weight: 800;
-  color: var(--green);
-  letter-spacing: clamp(1px, 1vw, 4px);
-  text-transform: uppercase;
-  text-shadow: 0 0 24px var(--accent-glow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-title-wordmark {
+  width: clamp(220px, 46vw, 420px);
+  max-width: 100%;
+  height: auto;
+  filter: drop-shadow(0 0 24px var(--accent-glow));
 }
 
 .app-tagline {
@@ -2735,41 +2738,7 @@ tr.hand-jump-flash > td {
   text-decoration: none;
   cursor: default;
 }
-.medal-cards { display: inline-flex; align-items: flex-start; }
-.mini-card {
-  width: 24px;
-  height: 33px;
-  border-radius: 4px;
-  background: #fff;
-  border: 1px solid #c9c9c9;
-  box-shadow: 0 1px 2px rgba(0,0,0,.28);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-head);
-  font-weight: 800;
-  font-size: .82rem;
-  line-height: 1;
-  color: #141414;
-}
-/* Held-cards overlap; the fan (made hands) tucks tighter and splays. */
-.mini-card + .mini-card { margin-left: -9px; }
-.mini-card:nth-child(2) { transform: rotate(3.5deg); transform-origin: bottom left; }
-/* The fan is a made hand — every card counts, so overlap is tight but
-   never full: each face keeps a visible slice of its rank + suit. */
-.medal[data-kind="fan"] .mini-card { width: 19px; height: 28px; font-size: .66rem; padding: 0; }
-.medal[data-kind="fan"] .mini-card + .mini-card { margin-left: -9px; }
-.medal[data-kind="fan"] .mini-card .pip { font-size: .68em; }
-.medal[data-kind="fan"] .mini-card:nth-child(1) { transform: rotate(-10deg) translateY(2px); transform-origin: bottom right; }
-.medal[data-kind="fan"] .mini-card:nth-child(2) { transform: rotate(-5deg) translateY(.5px); transform-origin: bottom right; }
-.medal[data-kind="fan"] .mini-card:nth-child(3) { transform: none; }
-.medal[data-kind="fan"] .mini-card:nth-child(4) { transform: rotate(5deg) translateY(.5px); transform-origin: bottom left; }
-.medal[data-kind="fan"] .mini-card:nth-child(5) { transform: rotate(10deg) translateY(2px); transform-origin: bottom left; }
-.mini-card .pip { font-size: .74em; margin-left: .5px; }
-.mini-card[data-suit="hearts"]   { color: #cc0000; }
-.mini-card[data-suit="spades"]   { color: #141414; }
-.mini-card[data-suit="diamonds"] { color: #1155bb; }
-.mini-card[data-suit="clubs"]    { color: #0a8f3c; }
+.medal-art { width: 40px; height: 40px; object-fit: contain; }
 .medal-label {
   font-family: var(--font-head);
   font-size: .55rem;
@@ -2784,7 +2753,7 @@ tr.hand-jump-flash > td {
 /* "+N" overflow chip keeps the old pill look, sized to the medals. */
 .gam-badge-more {
   align-self: center;
-  height: 33px;
+  height: 40px;
   display: inline-flex;
   align-items: center;
 }
