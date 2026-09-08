@@ -26,7 +26,7 @@
       };
     })();
   </script>
-  <link rel="stylesheet" href="/static/style.css?v=73"/>
+  <link rel="stylesheet" href="/static/style.css?v=74"/>
   <style>
     .page-back {
       display:inline-flex; align-items:center; gap:6px; color:var(--muted);
@@ -41,10 +41,10 @@
     .adm-meta { color:var(--muted); font-size:.85rem; }
 
     /* ── Rewards Game badge reference (panel-gamification) ────
-       Each row shows the actual card medallion the player earns, plus
-       the badge's name, its player-facing title, and the rule. Same
-       hand-strength ladder as the main-page shelf — the admin should
-       recognise every one at a glance without translating a code. */
+       Each row shows the actual medal art the player earns, plus the
+       badge's name, its player-facing title, and the rule. Same art
+       as the main-page shelf — the admin should recognise every one
+       at a glance without translating a code. */
     .adm-badge-group-title {
       font-family:var(--font-head); font-size:.72rem; font-weight:700;
       color:var(--muted); text-transform:uppercase; letter-spacing:1.2px;
@@ -89,36 +89,9 @@
       }
     }
 
-    /* Card-medallion mini-styles — mirror the main-page shelf's small
-       size so the admin sees exactly what the player sees. Kept scoped
-       to .adm-badge-cards so this style block never leaks. */
-    .adm-badge-cards .a-card {
-      display:inline-flex; align-items:center; justify-content:center;
-      width:22px; height:30px; border-radius:4px;
-      background:#fff; border:1px solid #c9c9c9;
-      box-shadow:0 1px 2px rgba(0,0,0,.28);
-      font-family:var(--font-head); font-weight:800; font-size:.72rem;
-      line-height:1; color:#141414;
-    }
-    .adm-badge-cards .a-card + .a-card { margin-left:-8px; }
-    .adm-badge-cards .a-card:nth-child(2) {
-      transform:rotate(3.5deg); transform-origin:bottom left;
-    }
-    .adm-badge-cards[data-kind="fan"] .a-card {
-      width:18px; height:26px; font-size:.6rem;
-    }
-    .adm-badge-cards[data-kind="fan"] .a-card + .a-card { margin-left:-8px; }
-    .adm-badge-cards[data-kind="fan"] .a-card .pip { font-size:.62em; }
-    .adm-badge-cards[data-kind="fan"] .a-card:nth-child(1) { transform:rotate(-10deg) translateY(2px); transform-origin:bottom right; }
-    .adm-badge-cards[data-kind="fan"] .a-card:nth-child(2) { transform:rotate(-5deg)  translateY(.5px); transform-origin:bottom right; }
-    .adm-badge-cards[data-kind="fan"] .a-card:nth-child(3) { transform:none; }
-    .adm-badge-cards[data-kind="fan"] .a-card:nth-child(4) { transform:rotate(5deg)   translateY(.5px); transform-origin:bottom left; }
-    .adm-badge-cards[data-kind="fan"] .a-card:nth-child(5) { transform:rotate(10deg)  translateY(2px);  transform-origin:bottom left; }
-    .adm-badge-cards .a-card .pip { font-size:.72em; margin-left:.5px; }
-    .adm-badge-cards .a-card[data-suit="hearts"]   { color:#cc0000; }
-    .adm-badge-cards .a-card[data-suit="spades"]   { color:#141414; }
-    .adm-badge-cards .a-card[data-suit="diamonds"] { color:#1155bb; }
-    .adm-badge-cards .a-card[data-suit="clubs"]    { color:#0a8f3c; }
+    /* Medal art — mirrors the main-page shelf's medallions so the admin
+       sees exactly what the player sees. */
+    .adm-badge-cards img { width:44px; height:44px; object-fit:contain; }
 
     /* ── Sidebar shell ─────────────────────────────────────── */
     .adm-shell { display:flex; gap:20px; align-items:flex-start; }
@@ -850,38 +823,16 @@
   }
 
   // ── Badge medallions ───────────────────────────────────────────────
-  // Same code→hand map used by the main-page reward shelf (see
-  // static/app.js:_BADGE_HANDS). Duplicated here rather than imported
-  // because admin loads independently and this is the whole surface
-  // that touches badges — a tiny table is cheaper than a runtime
-  // dependency between the two scripts.
-  const ADM_BADGE_HANDS = {
-    '72o':'7s 2d', '44':'4c 4h', 'JJ':'Js Jh', 'QQ':'Qd Qc',
-    'KK':'Ks Kh', 'AK':'As Kd', 'AA':'As Ah', 'AA88':'As Ac 8s 8c',
-    'AAAA':'As Ah Ad Ac', 'BWAY':'As Kh Qd Jc Ts', 'NUTS':'As Ks Qs Js Ts',
-    'K9':'Ks 9d', 'A2345':'Ad 2c 3h 4s 5d', 'STEEL':'As 2s 3s 4s 5s',
-    'T2':'Ts 2d', 'ROYAL':'Ah Kh Qh Jh Th', 'Q7':'Qs 7d', 'J4':'Js 4d',
-    '99':'9c 9h', '83':'8s 3d', '23o':'2s 3d',
-    'SF':'5c 6c 7c 8c 9c', 'QUADS':'Ks Kh Kd Kc', 'BOAT':'Qs Qh Qd 5c 5s',
-  };
-  const ADM_SUIT_NAME = { s:'spades', h:'hearts', d:'diamonds', c:'clubs' };
-  const ADM_SUIT_PIP  = { s:'♠', h:'♥', d:'♦', c:'♣' };
-  function admMiniCardHtml(card) {
-    const s = card.slice(-1);
-    const rank = card.slice(0, -1);
-    const disp = rank === 'T' ? '10' : rank;
-    return `<span class="a-card" data-suit="${ADM_SUIT_NAME[s] || 'spades'}">`
-         + `${esc(disp)}<span class="pip">${ADM_SUIT_PIP[s] || ''}</span></span>`;
-  }
+  // Every code in gamification.py's BADGES registry has matching art in
+  // static/badges/<code>.png (see static/app.js's _BADGE_ICON, which is
+  // the same code→art relationship used by the main-page reward shelf).
   /** Walk the server-rendered .adm-badge-cards[data-code] placeholders
-   *  and fill each with its hand's cards, choosing pair vs fan layout. */
+   *  and fill each with its medal art. */
   function hydrateBadgeMedallions() {
     document.querySelectorAll('.adm-badge-cards[data-code]').forEach(el => {
-      const hand = ADM_BADGE_HANDS[el.dataset.code];
-      if (!hand) return;
-      const cards = hand.split(' ');
-      el.dataset.kind = cards.length > 2 ? 'fan' : 'pair';
-      el.innerHTML = cards.map(admMiniCardHtml).join('');
+      const code = el.dataset.code;
+      if (!code) return;
+      el.innerHTML = `<img src="/static/badges/${code}.png" alt=""/>`;
     });
   }
 
