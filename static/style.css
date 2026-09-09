@@ -424,43 +424,25 @@ body {
 
 /* ── Hero row — import card + Grind card ───────────────────────
    Wide screens: Grind sits to the left of the import card (order swaps it
-   ahead of the import card despite coming after it in the DOM) and stays
-   at its own natural, compact height rather than stretching to match —
-   .grind-blurb below drops its forced full-width wrap on these widths so
-   the card reads as roughly half the import card's height. Narrow
-   screens: same order, but stacked in a column, Grind on top, and
-   .grind-blurb reverts to wrapping onto its own line so both cards land
-   at a comparable height instead of Grind looking squashed. */
+   ahead of the import card despite coming after it in the DOM) as a
+   narrow ~20%-width column; align-items: stretch makes both cards match
+   the row's tallest natural height instead of each sizing to its own
+   content. Narrow screens: same order, but stacked in a column — the
+   stretch also applies on the cross axis there, so each card spans the
+   full row width instead of shrinking to its content. */
 .hero-row {
   display: flex;
   gap: 1rem;
   max-width: 1400px;
   margin: 0 auto;
-  align-items: flex-start;
+  align-items: stretch;
 }
-.hero-row .import-card { order: 1; flex: 1 1 0; min-width: 0; }
-.hero-row #gam-block-right { order: 0; flex: 1 1 0; min-width: 0; }
+.hero-row .import-card { order: 1; flex: 1 1 auto; min-width: 0; }
+.hero-row #gam-block-right { order: 0; flex: 0 1 20%; min-width: 0; }
 @media (max-width: 767.98px) {
   .hero-row { flex-direction: column; }
   .hero-row .import-card,
   .hero-row #gam-block-right { flex: 1 1 auto; }
-}
-@media (min-width: 768px) {
-  /* Everything on one line — badges are capped at 4 + a "+N" overflow chip
-     (_loadGamification in app.js), so the row has a bounded natural width;
-     the blurb is the one part allowed to give up space and ellipsize. */
-  .hero-row #gam-block-right { flex-wrap: nowrap; overflow: hidden; }
-  .hero-row #gam-block-right .grind-title,
-  .hero-row #gam-block-right .gam-badges,
-  .hero-row #gam-block-right .gam-next { flex-shrink: 0; }
-  .grind-blurb {
-    flex: 1 1 auto;
-    min-width: 0;
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
 }
 
 /* ── Import card — the hero ───────────────────────────────────
