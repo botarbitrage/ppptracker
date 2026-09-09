@@ -37,6 +37,11 @@
    *                 the #modal-account modal in place instead.
    *   admin       - 'no' (omit the item), 'yes' (show it), or 'deferred' (render
    *                 it hidden as #admin-board-item for a later admin check).
+   *   versionHint - true to also render a hidden #admin-version-item row (below
+   *                 the menu items, above Sign out) that a caller can reveal and
+   *                 fill in once it knows the user is an admin — the deployed
+   *                 app.js/style.css versions, shown in the menu itself rather
+   *                 than as a hover tooltip on the Admin Board item.
    *   onSignOut   - name of a global function to call on Sign out.
    *   labels      - { myAccount, adminBoard, signOut }, already translated.
    */
@@ -57,12 +62,17 @@
       ? `<li><a href="/admin" id="admin-board-item" class="user-dropdown-item${o.admin === 'deferred' ? ' d-none' : ''}">${ICON.admin}<span></span></a></li>`
       : '';
 
+    const versionItem = o.versionHint
+      ? `<li id="admin-version-item" class="user-dropdown-version d-none"></li>`
+      : '';
+
     el.innerHTML =
       `<div class="user-menu">` +
       `<button class="user-btn" type="button" aria-haspopup="true" aria-expanded="false"></button>` +
       `<ul class="dropdown-menu user-dropdown-menu">` +
       accountItem +
       adminItem +
+      versionItem +
       `<li><button type="button" class="user-dropdown-item user-dropdown-item-danger" onclick="${onSignOut}()">${ICON.signOut}<span></span></button></li>` +
       `</ul></div>`;
 

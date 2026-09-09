@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Manrope:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700;800&family=Manrope:wght@300;400;500;600;700&display=swap');
 
 /* ── Variables ─────────────────────────────────────────────── */
 :root {
@@ -20,7 +20,7 @@
   --diamonds: #40c4ff;
   --clubs:    #00e676;
 
-  --font-head: 'Oswald', 'Segoe UI', system-ui, sans-serif;
+  --font-head: 'Oxanium', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'Manrope', 'Segoe UI', system-ui, sans-serif;
 
   /* Brand palette (sampled from reference icon + wordmark lockup) */
@@ -420,6 +420,47 @@ body {
   color: var(--muted);
   letter-spacing: 2px;
   justify-content: center;
+}
+
+/* ── Hero row — import card + Grind card ───────────────────────
+   Wide screens: Grind sits to the left of the import card (order swaps it
+   ahead of the import card despite coming after it in the DOM) and stays
+   at its own natural, compact height rather than stretching to match —
+   .grind-blurb below drops its forced full-width wrap on these widths so
+   the card reads as roughly half the import card's height. Narrow
+   screens: same order, but stacked in a column, Grind on top, and
+   .grind-blurb reverts to wrapping onto its own line so both cards land
+   at a comparable height instead of Grind looking squashed. */
+.hero-row {
+  display: flex;
+  gap: 1rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  align-items: flex-start;
+}
+.hero-row .import-card { order: 1; flex: 1 1 0; min-width: 0; }
+.hero-row #gam-block-right { order: 0; flex: 1 1 0; min-width: 0; }
+@media (max-width: 767.98px) {
+  .hero-row { flex-direction: column; }
+  .hero-row .import-card,
+  .hero-row #gam-block-right { flex: 1 1 auto; }
+}
+@media (min-width: 768px) {
+  /* Everything on one line — badges are capped at 4 + a "+N" overflow chip
+     (_loadGamification in app.js), so the row has a bounded natural width;
+     the blurb is the one part allowed to give up space and ellipsize. */
+  .hero-row #gam-block-right { flex-wrap: nowrap; overflow: hidden; }
+  .hero-row #gam-block-right .grind-title,
+  .hero-row #gam-block-right .gam-badges,
+  .hero-row #gam-block-right .gam-next { flex-shrink: 0; }
+  .grind-blurb {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 /* ── Import card — the hero ───────────────────────────────────
@@ -1287,7 +1328,7 @@ textarea::placeholder { color: var(--placeholder); font-size: .88rem; }
   display: none;
   margin: 6px 0 0;
   list-style: none;
-  min-width: 190px;
+  min-width: 210px;
   padding: 6px;
   background: var(--panel);
   border: 1px solid var(--border);
@@ -1318,6 +1359,22 @@ textarea::placeholder { color: var(--placeholder); font-size: .88rem; }
 .user-dropdown-item:hover { background: rgba(0,230,118,.1); color: var(--text); }
 .user-dropdown-item-danger:hover { background: rgba(255,82,82,.12); }
 .user-dropdown-item-danger:hover svg { color: var(--red); }
+
+/* Deploy-version row — admin-only, non-interactive, shown below the menu
+   items instead of as a hover tooltip so it's visible without guessing
+   which item to hover. */
+.user-dropdown-version {
+  display: block;
+  margin-top: 4px;
+  padding: 6px 10px 4px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: .68rem;
+  line-height: 1.4;
+  white-space: normal;
+  cursor: default;
+}
 
 .auth-chip {
   display: inline-flex;
