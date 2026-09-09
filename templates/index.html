@@ -50,7 +50,7 @@
       };
     })();
   </script>
-  <link rel="stylesheet" href="/static/style.css?v=81"/>
+  <link rel="stylesheet" href="/static/style.css?v=82"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" crossorigin="anonymous" defer></script>
 </head>
 <body>
@@ -249,9 +249,10 @@
       </div>
     </div>
 
-    <!-- Reward game card — The Grind. Shows one medal (the newest unlock),
-         the running count, and the next-badge countdown; the whole card is
-         the button that opens the full ladder (#modal-ladder). Stays d-none
+    <!-- Reward game card — Your Medals. Shows one medal at a time (cycling
+         through the player's collection when there's more than one), the
+         running count, and the next-level countdown; the whole card is the
+         button that opens the full ladder (#modal-ladder). Stays d-none
          until _loadGamification() has data, so it never competes on a first,
          empty load. -->
     <button type="button" id="gam-block-right" class="reward-card gam-side d-none"
@@ -260,21 +261,18 @@
       <span class="grind-head">
         <span class="grind-title">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-          {{ _('The Grind') }}
+          {{ _('Your Medals') }}
         </span>
         <span class="grind-count" id="gam-count"></span>
       </span>
 
-      <!-- The one medal on show. _loadGamification fills it with the newest
-           unlock, or leaves .is-empty on for a player who has none yet. -->
+      <!-- The medal on show. _loadGamification fills it and, when the player
+           holds more than one, _cycleHeroMedal rotates through the rest. -->
       <span class="grind-hero is-empty" id="gam-hero">
         <span class="grind-hero-art">
           <img id="gam-hero-img" src="" alt="" loading="lazy"/>
         </span>
-        <span class="grind-hero-body">
-          <span class="grind-hero-title" id="gam-hero-title"></span>
-          <span class="grind-hero-name" id="gam-hero-name"></span>
-        </span>
+        <span class="grind-hero-title" id="gam-hero-title"></span>
       </span>
 
       <span class="gam-next" id="gam-next"></span>
@@ -1420,6 +1418,11 @@
   window.I18N_ADMIN = {
     deployedAssets: "{{ _('Deployed assets') }}"
   };
+  {# Same hand-over, for the medal card's next-level countdown
+     (_loadGamification in app.js). #}
+  window.I18N_GAM = {
+    handsToNext: "{{ _('hands to next level') }}"
+  };
   {# Same hand-over pattern, for the survey-unlock modal's dynamic bits
      (openSurveyModal / _surveyStatus / _surveyShowCpx / _surveyShowTally in
      app.js) — these were previously hardcoded English literals, so the
@@ -1551,7 +1554,7 @@
   };
 </script>
 <script src="/static/header.js?v=2"></script>
-<script src="/static/app.js?v=75"></script>
+<script src="/static/app.js?v=76"></script>
 <script>
   if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
     navigator.serviceWorker.register('/static/sw.js', { scope: '/' })

@@ -266,29 +266,35 @@ body {
   gap: 12px;
 }
 
-/* Info tiles strip */
+/* Info tiles strip — the five modal buttons.
+   They hold a single line at every width: instead of wrapping, the whole
+   strip scales down with the viewport. Its type shrinks faster than the
+   wordmark above it (1.5vw against the wordmark's 53vw floor of 253px), so
+   the tiles are what give way first as the window narrows. */
 .info-tiles {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  gap: clamp(2px, .7vw, 8px);
+  flex-wrap: nowrap;
   justify-content: center;
+  max-width: 100%;
 }
 
 .info-tile {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 7px 16px;
+  gap: clamp(2px, .6vw, 7px);
+  padding: clamp(5px, .9vw, 7px) clamp(5px, 1.5vw, 16px);
   background: rgba(0,230,118,.07);
   border: 1px solid rgba(0,230,118,.22);
   border-radius: 8px;
   white-space: nowrap;
   color: var(--green);
   font-family: var(--font-head);
-  font-size: .82rem;
+  font-size: clamp(.42rem, 1.6vw, .82rem);
   font-weight: 600;
   letter-spacing: .4px;
-  flex-shrink: 0;
+  flex: 0 1 auto;
+  min-width: 0;
   cursor: pointer;
   transition: background .15s, border-color .15s;
 }
@@ -297,7 +303,12 @@ body {
   border-color: rgba(0,230,118,.45);
   color: var(--green);
 }
-.info-tile svg { opacity: .85; flex-shrink: 0; }
+.info-tile svg {
+  opacity: .85;
+  flex-shrink: 0;
+  width: clamp(11px, 1.7vw, 20px);
+  height: clamp(11px, 1.7vw, 20px);
+}
 
 /* Free vs Pro comparison */
 .tier-compare {
@@ -422,18 +433,15 @@ body {
   justify-content: center;
 }
 
-/* ── Hero row — import card + Grind card ───────────────────────
-   Wide screens: Grind sits to the left of the import card (order swaps it
-   ahead of the import card despite coming after it in the DOM) as a
-   ~30%-width column — wide enough that its badge row rarely wraps, so it
-   doesn't force the import card to stretch to an awkward height (the
-   ghost-helper tooltip replacing the old always-on blurb text helps the
-   same way: less content, less forced height). align-items: stretch
-   makes both cards match the row's tallest natural height instead of
-   each sizing to its own content. Narrow screens: same order, but
-   stacked in a column — the stretch also applies on the cross axis
-   there, so each card spans the full row width instead of shrinking to
-   its content. */
+/* ── Hero row — import card + medal card ───────────────────────
+   Wide screens: the medal card sits to the left of the import card (order
+   swaps it ahead despite coming after it in the DOM) as a fixed tile, and
+   the import card takes every pixel the row gains — so widening the window
+   lengthens the import field rather than stretching the medal card.
+   align-items: stretch makes both match the row's tallest natural height,
+   and aspect-ratio then derives the medal card's width from that height,
+   holding it just inside a square. Narrow screens: same order, stacked in
+   a column, where the stretch instead makes each card span the full width. */
 .hero-row {
   display: flex;
   gap: 1rem;
@@ -442,11 +450,22 @@ body {
   align-items: stretch;
 }
 .hero-row .import-card { order: 1; flex: 1 1 auto; min-width: 0; }
-.hero-row #gam-block-right { order: 0; flex: 0 1 30%; min-width: 0; }
+.hero-row #gam-block-right {
+  order: 0;
+  /* Height comes from the row; a hair under 1:1 keeps it square-ish but
+     never wider than it is tall, however wide the window gets. */
+  flex: 0 0 auto;
+  aspect-ratio: .92;
+  min-width: 168px;
+  max-width: 260px;
+}
 @media (max-width: 767.98px) {
   .hero-row { flex-direction: column; }
   .hero-row .import-card,
   .hero-row #gam-block-right { flex: 1 1 auto; }
+  /* Stacked, the card is a wide horizontal block — the square cap is a
+     landscape idea and would squeeze it to a sliver here. */
+  .hero-row #gam-block-right { aspect-ratio: auto; max-width: none; }
 }
 
 /* ── Import card — the hero ───────────────────────────────────
@@ -1895,7 +1914,11 @@ button.auth-chip { background: none; }
   justify-content: center;
   max-width: 1400px;
   margin: 0 auto 1rem;
+  /* Keeps the nowrap tile strip from spilling past the viewport at very
+     narrow widths — the tiles then shrink further via .info-tile's clamps. */
+  overflow: hidden;
 }
+.header-flanked-tiles { min-width: 0; max-width: 100%; }
 
 /* ── Gamification ───────────────────────────────────────────── */
 /* Points/streak/rank pill, sized to sit next to the round User button in
@@ -2742,10 +2765,14 @@ tr.hand-jump-flash > td {
 .reward-card.gam-side {
   display: grid;
   gap: .5rem .85rem;
-  /* Column layout for the narrow desktop slot: title row, medal, next. */
+  /* Portrait/square card: header on top, medal (center-anchored) in the
+     middle, countdown at the bottom, spread through the full height. */
   grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 1fr auto;
   grid-template-areas: "head" "hero" "next";
-  align-content: center;
+  justify-items: center;
+  align-items: center;
+  text-align: center;
   /* Button reset — the card is a real <button> so click and keyboard both
      open the ladder without a JS handler. */
   width: 100%;
@@ -2832,38 +2859,74 @@ tr.hand-jump-flash > td {
   filter: drop-shadow(0 0 6px rgba(0,230,118,.35));
 }
 .reward-card.gam-side:hover .grind-hero-art::before { opacity: .75; }
-.grind-hero-body { display: flex; flex-direction: column; min-width: 0; }
+/* The medal name wraps rather than truncating — in a card this narrow a
+   two-line "Weekly Third" beats "Weekly Thi…". */
 .grind-hero-title {
   font-family: var(--font-head);
   font-size: .92rem;
   font-weight: 700;
   letter-spacing: .4px;
+  line-height: 1.2;
   color: var(--text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
-.grind-hero-name {
-  font-size: .72rem;
-  color: var(--muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+/* Cross-fade while _startHeroCycle swaps in the next medal. */
+.grind-hero-art img, .grind-hero-title { transition: opacity .2s; }
+.grind-hero.is-swapping .grind-hero-art img,
+.grind-hero.is-swapping .grind-hero-title { opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .grind-hero-art img, .grind-hero-title { transition: none; }
+  .grind-hero.is-swapping .grind-hero-art img,
+  .grind-hero.is-swapping .grind-hero-title { opacity: 1; }
 }
 .gam-next { grid-area: next; }
 
 /* Portrait/mobile: the card is a full-width block, so the same three
-   pieces re-lay as one horizontal row — medal on the left, title and
-   countdown stacked beside it — instead of a tall stack. */
+   pieces re-lay as one horizontal row — the card header (title + count) on
+   the LEFT, the medal in the middle, the next-level countdown on the right
+   — instead of a tall square stack. */
 @media (max-width: 767.98px) {
   .reward-card.gam-side {
-    grid-template-columns: auto minmax(0, 1fr);
-    grid-template-areas:
-      "hero head"
-      "hero next";
+    /* header | medal (grows to center) | counter — the counter's column is
+       held to what its longest line naturally wants so it doesn't wrap word
+       by word, and the medal column takes the slack. */
+    grid-template-columns: auto minmax(0, 1fr) max-content;
+    grid-template-rows: auto;
+    grid-template-areas: "head hero next";
     align-items: center;
+    text-align: left;
+    justify-items: stretch;
+    gap: .35rem .6rem;
+    padding: .5rem .7rem;
   }
-  .grind-hero { align-self: center; }
+  .reward-card.gam-side .grind-title svg { display: none; }
+  .reward-card.gam-side .grind-hero-art { width: 42px; height: 42px; }
+  .reward-card.gam-side .grind-hero { gap: .45rem; }
+  .reward-card.gam-side .grind-head { justify-self: start; min-width: 0; }
+  /* Let the title scale down before it clips — never cut a letter off "MEDALS". */
+  .reward-card.gam-side .grind-title { font-size: clamp(.72rem, 3.4vw, 1.05rem); }
+  .reward-card.gam-side .grind-hero { justify-self: center; }
+  .reward-card.gam-side .gam-next   {
+    justify-self: end;
+    text-align: right;
+    font-size: .68rem;
+    line-height: 1.25;
+    max-width: 10ch;
+  }
+  /* The big number stays on one line even when the trailing phrase wraps. */
+  .reward-card.gam-side .gam-next strong { white-space: nowrap; }
+  /* No count chip beside the title in portrait — the ladder modal shows it. */
+  .grind-count { display: none; }
+  /* The medal name stays on one line in this horizontal layout, capped at
+     what the middle column can hold without pushing the counter off. */
+  .reward-card.gam-side .grind-hero-title {
+    max-width: 12ch;
+    font-size: .82rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 /* The medal's name used to print underneath it as a caption; it now lives
