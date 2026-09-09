@@ -425,11 +425,15 @@ body {
 /* ── Hero row — import card + Grind card ───────────────────────
    Wide screens: Grind sits to the left of the import card (order swaps it
    ahead of the import card despite coming after it in the DOM) as a
-   narrow ~20%-width column; align-items: stretch makes both cards match
-   the row's tallest natural height instead of each sizing to its own
-   content. Narrow screens: same order, but stacked in a column — the
-   stretch also applies on the cross axis there, so each card spans the
-   full row width instead of shrinking to its content. */
+   ~30%-width column — wide enough that its badge row rarely wraps, so it
+   doesn't force the import card to stretch to an awkward height (the
+   ghost-helper tooltip replacing the old always-on blurb text helps the
+   same way: less content, less forced height). align-items: stretch
+   makes both cards match the row's tallest natural height instead of
+   each sizing to its own content. Narrow screens: same order, but
+   stacked in a column — the stretch also applies on the cross axis
+   there, so each card spans the full row width instead of shrinking to
+   its content. */
 .hero-row {
   display: flex;
   gap: 1rem;
@@ -438,7 +442,7 @@ body {
   align-items: stretch;
 }
 .hero-row .import-card { order: 1; flex: 1 1 auto; min-width: 0; }
-.hero-row #gam-block-right { order: 0; flex: 0 1 20%; min-width: 0; }
+.hero-row #gam-block-right { order: 0; flex: 0 1 30%; min-width: 0; }
 @media (max-width: 767.98px) {
   .hero-row { flex-direction: column; }
   .hero-row .import-card,
@@ -2756,13 +2760,16 @@ tr.hand-jump-flash > td {
 }
 .grind-title svg { width: 19px; height: 19px; opacity: .9; }
 .gam-badges { gap: .55rem; align-items: center; }
-.grind-blurb {
-  flex-basis: 100%;
-  margin: .35rem 0 0;
-  font-size: .74rem;
+/* Ghost-helper trigger for the card's one-time explainer — a small "?"
+   next to the title instead of a paragraph that forced the card taller
+   than its badges needed (see .ghost-host above for the tooltip wiring). */
+.grind-help {
+  display: inline-flex;
   color: var(--muted);
-  line-height: 1.35;
+  opacity: .8;
+  cursor: help;
 }
+.grind-help:hover, .grind-help:focus-visible { color: var(--green); opacity: 1; }
 
 /* The medal's name used to print underneath it as a caption; it now lives
    in a "ghost helper" tooltip instead (see .ghost-host below), so the

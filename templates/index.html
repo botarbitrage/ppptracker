@@ -50,7 +50,7 @@
       };
     })();
   </script>
-  <link rel="stylesheet" href="/static/style.css?v=79"/>
+  <link rel="stylesheet" href="/static/style.css?v=80"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" crossorigin="anonymous" defer></script>
 </head>
 <body>
@@ -255,9 +255,18 @@
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
         {{ _('The Grind') }}
       </span>
+      <!-- Help text used to always print below the badges (grind-blurb),
+           forcing the card taller than it needed to be. Now it's a ghost
+           helper like the medal-name tooltips above: hover on desktop,
+           tap-to-focus on mobile (trigger:'hover focus' — same global
+           [data-bs-toggle="tooltip"] init in app.js), so the card only
+           grows as tall as its badges actually need. -->
+      <span class="grind-help ghost-host" tabindex="0" data-bs-toggle="tooltip"
+        title="{{ _("As you save hands, you'll get early access to our new poker training and playing tools.") }}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </span>
       <div class="gam-badges" id="gam-badges"></div>
       <div class="gam-next" id="gam-next"></div>
-      <p class="grind-blurb">{{ _("As you save hands, you'll get early access to our new poker training and playing tools.") }}</p>
     </div>
 
   </div>
