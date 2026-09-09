@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Manrope:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700;800&family=Manrope:wght@300;400;500;600;700&display=swap');
 
 /* ── Variables ─────────────────────────────────────────────── */
 :root {
@@ -20,7 +20,7 @@
   --diamonds: #40c4ff;
   --clubs:    #00e676;
 
-  --font-head: 'Oswald', 'Segoe UI', system-ui, sans-serif;
+  --font-head: 'Oxanium', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'Manrope', 'Segoe UI', system-ui, sans-serif;
 
   /* Brand palette (sampled from reference icon + wordmark lockup) */
@@ -1287,7 +1287,7 @@ textarea::placeholder { color: var(--placeholder); font-size: .88rem; }
   display: none;
   margin: 6px 0 0;
   list-style: none;
-  min-width: 190px;
+  min-width: 210px;
   padding: 6px;
   background: var(--panel);
   border: 1px solid var(--border);
@@ -1318,6 +1318,22 @@ textarea::placeholder { color: var(--placeholder); font-size: .88rem; }
 .user-dropdown-item:hover { background: rgba(0,230,118,.1); color: var(--text); }
 .user-dropdown-item-danger:hover { background: rgba(255,82,82,.12); }
 .user-dropdown-item-danger:hover svg { color: var(--red); }
+
+/* Deploy-version row — admin-only, non-interactive, shown below the menu
+   items instead of as a hover tooltip so it's visible without guessing
+   which item to hover. */
+.user-dropdown-version {
+  display: block;
+  margin-top: 4px;
+  padding: 6px 10px 4px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: .68rem;
+  line-height: 1.4;
+  white-space: normal;
+  cursor: default;
+}
 
 .auth-chip {
   display: inline-flex;

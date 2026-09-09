@@ -4079,11 +4079,11 @@ function _assetVersion(selector, urlAttr) {
 }
 
 /**
- * Tooltip for the Admin pill: the app.js / style.css cache-bust versions that
- * a deploy is confirmed against, so an admin can check what production is
- * actually serving without opening view-source. The two move independently —
- * a CSS-only change bumps style.css and leaves app.js behind — so both are
- * shown rather than a single "build number".
+ * The app.js / style.css cache-bust versions that a deploy is confirmed
+ * against, shown in the user dropdown menu for admins so they can check what
+ * production is actually serving without opening view-source. The two move
+ * independently — a CSS-only change bumps style.css and leaves app.js behind
+ * — so both are shown rather than a single "build number".
  */
 function _deployHint() {
   const t = window.I18N_ADMIN || {};
@@ -4114,9 +4114,11 @@ async function _checkAdmin(user) {
     console.warn('admin check failed', e);
   }
   item.classList.toggle('d-none', !isAdmin);
-  // Only set once we know they're an admin — the item is hidden otherwise, and
-  // the link text stays the accessible name either way (title is only a fallback).
-  if (isAdmin) item.title = _deployHint();
+  const versionItem = document.getElementById('admin-version-item');
+  if (versionItem) {
+    versionItem.classList.toggle('d-none', !isAdmin);
+    if (isAdmin) versionItem.textContent = _deployHint();
+  }
 }
 
 /** Returns the Firestore doc ref for the current user (auth) or guest (session). */
@@ -4199,10 +4201,12 @@ function _renderAuthBar(email) {
   if (!bar) return;
   const t = window.I18N_AUTH || {};
   if (email) {
-    // 'deferred' renders the Admin Board item hidden; _checkAdmin reveals it.
+    // 'deferred' renders the Admin Board item hidden; _checkAdmin reveals it
+    // (and the version-hint row alongside it).
     PPPHeader.renderUserMenu(bar, {
       email,
       admin: 'deferred',
+      versionHint: true,
       labels: { myAccount: t.myAccount, adminBoard: t.adminBoard, signOut: t.signOut },
     });
     _populateAccountModal(email);

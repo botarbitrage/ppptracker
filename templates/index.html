@@ -18,7 +18,7 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700;800&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
@@ -50,7 +50,7 @@
       };
     })();
   </script>
-  <link rel="stylesheet" href="/static/style.css?v=76"/>
+  <link rel="stylesheet" href="/static/style.css?v=77"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" crossorigin="anonymous" defer></script>
 </head>
 <body>
@@ -1334,8 +1334,8 @@
     unlockReady:        "{{ _('Unlock') }}"
   };
   window.GATE_STUB_MODAL_ENABLED = {{ 'true' if gate_stub_modal_enabled else 'false' }};
-  {# Same hand-over again, for the Admin pill's deploy-version tooltip
-     (_deployHint in app.js). #}
+  {# Same hand-over again, for the deploy-version row in the admin's user
+     dropdown menu (_deployHint in app.js). #}
   window.I18N_ADMIN = {
     deployedAssets: "{{ _('Deployed assets') }}"
   };
@@ -1469,8 +1469,8 @@
     levelToggle:          "{{ _('Level') }}"
   };
 </script>
-<script src="/static/header.js?v=1"></script>
-<script src="/static/app.js?v=73"></script>
+<script src="/static/header.js?v=2"></script>
+<script src="/static/app.js?v=74"></script>
 <script>
   if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
     navigator.serviceWorker.register('/static/sw.js', { scope: '/' })
