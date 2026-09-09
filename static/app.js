@@ -1186,6 +1186,44 @@ function _renderLadder(badges) {
   return count;
 }
 
+/* The card has room for exactly one medal, so when a player holds several it
+   cycles through them rather than picking a favourite. Newest first, so a
+   fresh unlock is what greets them. */
+let _heroTimer = null;
+
+function _startHeroCycle(badges) {
+  const heroEl  = document.getElementById('gam-hero');
+  const heroImg = document.getElementById('gam-hero-img');
+  const titleEl = document.getElementById('gam-hero-title');
+  if (!heroEl || !heroImg || !titleEl) return;
+
+  clearInterval(_heroTimer);
+  heroEl.classList.toggle('is-empty', !badges.length);
+  if (!badges.length) return;
+
+  let i = 0;
+  const show = () => {
+    const b    = badges[i % badges.length];
+    const icon = _BADGE_ICON[b.code];
+    heroImg.src = icon ? `/static/badges/${icon}.png` : '';
+    heroImg.alt = b.title || '';
+    heroImg.classList.toggle('d-none', !icon);
+    titleEl.textContent = b.title || '';
+  };
+  show();
+
+  if (badges.length < 2) return;
+  _heroTimer = setInterval(() => {
+    i += 1;
+    // Fade through the swap so the medal changes as a beat rather than a jump.
+    heroEl.classList.add('is-swapping');
+    setTimeout(() => {
+      show();
+      heroEl.classList.remove('is-swapping');
+    }, 220);
+  }, 4500);
+}
+
 function _loadGamification() {
   const left  = document.getElementById('gam-block-left');
   const right = document.getElementById('gam-block-right');
@@ -1209,22 +1247,11 @@ function _loadGamification() {
       const count  = _renderLadder(badges);
       document.getElementById('gam-count').textContent = count || '';
 
-      const hero    = badges[0];
-      const heroEl  = document.getElementById('gam-hero');
-      const heroImg = document.getElementById('gam-hero-img');
-      heroEl.classList.toggle('is-empty', !hero);
-      if (hero) {
-        const icon = _BADGE_ICON[hero.code];
-        heroImg.src = icon ? `/static/badges/${icon}.png` : '';
-        heroImg.alt = hero.title || '';
-        heroImg.classList.toggle('d-none', !icon);
-        document.getElementById('gam-hero-title').textContent = hero.title || '';
-        document.getElementById('gam-hero-name').textContent  = hero.name || '';
-      }
+      _startHeroCycle(badges);
 
       const next = g.next_badge;
       document.getElementById('gam-next').innerHTML = next
-        ? `<strong>${_fmtNum(next.remaining)}</strong> hands to ${_esc(next.title)}`
+        ? `<strong>${_fmtNum(next.remaining)}</strong> ${_esc(window.I18N_GAM?.handsToNext || 'hands to next level')}`
         : '';
 
       left.classList.remove('d-none');
