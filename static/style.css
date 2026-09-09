@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Manrope:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Manrope:wght@300;400;500;600;700&display=swap');
 
 /* ── Variables ─────────────────────────────────────────────── */
 :root {
@@ -20,7 +20,7 @@
   --diamonds: #40c4ff;
   --clubs:    #00e676;
 
-  --font-head: 'Rajdhani', 'Segoe UI', system-ui, sans-serif;
+  --font-head: 'Oswald', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'Manrope', 'Segoe UI', system-ui, sans-serif;
 
   /* Brand palette (sampled from reference icon + wordmark lockup) */
@@ -435,9 +435,9 @@ body {
 }
 .import-eyebrow {
   font-family: var(--font-head);
-  font-size: .74rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  letter-spacing: 2.5px;
+  letter-spacing: .8px;
   text-transform: uppercase;
   color: var(--green);
   display: flex;
@@ -910,18 +910,18 @@ textarea::placeholder { color: var(--placeholder); font-size: .88rem; }
 .table-dark thead th {
   font-family: var(--font-head);
   color: var(--muted);
-  font-size: .72rem;
+  font-size: .74rem;
   text-transform: uppercase;
-  letter-spacing: .8px;
+  letter-spacing: .6px;
   border-bottom: 1px solid var(--border) !important;
   font-weight: 700;
-  padding: 10px 14px;
+  padding: 10px 9px;
 }
 .table-dark tbody td {
   border-color: var(--border) !important;
   vertical-align: middle;
-  font-size: .88rem;
-  padding: 10px 14px;
+  font-size: 1rem;
+  padding: 10px 9px;
 }
 .table-dark .text-muted { color: var(--muted) !important; }
 
@@ -998,7 +998,7 @@ textarea::placeholder { color: var(--placeholder); font-size: .88rem; }
 .hand-table th:first-child, .hand-table td:first-child { width: 16%; }
 
 @media (max-width: 767px) {
-  .hand-table th, .hand-table td { font-size: .78rem; padding: 8px 8px; }
+  .hand-table th, .hand-table td { font-size: .88rem; padding: 8px 6px; }
 }
 
 /* ── Timezone select ──────────────────────────────────────── */
@@ -1589,7 +1589,7 @@ button.auth-chip { background: none; }
 @media (max-width: 575px) {
   .container-fluid { padding-left: 12px !important; padding-right: 12px !important; }
   .section-header { padding: 10px 14px; }
-  .table-dark tbody td { padding: 8px 10px; }
+  .table-dark tbody td { padding: 8px 6px; }
   .export-grid-btn { min-height: 58px; font-size: .68rem; }
   .btn-import { width: 100%; }
 }
@@ -2705,9 +2705,9 @@ tr.hand-jump-flash > td {
 }
 .grind-title {
   font-family: var(--font-head);
-  font-size: .72rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: .8px;
   text-transform: uppercase;
   color: var(--green);
   display: inline-flex;
@@ -2715,7 +2715,7 @@ tr.hand-jump-flash > td {
   gap: 8px;
   white-space: nowrap;
 }
-.grind-title svg { width: 15px; height: 15px; opacity: .9; }
+.grind-title svg { width: 19px; height: 19px; opacity: .9; }
 .gam-badges { gap: .55rem; align-items: center; }
 .grind-blurb {
   flex-basis: 100%;
