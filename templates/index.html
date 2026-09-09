@@ -50,7 +50,7 @@
       };
     })();
   </script>
-  <link rel="stylesheet" href="/static/style.css?v=77"/>
+  <link rel="stylesheet" href="/static/style.css?v=78"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" crossorigin="anonymous" defer></script>
 </head>
 <body>
@@ -205,38 +205,61 @@
     </nav>
   </div>
 
-  <!-- ── Import card — the hero ───────────────────────────────
-       Moved to the top of the content column: pasting a replay link is
-       this page's one job, so it leads on first load rather than sitting
-       below the Free-vs-Pro pitch (which now follows further down). -->
-  <div class="import-card mb-3" style="max-width:1400px;margin:0 auto">
-    <div class="import-eyebrow">{{ _('Bring a hand to the table') }}</div>
-    <div class="d-flex gap-2 align-items-center flex-wrap">
-      <!-- aria-label provides accessible name (Fix 1) -->
-      <input
-        type="text"
-        id="url-input"
-        class="form-control form-control-lg import-input"
-        placeholder="{{ _('Paste a PPPoker replay link or hand text…') }}"
-        aria-label="{{ _('PPPoker replay link') }}"
-        autocomplete="off"
-        spellcheck="false"
-      />
-      <button
-        id="import-btn"
-        class="btn btn-import btn-lg"
-        onclick="handleImport()"
-      >{{ _('IMPORT') }}</button>
+  <!-- ── Hero row — import card + Grind card ───────────────────
+       Side by side on wide screens (Grind on the left, half the height of
+       the import card — its help text sits inline to the right of the
+       badges instead of wrapping below); stacked on narrow screens, Grind
+       on top, both at their natural (equal-ish) height. See .hero-row in
+       style.css for the row/column switch. -->
+  <div class="hero-row mb-4">
+
+    <!-- Import card — the hero. Pasting a replay link is this page's one
+         job, so it leads on first load rather than sitting below the
+         Free-vs-Pro pitch (which now follows further down). -->
+    <div class="import-card">
+      <div class="import-eyebrow">{{ _('Bring a hand to the table') }}</div>
+      <div class="d-flex gap-2 align-items-center flex-wrap">
+        <!-- aria-label provides accessible name (Fix 1) -->
+        <input
+          type="text"
+          id="url-input"
+          class="form-control form-control-lg import-input"
+          placeholder="{{ _('Paste a PPPoker hand history link here') }}"
+          aria-label="{{ _('PPPoker replay link') }}"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button
+          id="import-btn"
+          class="btn btn-import btn-lg"
+          onclick="handleImport()"
+        >{{ _('IMPORT') }}</button>
+      </div>
+
+      <!-- Error -->
+      <div id="error-msg" class="alert alert-danger mt-3 mb-0 py-2 d-none"></div>
+
+      <!-- Loading / Success -->
+      <div id="loading-msg" class="d-none mt-3 text-center">
+        <div id="loading-spinner" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></div>
+        <span id="loading-text" style="color:var(--green)">{{ _('Dealing out the session… this can take a few seconds') }}</span>
+      </div>
     </div>
 
-    <!-- Error -->
-    <div id="error-msg" class="alert alert-danger mt-3 mb-0 py-2 d-none"></div>
-
-    <!-- Loading / Success -->
-    <div id="loading-msg" class="d-none mt-3 text-center">
-      <div id="loading-spinner" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></div>
-      <span id="loading-text" style="color:var(--green)">{{ _('Dealing out the session… this can take a few seconds') }}</span>
+    <!-- Reward game card (badges/next-badge) — The Grind. Stays d-none until
+         _loadGamification() has data, so it never competes on a first,
+         empty load. Same #gam-block-right / #gam-badges / #gam-next wiring
+         as before. -->
+    <div id="gam-block-right" class="reward-card gam-side d-none" aria-live="polite">
+      <span class="grind-title">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+        {{ _('The Grind') }}
+      </span>
+      <div class="gam-badges" id="gam-badges"></div>
+      <div class="gam-next" id="gam-next"></div>
+      <p class="grind-blurb">{{ _("As you save hands, you'll get early access to our new poker training and playing tools.") }}</p>
     </div>
+
   </div>
 
   <!-- ── Empty-state invitation ───────────────────────────────
@@ -249,21 +272,6 @@
       <li class="deal-step"><span class="chev" aria-hidden="true">›</span><span><b>{{ _('We deal out every hand') }}</b> {{ _('in that session.') }}</span></li>
       <li class="deal-step"><span class="chev" aria-hidden="true">›</span><span><b>{{ _('Study your leaks') }}</b> {{ _('by street and position.') }}</span></li>
     </ol>
-  </div>
-
-  <!-- ── Reward game card (badges/next-badge) ─────────────────
-       The Grind — card-medallion shelf. Sits directly under the import
-       for signed-in players; stays d-none until _loadGamification()
-       has data, so it never competes on a first, empty load. Same
-       #gam-block-right / #gam-badges / #gam-next wiring as before. -->
-  <div id="gam-block-right" class="reward-card gam-side d-none mb-4" style="max-width:1400px;margin:0 auto" aria-live="polite">
-    <span class="grind-title">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-      {{ _('The Grind') }}
-    </span>
-    <div class="gam-badges" id="gam-badges"></div>
-    <div class="gam-next" id="gam-next"></div>
-    <p class="grind-blurb">{{ _("As you save hands, you'll get early access to our new poker training and playing tools.") }}</p>
   </div>
 
   <!-- ── Feature banner ───────────────────────────────────── -->
