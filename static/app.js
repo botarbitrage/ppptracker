@@ -1118,16 +1118,29 @@ const _BADGE_ICON = {
 };
 
 /** One badge as an art medallion, or the old text pill for an
- *  unrecognised code (so a new server-side badge still shows). */
+ *  unrecognised code (so a new server-side badge still shows). The name
+ *  no longer sits printed under the art — it lives in a "ghost helper"
+ *  tooltip instead (hover on desktop; tap-to-focus on mobile, same
+ *  trigger the info ⓘ buttons use), so the shelf stays a clean row of
+ *  art instead of a wall of tiny caption text. */
 function _medalHtml(b) {
   const icon = _BADGE_ICON[b.code];
   const tip  = `${_esc(b.name)} — ${_esc(b.title)}`;
   if (!icon) {
     return `<span class="gam-badge" title="${tip}">${_esc(b.title)}</span>`;
   }
-  return `<span class="medal" title="${tip}">`
-       + `<img class="medal-art" src="/static/badges/${icon}.png" alt="" loading="lazy"/>`
-       + `<span class="medal-label">${_esc(b.title)}</span></span>`;
+  return `<span class="medal ghost-host" tabindex="0" data-bs-toggle="tooltip" title="${tip}">`
+       + `<img class="medal-art" src="/static/badges/${icon}.png" alt="${_esc(b.title)}" loading="lazy"/>`
+       + `</span>`;
+}
+
+/** One row (small art + name) inside the "+N" overflow badge's ghost
+ *  helper — the same medals that got cut from the shelf, just listed
+ *  at a smaller scale rather than only counted. */
+function _medalMiniRow(b) {
+  const icon = _BADGE_ICON[b.code];
+  const art  = icon ? `<img class="medal-art-mini" src="/static/badges/${icon}.png" alt="" loading="lazy"/>` : '';
+  return `<div class="medal-mini-row">${art}<span>${_esc(b.title)}</span></div>`;
 }
 
 function _loadGamification() {
@@ -1150,11 +1163,33 @@ function _loadGamification() {
       // Newest badges first — the most recent unlock is the interesting one.
       const badges = (g.badges || []).slice().sort((a, b) => (b.ts || 0) - (a.ts || 0));
       const shown  = badges.slice(0, 4);
+      const extra  = badges.slice(shown.length);
       let html = shown.map(_medalHtml).join('');
-      if (badges.length > shown.length) {
-        html += `<span class="gam-badge gam-badge-more">+${badges.length - shown.length}</span>`;
+      if (extra.length) {
+        html += `<span class="gam-badge gam-badge-more ghost-host" tabindex="0" data-bs-toggle="tooltip">+${extra.length}</span>`;
       }
-      document.getElementById('gam-badges').innerHTML = html;
+      const badgesEl = document.getElementById('gam-badges');
+      // Dispose tooltips bound to the outgoing nodes before they're replaced,
+      // so a re-render (e.g. after a fresh import) doesn't leak stray popups.
+      badgesEl.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+        const inst = bootstrap.Tooltip.getInstance(el);
+        if (inst) inst.dispose();
+      });
+      badgesEl.innerHTML = html;
+      // Ghost helpers — same 'hover focus' trigger as the info ⓘ buttons:
+      // hover reveals it on desktop, tapping a focusable element does the
+      // same on touch since there's no hover there.
+      badgesEl.querySelectorAll('.medal.ghost-host').forEach(el => {
+        new bootstrap.Tooltip(el, { trigger: 'hover focus' });
+      });
+      const moreEl = badgesEl.querySelector('.gam-badge-more');
+      if (moreEl) {
+        new bootstrap.Tooltip(moreEl, {
+          trigger: 'hover focus',
+          html: true,
+          title: extra.map(_medalMiniRow).join('')
+        });
+      }
 
       const next = g.next_badge;
       document.getElementById('gam-next').innerHTML = next
@@ -3882,6 +3917,10 @@ function _applyPricingCopy() {
   // price and the "locked in until launch" line would both be nonsense.
   document.querySelectorAll('[data-pricing-regular], [data-pricing-discount-only]')
     .forEach(el => el.classList.toggle('d-none', !_PRICING.is_discounted));
+  // Mirror image of the toggle above, for copy that only makes sense once
+  // there's no discount to plug (e.g. "Pro is A$X.XX/mo." with no "usually").
+  document.querySelectorAll('[data-pricing-nodiscount-only]')
+    .forEach(el => el.classList.toggle('d-none', _PRICING.is_discounted));
 }
 
 async function _loadPricing() {
@@ -3989,13 +4028,13 @@ function _applyExportAdsCopy() {
   }
   if (handFree !== 2 || hand.hand_hard_limit !== 5) {
     document.querySelectorAll('[data-exportads-hand-cell]').forEach(el => {
-      const tpl = I.freeUpToCell || '__FREE__/day (up to __TOTAL__/day with a 30s wait)';
+      const tpl = I.handUpToCell || '__FREE__/day (up to __TOTAL__ after ads)';
       el.textContent = _fillTemplate(tpl, { FREE: handFree, TOTAL: hand.hand_hard_limit });
     });
   }
   if (tourney.lifetime_free !== 1 || tourney.weekly_limit !== 1) {
     document.querySelectorAll('[data-exportads-tourney-cell]').forEach(el => {
-      const tpl = I.tourneyCell || '__N__ free ever, then __WEEKLY__/week (with survey)';
+      const tpl = I.tourneyCell || '__N__ free + __WEEKLY__/week (after ads)';
       el.textContent = _fillTemplate(tpl, { N: tourney.lifetime_free, WEEKLY: tourney.weekly_limit });
     });
   }

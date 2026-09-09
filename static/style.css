@@ -164,7 +164,7 @@ body {
 }
 
 .app-title-wordmark {
-  width: clamp(220px, 46vw, 420px);
+  width: clamp(253px, 53vw, 483px);
   max-width: 100%;
   height: auto;
   filter: drop-shadow(0 0 24px var(--accent-glow));
@@ -459,22 +459,6 @@ body {
   min-width: 0;
   font-size: 1.02rem;
 }
-.import-hint {
-  margin: 10px 2px 0;
-  font-size: .8rem;
-  color: var(--muted);
-}
-.import-hint kbd {
-  font-family: var(--font-head);
-  font-size: .72rem;
-  font-weight: 600;
-  color: var(--text);
-  background: var(--overlay-mid);
-  border: 1px solid var(--hairline);
-  border-radius: 4px;
-  padding: 1px 6px;
-}
-
 .form-label {
   font-family: var(--font-head);
   font-weight: 600;
@@ -669,7 +653,11 @@ textarea::placeholder { color: var(--placeholder); font-size: .88rem; }
   border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 16px rgba(0,0,0,.35);
+  /* A flat black shadow reads on light mode's pale ground but disappears
+     against dark mode's near-black background — so both themes get a
+     brand-tinted rim (the wordmark's green, via --accent-glow) stacked on
+     the theme's own --shadow-card, same recipe as .import-card above. */
+  box-shadow: 0 0 0 1px var(--accent-glow), var(--shadow-card);
 }
 
 .section-header {
@@ -2729,34 +2717,53 @@ tr.hand-jump-flash > td {
 }
 .grind-title svg { width: 15px; height: 15px; opacity: .9; }
 .gam-badges { gap: .55rem; align-items: center; }
+.grind-blurb {
+  flex-basis: 100%;
+  margin: .35rem 0 0;
+  font-size: .74rem;
+  color: var(--muted);
+  line-height: 1.35;
+}
 
+/* The medal's name used to print underneath it as a caption; it now lives
+   in a "ghost helper" tooltip instead (see .ghost-host below), so the
+   shelf is just a row of art. */
 .medal {
   display: inline-flex;
-  flex-direction: column;
   align-items: center;
-  gap: 5px;
   text-decoration: none;
   cursor: default;
 }
 .medal-art { width: 40px; height: 40px; object-fit: contain; }
-.medal-label {
-  font-family: var(--font-head);
-  font-size: .55rem;
-  font-weight: 700;
-  letter-spacing: .3px;
-  text-transform: uppercase;
-  color: var(--muted);
-  max-width: 74px;
-  text-align: center;
-  line-height: 1.15;
-}
 /* "+N" overflow chip keeps the old pill look, sized to the medals. */
 .gam-badge-more {
   align-self: center;
   height: 40px;
   display: inline-flex;
   align-items: center;
+  cursor: default;
 }
+
+/* ── Ghost helpers — Bootstrap tooltips on the medal shelf ────────────
+   `.ghost-host` just marks the trigger; the actual popup is Bootstrap's
+   own `.tooltip`, initialised with trigger:'hover focus' (app.js) so it
+   opens on mouse hover on desktop and on tap-to-focus on touch, matching
+   the info ⓘ buttons elsewhere on the page. Focus outline is suppressed
+   here since the tooltip itself is the visible affordance. */
+.ghost-host { outline: none; }
+.ghost-host:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
+/* Contents of the "+N" overflow's tooltip — the medals that didn't fit
+   on the shelf, listed at a smaller scale rather than only counted. */
+.medal-mini-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .72rem;
+  white-space: nowrap;
+}
+.medal-mini-row + .medal-mini-row { margin-top: 4px; }
+.medal-art-mini { width: 18px; height: 18px; object-fit: contain; flex: 0 0 auto; }
 .gam-next strong { font-variant-numeric: tabular-nums; }
 
 /* ── Table refinements ──────────────────────────────────────────
