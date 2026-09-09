@@ -472,14 +472,13 @@ body {
   gap: 9px;
   margin-bottom: 11px;
 }
-/* A dealt-card tick before the label — the table's own vernacular,
-   not a generic icon. */
-.import-eyebrow::before {
-  content: "";
-  width: 20px;
-  height: 2px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, var(--green), transparent);
+/* The app's own mark leads the label — it replaced the dealt-card tick
+   that used to sit here, so the card is branded rather than decorated. */
+.import-eyebrow-logo {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  flex: 0 0 auto;
 }
 .import-input {
   flex: 1 1 0;
@@ -1946,7 +1945,6 @@ button.auth-chip { background: none; }
   padding: .7rem 1.1rem;
   justify-content: flex-start;
 }
-.gam-badges { display: flex; flex-wrap: wrap; gap: .3rem; }
 .gam-badge {
   font-family: var(--font-head);
   font-size: .6rem;
@@ -1960,7 +1958,6 @@ button.auth-chip { background: none; }
   padding: .16rem .55rem;
   white-space: nowrap;
 }
-.gam-badge-more { color: var(--muted); background: none; border-color: var(--border); }
 .gam-next, .gam-signin { font-size: .74rem; color: var(--muted); }
 .gam-next strong { color: var(--text); font-weight: 600; }
 
@@ -2021,7 +2018,6 @@ button.auth-chip { background: none; }
 
 @media (max-width: 575.98px) {
   .gam-stats  { gap: 1.1rem; }
-  .gam-next   { display: none; }
 }
 
 
@@ -2736,15 +2732,44 @@ tr.hand-jump-flash > td {
 }
 .deal-step b { color: var(--text); font-weight: 600; }
 
-/* ── The Grind — card-medallion badge shelf ─────────────────────
-   The signature. Each earned badge is drawn as the actual poker hand
-   its code names (7-2 offsuit, Big Slick, pocket aces, a made-hand
-   fan) on little white card faces, so the reward system speaks the
-   subject's own language instead of trophies and stars. Reads at a
-   glance in the row; the same markup scales up in the unlock toast. */
+/* ── The Grind — one medal, and the door to the ladder ──────────
+   The signature. Each badge is drawn as the actual poker hand its code
+   names (7-2 offsuit, Big Slick, pocket aces, a made-hand fan), so the
+   reward system speaks the subject's own language instead of trophies
+   and stars. The card shows only the newest unlock — one medal, lit —
+   plus the running count and the next milestone; the whole card is the
+   button that opens the full ladder. */
 .reward-card.gam-side {
+  display: grid;
+  gap: .5rem .85rem;
+  /* Column layout for the narrow desktop slot: title row, medal, next. */
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "head" "hero" "next";
+  align-content: center;
+  /* Button reset — the card is a real <button> so click and keyboard both
+     open the ladder without a JS handler. */
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s, transform .15s;
+}
+.reward-card.gam-side:hover {
+  border-color: rgba(0,230,118,.45);
+  box-shadow: 0 0 18px rgba(0,230,118,.14);
+}
+.reward-card.gam-side:active { transform: translateY(1px); }
+.reward-card.gam-side:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+.grind-head {
+  grid-area: head;
+  display: flex;
   align-items: center;
-  gap: .75rem 1.15rem;
+  gap: .5rem;
+  min-width: 0;
 }
 .grind-title {
   font-family: var(--font-head);
@@ -2759,21 +2784,91 @@ tr.hand-jump-flash > td {
   white-space: nowrap;
 }
 .grind-title svg { width: 19px; height: 19px; opacity: .9; }
-.gam-badges { gap: .55rem; align-items: center; }
-/* Ghost-helper trigger for the card's one-time explainer — a small "?"
-   next to the title instead of a paragraph that forced the card taller
-   than its badges needed (see .ghost-host above for the tooltip wiring). */
-.grind-help {
-  display: inline-flex;
+/* Medals earned out of the ladder's total — the card's one number. */
+.grind-count {
+  margin-left: auto;
+  font-family: var(--font-head);
+  font-size: .8rem;
+  font-weight: 700;
+  letter-spacing: .5px;
   color: var(--muted);
-  opacity: .8;
-  cursor: help;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
-.grind-help:hover, .grind-help:focus-visible { color: var(--green); opacity: 1; }
+
+/* The one medal on show. With only a single piece of art in the card it
+   can afford to be lit properly — a soft green halo behind it, brighter
+   on hover, instead of sitting flat in a row of siblings. */
+.grind-hero {
+  grid-area: hero;
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  min-width: 0;
+}
+.grind-hero.is-empty { display: none; }
+.grind-hero-art {
+  position: relative;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+}
+.grind-hero-art::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,230,118,.32), rgba(0,230,118,0) 68%);
+  transition: opacity .2s;
+}
+.grind-hero-art img {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 6px rgba(0,230,118,.35));
+}
+.reward-card.gam-side:hover .grind-hero-art::before { opacity: .75; }
+.grind-hero-body { display: flex; flex-direction: column; min-width: 0; }
+.grind-hero-title {
+  font-family: var(--font-head);
+  font-size: .92rem;
+  font-weight: 700;
+  letter-spacing: .4px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.grind-hero-name {
+  font-size: .72rem;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gam-next { grid-area: next; }
+
+/* Portrait/mobile: the card is a full-width block, so the same three
+   pieces re-lay as one horizontal row — medal on the left, title and
+   countdown stacked beside it — instead of a tall stack. */
+@media (max-width: 767.98px) {
+  .reward-card.gam-side {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "hero head"
+      "hero next";
+    align-items: center;
+  }
+  .grind-hero { align-self: center; }
+}
 
 /* The medal's name used to print underneath it as a caption; it now lives
    in a "ghost helper" tooltip instead (see .ghost-host below), so the
-   shelf is just a row of art. */
+   unlock toast is just a row of art. */
 .medal {
   display: inline-flex;
   align-items: center;
@@ -2781,14 +2876,6 @@ tr.hand-jump-flash > td {
   cursor: default;
 }
 .medal-art { width: 40px; height: 40px; object-fit: contain; }
-/* "+N" overflow chip keeps the old pill look, sized to the medals. */
-.gam-badge-more {
-  align-self: center;
-  height: 40px;
-  display: inline-flex;
-  align-items: center;
-  cursor: default;
-}
 
 /* ── Ghost helpers — Bootstrap tooltips on the medal shelf ────────────
    `.ghost-host` just marks the trigger; the actual popup is Bootstrap's
@@ -2799,18 +2886,83 @@ tr.hand-jump-flash > td {
 .ghost-host { outline: none; }
 .ghost-host:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
 
-/* Contents of the "+N" overflow's tooltip — the medals that didn't fit
-   on the shelf, listed at a smaller scale rather than only counted. */
-.medal-mini-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: .72rem;
-  white-space: nowrap;
-}
-.medal-mini-row + .medal-mini-row { margin-top: 4px; }
-.medal-art-mini { width: 18px; height: 18px; object-fit: contain; flex: 0 0 auto; }
 .gam-next strong { font-variant-numeric: tabular-nums; }
+
+/* ── The ladder modal ───────────────────────────────────────────
+   Every rung of the reward game: what's still to climb on top, dimmed,
+   and what's already unlocked below it, lit — so the eye lands on the
+   boundary between the two. Kept to a square in landscape (never wider
+   than it is tall) so it reads as a panel rather than a page. */
+.ladder-dialog { max-width: min(94vw, 620px); }
+@media (orientation: landscape) {
+  .ladder-dialog { max-width: min(94vw, 88vh, 620px); }
+}
+.ladder-body { padding-top: .5rem; }
+.ladder-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  max-height: min(62vh, 460px);
+  overflow-y: auto;
+  padding-right: .25rem;
+}
+.ladder-count {
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  margin-left: .5rem;
+}
+.ladder-group-title {
+  font-family: var(--font-head);
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 .55rem;
+  padding-bottom: .3rem;
+  border-bottom: 1px solid var(--border);
+}
+.ladder-group-title.is-earned { color: var(--green); border-bottom-color: rgba(0,230,118,.3); }
+.ladder-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: .55rem;
+}
+.ladder-empty { margin: .2rem 0 0; font-size: .78rem; color: var(--muted); }
+
+.rung {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .2rem;
+  padding: .6rem .4rem .5rem;
+  border: 1px solid rgba(0,230,118,.22);
+  border-radius: 10px;
+  background: rgba(0,230,118,.06);
+  text-align: center;
+  cursor: help;
+}
+.rung-art { width: 42px; height: 42px; object-fit: contain; }
+.rung-title {
+  font-family: var(--font-head);
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .3px;
+  color: var(--text);
+  line-height: 1.2;
+}
+.rung-name { font-size: .66rem; color: var(--muted); line-height: 1.2; }
+/* Still to climb — present but plainly out of reach. */
+.rung.is-locked {
+  border-color: var(--border);
+  background: var(--overlay-lo);
+}
+.rung.is-locked .rung-art { filter: grayscale(1); opacity: .38; }
+.rung.is-locked .rung-title { color: var(--muted); }
+.rung.is-locked .rung-name { opacity: .7; }
+.rung.is-locked:hover .rung-art { opacity: .6; }
 
 /* ── Table refinements ──────────────────────────────────────────
    Grinders scan numeric columns; tabular figures keep them from

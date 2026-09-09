@@ -181,7 +181,8 @@ def _fetch_record(uid, rdkey, summary, referer):
 
 @app.route("/")
 def index():
-    return render_template("index.html", gate_stub_modal_enabled=_GATE_STUB_MODAL_ENABLED)
+    return render_template("index.html", gate_stub_modal_enabled=_GATE_STUB_MODAL_ENABLED,
+                           badge_ladder=gamification.badge_ladder())
 
 
 @app.route("/health")
@@ -4199,18 +4200,10 @@ def tournaments_page():
 @app.route('/admin')
 def admin_page():
     """Admin console. Unlisted for non-admins — the APIs it calls are the gate."""
-    volume_badges = [
-        {**gamification.BADGES[code], 'code': code, 'threshold': threshold}
-        for threshold, code in gamification.VOLUME_BADGES
-    ]
-    behavioural_codes = ('K9', 'A2345', 'STEEL', 'T2', 'ROYAL', 'Q7', 'J4', '99', '83', '23o')
-    behavioural_badges = [{**gamification.BADGES[code], 'code': code} for code in behavioural_codes]
-    podium_badges = [
-        {**gamification.BADGES[code], 'code': code, 'rank': rank, 'points': points}
-        for rank, (points, code) in sorted(gamification.PODIUM.items())
-    ]
-    return render_template('admin.html', volume_badges=volume_badges,
-                            behavioural_badges=behavioural_badges, podium_badges=podium_badges)
+    ladder = gamification.badge_ladder()
+    return render_template('admin.html', volume_badges=ladder['volume'],
+                            behavioural_badges=ladder['behavioural'],
+                            podium_badges=ladder['podium'])
 
 @app.route('/offline')
 def offline():
