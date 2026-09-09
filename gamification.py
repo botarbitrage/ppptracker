@@ -124,8 +124,36 @@ VOLUME_BADGES = (
     (2000000, 'AAAA'), (5000000, 'BWAY'), (10000000, 'NUTS'),
 )
 
+# The order the behavioural badges are listed in — BADGES itself is keyed by code,
+# so the ladder needs its own sequence to render the same way every time.
+BEHAVIOURAL_BADGES = ('K9', 'A2345', 'STEEL', 'T2', 'ROYAL', 'Q7', 'J4', '99', '83', '23o')
+
 # rank → (points, badge code)
 PODIUM = {1: (2000, 'SF'), 2: (1000, 'QUADS'), 3: (500, 'BOAT')}
+
+
+def badge_ladder():
+    """Every badge, grouped, in ladder order — the one description both ladders read.
+
+    The admin console's reference table and the player-facing modal on the main page
+    are the same list seen from two angles, so they share this rather than each
+    rebuilding it from BADGES (which is how the two drifted apart before).
+    """
+    return {
+        'volume': [
+            {**BADGES[code], 'code': code, 'threshold': threshold,
+             'how': f'{threshold:,} lifetime hands'}
+            for threshold, code in VOLUME_BADGES
+        ],
+        'behavioural': [
+            {**BADGES[code], 'code': code} for code in BEHAVIOURAL_BADGES
+        ],
+        'podium': [
+            {**BADGES[code], 'code': code, 'rank': rank, 'points': points,
+             'how': f'Rank #{rank} · {points:,} pts'}
+            for rank, (points, code) in sorted(PODIUM.items())
+        ],
+    }
 
 
 # ── Time helpers ─────────────────────────────────────────────────────────────

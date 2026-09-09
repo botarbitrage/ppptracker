@@ -1134,13 +1134,56 @@ function _medalHtml(b) {
        + `</span>`;
 }
 
-/** One row (small art + name) inside the "+N" overflow badge's ghost
- *  helper — the same medals that got cut from the shelf, just listed
- *  at a smaller scale rather than only counted. */
-function _medalMiniRow(b) {
-  const icon = _BADGE_ICON[b.code];
-  const art  = icon ? `<img class="medal-art-mini" src="/static/badges/${icon}.png" alt="" loading="lazy"/>` : '';
-  return `<div class="medal-mini-row">${art}<span>${_esc(b.title)}</span></div>`;
+/**
+ * Deal the ladder modal's rungs into "still to climb" (top) and "unlocked"
+ * (bottom). Every rung ships in the page as an inert <template> — rendered
+ * from gamification.badge_ladder(), the same description the admin console
+ * reads — so this only decides which grid each one lands in and dims the
+ * ones still out of reach.
+ */
+function _renderLadder(badges) {
+  const tpl    = document.getElementById('ladder-rungs');
+  const locked = document.getElementById('ladder-locked');
+  const earned = document.getElementById('ladder-earned');
+  if (!tpl || !locked || !earned) return;
+
+  const earnedCodes = new Set((badges || []).map(b => b.code));
+
+  // Drop tooltips bound to the outgoing rungs before replacing them, so a
+  // re-render after a fresh import doesn't strand a popup on a dead node.
+  [locked, earned].forEach(grid => {
+    grid.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+      const inst = bootstrap.Tooltip.getInstance(el);
+      if (inst) inst.dispose();
+    });
+    grid.innerHTML = '';
+  });
+
+  tpl.content.querySelectorAll('.rung').forEach(node => {
+    const rung = node.cloneNode(true);
+    const got  = earnedCodes.has(rung.dataset.code);
+    rung.classList.toggle('is-locked', !got);
+    if (!got) rung.setAttribute('aria-disabled', 'true');
+    (got ? earned : locked).appendChild(rung);
+  });
+
+  // Same 'hover focus' ghost helper as the rest of the page: the rule for
+  // earning a medal is the detail worth reading, locked ones included.
+  [locked, earned].forEach(grid => {
+    grid.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+      new bootstrap.Tooltip(el, { trigger: 'hover focus' });
+    });
+  });
+
+  const total = tpl.content.querySelectorAll('.rung').length;
+  const count = `${earnedCodes.size}/${total}`;
+  const countEl = document.getElementById('ladder-count');
+  if (countEl) countEl.textContent = count;
+  const emptyEl = document.getElementById('ladder-empty');
+  if (emptyEl) emptyEl.classList.toggle('d-none', earnedCodes.size > 0);
+  document.getElementById('ladder-locked-group').classList
+    .toggle('d-none', locked.children.length === 0);
+  return count;
 }
 
 function _loadGamification() {
@@ -1160,35 +1203,23 @@ function _loadGamification() {
       document.getElementById('gam-rank').textContent =
         g.rank ? `#${g.rank}` : '—';
 
-      // Newest badges first — the most recent unlock is the interesting one.
+      // Newest badges first — the card shows one medal, and the most recent
+      // unlock is the one worth showing off. The rest live in the ladder.
       const badges = (g.badges || []).slice().sort((a, b) => (b.ts || 0) - (a.ts || 0));
-      const shown  = badges.slice(0, 4);
-      const extra  = badges.slice(shown.length);
-      let html = shown.map(_medalHtml).join('');
-      if (extra.length) {
-        html += `<span class="gam-badge gam-badge-more ghost-host" tabindex="0" data-bs-toggle="tooltip">+${extra.length}</span>`;
-      }
-      const badgesEl = document.getElementById('gam-badges');
-      // Dispose tooltips bound to the outgoing nodes before they're replaced,
-      // so a re-render (e.g. after a fresh import) doesn't leak stray popups.
-      badgesEl.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
-        const inst = bootstrap.Tooltip.getInstance(el);
-        if (inst) inst.dispose();
-      });
-      badgesEl.innerHTML = html;
-      // Ghost helpers — same 'hover focus' trigger as the info ⓘ buttons:
-      // hover reveals it on desktop, tapping a focusable element does the
-      // same on touch since there's no hover there.
-      badgesEl.querySelectorAll('.medal.ghost-host').forEach(el => {
-        new bootstrap.Tooltip(el, { trigger: 'hover focus' });
-      });
-      const moreEl = badgesEl.querySelector('.gam-badge-more');
-      if (moreEl) {
-        new bootstrap.Tooltip(moreEl, {
-          trigger: 'hover focus',
-          html: true,
-          title: extra.map(_medalMiniRow).join('')
-        });
+      const count  = _renderLadder(badges);
+      document.getElementById('gam-count').textContent = count || '';
+
+      const hero    = badges[0];
+      const heroEl  = document.getElementById('gam-hero');
+      const heroImg = document.getElementById('gam-hero-img');
+      heroEl.classList.toggle('is-empty', !hero);
+      if (hero) {
+        const icon = _BADGE_ICON[hero.code];
+        heroImg.src = icon ? `/static/badges/${icon}.png` : '';
+        heroImg.alt = hero.title || '';
+        heroImg.classList.toggle('d-none', !icon);
+        document.getElementById('gam-hero-title').textContent = hero.title || '';
+        document.getElementById('gam-hero-name').textContent  = hero.name || '';
       }
 
       const next = g.next_badge;
@@ -3794,6 +3825,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('auth-email-input').addEventListener('keydown', e => {
       if (e.key === 'Enter') sendMagicLink();
+    });
+  }
+
+  // Ladder modal: open standing on your own rung. The unlocked medals sit at
+  // the bottom of the list, so scrolling there puts them on screen with what's
+  // still to climb running up above — rather than opening on a wall of locked
+  // art with the player's own medals off the bottom of the panel.
+  const ladderModal = document.getElementById('modal-ladder');
+  if (ladderModal) {
+    ladderModal.addEventListener('shown.bs.modal', () => {
+      const scroll = ladderModal.querySelector('.ladder-scroll');
+      if (scroll) scroll.scrollTop = scroll.scrollHeight;
     });
   }
 
