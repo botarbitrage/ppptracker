@@ -50,7 +50,7 @@
       };
     })();
   </script>
-  <link rel="stylesheet" href="/static/style.css?v=88"/>
+  <link rel="stylesheet" href="/static/style.css?v=89"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" crossorigin="anonymous" defer></script>
 </head>
 <body>
@@ -580,10 +580,10 @@
               <th scope="col" class="sort-th" onclick="_sortTs('name')" data-col="name">{{ _('Tournament') }} <span class="sort-icon"></span></th>
               <th scope="col" class="text-center sort-th" onclick="_sortTs('events')" data-col="events">{{ _('Events') }} <span class="sort-icon"></span></th>
               <th scope="col" class="text-center d-none sort-th" onclick="_sortTs('type')" data-col="type">{{ _('Type') }} <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center d-none d-sm-table-cell">{{ _('Seats') }}</th>
-              <th scope="col" class="text-center d-none d-md-table-cell sort-th" onclick="_sortTs('avgHands')" data-col="avgHands">{{ _('Avg Hands') }} <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center d-none d-md-table-cell sort-th" onclick="_sortTs('avgDur')" data-col="avgDur">{{ _('Avg Duration') }} <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center d-none d-lg-table-cell sort-th" onclick="_sortTs('handsHr')" data-col="handsHr">{{ _('Hands/hr') }} <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center sort-th" onclick="_sortTs('avgHands')" data-col="avgHands">{{ _('Avg Hands') }} <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center">{{ _('Seats') }}</th>
+              <th scope="col" class="text-center sort-th" onclick="_sortTs('avgDur')" data-col="avgDur">{{ _('Avg Duration') }} <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center sort-th" onclick="_sortTs('handsHr')" data-col="handsHr">{{ _('Hands/hr') }} <span class="sort-icon"></span></th>
               <th scope="col" class="text-center sort-th" onclick="_sortTs('last')" data-col="last">{{ _('Last Played') }} <span class="sort-icon"></span></th>
             </tr>
           </thead>
@@ -696,10 +696,10 @@
             <tr>
               <th scope="col" class="sort-th" onclick="_sortCgs('name')" data-col="name">{{ _('Session') }} <span class="sort-icon"></span></th>
               <th scope="col" class="text-center sort-th" onclick="_sortCgs('events')" data-col="events">{{ _('Sessions') }} <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center d-none d-sm-table-cell">{{ _('Seats') }}</th>
-              <th scope="col" class="text-center d-none d-md-table-cell sort-th" onclick="_sortCgs('avgHands')" data-col="avgHands">{{ _('Avg Hands') }} <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center d-none d-md-table-cell sort-th" onclick="_sortCgs('avgDur')" data-col="avgDur">{{ _('Avg Duration') }} <span class="sort-icon"></span></th>
-              <th scope="col" class="text-center d-none d-lg-table-cell sort-th" onclick="_sortCgs('handsHr')" data-col="handsHr">{{ _('Hands/hr') }} <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center sort-th" onclick="_sortCgs('avgHands')" data-col="avgHands">{{ _('Avg Hands') }} <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center">{{ _('Seats') }}</th>
+              <th scope="col" class="text-center sort-th" onclick="_sortCgs('avgDur')" data-col="avgDur">{{ _('Avg Duration') }} <span class="sort-icon"></span></th>
+              <th scope="col" class="text-center sort-th" onclick="_sortCgs('handsHr')" data-col="handsHr">{{ _('Hands/hr') }} <span class="sort-icon"></span></th>
               <th scope="col" class="text-center sort-th" onclick="_sortCgs('last')" data-col="last">{{ _('Last Played') }} <span class="sort-icon"></span></th>
             </tr>
           </thead>
@@ -1553,7 +1553,7 @@
   };
 </script>
 <script src="/static/header.js?v=2"></script>
-<script src="/static/app.js?v=78"></script>
+<script src="/static/app.js?v=79"></script>
 <script>
   if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
     navigator.serviceWorker.register('/static/sw.js', { scope: '/' })
