@@ -50,7 +50,7 @@
       };
     })();
   </script>
-  <link rel="stylesheet" href="/static/style.css?v=83"/>
+  <link rel="stylesheet" href="/static/style.css?v=84"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" crossorigin="anonymous" defer></script>
 </head>
 <body>
@@ -218,9 +218,9 @@
     <div class="import-card">
       <div class="import-eyebrow">
         <img class="import-eyebrow-logo" src="/static/icons/icon-192.png" alt="" aria-hidden="true"/>
-        {{ _('Insert your Hand History here:') }}
+        <span class="import-eyebrow-text">{{ _('Insert your Hand History here:') }}</span>
       </div>
-      <div class="d-flex gap-2 align-items-center flex-wrap">
+      <div class="d-flex gap-2 align-items-center flex-nowrap">
         <!-- aria-label provides accessible name (Fix 1) -->
         <input
           type="text"
@@ -248,11 +248,12 @@
       </div>
     </div>
 
-    <!-- Reward game card — Your Medals. Shows one medal at a time (cycling
-         through the player's collection when there's more than one), the
-         running count, and the next-level countdown; the whole card is the
-         button that opens the full ladder (#modal-ladder). Stays d-none
-         until _loadGamification() has data, so it never competes on a first,
+    <!-- Reward game card — Your Medals. Shows one medal (desktop) or up to
+         two (portrait, when the row has room) at a time, cycling through the
+         player's collection when there's more than one; the running count
+         and the next-level countdown; the whole card is the button that
+         opens the full ladder (#modal-ladder). Stays d-none until
+         _loadGamification() has data, so it never competes on a first,
          empty load. -->
     <button type="button" id="gam-block-right" class="reward-card gam-side d-none"
             data-bs-toggle="modal" data-bs-target="#modal-ladder" aria-live="polite"
@@ -260,18 +261,16 @@
       <span class="grind-head">
         <span class="grind-title">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-          {{ _('Your Medals') }}
+          <span class="grind-title-text">{{ _('Your Medals') }}</span>
         </span>
         <span class="grind-count" id="gam-count"></span>
       </span>
 
-      <!-- The medal on show. _loadGamification fills it and, when the player
-           holds more than one, _cycleHeroMedal rotates through the rest. -->
+      <!-- The medal(s) on show — _startHeroCycle fills #gam-hero-track with
+           one .medal-chip on desktop, or up to two in portrait when they fit
+           (measured against the viewport's width; falls back to one). -->
       <span class="grind-hero is-empty" id="gam-hero">
-        <span class="grind-hero-art">
-          <img id="gam-hero-img" src="" alt="" loading="lazy"/>
-        </span>
-        <span class="grind-hero-title" id="gam-hero-title"></span>
+        <span class="grind-hero-track" id="gam-hero-track"></span>
       </span>
 
       <span class="gam-next" id="gam-next"></span>
@@ -556,13 +555,13 @@
        tables, sit-and-gos and play-money games live in Cash & Play Money ── -->
   <div id="tournament-summary-section" class="d-none" style="max-width:1400px;margin:0 auto">
     <div class="section-card mb-4">
-      <div class="section-header d-flex align-items-center justify-content-between gap-2">
-        <div class="d-flex align-items-center gap-3 flex-shrink-0">
+      <div class="section-header ts-summary-header d-flex align-items-center justify-content-between gap-2">
+        <div class="d-flex align-items-center gap-3 ts-summary-title">
           <h2 class="mb-0 d-flex align-items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="url(#brand-grad)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
             {{ _('Tournament Summary') }}
           </h2>
-          <div id="tourney-strip-pro" class="val-strip"></div>
+          <div id="tourney-strip-pro" class="val-strip ts-summary-pills"></div>
         </div>
         <div class="d-flex align-items-center gap-2 flex-shrink-0">
           <span class="ts-filter-prefix">{{ _('Interval') }}</span>
@@ -601,9 +600,10 @@
        ("Ad Campaigns" -> "Banners") and served by /api/banners-config,
        which ships pointing at the placeholder art in static/banners/.
        Clearing the field at /admin hides it again, claiming no space. -->
-  <div id="mid-banner" class="mid-banner d-none mb-4" style="max-width:1400px;margin:0 auto" aria-label="{{ _('Promotional banner') }}">
+  <button type="button" id="mid-banner" class="mid-banner d-none mb-4" style="max-width:1400px;margin:0 auto"
+          onclick="showUpgradeModal('banner')" aria-label="{{ _('Promotional banner — Subscribe now') }}">
     <img id="mid-banner-img" class="mid-banner-img" alt=""/>
-  </div>
+  </button>
 
   <!-- ── Tournament Details (Pro) — hands of the tournament selected in the Summary above ── -->
   <div id="tournament-history-pro-section" class="d-none" style="max-width:1400px;margin:0 auto">
@@ -672,13 +672,13 @@
        real-money MTT: cash tables, sit-and-gos, and all play-money games ── -->
   <div id="cash-games-summary-section" class="d-none" style="max-width:1400px;margin:0 auto">
     <div class="section-card mb-4">
-      <div class="section-header d-flex align-items-center justify-content-between gap-2">
-        <div class="d-flex align-items-center gap-3 flex-shrink-0">
+      <div class="section-header ts-summary-header d-flex align-items-center justify-content-between gap-2">
+        <div class="d-flex align-items-center gap-3 ts-summary-title">
           <h2 class="mb-0 d-flex align-items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="url(#brand-grad)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
             {{ _('Cash & Play Money Games') }}
           </h2>
-          <div id="cgs-strip" class="val-strip"></div>
+          <div id="cgs-strip" class="val-strip ts-summary-pills"></div>
         </div>
         <div class="d-flex align-items-center gap-2 flex-shrink-0">
           <span class="ts-filter-prefix">{{ _('Interval') }}</span>
@@ -1553,7 +1553,7 @@
   };
 </script>
 <script src="/static/header.js?v=2"></script>
-<script src="/static/app.js?v=76"></script>
+<script src="/static/app.js?v=77"></script>
 <script>
   if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
     navigator.serviceWorker.register('/static/sw.js', { scope: '/' })

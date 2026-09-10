@@ -1186,43 +1186,84 @@ function _renderLadder(badges) {
   return count;
 }
 
-/* The card has room for exactly one medal, so when a player holds several it
-   cycles through them rather than picking a favourite. Newest first, so a
-   fresh unlock is what greets them. */
-let _heroTimer = null;
+/* Desktop has room for exactly one medal; portrait's wider horizontal row
+   can often fit two side by side. Either way, when a player holds more
+   medals than the card shows at once, it cycles through them — newest
+   first, so a fresh unlock is what greets them. */
+let _heroTimer   = null;
+let _heroBadges  = [];
+let _heroIndex   = 0;
+
+function _isPortraitHeroLayout() {
+  return window.matchMedia('(max-width: 767.98px)').matches;
+}
+
+function _medalChipHtml(b) {
+  const icon = _BADGE_ICON[b.code];
+  const art  = icon ? `<img src="/static/badges/${icon}.png" alt="${_esc(b.title)}" loading="lazy"/>` : '';
+  return `<span class="medal-chip"><span class="grind-hero-art">${art}</span>`
+       + `<span class="grind-hero-title">${_esc(b.title)}</span></span>`;
+}
+
+/** Fill the track with the current medal, plus a second one in portrait if
+ *  it actually fits — measured against the real available width rather than
+ *  guessed, so a long name correctly falls back to showing just one. */
+function _renderHeroFrame() {
+  const heroEl = document.getElementById('gam-hero');
+  const track  = document.getElementById('gam-hero-track');
+  if (!heroEl || !track || !_heroBadges.length) return;
+
+  const len = _heroBadges.length;
+  const i0  = _heroIndex % len;
+  const tryTwo = _isPortraitHeroLayout() && len > 1;
+
+  // has-two-chips gives chips their natural (unshrunk) width so this
+  // measurement reflects what they'd really need — only then do we know
+  // whether two actually fit.
+  track.classList.toggle('has-two-chips', tryTwo);
+  track.innerHTML = _medalChipHtml(_heroBadges[i0]) +
+    (tryTwo ? _medalChipHtml(_heroBadges[(i0 + 1) % len]) : '');
+  if (tryTwo && track.scrollWidth > heroEl.clientWidth) {
+    track.classList.remove('has-two-chips');
+    track.innerHTML = _medalChipHtml(_heroBadges[i0]);
+  }
+}
 
 function _startHeroCycle(badges) {
-  const heroEl  = document.getElementById('gam-hero');
-  const heroImg = document.getElementById('gam-hero-img');
-  const titleEl = document.getElementById('gam-hero-title');
-  if (!heroEl || !heroImg || !titleEl) return;
+  const heroEl = document.getElementById('gam-hero');
+  const track  = document.getElementById('gam-hero-track');
+  if (!heroEl || !track) return;
 
   clearInterval(_heroTimer);
-  heroEl.classList.toggle('is-empty', !badges.length);
-  if (!badges.length) return;
+  _heroBadges = badges || [];
+  _heroIndex  = 0;
+  heroEl.classList.toggle('is-empty', !_heroBadges.length);
+  if (!_heroBadges.length) return;
+  _renderHeroFrame();
 
-  let i = 0;
-  const show = () => {
-    const b    = badges[i % badges.length];
-    const icon = _BADGE_ICON[b.code];
-    heroImg.src = icon ? `/static/badges/${icon}.png` : '';
-    heroImg.alt = b.title || '';
-    heroImg.classList.toggle('d-none', !icon);
-    titleEl.textContent = b.title || '';
-  };
-  show();
-
-  if (badges.length < 2) return;
+  if (_heroBadges.length < 2) return;
   _heroTimer = setInterval(() => {
-    i += 1;
-    // Fade through the swap so the medal changes as a beat rather than a jump.
-    heroEl.classList.add('is-swapping');
+    // Fade (desktop) / slide (portrait, via CSS) through the swap so the
+    // medal changes as a beat rather than a jump.
+    track.classList.add('is-swapping');
     setTimeout(() => {
-      show();
-      heroEl.classList.remove('is-swapping');
+      _heroIndex = (_heroIndex + 1) % _heroBadges.length;
+      _renderHeroFrame();
+      track.classList.remove('is-swapping');
     }, 220);
   }, 4500);
 }
+
+// Re-fit the current frame on resize (debounced) rather than waiting for the
+// next 4.5s tick — otherwise rotating the device or dragging a window
+// briefly leaves a stale 1-vs-2-chip decision on screen.
+let _heroResizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(_heroResizeTimer);
+  _heroResizeTimer = setTimeout(() => {
+    if (_heroBadges.length) _renderHeroFrame();
+  }, 150);
+});
 
 function _loadGamification() {
   const left  = document.getElementById('gam-block-left');

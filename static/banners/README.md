@@ -34,7 +34,7 @@ Firestore.
 | `side-1.svg` | 120×480 | Brand — PPPoker Hand Tracker, "Analyse · Study · Win" |
 | `side-2.svg` | 120×480 | Leak Finder — "Spot the costly spots" |
 | `side-3.svg` | 120×480 | Pro upsell — unlimited imports, no surveys |
-| `mid-1.svg` | 1400×180 | Main pitch — "Paste any PPPoker replay link" |
+| `mid-1.svg` | 1400×180 | Main pitch — "Track every single hand you get", clickable through to Subscribe |
 | `mid-2.svg` | 1400×180 | Pro upsell — the Free vs Pro benefits, wide layout |
 
 ## Replacing them with real artwork
