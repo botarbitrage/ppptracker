@@ -2079,16 +2079,20 @@ button.auth-chip { background: none; }
 }
 
 /* Top banner (.header-row): never wraps onto a second line and never grows
-   taller as the viewport narrows. Below the portrait breakpoint the
-   points/streak/rank labels ("Points", "Day Streak", "Weekly Rank") are
-   dropped entirely — the numbers alone give the row enough room to stay
-   on one line without shrinking the round User button or the language/
-   timezone controls. */
+   taller as the viewport narrows. */
 @media (max-width: 767.98px) {
   .header-row,
   .header-row-left,
   .header-row-right { flex-wrap: nowrap; }
   .header-row .gam-stats { gap: .6rem; padding: 4px 10px; }
+}
+/* Below phone width there isn't room for the row to stay on one line with
+   labels attached, so below that the points/streak/rank labels ("Points",
+   "Day Streak", "Weekly Rank") are dropped entirely — the numbers alone
+   give the row enough room to stay on one line without shrinking the round
+   User button or the language/timezone controls. Wider portrait screens
+   (tablets) keep the labels. */
+@media (max-width: 599.98px) {
   .gam-stat-label { display: none; }
 }
 
@@ -3006,15 +3010,11 @@ tr.hand-jump-flash > td {
      column next to it — .grind-hero's own flex default (justify-content:
      flex-start) is what left-aligns the medal(s) within that box, near
      the header, instead of floating centered in the leftover width. */
-  /* Hidden (ellipsis) rather than the old wrap-to-two-lines — the row's
-     height must stay fixed, so a long "N hands to next level" is cut
-     instead of pushing the card taller. */
   .reward-card.gam-side .gam-next   {
     justify-self: end;
     text-align: right;
     font-size: .66rem;
     line-height: 1.25;
-    max-width: 7ch;
     white-space: nowrap;
   }
   /* No count chip beside the title in portrait — the ladder modal shows it. */
@@ -3025,6 +3025,16 @@ tr.hand-jump-flash > td {
 }
 @media (max-width: 767.98px) and (prefers-reduced-motion: reduce) {
   .reward-card.gam-side .grind-hero-track.is-swapping { transform: none; }
+}
+/* Phone widths only: clip "N hands to next level" to an ellipsis so the
+   row's height stays fixed instead of squeezing the medal art. Wider
+   portrait screens (tablets) have room to show it in full. */
+@media (max-width: 599.98px) {
+  .reward-card.gam-side .gam-next {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 7ch;
+  }
 }
 
 /* The medal's name used to print underneath it as a caption; it now lives

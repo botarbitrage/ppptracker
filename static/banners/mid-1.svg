@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1400" height="180" viewBox="0 0 1400 180"
-     role="img" aria-label="Track every single hand you get. Instant stats, graphs and GTO Wizard-ready exports — free to start.">
-  <title>PPPoker Hand Tracker — track every single hand you get</title>
+     role="img" aria-label="Track every hand you get. Instant stats, graphs and GTO Wizard-ready exports — free to start.">
+  <title>PPPoker Hand Tracker — track every hand you get</title>
   <!-- Placeholder promo art for the horizontal mid-page banner slot (1400x180).
        The slot renders at width:100% with max-height:180px, so this scales
        down on narrower screens — type sizes are kept large enough to stay
@@ -33,7 +33,7 @@
   <!-- message -->
   <g font-family="'Segoe UI', system-ui, sans-serif">
     <text x="436" y="82" font-size="27" font-weight="700" fill="#d0ddd0"
-          textLength="392" lengthAdjust="spacingAndGlyphs">Track every single hand you get</text>
+          textLength="306" lengthAdjust="spacingAndGlyphs">Track every hand you get</text>
     <text x="436" y="115" font-size="17" fill="#6b8c6b"
           textLength="508" lengthAdjust="spacingAndGlyphs">Instant stats, graphs and GTO Wizard-ready exports &#8212; free to start.</text>
   </g>
