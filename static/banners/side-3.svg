@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="480" viewBox="0 0 120 480"
-     role="img" aria-label="Go Pro — unlimited imports, no surveys, ever">
-  <title>Go Pro — unlimited imports, no surveys, ever</title>
+     role="img" aria-label="Join Now — unlimited imports, no surveys, ever">
+  <title>Join Now — unlimited imports, no surveys, ever</title>
   <!-- Placeholder promo art for the vertical side banner slot (120x480).
        Third rotation frame: the Pro upsell. Copy mirrors the Unlock Pro modal
        in templates/index.html; the price is deliberately NOT baked into the
@@ -27,8 +27,8 @@
 
   <g font-family="Oxanium, 'Segoe UI', system-ui, sans-serif" font-weight="800"
      text-anchor="middle" fill="#cccc00">
-    <text x="60" y="126" font-size="20" textLength="34" lengthAdjust="spacingAndGlyphs">GO</text>
-    <text x="60" y="152" font-size="26" textLength="60" lengthAdjust="spacingAndGlyphs">PRO</text>
+    <text x="60" y="124" font-size="17" textLength="66" lengthAdjust="spacingAndGlyphs">JOIN</text>
+    <text x="60" y="150" font-size="24" textLength="60" lengthAdjust="spacingAndGlyphs">NOW</text>
   </g>
 
   <line x1="30" y1="170" x2="90" y2="170" stroke="#5c5c00" stroke-width="1"/>
