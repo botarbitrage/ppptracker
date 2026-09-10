@@ -152,6 +152,32 @@ body {
   flex-direction: column;
 }
 
+/* ── Ambient background — every page ─────────────────────────────
+   A single body rule, so it's automatic on every page that loads this
+   stylesheet (index, admin, leaks, tournaments, offline) with no template
+   changes. static/icons/bg-flow.svg is a tall (900x1800) tile of soft,
+   low-opacity brand-gradient ribbons and oversized spade watermarks —
+   its own file comment has the design notes. background-position drifts
+   downward by exactly one tile-height on a slow loop; since the art tiles
+   seamlessly on repeat-y, the loop reset is invisible, so it reads as a
+   continuous slow scroll rather than a snap. Dark theme only — the art
+   is tuned for the near-black background and would just look muddy on
+   light's parchment tone, so light theme keeps a flat --bg instead. */
+html:not([data-theme="light"]) body {
+  background-image: url('/static/icons/bg-flow.svg');
+  background-repeat: repeat-y;
+  background-position: center top;
+  background-size: 900px 1800px;
+  animation: bg-flow-drift 150s linear infinite;
+}
+@keyframes bg-flow-drift {
+  from { background-position: center 0; }
+  to   { background-position: center 1800px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-theme="light"]) body { animation: none; }
+}
+
 .container-fluid { flex: 1; }
 
 .site-footer { margin-top: auto; }
