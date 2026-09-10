@@ -1443,7 +1443,7 @@
     const defaults = cfg.defaults || [];
     const rows = defaults.map((d, i) => adMediaRow(type, {
       id: d.id, deletable: false, selected: adMediaIsSelected(cfg, d.id),
-      label: defaults.length > 1 ? `Default ${i + 1}` : 'Default',
+      label: esc(d.name || (defaults.length > 1 ? `Default ${i + 1}` : 'Default')),
       preview: `<a href="${esc(d.path)}" target="_blank" rel="noopener">preview</a>`,
     }));
     for (const f of cfg.files) {

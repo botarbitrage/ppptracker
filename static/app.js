@@ -476,13 +476,14 @@ let _gateStubState = {
    (see ad_media_config_get in app.py). Same shape _ad_media_config()
    returns server-side: one entry per type, each {files, active, default_path}.
    These defaults match every type starting on 'active: default' with no
-   uploaded files — video_30/video_60 have no default_path, so they resolve
-   to "nothing configured" until an admin uploads and activates one. */
+   uploaded files — each video type ships a portrait default clip (the 60s one
+   is the 30s clip played twice), so both resolve to that clip until an admin
+   uploads and activates a different one. */
 let _AD_MEDIA = {
   banner_a: { files: [], active: 'default', default_path: '/static/ad_media/banner_a_default.svg' },
   banner_b: { files: [], active: 'default', default_path: '/static/ad_media/banner_b_default.svg' },
-  video_30: { files: [], active: 'default', default_path: null },
-  video_60: { files: [], active: 'default', default_path: null },
+  video_30: { files: [], active: 'default', default_path: '/static/ad_media/video_30_default.mp4' },
+  video_60: { files: [], active: 'default', default_path: '/static/ad_media/video_60_default.mp4' },
 };
 
 /** Fetch the live ad media config. A failed fetch leaves the defaults in

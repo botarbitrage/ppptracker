@@ -868,8 +868,12 @@
            see _AD_MEDIA / _showGateStubModal in app.js. Hidden by default;
            the countdown-only stub below is the fallback when no video is
            configured, or if the video fails to load. #}
+        {# Sized by CSS (.gate-stub-video), not w-100: the ad clips are portrait,
+           so the element is capped by height and centered rather than stretched
+           to the modal's full width. Landscape uploads still fit — the same
+           rule caps them by width instead. #}
         <div id="gate-stub-video-wrap" class="mb-3 d-none">
-          <video id="gate-stub-video" class="w-100 rounded" style="max-height:220px;background:#000" playsinline controls></video>
+          <video id="gate-stub-video" class="gate-stub-video rounded d-block mx-auto" playsinline controls></video>
         </div>
         {# Active admin-uploaded banner (banner_a for import, banner_b for
            hand_export) — same slot the Pro-upsell copy below occupies.
