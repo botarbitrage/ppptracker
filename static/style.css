@@ -451,11 +451,13 @@ body {
 /* ── Hero row — import card + medal card ───────────────────────
    Wide screens: the medal card sits to the left of the import card (order
    swaps it ahead despite coming after it in the DOM) as a ~30%-width
-   column — wide enough for the medal art + title to sit side by side
-   without wrapping too tightly. align-items: stretch makes both cards
-   match the row's tallest natural height. Narrow screens: same order,
-   stacked in a column, where the stretch instead makes each card span
-   the full width. */
+   column, capped at 280px — wide enough for the medal art + title to sit
+   side by side without wrapping too tightly, but past that width it holds
+   still rather than growing further; the import card (flex: 1 1 auto)
+   absorbs all the extra room instead. align-items: stretch makes both
+   cards match the row's tallest natural height. Narrow screens: same
+   order, stacked in a column, where the stretch instead makes each card
+   span the full width. */
 .hero-row {
   display: flex;
   gap: 1rem;
@@ -464,11 +466,12 @@ body {
   align-items: stretch;
 }
 .hero-row .import-card { order: 1; flex: 1 1 auto; min-width: 0; }
-.hero-row #gam-block-right { order: 0; flex: 0 1 30%; min-width: 0; }
+.hero-row #gam-block-right { order: 0; flex: 0 1 30%; max-width: 280px; min-width: 0; }
 @media (max-width: 767.98px) {
   .hero-row { flex-direction: column; }
   .hero-row .import-card,
   .hero-row #gam-block-right { flex: 1 1 auto; }
+  .hero-row #gam-block-right { max-width: none; }
 }
 
 /* ── Import card — the hero ───────────────────────────────────
