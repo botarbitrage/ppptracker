@@ -2099,6 +2099,19 @@ button.auth-chip { background: none; }
 
 /* ── Tournament Summary drill-down ───────────────────────────── */
 
+/* The Seats/Avg Hands/Avg Duration/Hands-per-hr stat columns used to hide
+   behind Bootstrap breakpoints as the viewport narrowed. Now they always
+   render, and .table-responsive's built-in horizontal scroll (inherited
+   from Bootstrap) takes over instead — nowrap keeps the header/cell text
+   from wrapping first, which would just make the table taller instead of
+   wider, defeating the scroll. */
+#tournament-summary-section table th,
+#tournament-summary-section table td,
+#cash-games-summary-section table th,
+#cash-games-summary-section table td {
+  white-space: nowrap;
+}
+
 .tsum-summary-row {
   cursor: pointer;
 }
