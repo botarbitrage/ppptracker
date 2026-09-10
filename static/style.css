@@ -167,7 +167,7 @@ html:not([data-theme="light"]) body {
   background-image: url('/static/icons/bg-flow.svg');
   background-repeat: repeat-y;
   background-position: center top;
-  background-size: 900px 1800px;
+  background-size: 100% 1800px;
   animation: bg-flow-drift 150s linear infinite;
 }
 @keyframes bg-flow-drift {

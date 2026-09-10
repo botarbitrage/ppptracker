@@ -50,7 +50,7 @@
       };
     })();
   </script>
-  <link rel="stylesheet" href="/static/style.css?v=86"/>
+  <link rel="stylesheet" href="/static/style.css?v=87"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" crossorigin="anonymous" defer></script>
 </head>
 <body>
@@ -218,7 +218,7 @@
     <div class="import-card">
       <div class="import-eyebrow">
         <img class="import-eyebrow-logo" src="/static/icons/icon-192.png" alt="" aria-hidden="true"/>
-        <span class="import-eyebrow-text">{{ _('Insert your Hand History here:') }}</span>
+        <span class="import-eyebrow-text">{{ _('Paste your hand history link') }}</span>
       </div>
       <div class="d-flex gap-2 align-items-center flex-nowrap">
         <!-- aria-label provides accessible name (Fix 1) -->
@@ -226,7 +226,7 @@
           type="text"
           id="url-input"
           class="form-control form-control-lg import-input"
-          placeholder="{{ _('Paste a PPPoker hand history link here') }}"
+          placeholder="{{ _('http://replay.pppoker.net/...?uid=...&rdkey=...') }}"
           aria-label="{{ _('PPPoker replay link') }}"
           autocomplete="off"
           spellcheck="false"
