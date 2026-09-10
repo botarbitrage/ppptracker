@@ -163,9 +163,11 @@ body {
   justify-content: center;
 }
 
+/* Fixed size at every viewport — the brand mark never shrinks to fit. A
+   viewport too narrow for it gets horizontal scroll on the page instead
+   (no max-width cap here), rather than a smaller logo. */
 .app-title-wordmark {
-  width: clamp(253px, 53vw, 483px);
-  max-width: 100%;
+  width: 483px;
   height: auto;
   filter: drop-shadow(0 0 24px var(--accent-glow));
 }
@@ -236,10 +238,23 @@ body {
    image is cleared the slot renders nothing and reserves no height, rather
    than showing an empty box. */
 .mid-banner {
+  display: block;
+  width: 100%;
+  padding: 0;
   border: 1px solid var(--color-accent-green-dark);
   border-radius: 10px;
   overflow: hidden;
   background: var(--color-bg-black);
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s;
+}
+.mid-banner:hover {
+  border-color: var(--color-accent-green);
+  box-shadow: 0 0 16px rgba(0,230,118,.18);
+}
+.mid-banner:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
 }
 /* Both banner slots ride on a hardcoded brand-black behind their image;
    on the light theme a black rectangle among parchment reads as broken
@@ -489,7 +504,10 @@ body {
 }
 .import-input {
   flex: 1 1 0;
-  min-width: 0;
+  /* Small floor rather than 0 — the button never wraps below it (flex-nowrap
+     on the row), so past this width the row itself overflows instead of the
+     input becoming too narrow to paste a link into. */
+  min-width: 120px;
   font-size: 1.02rem;
 }
 .form-label {
@@ -2031,6 +2049,20 @@ button.auth-chip { background: none; }
   .gam-stats  { gap: 1.1rem; }
 }
 
+/* Top banner (.header-row): never wraps onto a second line and never grows
+   taller as the viewport narrows. Below the portrait breakpoint the
+   points/streak/rank labels ("Points", "Day Streak", "Weekly Rank") are
+   dropped entirely — the numbers alone give the row enough room to stay
+   on one line without shrinking the round User button or the language/
+   timezone controls. */
+@media (max-width: 767.98px) {
+  .header-row,
+  .header-row-left,
+  .header-row-right { flex-wrap: nowrap; }
+  .header-row .gam-stats { gap: .6rem; padding: 4px 10px; }
+  .gam-stat-label { display: none; }
+}
+
 
 /* ── Tournament Summary drill-down ───────────────────────────── */
 
@@ -2271,6 +2303,18 @@ tr.row-flash > td {
 .ts-filter-select option {
   background: var(--panel);
   color: var(--fg);
+}
+/* Tournament Summary / Cash & Play Money Games section headers: the title
+   cluster (icon + h2 + count pills) is what gives way as the header
+   narrows, since the Interval filter is the control someone's actually
+   trying to reach — never wrapped off past this row, never squeezed off
+   past the edge. h2 already ellipsizes (.section-header h2 above); it just
+   needs room to actually shrink into, which flex-shrink-0 on this wrapper
+   was blocking before it lost that class. */
+.ts-summary-header { flex-wrap: nowrap; }
+.ts-summary-title { min-width: 0; overflow: hidden; flex-shrink: 1; }
+@media (max-width: 767.98px) {
+  .ts-summary-pills { display: none; }
 }
 .ts-filter-active-label {
   font-family: var(--font-head);
@@ -2754,10 +2798,14 @@ tr.hand-jump-flash > td {
   display: grid;
   gap: .5rem .85rem;
   /* Column layout for the narrow desktop slot: title row, medal, next —
-     left-aligned, natural height (not forced into a square tile). */
+     left-aligned. The middle row is 1fr so it claims whatever height the
+     card has beyond its head/next rows, and the medal (a grid item, which
+     stretches to fill its area by default) centers within that — so the
+     medal stays vertically centered as the card's height changes, without
+     the card itself ever needing to change height on its own. */
   grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 1fr auto;
   grid-template-areas: "head" "hero" "next";
-  align-content: center;
   /* Button reset — the card is a real <button> so click and keyboard both
      open the ladder without a JS handler. */
   width: 100%;
@@ -2783,8 +2831,6 @@ tr.hand-jump-flash > td {
   gap: .5rem;
   min-width: 0;
 }
-/* The card is narrower than "Your Medals" wants on one line at this size —
-   letting it wrap to two lines beats shrinking the type to fit. */
 .grind-title {
   font-family: var(--font-head);
   font-size: 1.05rem;
@@ -2795,11 +2841,18 @@ tr.hand-jump-flash > td {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  line-height: 1.15;
   flex: 1 1 auto;
   min-width: 0;
 }
 .grind-title svg { width: 19px; height: 19px; opacity: .9; flex-shrink: 0; }
+/* The card is narrower than "Your Medals" wants on one line at some sizes —
+   hidden (ellipsis) rather than wrapped, so the card's height never moves. */
+.grind-title-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 /* Medals earned out of the ladder's total — the card's one number. */
 .grind-count {
   flex: 0 0 auto;
@@ -2812,17 +2865,33 @@ tr.hand-jump-flash > td {
   white-space: nowrap;
 }
 
-/* The one medal on show. With only a single piece of art in the card it
-   can afford to be lit properly — a soft green halo behind it, brighter
-   on hover, instead of sitting flat in a row of siblings. */
+/* The medal(s) on show. With only a single piece of art in the card it can
+   afford to be lit properly — a soft green halo behind it, brighter on
+   hover, instead of sitting flat in a row of siblings. #gam-hero is the
+   viewport (its width is what _renderHeroFrame measures against); the
+   track inside is what actually swaps/slides. */
 .grind-hero {
   grid-area: hero;
   display: flex;
   align-items: center;
-  gap: .7rem;
   min-width: 0;
+  overflow: hidden;
 }
 .grind-hero.is-empty { display: none; }
+.grind-hero-track {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  min-width: 0;
+  transition: opacity .2s, transform .2s;
+}
+/* One chip: let it shrink and ellipsize like any other flex content — the
+   card's height must never move for a long name, so hidden beats wrapped.
+   Two chips (portrait only, added by _renderHeroFrame/_isPortraitHeroLayout
+   once they're measured to fit): natural width instead, so a name already
+   confirmed to fit is shown in full rather than getting shrunk anyway. */
+.medal-chip { display: flex; align-items: center; gap: .55rem; min-width: 0; flex: 1 1 auto; }
+.grind-hero-track.has-two-chips .medal-chip { flex: 0 0 auto; }
 .grind-hero-art {
   position: relative;
   flex: 0 0 auto;
@@ -2848,8 +2917,8 @@ tr.hand-jump-flash > td {
   filter: drop-shadow(0 0 6px rgba(0,230,118,.35));
 }
 .reward-card.gam-side:hover .grind-hero-art::before { opacity: .75; }
-/* The medal name wraps rather than truncating — in a card this narrow a
-   two-line "Weekly Third" beats "Weekly Thi…". */
+/* Hidden (ellipsis) rather than wrapped — see .medal-chip above for why a
+   two-chip row is exempt. */
 .grind-hero-title {
   font-family: var(--font-head);
   font-size: .92rem;
@@ -2858,63 +2927,75 @@ tr.hand-jump-flash > td {
   line-height: 1.2;
   color: var(--text);
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-/* Cross-fade while _startHeroCycle swaps in the next medal. */
-.grind-hero-art img, .grind-hero-title { transition: opacity .2s; }
-.grind-hero.is-swapping .grind-hero-art img,
-.grind-hero.is-swapping .grind-hero-title { opacity: 0; }
+/* Cross-fade (desktop) while _startHeroCycle swaps the track's contents. */
+.grind-hero-track.is-swapping { opacity: 0; }
 @media (prefers-reduced-motion: reduce) {
-  .grind-hero-art img, .grind-hero-title { transition: none; }
-  .grind-hero.is-swapping .grind-hero-art img,
-  .grind-hero.is-swapping .grind-hero-title { opacity: 1; }
+  .grind-hero-track { transition: none; }
+  .grind-hero-track.is-swapping { opacity: 1; }
 }
-.gam-next { grid-area: next; }
+/* Hidden (ellipsis) rather than wrapped, like the title/medal name above —
+   a long "N hands to next level" must not grow the card's height. */
+.gam-next {
+  grid-area: next;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 /* Portrait/mobile: the card is a full-width block, so the same three
-   pieces re-lay as one horizontal row — the card header (title + count) on
-   the LEFT, the medal in the middle, the next-level countdown on the right
-   — instead of a tall square stack. */
+   pieces re-lay as one horizontal row — the card header on the LEFT, the
+   medal(s) left-aligned right next to it, the next-level countdown on the
+   right — instead of a tall stack. */
 @media (max-width: 767.98px) {
   .reward-card.gam-side {
-    /* header | medal (grows to center) | counter — the counter's column is
-       held to what its longest line naturally wants so it doesn't wrap word
-       by word, and the medal column takes the slack. */
+    /* header | medal (grows, but content stays left-aligned within it) |
+       counter — the counter's column is held to what its longest line
+       naturally wants so it doesn't wrap word by word. */
     grid-template-columns: auto minmax(0, 1fr) max-content;
     grid-template-rows: auto;
     grid-template-areas: "head hero next";
     align-items: center;
     text-align: left;
     justify-items: stretch;
-    gap: .35rem .6rem;
-    padding: .5rem .7rem;
+    gap: .3rem .45rem;
+    padding: .5rem .55rem;
   }
   .reward-card.gam-side .grind-title svg { display: none; }
-  .reward-card.gam-side .grind-hero-art { width: 42px; height: 42px; }
-  .reward-card.gam-side .grind-hero { gap: .45rem; }
+  .reward-card.gam-side .grind-hero-art { width: 38px; height: 38px; }
+  .reward-card.gam-side .grind-hero-track { gap: .4rem; }
+  .reward-card.gam-side .grind-hero-title { font-size: .8rem; }
   .reward-card.gam-side .grind-head { justify-self: start; min-width: 0; }
   /* Let the title scale down before it clips — never cut a letter off "MEDALS". */
-  .reward-card.gam-side .grind-title { font-size: clamp(.72rem, 3.4vw, 1.05rem); }
-  .reward-card.gam-side .grind-hero { justify-self: center; }
+  .reward-card.gam-side .grind-title { font-size: clamp(.66rem, 3.2vw, 1.05rem); }
+  /* Stays justify-self: stretch (the grid default) so the box is held to
+     the "hero" track's actual width and can't spill into the counter
+     column next to it — .grind-hero's own flex default (justify-content:
+     flex-start) is what left-aligns the medal(s) within that box, near
+     the header, instead of floating centered in the leftover width. */
+  /* Hidden (ellipsis) rather than the old wrap-to-two-lines — the row's
+     height must stay fixed, so a long "N hands to next level" is cut
+     instead of pushing the card taller. */
   .reward-card.gam-side .gam-next   {
     justify-self: end;
     text-align: right;
-    font-size: .68rem;
+    font-size: .66rem;
     line-height: 1.25;
-    max-width: 10ch;
+    max-width: 7ch;
+    white-space: nowrap;
   }
-  /* The big number stays on one line even when the trailing phrase wraps. */
-  .reward-card.gam-side .gam-next strong { white-space: nowrap; }
   /* No count chip beside the title in portrait — the ladder modal shows it. */
   .grind-count { display: none; }
-  /* The medal name gets whatever room the flexible middle column has and
-     wraps rather than truncating — a two-line "Dead Man's Hand" beats a
-     clipped one. */
-  .reward-card.gam-side .grind-hero-title {
-    font-size: .82rem;
-    line-height: 1.15;
-    overflow-wrap: anywhere;
-  }
+  /* Slide, not fade, for the portrait reel — a horizontal nudge reads as
+     "the next medal is arriving from the side" rather than a plain cross-fade. */
+  .reward-card.gam-side .grind-hero-track.is-swapping { transform: translateX(14px); }
+}
+@media (max-width: 767.98px) and (prefers-reduced-motion: reduce) {
+  .reward-card.gam-side .grind-hero-track.is-swapping { transform: none; }
 }
 
 /* The medal's name used to print underneath it as a caption; it now lives

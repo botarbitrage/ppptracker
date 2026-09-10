@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1400" height="180" viewBox="0 0 1400 180"
-     role="img" aria-label="Paste any PPPoker replay link and get instant stats, graphs and PokerStars-ready exports">
-  <title>PPPoker Hand Tracker — paste a replay link, get instant stats</title>
+     role="img" aria-label="Track every single hand you get. Instant stats, graphs and PokerStars-ready exports — free to start.">
+  <title>PPPoker Hand Tracker — track every single hand you get</title>
   <!-- Placeholder promo art for the horizontal mid-page banner slot (1400x180).
        The slot renders at width:100% with max-height:180px, so this scales
        down on narrower screens — type sizes are kept large enough to stay
@@ -36,7 +36,7 @@
   <!-- message -->
   <g font-family="'Segoe UI', system-ui, sans-serif">
     <text x="436" y="82" font-size="27" font-weight="700" fill="#d0ddd0"
-          textLength="392" lengthAdjust="spacingAndGlyphs">Paste any PPPoker replay link.</text>
+          textLength="392" lengthAdjust="spacingAndGlyphs">Track every single hand you get</text>
     <text x="436" y="115" font-size="17" fill="#6b8c6b"
           textLength="508" lengthAdjust="spacingAndGlyphs">Instant stats, graphs and PokerStars-ready exports &#8212; free to start.</text>
   </g>
@@ -45,7 +45,7 @@
   <rect x="1122" y="62" width="216" height="56" rx="10" fill="url(#m1cta)"/>
   <text x="1230" y="97" text-anchor="middle" font-size="17" font-weight="700" fill="#04140c"
         font-family="Oxanium, 'Segoe UI', system-ui, sans-serif"
-        textLength="150" lengthAdjust="spacingAndGlyphs">IMPORT A HAND</text>
+        textLength="150" lengthAdjust="spacingAndGlyphs">SUBSCRIBE NOW</text>
 
   <text x="1338" y="150" text-anchor="end" font-size="9" fill="#3f5f4a"
         font-family="'Segoe UI', system-ui, sans-serif"
