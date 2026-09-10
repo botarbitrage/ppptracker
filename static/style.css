@@ -435,13 +435,12 @@ body {
 
 /* ── Hero row — import card + medal card ───────────────────────
    Wide screens: the medal card sits to the left of the import card (order
-   swaps it ahead despite coming after it in the DOM) as a fixed tile, and
-   the import card takes every pixel the row gains — so widening the window
-   lengthens the import field rather than stretching the medal card.
-   align-items: stretch makes both match the row's tallest natural height,
-   and aspect-ratio then derives the medal card's width from that height,
-   holding it just inside a square. Narrow screens: same order, stacked in
-   a column, where the stretch instead makes each card span the full width. */
+   swaps it ahead despite coming after it in the DOM) as a ~30%-width
+   column — wide enough for the medal art + title to sit side by side
+   without wrapping too tightly. align-items: stretch makes both cards
+   match the row's tallest natural height. Narrow screens: same order,
+   stacked in a column, where the stretch instead makes each card span
+   the full width. */
 .hero-row {
   display: flex;
   gap: 1rem;
@@ -450,22 +449,11 @@ body {
   align-items: stretch;
 }
 .hero-row .import-card { order: 1; flex: 1 1 auto; min-width: 0; }
-.hero-row #gam-block-right {
-  order: 0;
-  /* Height comes from the row; a hair under 1:1 keeps it square-ish but
-     never wider than it is tall, however wide the window gets. */
-  flex: 0 0 auto;
-  aspect-ratio: .92;
-  min-width: 168px;
-  max-width: 260px;
-}
+.hero-row #gam-block-right { order: 0; flex: 0 1 30%; min-width: 0; }
 @media (max-width: 767.98px) {
   .hero-row { flex-direction: column; }
   .hero-row .import-card,
   .hero-row #gam-block-right { flex: 1 1 auto; }
-  /* Stacked, the card is a wide horizontal block — the square cap is a
-     landscape idea and would squeeze it to a sliver here. */
-  .hero-row #gam-block-right { aspect-ratio: auto; max-width: none; }
 }
 
 /* ── Import card — the hero ───────────────────────────────────
@@ -2765,14 +2753,11 @@ tr.hand-jump-flash > td {
 .reward-card.gam-side {
   display: grid;
   gap: .5rem .85rem;
-  /* Portrait/square card: header on top, medal (center-anchored) in the
-     middle, countdown at the bottom, spread through the full height. */
+  /* Column layout for the narrow desktop slot: title row, medal, next —
+     left-aligned, natural height (not forced into a square tile). */
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto 1fr auto;
   grid-template-areas: "head" "hero" "next";
-  justify-items: center;
-  align-items: center;
-  text-align: center;
+  align-content: center;
   /* Button reset — the card is a real <button> so click and keyboard both
      open the ladder without a JS handler. */
   width: 100%;
@@ -2794,10 +2779,12 @@ tr.hand-jump-flash > td {
 .grind-head {
   grid-area: head;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: .5rem;
   min-width: 0;
 }
+/* The card is narrower than "Your Medals" wants on one line at this size —
+   letting it wrap to two lines beats shrinking the type to fit. */
 .grind-title {
   font-family: var(--font-head);
   font-size: 1.05rem;
@@ -2808,12 +2795,14 @@ tr.hand-jump-flash > td {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  white-space: nowrap;
+  line-height: 1.15;
+  flex: 1 1 auto;
+  min-width: 0;
 }
-.grind-title svg { width: 19px; height: 19px; opacity: .9; }
+.grind-title svg { width: 19px; height: 19px; opacity: .9; flex-shrink: 0; }
 /* Medals earned out of the ladder's total — the card's one number. */
 .grind-count {
-  margin-left: auto;
+  flex: 0 0 auto;
   font-family: var(--font-head);
   font-size: .8rem;
   font-weight: 700;
@@ -2918,14 +2907,13 @@ tr.hand-jump-flash > td {
   .reward-card.gam-side .gam-next strong { white-space: nowrap; }
   /* No count chip beside the title in portrait — the ladder modal shows it. */
   .grind-count { display: none; }
-  /* The medal name stays on one line in this horizontal layout, capped at
-     what the middle column can hold without pushing the counter off. */
+  /* The medal name gets whatever room the flexible middle column has and
+     wraps rather than truncating — a two-line "Dead Man's Hand" beats a
+     clipped one. */
   .reward-card.gam-side .grind-hero-title {
-    max-width: 12ch;
     font-size: .82rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
   }
 }
 
