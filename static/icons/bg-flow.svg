@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1800" viewBox="0 0 900 1800">
+  <!-- Ambient page background — a vertical tile, repeated by CSS
+       (body { background-repeat: repeat-y }) and slowly animated via
+       background-position for the "drifting downward" feel. Built from
+       the app's own two marks (the spade from icon.svg, oversized and
+       blurred into soft watermarks) and a few flowing brand-gradient
+       ribbons in the same green-to-gold sweep as #brand-grad, echoing
+       the reference mood board's smoke-trail look. Kept fully transparent
+       and low-opacity so it reads as atmosphere behind panels, never
+       competing with them — deliberately not pixel-seamless at the tile
+       seam; at this opacity/blur the repeat just reads as a steady rhythm. -->
+  <defs>
+    <linearGradient id="bgFlowSweep" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00e676"/>
+      <stop offset="100%" stop-color="#cccc00"/>
+    </linearGradient>
+    <linearGradient id="bgFlowSweepRev" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#cccc00"/>
+      <stop offset="100%" stop-color="#00e676"/>
+    </linearGradient>
+    <filter id="bgFlowBlurSoft" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="34"/>
+    </filter>
+    <filter id="bgFlowBlurTight" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="16"/>
+    </filter>
+  </defs>
+
+  <!-- Oversized spade watermarks (icon.svg's path, rescaled) -->
+  <g opacity="0.05" filter="url(#bgFlowBlurSoft)">
+    <path transform="translate(-60,60) scale(1.35) rotate(-8)"
+          d="M256 80C256 80 110 200 110 300C110 355 155 385 210 370C195 410 175 430 145 445L367 445C337 430 317 410 302 370C357 385 402 355 402 300C402 200 256 80 256 80Z"
+          fill="#00e676"/>
+  </g>
+  <g opacity="0.04" filter="url(#bgFlowBlurSoft)">
+    <path transform="translate(560,880) scale(1.6) rotate(14)"
+          d="M256 80C256 80 110 200 110 300C110 355 155 385 210 370C195 410 175 430 145 445L367 445C337 430 317 410 302 370C357 385 402 355 402 300C402 200 256 80 256 80Z"
+          fill="#cccc00"/>
+  </g>
+  <g opacity="0.045" filter="url(#bgFlowBlurSoft)">
+    <path transform="translate(-140,1360) scale(1.1) rotate(-20)"
+          d="M256 80C256 80 110 200 110 300C110 355 155 385 210 370C195 410 175 430 145 445L367 445C337 430 317 410 302 370C357 385 402 355 402 300C402 200 256 80 256 80Z"
+          fill="#00e676"/>
+  </g>
+
+  <!-- Flowing brand-gradient ribbons, echoing the smoke-trail reference -->
+  <path d="M -100 120 C 180 40, 260 260, 520 220 S 860 420, 980 340"
+        fill="none" stroke="url(#bgFlowSweep)" stroke-width="70"
+        stroke-linecap="round" opacity="0.13" filter="url(#bgFlowBlurTight)"/>
+  <path d="M 940 560 C 700 620, 640 780, 380 760 S 60 900, -80 1020"
+        fill="none" stroke="url(#bgFlowSweepRev)" stroke-width="54"
+        stroke-linecap="round" opacity="0.11" filter="url(#bgFlowBlurTight)"/>
+  <path d="M -120 1120 C 160 1080, 220 1260, 480 1300 S 780 1480, 1000 1440"
+        fill="none" stroke="url(#bgFlowSweep)" stroke-width="46"
+        stroke-linecap="round" opacity="0.10" filter="url(#bgFlowBlurTight)"/>
+  <path d="M 60 1560 C 300 1620, 420 1700, 700 1680"
+        fill="none" stroke="url(#bgFlowSweepRev)" stroke-width="34"
+        stroke-linecap="round" opacity="0.08" filter="url(#bgFlowBlurTight)"/>
+</svg>
