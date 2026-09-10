@@ -2137,7 +2137,7 @@ function _renderCashGamesSummary(tournaments) {
         <small>${name}</small>
       </td>
       <td class="text-center">${count}</td>
-      <td class="text-center d-none d-md-table-cell">${Math.max(...entries.map(t => t.max_players || 0)) || '—'}</td>
+      <td class="text-center d-none d-sm-table-cell">${Math.max(...entries.map(t => t.max_players || 0)) || '—'}</td>
       <td class="text-center d-none d-md-table-cell">${avgHands}</td>
       <td class="text-center d-none d-md-table-cell">${_fmtDuration(avgDurSecs)}</td>
       <td class="text-center d-none d-lg-table-cell">${handsPerHr.toFixed(1)}</td>
@@ -2452,7 +2452,7 @@ function _renderTournamentSummary(tournaments) {
       </td>
       <td class="text-center">${count}</td>
       <td class="text-center d-none">${isMtt ? '<span class="badge bg-primary">MTT</span>' : '<span class="badge bg-secondary">MTT</span>'}</td>
-      <td class="text-center d-none d-md-table-cell">${Math.max(...entries.map(t => t.max_players || 0)) || '—'}</td>
+      <td class="text-center d-none d-sm-table-cell">${Math.max(...entries.map(t => t.max_players || 0)) || '—'}</td>
       <td class="text-center d-none d-md-table-cell">${avgHands}</td>
       <td class="text-center d-none d-md-table-cell">${_fmtDuration(avgDurSecs)}</td>
       <td class="text-center d-none d-lg-table-cell">${handsPerHr.toFixed(1)}</td>
