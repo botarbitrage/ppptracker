@@ -169,9 +169,18 @@ def main():
               len(A._ad_media_defaults(A._AD_MEDIA_TYPES[media_type])) == 1)
     check('banner_vertical ships 3 selectable slides',
           len(A._ad_media_defaults(A._AD_MEDIA_TYPES['banner_vertical'])) == 3)
-    for media_type in ('video_30', 'video_60'):
-        check('no bundled default for ' + media_type,
-              A._ad_media_defaults(A._AD_MEDIA_TYPES[media_type]) == [])
+    # Both video types now ship a single bundled default clip, each carrying the
+    # human name the admin library labels it with.
+    expected_video_names = {
+        'video_30': 'PPPoker Hand Tracker short video ad #1',
+        'video_60': 'long video ad #1',
+    }
+    for media_type, name in expected_video_names.items():
+        defaults = A._ad_media_defaults(A._AD_MEDIA_TYPES[media_type])
+        check('%s ships one bundled default' % media_type,
+              len(defaults) == 1 and defaults[0]['id'] == 'default', str(defaults))
+        check('%s default carries its name' % media_type,
+              defaults and defaults[0].get('name') == name, str(defaults))
 
     # ── 2. Fresh config: every type starts unselected-but-valid, no files ────
     # Single-select types sit on 'default'; the multi type starts with every
@@ -317,7 +326,8 @@ def main():
     status, body = set_active('banner_b', 'no-such-id')
     check('set active rejects unknown id', status == 400, str(body))
     status, body = set_active('video_30', 'default')
-    check("set active rejects 'default' for a type with no default file", status == 400, str(body))
+    check("set active accepts 'default' now video_30 ships one",
+          status == 200 and body['video_30']['active'] == 'default', str(body))
 
     # ── 10. Delete ─────────────────────────────────────────────────────────
     status, _ = delete('banner_b', 'default')

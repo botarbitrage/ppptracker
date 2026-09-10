@@ -1133,22 +1133,26 @@ _AD_MEDIA_TYPES = {
         'content_types': {'image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/svg+xml'},
         'default_path': '/static/ad_media/banner_b_default.svg',
     },
-    # No bundled default video (default_path stays None): actually encoding a
-    # placeholder 30s/60s MP4 needs tooling this codebase doesn't have. The
-    # next Task's AC already requires "falls back gracefully to the existing
-    # stub behavior if no active video is configured for a type" — this is
-    # exactly that state, reachable from day one until an admin uploads one.
+    # Bundled default videos (portrait, self-hosted in static/ad_media/). The
+    # 30s slot backs the Link Import gate, the 60s slot the Hand Export gate.
+    # video_60_default.mp4 is video_30_default.mp4 played through twice. These
+    # are always-available fallbacks — like the banner defaults, they can't be
+    # deleted from the admin UI; an admin still uploads and selects a different
+    # clip to override. `default_name` is what the admin library labels the
+    # default row (instead of the generic "Default").
     'video_30': {
         'kind': 'video', 'max_bytes': 15 * 1024 * 1024,
         'content_types': {'video/mp4'},
         'target_duration': 30, 'duration_tolerance': 3,
-        'default_path': None,
+        'default_path': '/static/ad_media/video_30_default.mp4',
+        'default_name': 'PPPoker Hand Tracker short video ad #1',
     },
     'video_60': {
         'kind': 'video', 'max_bytes': 15 * 1024 * 1024,
         'content_types': {'video/mp4'},
         'target_duration': 60, 'duration_tolerance': 3,
-        'default_path': None,
+        'default_path': '/static/ad_media/video_60_default.mp4',
+        'default_name': 'long video ad #1',
     },
     # The two promo slots on the main page. Same upload/select mechanism as the
     # gate media above — the slots used to take a typed URL or /static path,
@@ -1179,17 +1183,21 @@ _AD_MEDIA_TYPES = {
 
 
 def _ad_media_defaults(spec):
-    """The type's shipped defaults as [{'id', 'path'}], newest concept first.
+    """The type's shipped defaults as [{'id', 'path', 'name'}], newest concept first.
 
     Single-default types keep the historical 'default' id so stored configs
     (and app.js's gate-modal lookup) keep resolving; multi types number theirs
-    so each slide can be selected on its own.
+    so each slide can be selected on its own. `name` is a human label for the
+    default (the admin library shows it in place of the generic "Default"); it
+    is None when the type declares no `default_name`.
     """
     paths = spec.get('default_paths')
     if paths:
-        return [{'id': 'default-%d' % (i + 1), 'path': p} for i, p in enumerate(paths)]
+        return [{'id': 'default-%d' % (i + 1), 'path': p, 'name': None}
+                for i, p in enumerate(paths)]
     if spec.get('default_path'):
-        return [{'id': 'default', 'path': spec['default_path']}]
+        return [{'id': 'default', 'path': spec['default_path'],
+                 'name': spec.get('default_name')}]
     return []
 
 

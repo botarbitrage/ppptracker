@@ -1751,6 +1751,19 @@ button.auth-chip { background: none; }
   word-break: break-all;
 }
 
+/* Gate-stub ad video (import / hand-export unlock modals). The shipped ad
+   clips are portrait, so the player is sized by height and centered rather
+   than stretched to the modal width — a full-width portrait video would tower
+   over the dialog. width/height auto with both max constraints keeps the
+   aspect ratio and also fits a landscape upload (capped by width instead). */
+.gate-stub-video {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: min(58vh, 440px);
+  background: #000;
+}
+
 /* How to Use steps */
 .howto-steps {
   padding-left: 0;
