@@ -19,10 +19,18 @@
                               (dict), vpip_pct, pfr_pct, steal_pct,
                               check_raise_pct, three_bet_pct,
                               fold_to_bet_pct, cbet_pct, fold_to_cbet_pct
-    highlights       list  — highlight-hand entries (F1-2); each expected to
-                              carry at least {label, hand_url}. Empty until
-                              F1-2 lands — the section below simply omits
-                              itself when the list is empty.
+    highlights       list  — highlight-hand entries from highlights.py (F1-2):
+                              {pattern, label, hand_id, hand_url, art_uri}.
+                              Empty when the window has none — the section
+                              below simply omits itself. Known limitation:
+                              art_uri is a data:image/svg+xml;base64 URI —
+                              renders fine in the admin Preview (a browser
+                              iframe) but Outlook desktop's Word-based
+                              renderer does not support data: image sources,
+                              so the art may not show there. Not fixed here
+                              since real sending (F1-8) isn't wired up yet;
+                              revisit (e.g. upload to Storage + a real https
+                              URL) before this actually goes out to inboxes.
     app_url          str   — CTA link back into the app
 -->
 <!DOCTYPE html>
@@ -136,9 +144,15 @@
             {% for h in highlights %}
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;">
               <tr>
-                <td style="background-color:#152a20; border-radius:8px; padding:12px 14px; font-size:13px; color:#e7efec;">
-                  {{ h.label }}
-                  {% if h.hand_url %}&nbsp;&middot; <a href="{{ h.hand_url }}" style="color:#00e676; text-decoration:none;">View hand</a>{% endif %}
+                <td style="background-color:#152a20; border-radius:8px; padding:12px 14px;">
+                  {% if h.art_uri %}
+                  <img src="{{ h.art_uri }}" width="320" height="170" alt="{{ h.label }}"
+                       style="display:block; width:100%; max-width:320px; height:auto; border-radius:6px; margin-bottom:8px;"/>
+                  {% endif %}
+                  <span style="font-size:13px; color:#e7efec;">
+                    {{ h.label }}
+                    {% if h.hand_url %}&nbsp;&middot; <a href="{{ h.hand_url }}" style="color:#00e676; text-decoration:none;">View hand</a>{% endif %}
+                  </span>
                 </td>
               </tr>
             </table>
