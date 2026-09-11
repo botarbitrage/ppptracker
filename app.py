@@ -3412,14 +3412,19 @@ def _send_pokerpulse_email(to_email, html):
     Returns True on successful delivery, False otherwise (caller decides
     whether to still stamp last_report_sent_at).
 
-    Connects over IPv4 explicitly: Railway's containers have no IPv6 default
-    route, and smtplib's default address resolution tries Gmail's IPv6
-    address(es) first, each failing with ENETUNREACH before it falls through
-    to IPv4 — costing ~20s per send and occasionally outliving Railway's edge
-    proxy timeout, which surfaces as a 502 to the caller even though the
-    backend eventually completes. See PR discussion on F1-8 (2026-09-11)."""
+    Connects over IPv4 explicitly (Railway's containers have no IPv6 default
+    route — smtplib's default resolution tries Gmail's IPv6 address(es)
+    first and fails ENETUNREACH before falling through). On top of that,
+    tries port 465 (implicit TLS) then 587 (STARTTLS) with a short per-port
+    timeout: which outbound SMTP ports a given network egress allows is
+    provider-specific and wasn't yet confirmed for Railway as of 2026-09-11
+    (465 alone hung to a bare TCP-connect timeout in production — consistent
+    with the port being firewalled rather than the host being unreachable).
+    Logs a `[pokerpulse][diag]` line per attempt so the next real send's
+    Railway deploy log states definitively which port (if either) works."""
     import smtplib
     import socket
+    import time
     from email.mime.multipart import MIMEMultipart
     from email.mime.text import MIMEText
 
@@ -3441,14 +3446,36 @@ def _send_pokerpulse_email(to_email, html):
     def _ipv4_only_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
         return real_getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
 
+    def _connect_ssl(timeout):
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=timeout)
+        return server
+
+    def _connect_starttls(timeout):
+        server = smtplib.SMTP('smtp.gmail.com', 587, timeout=timeout)
+        server.starttls()
+        return server
+
+    attempts = [('465/ssl', _connect_ssl), ('587/starttls', _connect_starttls)]
+    last_exc = None
     try:
         socket.getaddrinfo = _ipv4_only_getaddrinfo
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=20) as server:
-            server.login(user, app_password)
-            server.sendmail(user, [to_email], msg.as_string())
-        return True
-    except Exception as exc:
-        print(f'[pokerpulse] send to {to_email} failed: {type(exc).__name__}: {exc}')
+        for label, connect in attempts:
+            t0 = time.monotonic()
+            try:
+                with connect(8) as server:
+                    elapsed = round(time.monotonic() - t0, 2)
+                    print(f'[pokerpulse][diag] {label} connected in {elapsed}s')
+                    server.login(user, app_password)
+                    server.sendmail(user, [to_email], msg.as_string())
+                print(f'[pokerpulse] sent to {to_email} via {label}')
+                return True
+            except Exception as exc:
+                elapsed = round(time.monotonic() - t0, 2)
+                print(f'[pokerpulse][diag] {label} failed after {elapsed}s: '
+                      f'{type(exc).__name__}: {exc}')
+                last_exc = exc
+        print(f'[pokerpulse] send to {to_email} failed on all ports: '
+              f'{type(last_exc).__name__}: {last_exc}')
         return False
     finally:
         socket.getaddrinfo = real_getaddrinfo
