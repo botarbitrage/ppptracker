@@ -20,7 +20,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Compile check
-        run: python -m py_compile app.py gamification.py hand_parser.py hand_exporter.py leak_engine.py leak_validation.py tournament_analyzer.py equity.py session_engine.py
+        run: python -m py_compile app.py gamification.py hand_parser.py hand_exporter.py leak_engine.py leak_validation.py tournament_analyzer.py equity.py session_engine.py highlights.py
 
       - name: Run test suite
         run: |
@@ -36,3 +36,4 @@ jobs:
           python test_banners_config.py
           python test_session_engine.py
           python test_pokerpulse_admin.py
+          python test_highlights.py

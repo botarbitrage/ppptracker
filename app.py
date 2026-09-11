@@ -3312,17 +3312,13 @@ def _tournament_overlaps_window(doc_dict, start_ts, end_ts):
     return earliest < end_ts and latest >= start_ts
 
 
-def compute_uid_session_stats(uid, start_ts, end_ts):
-    """
-    Given a uid and a [start_ts, end_ts) window, pulls every tournament doc +
-    hand JSON overlapping that window and computes session stats via
-    session_engine.compute_session_stats. The Firestore-level overlap check
-    is a coarse pre-filter only (tournament granularity); the actual window
-    split happens at hand level inside compute_session_stats itself. Nothing
-    is written — no run-history collection, matching the MVP spec.
-    """
-    from session_engine import compute_session_stats
-
+def _fetch_uid_records_for_window(uid, start_ts, end_ts):
+    """Every raw hand record from every tournament doc overlapping [start_ts,
+    end_ts) for uid — the coarse, tournament-granularity pre-filter shared by
+    compute_uid_session_stats and compute_uid_session_highlights. The actual
+    hand-level window split happens inside whichever of those the caller
+    passes this to (session_engine.compute_session_stats /
+    highlights.detect_session_highlights), not here."""
     db = _get_admin_db()
     records = []
     for doc in db.collection('users').document(uid).collection('tournaments').get():
@@ -3332,7 +3328,29 @@ def compute_uid_session_stats(uid, start_ts, end_ts):
         recs, _d = _fetch_tournament_records(uid, doc.id)
         if recs:
             records.extend(recs)
-    return compute_session_stats(records, start_ts, end_ts)
+    return records
+
+
+def compute_uid_session_stats(uid, start_ts, end_ts):
+    """
+    Given a uid and a [start_ts, end_ts) window, pulls every tournament doc +
+    hand JSON overlapping that window and computes session stats via
+    session_engine.compute_session_stats. Nothing is written — no run-history
+    collection, matching the MVP spec.
+    """
+    from session_engine import compute_session_stats
+    return compute_session_stats(_fetch_uid_records_for_window(uid, start_ts, end_ts),
+                                 start_ts, end_ts)
+
+
+def compute_uid_session_highlights(uid, start_ts, end_ts):
+    """Given a uid and a [start_ts, end_ts) window, returns this session's
+    highlight hands (biggest win/loss, named patterns — see highlights.py,
+    F1-2). Nothing is written — same no-run-history contract as
+    compute_uid_session_stats."""
+    from highlights import detect_session_highlights
+    return detect_session_highlights(_fetch_uid_records_for_window(uid, start_ts, end_ts),
+                                     start_ts, end_ts)
 
 
 # ── PokerPulse: Session Reports (Admin) ─────────────────────────────────────
@@ -3439,12 +3457,13 @@ def admin_pokerpulse_analyse():
     results = []
     for target_uid, email in _pokerpulse_subscribed_users(db):
         stats = compute_uid_session_stats(target_uid, start_ts, end_ts)
+        session_highlights = compute_uid_session_highlights(target_uid, start_ts, end_ts)
         doc = {
             'window_start': start_ts,
             'window_end':   end_ts,
             'computed_at':  now,
             'stats':        stats,
-            'highlights':   [],  # populated once F1-2 lands
+            'highlights':   session_highlights,
         }
         _pokerpulse_analysis_ref(db, target_uid).set(doc)
         results.append({
