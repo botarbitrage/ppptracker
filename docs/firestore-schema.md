@@ -30,6 +30,15 @@ One document per signed-in account.
 | `last_payment_at` | int (epoch secs) | **server-only** (Stripe webhook) | Stamped on `checkout.session.completed` and `invoice.payment_succeeded` — the two events that represent an actual payment. Left untouched by `customer.subscription.updated` (status sync, not necessarily a new payment). Unset for users who have never paid (`app.py:stripe_webhook`). |
 | `quota` | map | **server-only** | Today's usage counters. See below. |
 | `credits` | map | **server-only** | Unspent survey unlocks. See below. |
+| `pokerpulse_subscribed` | bool | **server-only** (admin) | Whether this user receives PokerPulse session-report emails (see the `users/{uid}/pokerpulse/last_analysis` section below). Missing reads as `False` — see backfill note directly below. Toggled from Admin → Users (a checkbox column next to **Pro**, same pattern: `PATCH /api/admin/users/<uid>/pokerpulse`, `admin_set_user_pokerpulse()` in `app.py`) — no self-serve subscribe/unsubscribe yet, matching the MVP scope in the F1 Feature spec. The report's recipient address is **not** read from this doc or any other Firestore field — it's resolved server-side from Firebase Auth by uid (`admin_auth.get_user(uid).email`, the same source `admin_list_users()` already uses), so it always matches the account's current sign-in email and can't drift from a stale copy. |
+
+**Backfill:** `pokerpulse_subscribed` is not strictly required for correctness
+— every read site treats a missing field as `False` (`admin_list_users()`,
+same convention as the rest of this table) — but
+`backfill_pokerpulse_subscription.py` (one-shot, disposable, see the file
+header) writes `pokerpulse_subscribed: False` onto every existing user doc so
+the field is visible in Firestore immediately instead of only appearing
+lazily on first read, matching the `tourney_export` backfill pattern below.
 
 ### `quota`
 
@@ -67,6 +76,36 @@ it is still unspent.
 Read/spent by `_import_gate()` (imports), `_hand_export_gate()` (hand
 exports) and `_tourney_export_gate()` (tourney exports, once the lifetime
 freebie is spent) — see the `_export_gate`/`_import_gate` section of `app.py`.
+
+---
+
+## `users/{uid}/pokerpulse/last_analysis` — server-only
+
+A single document, keyed by a fixed id (`last_analysis`), holding the most
+recent PokerPulse "Analyse Now" result for this user. One doc per user, no
+historical collection — each run **overwrites** the previous one outright.
+
+This is a deliberate exception to the `.update()`-only convention the rest of
+this schema follows (see [Security rules](#security-rules)): the admin
+Session Reports "Analyse Now" action (F1-5) is expected to `.set()` this
+document wholesale on every run rather than merge into it, because a stale
+leftover field from a previous run's shape (e.g. an old highlight that no
+longer applies) must not survive into the new result. There is nothing here
+worth an audit trail — unlike `gate_events` or `survey_completions`, this is
+scratch space for a preview/send cycle, not a ledger.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `window_start` / `window_end` | int (epoch secs) | The report period this result covers (5am/5pm Adelaide-time cutoff — see the F1 Feature spec). |
+| `computed_at` | int (epoch secs) | When this run produced the result. |
+| `stats` | map | The session_engine.py `compute_session_stats()` output for the window (total hands, VPIP%, PFR%, etc. — see `session_engine.py`). |
+| `highlights` | array | Highlight-hand entries for the window (biggest win/loss, named patterns — see the F1-2 Task), once that Task lands. Empty/absent until then. |
+| `last_report_sent_at` | int (epoch secs) \| null | Set by Send Now (F1-8), not Analyse Now — lets the admin UI show repeat sends and makes accidental double-sends visible, per the F1-5 Task's Acceptance Criteria. `null`/absent until the first send. |
+
+Not yet read or written by any code — this section documents the agreed
+shape ahead of F1-5/F1-8 landing, per the project's paired-plan convention
+(schema documented alongside the field/flag that motivates it, before the
+first consumer is built).
 
 ---
 
@@ -303,14 +342,15 @@ deleted outright once claimed.
 `firestore.rules` enforces the "server-only" column above. Two properties matter:
 
 1. **`users/{uid}` update** may not touch `is_pro`, `stripe_customer_id`,
-   `subscription_status`, `quota` or `credits`; **create** may not seed them
-   either, so a delete-and-recreate cannot wash away a spent allowance.
-2. **`ad_jtis`, `survey_completions`, `quota` and `gate_events` are excluded
-   from the blanket subcollection grant**, not merely re-matched with a
-   stricter rule. Rule matches are OR'd, so a permissive parent rule would
-   outvote a strict child one, and the account that benefits from deleting a
-   spent-unlock record (or its own gate-event history) is exactly the account
-   that must not be able to.
+   `subscription_status`, `quota`, `credits` or `pokerpulse_subscribed`;
+   **create** may not seed them either, so a delete-and-recreate cannot wash
+   away a spent allowance (or self-grant a PokerPulse subscription).
+2. **`ad_jtis`, `survey_completions`, `quota`, `gate_events` and `pokerpulse`
+   are excluded from the blanket subcollection grant**, not merely re-matched
+   with a stricter rule. Rule matches are OR'd, so a permissive parent rule
+   would outvote a strict child one, and the account that benefits from
+   deleting a spent-unlock record (or its own gate-event or PokerPulse-report
+   history) is exactly the account that must not be able to.
 
-All four subcollections stay owner-**readable**, so a player can audit their
-own unlocks, payouts, and tourney-export/gate history.
+All five subcollections stay owner-**readable**, so a player can audit their
+own unlocks, payouts, tourney-export/gate history, and PokerPulse reports.

@@ -524,6 +524,7 @@
                     <th>Signed up</th>
                     <th>Last sign-in</th>
                     <th class="text-center">Pro</th>
+                    <th class="text-center">PokerPulse</th>
                     <th>Subscription</th>
                     <th>Registered</th>
                     <th>Last active</th>
@@ -1586,7 +1587,7 @@
     const body = document.getElementById('adm-users-body');
 
     if (!rows.length) {
-      body.innerHTML = `<tr><td colspan="8" class="text-center adm-meta py-4">` +
+      body.innerHTML = `<tr><td colspan="9" class="text-center adm-meta py-4">` +
         (USERS.length ? 'No users match that search.' : 'No registered users yet.') +
         `</td></tr>`;
     } else {
@@ -1605,6 +1606,12 @@
                    aria-label="Pro"
                    ${u.is_pro ? 'checked' : ''}
                    onchange="setPro('${esc(u.uid)}', this)"/>
+          </td>
+          <td class="text-center">
+            <input type="checkbox" class="form-check-input adm-check"
+                   aria-label="PokerPulse"
+                   ${u.pokerpulse_subscribed ? 'checked' : ''}
+                   onchange="setPokerPulse('${esc(u.uid)}', this)"/>
           </td>
           <td>${subscriptionBadge(u.subscription_status)}</td>
           <td class="adm-date">${esc(fmtDate(u.first_seen))}</td>
@@ -1686,6 +1693,37 @@
         return;
       }
       if (user) user.is_pro = want;
+      renderUsers();
+    } catch (e) {
+      checkbox.checked = !want;
+      showUsersError('Could not reach the server: ' + e.message);
+    } finally {
+      checkbox.disabled = false;
+      if (row) row.classList.remove('adm-row-busy');
+    }
+  }
+
+  async function setPokerPulse(uid, checkbox) {
+    const want = checkbox.checked;
+    const user = USERS.find(u => u.uid === uid);
+
+    const row = checkbox.closest('tr');
+    checkbox.disabled = true;
+    if (row) row.classList.add('adm-row-busy');
+    showUsersError('');
+
+    try {
+      const res = await authFetch(`/api/admin/users/${encodeURIComponent(uid)}/pokerpulse`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pokerpulse_subscribed: want }),
+      });
+      if (!res.ok) {
+        checkbox.checked = !want;  // revert — the server rejected it
+        showUsersError(await errorText(res, 'Could not update PokerPulse subscription'));
+        return;
+      }
+      if (user) user.pokerpulse_subscribed = want;
       renderUsers();
     } catch (e) {
       checkbox.checked = !want;

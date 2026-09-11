@@ -2850,7 +2850,8 @@ def admin_list_users():
         exports_today = (int(quota.get('hand_exports') or 0) + int(quota.get('tourney_exports') or 0)) \
             if quota.get('day') == today else 0
         profiles[doc.id] = {
-            'is_pro':              bool(d.get('is_pro')),
+            'is_pro':                 bool(d.get('is_pro')),
+            'pokerpulse_subscribed':  bool(d.get('pokerpulse_subscribed')),
             'first_seen':          _fs_ts_to_secs(d.get('first_seen')),
             'last_seen':           _fs_ts_to_secs(d.get('last_seen')),
             'exports_today':       exports_today,
@@ -2875,6 +2876,7 @@ def admin_list_users():
                     'created_at':    _ms_to_secs(getattr(meta, 'creation_timestamp', None)),
                     'last_sign_in':  _ms_to_secs(getattr(meta, 'last_sign_in_timestamp', None)),
                     'is_pro':              profile.get('is_pro', False),
+                    'pokerpulse_subscribed': profile.get('pokerpulse_subscribed', False),
                     'first_seen':          profile.get('first_seen'),
                     'last_seen':           profile.get('last_seen'),
                     'exports_today':       profile.get('exports_today', 0),
@@ -2963,6 +2965,40 @@ def admin_set_user_pro(target_uid):
     else:
         ref.set({'is_pro': make_pro}, merge=True)
     return jsonify({'ok': True, 'uid': target_uid, 'is_pro': make_pro})
+
+
+@app.route('/api/admin/users/<target_uid>/pokerpulse', methods=['PATCH'])
+def admin_set_user_pokerpulse(target_uid):
+    """Subscribe or unsubscribe target_uid to PokerPulse session-report emails,
+    on users/{uid}.pokerpulse_subscribed. See docs/firestore-schema.md."""
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+
+    body = request.get_json(silent=True) or {}
+    want = body.get('pokerpulse_subscribed')
+    if not isinstance(want, bool):
+        return jsonify({'error': 'pokerpulse_subscribed must be true or false'}), 400
+
+    try:
+        admin_auth.get_user(target_uid)
+    except admin_auth.UserNotFoundError:
+        return jsonify({'error': 'No such user'}), 404
+    except Exception as exc:
+        print(f"[admin_set_user_pokerpulse] get_user failed for {target_uid}: "
+              f"{type(exc).__name__}: {exc}")
+        return jsonify({'error': f'Could not look up user: {exc}'}), 500
+
+    ref = _get_admin_db().collection('users').document(target_uid)
+    # .update() merges without a full-document overwrite, per project convention —
+    # but a user who has never loaded the home page has no users/{uid} doc yet
+    # (see admin_list_users), so fall back to a merge-set rather than 500ing on
+    # what is otherwise a perfectly valid manual subscribe/unsubscribe.
+    if ref.get().exists:
+        ref.update({'pokerpulse_subscribed': want})
+    else:
+        ref.set({'pokerpulse_subscribed': want}, merge=True)
+    return jsonify({'ok': True, 'uid': target_uid, 'pokerpulse_subscribed': want})
 
 
 # ── Pricing plan ─────────────────────────────────────────────────────────────
