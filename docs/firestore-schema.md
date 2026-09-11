@@ -100,12 +100,13 @@ scratch space for a preview/send cycle, not a ledger.
 | `computed_at` | int (epoch secs) | When this run produced the result. |
 | `stats` | map | The session_engine.py `compute_session_stats()` output for the window (total hands, VPIP%, PFR%, etc. — see `session_engine.py`). |
 | `highlights` | array | Highlight-hand entries for the window (biggest win/loss, named patterns — see the F1-2 Task), once that Task lands. Empty/absent until then. |
-| `last_report_sent_at` | int (epoch secs) \| null | Set by Send Now (F1-8), not Analyse Now — lets the admin UI show repeat sends and makes accidental double-sends visible, per the F1-5 Task's Acceptance Criteria. `null`/absent until the first send. |
+| `last_report_sent_at` | int (epoch secs) \| null | Set by Send Now's own endpoint (`admin_pokerpulse_send()` in `app.py`, F1-5), not Analyse Now — lets the admin UI show repeat sends and makes accidental double-sends visible, per this Task's Acceptance Criteria. `null`/absent until the first send. |
 
-Not yet read or written by any code — this section documents the agreed
-shape ahead of F1-5/F1-8 landing, per the project's paired-plan convention
-(schema documented alongside the field/flag that motivates it, before the
-first consumer is built).
+Read/written by `admin_pokerpulse_analyse()` (full `.set()`), `admin_pokerpulse_preview()`
+(read-only) and `admin_pokerpulse_send()` (`.update()` of `last_report_sent_at`
+only) in `app.py` — see the "PokerPulse: Session Reports (Admin)" section
+there. Actual email delivery is still a stub (`_send_pokerpulse_email()`) —
+the SMTP/transport wiring is F1-8's job, not this doc's.
 
 ---
 

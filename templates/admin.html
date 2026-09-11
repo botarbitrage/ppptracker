@@ -490,6 +490,10 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
             Freebies / Ads
           </button>
+          <button type="button" class="adm-nav-item" data-section="pokerpulse" onclick="switchSection('pokerpulse')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            PokerPulse
+          </button>
 
           <!-- Their own pages, so these navigate rather than switch panels. -->
           <a class="adm-nav-item" href="/tournaments">
@@ -782,8 +786,61 @@
             </div>
           </section>
 
+          <section class="section-card adm-panel d-none" id="panel-pokerpulse">
+            <div class="section-header">
+              <h2>PokerPulse — Session Reports</h2>
+            </div>
+            <div class="p-3">
+              <p class="adm-meta mb-3">
+                Analyse Now computes each subscriber's stats for the chosen window and stores
+                them for preview. Send Now emails the report to subscribers who actually played
+                in the window — no email goes to anyone with zero hands.
+              </p>
+              <div id="adm-pp-error" class="alert alert-danger d-none py-2"></div>
+
+              <div class="adm-toolbar px-0 flex-wrap">
+                <label class="adm-meta mb-0" for="adm-pp-start">From</label>
+                <input type="datetime-local" id="adm-pp-start" class="form-control form-control-sm adm-search" style="max-width:220px;"/>
+                <label class="adm-meta mb-0" for="adm-pp-end">To</label>
+                <input type="datetime-local" id="adm-pp-end" class="form-control form-control-sm adm-search" style="max-width:220px;"/>
+                <button type="button" class="adm-btn" id="adm-pp-analyse" onclick="ppAnalyseNow()">Analyse Now</button>
+                <button type="button" class="adm-btn" id="adm-pp-send" onclick="ppSendNow()" disabled>Send Now</button>
+              </div>
+
+              <div id="adm-pp-status" class="adm-meta mt-2"></div>
+
+              <div class="table-responsive mt-3">
+                <table class="table table-dark table-striped table-hover mb-0">
+                  <thead>
+                    <tr>
+                      <th>Subscriber</th>
+                      <th>Hands</th>
+                      <th>Tournaments</th>
+                      <th>Last sent</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="adm-pp-body">
+                    <tr><td colspan="5" class="text-center adm-meta py-4">Pick a window and run Analyse Now.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- PokerPulse email preview -->
+  <div id="adm-pp-preview-backdrop" class="d-none" style="position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:1000;" onclick="ppClosePreview(event)">
+    <div style="position:absolute; inset:5% 10%; background:#fff; border-radius:10px; overflow:hidden; display:flex; flex-direction:column;" onclick="event.stopPropagation()">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 16px; background:#101b17;">
+        <span style="color:#e7efec; font-size:13px;">Email preview</span>
+        <button type="button" class="adm-btn" onclick="ppClosePreview()">Close</button>
+      </div>
+      <iframe id="adm-pp-preview-frame" style="border:0; flex:1; width:100%;"></iframe>
     </div>
   </div>
 
@@ -1732,6 +1789,146 @@
       checkbox.disabled = false;
       if (row) row.classList.remove('adm-row-busy');
     }
+  }
+
+  // ── PokerPulse: Session Reports ───────────────────────────────────────────
+  let PP_WINDOW = null;   // {start, end} epoch secs of the last Analyse Now run
+
+  function showPPError(msg) {
+    const e = document.getElementById('adm-pp-error');
+    e.textContent = msg || '';
+    e.classList.toggle('d-none', !msg);
+  }
+
+  function ppWindowFromInputs() {
+    const startEl = document.getElementById('adm-pp-start');
+    const endEl = document.getElementById('adm-pp-end');
+    const start = startEl.value ? Math.floor(new Date(startEl.value).getTime() / 1000) : null;
+    const end = endEl.value ? Math.floor(new Date(endEl.value).getTime() / 1000) : null;
+    if (!start || !end || end <= start) return null;
+    return { start, end };
+  }
+
+  function fmtSentAt(ts) {
+    return ts ? new Date(ts * 1000).toLocaleString() : '—';
+  }
+
+  function ppRenderResults(results, sentMap) {
+    const body = document.getElementById('adm-pp-body');
+    if (!results.length) {
+      body.innerHTML = `<tr><td colspan="5" class="text-center adm-meta py-4">No PokerPulse subscribers yet.</td></tr>`;
+      return;
+    }
+    body.innerHTML = results.map(r => `
+      <tr data-uid="${esc(r.uid)}">
+        <td>${esc(r.email)}</td>
+        <td>${r.total_hands}</td>
+        <td>${r.total_games}</td>
+        <td class="adm-date">${fmtSentAt(sentMap && sentMap[r.uid])}</td>
+        <td class="text-end">
+          <button type="button" class="adm-btn" onclick="ppPreview('${esc(r.uid)}')">Preview</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  async function ppAnalyseNow() {
+    const win = ppWindowFromInputs();
+    if (!win) {
+      showPPError('Pick a valid From/To window (To must be after From).');
+      return;
+    }
+    showPPError('');
+    const btn = document.getElementById('adm-pp-analyse');
+    btn.disabled = true;
+    document.getElementById('adm-pp-status').textContent = 'Analysing subscribed users…';
+    try {
+      const res = await authFetch('/api/admin/pokerpulse/analyse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(win),
+      });
+      if (!res.ok) {
+        showPPError(await errorText(res, 'Could not run Analyse Now'));
+        document.getElementById('adm-pp-status').textContent = '';
+        return;
+      }
+      const data = await res.json();
+      PP_WINDOW = { start: data.window_start, end: data.window_end };
+      ppRenderResults(data.results, {});
+      document.getElementById('adm-pp-send').disabled = data.results.length === 0;
+      const withHands = data.results.filter(r => r.total_hands > 0).length;
+      document.getElementById('adm-pp-status').textContent =
+        `${data.results.length} subscriber${data.results.length === 1 ? '' : 's'} analysed · ` +
+        `${withHands} had hands in this window.`;
+    } catch (e) {
+      showPPError('Could not reach the server: ' + e.message);
+      document.getElementById('adm-pp-status').textContent = '';
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  async function ppSendNow() {
+    if (!PP_WINDOW) {
+      showPPError('Run Analyse Now first.');
+      return;
+    }
+    if (!confirm('Send the PokerPulse report to every subscriber with hands in this window?')) return;
+    showPPError('');
+    const btn = document.getElementById('adm-pp-send');
+    btn.disabled = true;
+    document.getElementById('adm-pp-status').textContent = 'Sending…';
+    try {
+      const res = await authFetch('/api/admin/pokerpulse/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(PP_WINDOW),
+      });
+      if (!res.ok) {
+        showPPError(await errorText(res, 'Could not run Send Now'));
+        return;
+      }
+      const data = await res.json();
+      const sentMap = {};
+      const nowSecs = Math.floor(Date.now() / 1000);
+      data.sent.forEach(s => { sentMap[s.uid] = nowSecs; });
+      const rows = document.querySelectorAll('#adm-pp-body tr[data-uid]');
+      rows.forEach(row => {
+        const uid = row.dataset.uid;
+        if (sentMap[uid]) {
+          const cell = row.children[3];
+          if (cell) cell.textContent = fmtSentAt(sentMap[uid]);
+        }
+      });
+      document.getElementById('adm-pp-status').textContent =
+        `Sent to ${data.sent.length}, skipped ${data.skipped.length} (no hands in window or not yet analysed).`;
+    } catch (e) {
+      showPPError('Could not reach the server: ' + e.message);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  async function ppPreview(uid) {
+    showPPError('');
+    try {
+      const res = await authFetch(`/api/admin/pokerpulse/preview/${encodeURIComponent(uid)}`);
+      if (!res.ok) {
+        showPPError(await errorText(res, 'Could not load preview'));
+        return;
+      }
+      const html = await res.text();
+      document.getElementById('adm-pp-preview-frame').srcdoc = html;
+      document.getElementById('adm-pp-preview-backdrop').classList.remove('d-none');
+    } catch (e) {
+      showPPError('Could not reach the server: ' + e.message);
+    }
+  }
+
+  function ppClosePreview(evt) {
+    if (evt && evt.target !== evt.currentTarget) return;
+    document.getElementById('adm-pp-preview-backdrop').classList.add('d-none');
+    document.getElementById('adm-pp-preview-frame').srcdoc = '';
   }
 
   // ── Loading + errors ───────────────────────────────────────────────────────
