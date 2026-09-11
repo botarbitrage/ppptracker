@@ -3335,6 +3335,163 @@ def compute_uid_session_stats(uid, start_ts, end_ts):
     return compute_session_stats(records, start_ts, end_ts)
 
 
+# ── PokerPulse: Session Reports (Admin) ─────────────────────────────────────
+# Admin → Session Reports: Analyse Now computes + stores each subscriber's
+# session stats for a chosen window; Preview renders the real email body from
+# that stored result; Send Now sends it (stubbed — see _send_pokerpulse_email)
+# to subscribers who actually played in the window. See docs/firestore-schema.md
+# for the users/{uid}/pokerpulse/last_analysis doc shape this reads/writes.
+
+def _pokerpulse_subscribed_users(db):
+    """[(uid, email), ...] for every users/{uid} with pokerpulse_subscribed=True.
+    Email is resolved from Firebase Auth, not Firestore — see F1-3's note in
+    docs/firestore-schema.md on why."""
+    out = []
+    for doc in db.collection('users').where('pokerpulse_subscribed', '==', True).stream():
+        try:
+            user = admin_auth.get_user(doc.id)
+        except Exception as exc:
+            print(f"[pokerpulse] get_user failed for {doc.id}: {type(exc).__name__}: {exc}")
+            continue
+        if user.email:
+            out.append((doc.id, user.email))
+    return out
+
+
+def _pokerpulse_analysis_ref(db, uid):
+    return db.collection('users').document(uid).collection('pokerpulse').document('last_analysis')
+
+
+def render_pokerpulse_email(email, analysis):
+    """Renders the PokerPulse report template (templates/emails/pokerpulse_report.html)
+    from a stored users/{uid}/pokerpulse/last_analysis document."""
+    from datetime import datetime as _dt, timezone as _tz
+
+    def _fmt(ts):
+        return _dt.fromtimestamp(ts, tz=_tz.utc).strftime('%b %d, %I:%M %p UTC') if ts else ''
+
+    return render_template(
+        'emails/pokerpulse_report.html',
+        email=email,
+        window_start_str=_fmt(analysis.get('window_start')),
+        window_end_str=_fmt(analysis.get('window_end')),
+        stats=analysis.get('stats') or {},
+        highlights=analysis.get('highlights') or [],
+        app_url=request.url_root.rstrip('/'),
+    )
+
+
+def _send_pokerpulse_email(to_email, html):
+    """STUB — actual SMTP delivery via handtrackerpppoker@gmail.com is F1-8's
+    job (needs Railway env vars Caio hasn't created yet). For now this just
+    logs what would have been sent, so Send Now's filtering/marker logic
+    (this task's AC) can be built and tested ahead of F1-8 landing.
+    TODO(F1-8): replace this body with real SMTP/API delivery."""
+    print(f"[pokerpulse] STUB send to {to_email} ({len(html)} chars) — "
+          f"no transport wired yet, see F1-8")
+    return True
+
+
+@app.route('/api/admin/pokerpulse/analyse', methods=['POST'])
+def admin_pokerpulse_analyse():
+    """Computes session stats for every subscribed user over [start, end) and
+    overwrites each users/{uid}/pokerpulse/last_analysis doc (full .set(),
+    not .update() — see docs/firestore-schema.md's documented exception)."""
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+
+    body = request.get_json(silent=True) or {}
+    start_ts, end_ts = body.get('start'), body.get('end')
+    if not isinstance(start_ts, int) or not isinstance(end_ts, int) or end_ts <= start_ts:
+        return jsonify({'error': 'start and end must be epoch-second ints with end > start'}), 400
+
+    db = _get_admin_db()
+    now = int(time.time())
+    results = []
+    for target_uid, email in _pokerpulse_subscribed_users(db):
+        stats = compute_uid_session_stats(target_uid, start_ts, end_ts)
+        doc = {
+            'window_start': start_ts,
+            'window_end':   end_ts,
+            'computed_at':  now,
+            'stats':        stats,
+            'highlights':   [],  # populated once F1-2 lands
+        }
+        _pokerpulse_analysis_ref(db, target_uid).set(doc)
+        results.append({
+            'uid': target_uid, 'email': email,
+            'total_hands': stats['total_hands'], 'total_games': stats['total_games'],
+        })
+
+    results.sort(key=lambda r: r['email'].lower())
+    return jsonify({'window_start': start_ts, 'window_end': end_ts, 'results': results})
+
+
+@app.route('/api/admin/pokerpulse/preview/<target_uid>', methods=['GET'])
+def admin_pokerpulse_preview(target_uid):
+    """Renders the real email body for a subscriber's most recent Analyse Now
+    result. Requires Analyse Now to have run first (this task's AC: 'Preview
+    renders the actual email HTML ... before anything is sent')."""
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+
+    db = _get_admin_db()
+    snap = _pokerpulse_analysis_ref(db, target_uid).get()
+    if not snap.exists:
+        return jsonify({'error': 'No analysis yet for this user — run Analyse Now first.'}), 404
+
+    try:
+        user = admin_auth.get_user(target_uid)
+    except admin_auth.UserNotFoundError:
+        return jsonify({'error': 'No such user'}), 404
+
+    html = render_pokerpulse_email(user.email or '', snap.to_dict())
+    return Response(html, mimetype='text/html')
+
+
+@app.route('/api/admin/pokerpulse/send', methods=['POST'])
+def admin_pokerpulse_send():
+    """Sends the report (stubbed transport, see _send_pokerpulse_email) to
+    every subscriber whose stored last_analysis matches [start, end) and has
+    total_hands > 0; skips (no email) everyone else, per this task's AC.
+    Stamps last_report_sent_at via .update() — the one field on this doc that
+    Send Now, not Analyse Now, owns (see docs/firestore-schema.md)."""
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+
+    body = request.get_json(silent=True) or {}
+    start_ts, end_ts = body.get('start'), body.get('end')
+    if not isinstance(start_ts, int) or not isinstance(end_ts, int) or end_ts <= start_ts:
+        return jsonify({'error': 'start and end must be epoch-second ints with end > start'}), 400
+
+    db = _get_admin_db()
+    now = int(time.time())
+    sent, skipped = [], []
+    for target_uid, email in _pokerpulse_subscribed_users(db):
+        ref = _pokerpulse_analysis_ref(db, target_uid)
+        snap = ref.get()
+        if not snap.exists:
+            skipped.append({'uid': target_uid, 'email': email, 'reason': 'not_analysed'})
+            continue
+        analysis = snap.to_dict()
+        if analysis.get('window_start') != start_ts or analysis.get('window_end') != end_ts:
+            skipped.append({'uid': target_uid, 'email': email, 'reason': 'stale_analysis'})
+            continue
+        if not (analysis.get('stats') or {}).get('total_hands'):
+            skipped.append({'uid': target_uid, 'email': email, 'reason': 'no_hands'})
+            continue
+
+        html = render_pokerpulse_email(email, analysis)
+        _send_pokerpulse_email(email, html)
+        ref.update({'last_report_sent_at': now})
+        sent.append({'uid': target_uid, 'email': email})
+
+    return jsonify({'sent': sent, 'skipped': skipped})
+
+
 def _norm_room_name(s):
     """Strip platform emoji/punctuation so room names compare cleanly, e.g.
     "🌐 LUCKY DAY" (as stored on hand records) == "LUCKY DAY" (config doc name)."""

@@ -35,3 +35,4 @@ jobs:
           python test_tiering.py
           python test_banners_config.py
           python test_session_engine.py
+          python test_pokerpulse_admin.py
