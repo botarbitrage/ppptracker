@@ -3410,8 +3410,16 @@ def _send_pokerpulse_email(to_email, html):
     scheduled sends on reaching >=5 subscribers), so MVP volume is nowhere
     near that ceiling.
     Returns True on successful delivery, False otherwise (caller decides
-    whether to still stamp last_report_sent_at)."""
+    whether to still stamp last_report_sent_at).
+
+    Connects over IPv4 explicitly: Railway's containers have no IPv6 default
+    route, and smtplib's default address resolution tries Gmail's IPv6
+    address(es) first, each failing with ENETUNREACH before it falls through
+    to IPv4 — costing ~20s per send and occasionally outliving Railway's edge
+    proxy timeout, which surfaces as a 502 to the caller even though the
+    backend eventually completes. See PR discussion on F1-8 (2026-09-11)."""
     import smtplib
+    import socket
     from email.mime.multipart import MIMEMultipart
     from email.mime.text import MIMEText
 
@@ -3428,7 +3436,13 @@ def _send_pokerpulse_email(to_email, html):
     msg['To'] = to_email
     msg.attach(MIMEText(html, 'html'))
 
+    real_getaddrinfo = socket.getaddrinfo
+
+    def _ipv4_only_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
+        return real_getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
+
     try:
+        socket.getaddrinfo = _ipv4_only_getaddrinfo
         with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=20) as server:
             server.login(user, app_password)
             server.sendmail(user, [to_email], msg.as_string())
@@ -3436,6 +3450,8 @@ def _send_pokerpulse_email(to_email, html):
     except Exception as exc:
         print(f'[pokerpulse] send to {to_email} failed: {type(exc).__name__}: {exc}')
         return False
+    finally:
+        socket.getaddrinfo = real_getaddrinfo
 
 
 @app.route('/api/admin/pokerpulse/analyse', methods=['POST'])
