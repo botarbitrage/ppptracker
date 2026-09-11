@@ -3264,6 +3264,41 @@ def _fetch_tournament_records(uid, tourney_id):
     return _jj.loads(blob.download_as_bytes()), d
 
 
+def _tournament_overlaps_window(doc_dict, start_ts, end_ts):
+    """Coarse Firestore-level overlap test for one tournament doc against a
+    session window. A doc with no earliest_ts is always included — "undated"
+    isn't evidence the tournament is outside the window (same fail-open
+    convention _history_cutoff_ts/_is_expired use for tiering)."""
+    earliest = doc_dict.get('earliest_ts')
+    if not earliest:
+        return True
+    latest = earliest + (doc_dict.get('duration_secs') or 0)
+    return earliest < end_ts and latest >= start_ts
+
+
+def compute_uid_session_stats(uid, start_ts, end_ts):
+    """
+    Given a uid and a [start_ts, end_ts) window, pulls every tournament doc +
+    hand JSON overlapping that window and computes session stats via
+    session_engine.compute_session_stats. The Firestore-level overlap check
+    is a coarse pre-filter only (tournament granularity); the actual window
+    split happens at hand level inside compute_session_stats itself. Nothing
+    is written — no run-history collection, matching the MVP spec.
+    """
+    from session_engine import compute_session_stats
+
+    db = _get_admin_db()
+    records = []
+    for doc in db.collection('users').document(uid).collection('tournaments').get():
+        d = doc.to_dict()
+        if not _tournament_overlaps_window(d, start_ts, end_ts):
+            continue
+        recs, _d = _fetch_tournament_records(uid, doc.id)
+        if recs:
+            records.extend(recs)
+    return compute_session_stats(records, start_ts, end_ts)
+
+
 def _norm_room_name(s):
     """Strip platform emoji/punctuation so room names compare cleanly, e.g.
     "🌐 LUCKY DAY" (as stored on hand records) == "LUCKY DAY" (config doc name)."""
