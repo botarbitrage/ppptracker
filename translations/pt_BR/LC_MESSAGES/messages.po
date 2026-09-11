@@ -748,33 +748,41 @@ msgstr "Fiquei frustrado o suficiente para fazer algo a respeito. Com a ajuda de
 msgid "No poker background in software development. No team. Just a player who wanted better tools and figured out how to build them. If it helps your game even a little, it was worth it. ♠"
 msgstr "Nenhuma experiência em desenvolvimento de software. Nenhuma equipe. Apenas um jogador que queria ferramentas melhores e descobriu como construí-las. Se isso ajudar seu jogo mesmo que um pouco, já valeu a pena. ♠"
 
-#: templates/index.html:988
+#: templates/index.html:1084
 msgid "<strong>PPPoker Hand Tracker</strong> bridges the gap between PPPoker and your training software. Here's what it does:"
 msgstr "O <strong>PPPoker Hand Tracker</strong> preenche a lacuna entre o PPPoker e seu software de treino. Veja o que ele faz:"
 
-#: templates/index.html:990
+#: templates/index.html:1086
 msgid "<strong>Fetches your hands</strong> directly from PPPoker's API using your hand review link — no installs, no file uploads, no screen scraping."
 msgstr "<strong>Busca suas mãos</strong> diretamente da API do PPPoker usando seu link de revisão de mão — sem instalações, sem upload de arquivos, sem captura de tela."
 
-#: templates/index.html:991
+#: templates/index.html:1087
 msgid "<strong>Converts to PokerStars format</strong> — the industry-standard hand history format accepted by PokerTracker 4, DriveHUD, and GTO Wizard."
 msgstr "<strong>Converte para o formato PokerStars</strong> — o formato padrão do setor, aceito pelo PokerTracker 4, DriveHUD e GTO Wizard."
 
-#: templates/index.html:992
-msgid "<strong>Tracks tournaments and cash sessions</strong> — every event you've played with hands logged, session length, and result, plus a per-tournament progress graph you can click through to any hand."
-msgstr "<strong>Acompanha torneios e sessões de cash</strong> — todo evento que você jogou com as mãos registradas, duração da sessão e resultado, além de um gráfico de progresso por torneio no qual você pode clicar para ir direto a qualquer mão."
+#: templates/index.html:1088
+msgid "<strong>Analyzes your tournaments</strong> — the Tournament Summary aggregates every event you've played, showing games entered, average hands, average duration, and hands per hour, with filters for today, this week, or this month."
+msgstr "<strong>Analisa seus torneios</strong> — o Resumo de Torneios reúne todo evento que você jogou, mostrando jogos disputados, média de mãos, duração média e mãos por hora, com filtros para hoje, esta semana ou este mês."
 
-#: templates/index.html:993
+#: templates/index.html:1089
+msgid "<strong>Breaks down each tournament</strong> — open any event to review every hand you played next to a progress graph of your stack, shown in chips or big blinds; click any point on the curve to jump straight to that hand."
+msgstr "<strong>Detalha cada torneio</strong> — abra qualquer evento para revisar todas as mãos que você jogou ao lado de um gráfico de progresso da sua pilha, exibido em fichas ou big blinds; clique em qualquer ponto da curva para ir direto a essa mão."
+
+#: templates/index.html:1090
+msgid "<strong>Tracks cash and play-money sessions</strong> — cash tables and sit-and-gos get their own section, kept separate from your real-money tournaments."
+msgstr "<strong>Acompanha sessões de cash e play-money</strong> — mesas de cash e sit-and-gos têm sua própria seção, separada dos seus torneios em dinheiro real."
+
+#: templates/index.html:1091
 msgid "<strong>Exports on demand</strong> — download all hands, a single hand by ID, or a full tournament in .txt or .json format."
 msgstr "<strong>Exporta sob demanda</strong> — baixe todas as mãos, uma única mão por ID, ou um torneio completo em formato .txt ou .json."
 
-#: templates/index.html:996
-msgid "<strong>🔒 Your PPPoker account is never touched.</strong> This tool works entirely through the public hand review link PPPoker generates for you. It does not ask for, store, or transmit your PPPoker username, password, or any account credentials — ever. The only data processed is the hand history contained in the link you provide."
-msgstr "<strong>🔒 Sua conta do PPPoker nunca é acessada.</strong> Esta ferramenta funciona inteiramente através do link público de revisão de mãos que o PPPoker gera para você. Ela nunca solicita, armazena ou transmite seu usuário, senha ou qualquer credencial de conta do PPPoker. Os únicos dados processados são o histórico de mãos contido no link que você fornece."
+#: templates/index.html:1094
+msgid "<strong>Your PPPoker account is never touched.</strong> This tool works entirely through the public hand review link PPPoker generates for you. It never asks for, stores, or transmits your PPPoker username, password, or any account credentials. The only data processed is the hand history contained in the link you provide."
+msgstr "<strong>Sua conta do PPPoker nunca é acessada.</strong> Esta ferramenta funciona inteiramente através do link público de revisão de mãos que o PPPoker gera para você. Ela nunca solicita, armazena ou transmite seu usuário, senha ou qualquer credencial de conta do PPPoker. Os únicos dados processados são o histórico de mãos contido no link que você fornece."
 
-#: templates/index.html:997
-msgid "<strong>Conversion accuracy is 95%+</strong> across the hands tested so far. The vast majority of hand types, bet sizes, and board runouts convert cleanly. That said, edge cases exist — unusual all-in situations, incomplete hands, or rare PPPoker-specific action types may not convert perfectly. Use exported files for study and improvement, not as official records."
-msgstr "<strong>A precisão da conversão é de 95%+</strong> nas mãos testadas até agora. A grande maioria dos tipos de mão, tamanhos de aposta e runouts do board converte perfeitamente. Dito isso, existem casos extremos — situações incomuns de all-in, mãos incompletas ou tipos de ação raros específicos do PPPoker podem não converter perfeitamente. Use os arquivos exportados para estudo e melhoria, não como registros oficiais."
+#: templates/index.html:1095
+msgid "<strong>Conversion accuracy is 95%+</strong> across the hands tested so far. Most hand types, bet sizes, and board runouts convert cleanly, but edge cases remain — unusual all-in situations, incomplete hands, or rare PPPoker-specific actions may not convert perfectly. Use exported files for study and improvement, not as official records."
+msgstr "<strong>A precisão da conversão é de 95%+</strong> nas mãos testadas até agora. A maioria dos tipos de mão, tamanhos de aposta e runouts do board converte perfeitamente, mas casos extremos permanecem — situações incomuns de all-in, mãos incompletas ou ações raras específicas do PPPoker podem não converter perfeitamente. Use os arquivos exportados para estudo e melhoria, não como registros oficiais."
 
 #: templates/index.html:1018
 msgid "Open PPPoker on your phone or PC"
