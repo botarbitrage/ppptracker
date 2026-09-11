@@ -30,6 +30,17 @@ on, rather than re-deriving raw action-code parsing a second time.
 total_hands/total_games/hands_per_street are computed straight off the raw
 records instead, since those need no action semantics at all and should
 count every in-window hand regardless of whether it converts cleanly.
+
+Stat definitions follow the standard, simple convention used by mainstream
+trackers' basic stat panel (PT4/HM3), not the Leak Finder's granular
+HU/3-bet-pot-split report columns:
+  - check-raise% / fold-to-bet% / c-bet% / fold-to-c-bet% are all FLOP-only
+    (the conventional default when a tracker shows one unqualified number
+    for these, rather than separate flop/turn/river variants), and each is
+    a single made/opp decision per hand — hero's first bet-facing decision
+    on the flop, not every subsequent one.
+  - steal% is raise-first-in from BTN/CO/SB specifically.
+  - 3-bet% is the standard preflop re-raise-facing-one-raise definition.
 """
 
 from hand_exporter import records_to_ps_text
@@ -44,8 +55,6 @@ _STAT_KEYS = (
     'vpip', 'pfr', 'three_bet', 'steal', 'check_raise', 'fold_to_bet',
     'cbet', 'fold_to_cbet',
 )
-
-_STREET_MIN_BOARD = {'flop': 3, 'turn': 4, 'river': 5}
 
 
 def _in_window(record, start_ts, end_ts):
@@ -80,12 +89,10 @@ def _hands_per_street_bucket(record):
 
 def _hero_hand_flags(hand):
     """
-    {key: (made, opp)} for one leak_engine IR hand, hero-perspective.
-
-    vpip/pfr/three_bet/steal/cbet/fold_to_cbet have at most one opportunity
-    per hand. check_raise/fold_to_bet can have one opportunity per postflop
-    street (0-3 per hand) and are summed like any other made/opp counter —
-    callers add them into a running total, not treat them as booleans.
+    {key: (made, opp)} for one leak_engine IR hand, hero-perspective. Every
+    stat has at most one opportunity per hand — including check_raise and
+    fold_to_bet, which look only at hero's first bet-facing decision on the
+    flop, matching the standard single-number-per-stat convention.
     """
     stats = {k: (0, 0) for k in _STAT_KEYS}
     hero = hand.get('hero')
@@ -105,55 +112,28 @@ def _hero_hand_flags(hand):
 
     pfa = pre_ctx['pfa']
     board = hand.get('board') or []
-    cr = [0, 0]
-    ftb = [0, 0]
-    cbet = [0, 0]
-    fcbet = [0, 0]
+    if len(board) < 3 or hero in _folded_by(hand, 'flop'):
+        return stats
 
-    for street in ('flop', 'turn', 'river'):
-        if len(board) < _STREET_MIN_BOARD[street] or hero in _folded_by(hand, street):
-            break
-        ctxs, _info = _street_walk(hand, street, hero)
-        if not ctxs:
-            break
+    ctxs, _info = _street_walk(hand, 'flop', hero)
+    if not ctxs:
+        return stats
 
-        first = ctxs[0]
-        facing = [c for c in ctxs if c['facing'] > 0]
+    first = ctxs[0]
+    facing = next((c for c in ctxs if c['facing'] > 0), None)
 
-        # Check-raise opportunity: hero's first action was a check and hero
-        # got at least one more decision this street while facing a bet.
-        if first['verb'] == 'check' and facing:
-            cr[1] += 1
-            if facing[0]['verb'] == 'raise':
-                cr[0] += 1
+    if hero == pfa and first['n_bets'] == 0:
+        stats['cbet'] = (1 if first['verb'] == 'bet' else 0, 1)
 
-        # Fold-to-bet: every hero decision point facing a bet, this street.
-        for c in facing:
-            ftb[1] += 1
-            if c['verb'] == 'fold':
-                ftb[0] += 1
+    if hero != pfa and facing is not None and facing['first_bettor'] == pfa:
+        stats['fold_to_cbet'] = (1 if facing['verb'] == 'fold' else 0, 1)
 
-        if street == 'flop':
-            # C-bet% / fold-to-c-bet% are conventionally the flop stat —
-            # turn/river continuations aren't counted here.
-            cbet_opp_here = (hero == pfa) and first['n_bets'] == 0
-            if cbet_opp_here:
-                cbet[1] += 1
-                if first['verb'] == 'bet':
-                    cbet[0] += 1
+    if first['verb'] == 'check' and facing is not None:
+        stats['check_raise'] = (1 if facing['verb'] == 'raise' else 0, 1)
 
-            f_def = facing[0] if facing else None
-            fcbet_opp_here = (hero != pfa and f_def is not None
-                              and f_def['first_bettor'] == pfa)
-            if fcbet_opp_here:
-                fcbet[1] += 1
-                if f_def['verb'] == 'fold':
-                    fcbet[0] += 1
+    if facing is not None:
+        stats['fold_to_bet'] = (1 if facing['verb'] == 'fold' else 0, 1)
 
-    stats['check_raise'] = tuple(cr)
-    stats['fold_to_bet'] = tuple(ftb)
-    stats['cbet'] = tuple(cbet)
-    stats['fold_to_cbet'] = tuple(fcbet)
     return stats
 
 
