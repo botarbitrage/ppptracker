@@ -23,8 +23,14 @@ service cloud.firestore {
     // quota and credits are here for the same reason: they are the free tier's
     // daily import/export counters and its survey unlocks. A counter the browser
     // can zero is not a counter, so both are written only by app.py.
+    //
+    // pokerpulse_subscribed is admin-toggled only (Admin → Users), not a
+    // self-serve preference yet — see docs/firestore-schema.md — so it's
+    // blocked the same way rather than letting a signed-in user subscribe or
+    // unsubscribe themselves from the browser console.
     function serverOnlyFields() {
-      return ['is_pro', 'stripe_customer_id', 'subscription_status', 'quota', 'credits'];
+      return ['is_pro', 'stripe_customer_id', 'subscription_status', 'quota', 'credits',
+              'pokerpulse_subscribed'];
     }
     match /users/{uid} {
       allow read: if request.auth != null && request.auth.uid == uid;
@@ -36,7 +42,8 @@ service cloud.firestore {
                     && (!('is_pro' in request.resource.data)
                         || request.resource.data.is_pro == false)
                     && !request.resource.data.keys()
-                          .hasAny(['stripe_customer_id', 'subscription_status', 'quota', 'credits']);
+                          .hasAny(['stripe_customer_id', 'subscription_status', 'quota', 'credits',
+                                   'pokerpulse_subscribed']);
       allow update: if request.auth != null && request.auth.uid == uid
                     && !request.resource.data.diff(resource.data)
                           .affectedKeys().hasAny(serverOnlyFields());
@@ -50,13 +57,14 @@ service cloud.firestore {
     // silently re-open the server-owned-field hole closed above.
     //
     // ad_jtis, survey_completions, quota (the tourney_export doc lives at
-    // users/{uid}/quota/tourney_export) and gate_events are carved out for the
-    // same reason and must be excluded *here* rather than only re-matched
+    // users/{uid}/quota/tourney_export), gate_events and pokerpulse (the
+    // last_analysis doc — see docs/firestore-schema.md) are carved out for
+    // the same reason and must be excluded *here* rather than only re-matched
     // below: rule matches are OR'd, so a blanket write on the parent would
     // outvote a stricter rule on the child.
     match /users/{uid}/{sub}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == uid
-                         && !(sub in ['ad_jtis', 'survey_completions', 'quota', 'gate_events']);
+                         && !(sub in ['ad_jtis', 'survey_completions', 'quota', 'gate_events', 'pokerpulse']);
     }
 
     // Spent export unlocks. The whole point of the jti record is that it exists
@@ -80,6 +88,15 @@ service cloud.firestore {
     // quota map field on users/{uid} above). A counter the browser can zero
     // is not a counter, same rationale as the daily quota map.
     match /users/{uid}/quota/{quotaDoc} {
+      allow read:  if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // PokerPulse's most-recent "Analyse Now" result (a single doc, id
+    // 'last_analysis'). Server-written by the Analyse Now action (F1-5), same
+    // rationale as the tourney_export counter above — a client-writable
+    // result doc could fake stats into its own preview/send.
+    match /users/{uid}/pokerpulse/{docId} {
       allow read:  if request.auth != null && request.auth.uid == uid;
       allow write: if false;
     }

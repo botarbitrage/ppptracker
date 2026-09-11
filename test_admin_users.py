@@ -220,6 +220,14 @@ def main():
     def is_pro_now(uid):
         return bool((db.get(('users', uid)) or {}).get('is_pro'))
 
+    def set_pokerpulse(uid, value):
+        return _json(client.patch('/api/admin/users/%s/pokerpulse' % uid,
+                                  data=json.dumps({'pokerpulse_subscribed': value}),
+                                  content_type='application/json'))
+
+    def pokerpulse_now(uid):
+        return bool((db.get(('users', uid)) or {}).get('pokerpulse_subscribed'))
+
     # ── 1. Permanent admin is admin without being in the allowlist ───────────
     check('permanent admin is admin', A._is_admin(PERM_UID) is True)
     check('allowlisted uid is admin', A._is_admin(ADMIN_UID) is True)
@@ -259,6 +267,10 @@ def main():
     check('free user not flagged', rows[ADMIN_UID]['is_pro'] is False)
     check('user with no Firestore doc defaults to not pro',
           rows[PERM_UID]['is_pro'] is False)
+    check('pokerpulse defaults to unsubscribed for every user',
+          rows[PLAIN_UID]['pokerpulse_subscribed'] is False
+          and rows[ADMIN_UID]['pokerpulse_subscribed'] is False
+          and rows[PERM_UID]['pokerpulse_subscribed'] is False)
     check('first_seen converted to epoch secs',
           rows[PLAIN_UID]['first_seen'] == 1_704_067_200, str(rows[PLAIN_UID]['first_seen']))
     check('missing first_seen is null', rows[PERM_UID]['first_seen'] is None)
@@ -339,6 +351,45 @@ def main():
     res = client.patch('/api/admin/users/%s/pro' % PLAIN_UID,
                        data='not json', content_type='application/json')
     check('malformed pro body 400', res.status_code == 400, str(res.status_code))
+
+    # ── 4c. PokerPulse subscribe toggle (mirrors 4b's Pro toggle) ────────────
+    check('admin starts unsubscribed', pokerpulse_now(ADMIN_UID) is False)
+    status, body = set_pokerpulse(ADMIN_UID, True)
+    check('subscribe 200', status == 200, str(status))
+    check('subscribe echoes state', body.get('pokerpulse_subscribed') is True, str(body))
+    check('subscribe writes doc', pokerpulse_now(ADMIN_UID) is True)
+    check('subscribe leaves other fields alone',
+          (db.get(('users', ADMIN_UID)) or {}).get('first_seen') is not None)
+    check('subscribe leaves is_pro alone', is_pro_now(ADMIN_UID) is False)
+
+    status, body = set_pokerpulse(ADMIN_UID, False)
+    check('unsubscribe 200', status == 200, str(status))
+    check('unsubscribe writes doc', pokerpulse_now(ADMIN_UID) is False)
+
+    check('perm admin has a doc by now (created above)',
+          db.get(('users', PERM_UID)) is not None)
+    status, body = set_pokerpulse(PERM_UID, True)
+    check('subscribe for previously-docless user 200', status == 200, str(status))
+    check('subscribe for previously-docless user writes doc', pokerpulse_now(PERM_UID) is True)
+
+    for who, label in ((PLAIN_UID, 'non-admin'), (None, 'signed-out')):
+        caller['uid'] = who
+        status, _ = set_pokerpulse(ADMIN_UID, True)
+        check('PATCH pokerpulse 403 for %s' % label, status == 403, str(status))
+    caller['uid'] = ADMIN_UID
+
+    status, _ = set_pokerpulse('uid-does-not-exist', True)
+    check('unknown uid pokerpulse 404', status == 404, str(status))
+
+    for bad in ('yes', 1, None):
+        res = client.patch('/api/admin/users/%s/pokerpulse' % PLAIN_UID,
+                           data=json.dumps({'pokerpulse_subscribed': bad}),
+                           content_type='application/json')
+        check('non-bool pokerpulse_subscribed (%r) 400' % bad, res.status_code == 400,
+              str(res.status_code))
+    res = client.patch('/api/admin/users/%s/pokerpulse' % PLAIN_UID,
+                       data='not json', content_type='application/json')
+    check('malformed pokerpulse body 400', res.status_code == 400, str(res.status_code))
 
     # ── 5. Guardrails ────────────────────────────────────────────────────────
     before = admins_now()
