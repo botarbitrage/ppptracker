@@ -1085,12 +1085,14 @@
         <ul>
           <li>{% trans %}<strong>Fetches your hands</strong> directly from PPPoker's API using your hand review link — no installs, no file uploads, no screen scraping.{% endtrans %}</li>
           <li>{% trans %}<strong>Converts to PokerStars format</strong> — the industry-standard hand history format accepted by PokerTracker 4, DriveHUD, and GTO Wizard.{% endtrans %}</li>
-          <li>{% trans %}<strong>Tracks tournaments and cash sessions</strong> — every event you've played with hands logged, session length, and result, plus a per-tournament progress graph you can click through to any hand.{% endtrans %}</li>
+          <li>{% trans %}<strong>Analyzes your tournaments</strong> — the Tournament Summary aggregates every event you've played, showing games entered, average hands, average duration, and hands per hour, with filters for today, this week, or this month.{% endtrans %}</li>
+          <li>{% trans %}<strong>Breaks down each tournament</strong> — open any event to review every hand you played next to a progress graph of your stack, shown in chips or big blinds; click any point on the curve to jump straight to that hand.{% endtrans %}</li>
+          <li>{% trans %}<strong>Tracks cash and play-money sessions</strong> — cash tables and sit-and-gos get their own section, kept separate from your real-money tournaments.{% endtrans %}</li>
           <li>{% trans %}<strong>Exports on demand</strong> — download all hands, a single hand by ID, or a full tournament in .txt or .json format.{% endtrans %}</li>
         </ul>
         <hr style="border-color:var(--border);margin:14px 0"/>
-        <p>{% trans %}<strong>🔒 Your PPPoker account is never touched.</strong> This tool works entirely through the public hand review link PPPoker generates for you. It does not ask for, store, or transmit your PPPoker username, password, or any account credentials — ever. The only data processed is the hand history contained in the link you provide.{% endtrans %}</p>
-        <p>{% trans %}<strong>Conversion accuracy is 95%+</strong> across the hands tested so far. The vast majority of hand types, bet sizes, and board runouts convert cleanly. That said, edge cases exist — unusual all-in situations, incomplete hands, or rare PPPoker-specific action types may not convert perfectly. Use exported files for study and improvement, not as official records.{% endtrans %}</p>
+        <p>{% trans %}<strong>Your PPPoker account is never touched.</strong> This tool works entirely through the public hand review link PPPoker generates for you. It never asks for, stores, or transmits your PPPoker username, password, or any account credentials. The only data processed is the hand history contained in the link you provide.{% endtrans %}</p>
+        <p>{% trans %}<strong>Conversion accuracy is 95%+</strong> across the hands tested so far. Most hand types, bet sizes, and board runouts convert cleanly, but edge cases remain — unusual all-in situations, incomplete hands, or rare PPPoker-specific actions may not convert perfectly. Use exported files for study and improvement, not as official records.{% endtrans %}</p>
       </div>
     </div>
   </div>

@@ -793,54 +793,69 @@ msgid ""
 "game even a little, it was worth it. ♠"
 msgstr ""
 
-#: templates/index.html:988
+#: templates/index.html:1084
 msgid ""
 "<strong>PPPoker Hand Tracker</strong> bridges the gap between PPPoker and"
 " your training software. Here's what it does:"
 msgstr ""
 
-#: templates/index.html:990
+#: templates/index.html:1086
 msgid ""
 "<strong>Fetches your hands</strong> directly from PPPoker's API using "
 "your hand review link — no installs, no file uploads, no screen scraping."
 msgstr ""
 
-#: templates/index.html:991
+#: templates/index.html:1087
 msgid ""
 "<strong>Converts to PokerStars format</strong> — the industry-standard "
 "hand history format accepted by PokerTracker 4, DriveHUD, and GTO Wizard."
 msgstr ""
 
-#: templates/index.html:992
+#: templates/index.html:1088
 msgid ""
-"<strong>Tracks tournaments and cash sessions</strong> — every event "
-"you've played with hands logged, session length, and result, plus a per-"
-"tournament progress graph you can click through to any hand."
+"<strong>Analyzes your tournaments</strong> — the Tournament Summary "
+"aggregates every event you've played, showing games entered, average "
+"hands, average duration, and hands per hour, with filters for today, this"
+" week, or this month."
 msgstr ""
 
-#: templates/index.html:993
+#: templates/index.html:1089
+msgid ""
+"<strong>Breaks down each tournament</strong> — open any event to review "
+"every hand you played next to a progress graph of your stack, shown in "
+"chips or big blinds; click any point on the curve to jump straight to "
+"that hand."
+msgstr ""
+
+#: templates/index.html:1090
+msgid ""
+"<strong>Tracks cash and play-money sessions</strong> — cash tables and "
+"sit-and-gos get their own section, kept separate from your real-money "
+"tournaments."
+msgstr ""
+
+#: templates/index.html:1091
 msgid ""
 "<strong>Exports on demand</strong> — download all hands, a single hand by"
 " ID, or a full tournament in .txt or .json format."
 msgstr ""
 
-#: templates/index.html:996
+#: templates/index.html:1094
 msgid ""
-"<strong>🔒 Your PPPoker account is never touched.</strong> This tool works"
-" entirely through the public hand review link PPPoker generates for you. "
-"It does not ask for, store, or transmit your PPPoker username, password, "
-"or any account credentials — ever. The only data processed is the hand "
-"history contained in the link you provide."
+"<strong>Your PPPoker account is never touched.</strong> This tool works "
+"entirely through the public hand review link PPPoker generates for you. "
+"It never asks for, stores, or transmits your PPPoker username, password, "
+"or any account credentials. The only data processed is the hand history "
+"contained in the link you provide."
 msgstr ""
 
-#: templates/index.html:997
+#: templates/index.html:1095
 msgid ""
 "<strong>Conversion accuracy is 95%+</strong> across the hands tested so "
-"far. The vast majority of hand types, bet sizes, and board runouts "
-"convert cleanly. That said, edge cases exist — unusual all-in situations,"
-" incomplete hands, or rare PPPoker-specific action types may not convert "
-"perfectly. Use exported files for study and improvement, not as official "
-"records."
+"far. Most hand types, bet sizes, and board runouts convert cleanly, but "
+"edge cases remain — unusual all-in situations, incomplete hands, or rare "
+"PPPoker-specific actions may not convert perfectly. Use exported files "
+"for study and improvement, not as official records."
 msgstr ""
 
 #: templates/index.html:1018
