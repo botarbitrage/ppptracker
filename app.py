@@ -3338,9 +3338,10 @@ def compute_uid_session_stats(uid, start_ts, end_ts):
 # ── PokerPulse: Session Reports (Admin) ─────────────────────────────────────
 # Admin → Session Reports: Analyse Now computes + stores each subscriber's
 # session stats for a chosen window; Preview renders the real email body from
-# that stored result; Send Now sends it (stubbed — see _send_pokerpulse_email)
-# to subscribers who actually played in the window. See docs/firestore-schema.md
-# for the users/{uid}/pokerpulse/last_analysis doc shape this reads/writes.
+# that stored result; Send Now delivers it via Gmail SMTP (see
+# _send_pokerpulse_email) to subscribers who actually played in the window.
+# See docs/firestore-schema.md for the users/{uid}/pokerpulse/last_analysis
+# doc shape this reads/writes.
 
 def _pokerpulse_subscribed_users(db):
     """[(uid, email), ...] for every users/{uid} with pokerpulse_subscribed=True.
@@ -3382,14 +3383,41 @@ def render_pokerpulse_email(email, analysis):
 
 
 def _send_pokerpulse_email(to_email, html):
-    """STUB — actual SMTP delivery via handtrackerpppoker@gmail.com is F1-8's
-    job (needs Railway env vars Caio hasn't created yet). For now this just
-    logs what would have been sent, so Send Now's filtering/marker logic
-    (this task's AC) can be built and tested ahead of F1-8 landing.
-    TODO(F1-8): replace this body with real SMTP/API delivery."""
-    print(f"[pokerpulse] STUB send to {to_email} ({len(html)} chars) — "
-          f"no transport wired yet, see F1-8")
-    return True
+    """Sends the rendered report via Gmail SMTP as handtrackerpppoker@gmail.com.
+    Credentials come from Railway env vars POKERPULSE_GMAIL_USER /
+    POKERPULSE_GMAIL_APP_PASSWORD (a Gmail App Password, not the account
+    password — Google requires this for SMTP with 2FA on) and are never
+    committed. Standard Gmail SMTP caps at ~500 msgs/day; sends here are
+    admin-triggered only (no scheduler until F1-9, which itself gates
+    scheduled sends on reaching >=5 subscribers), so MVP volume is nowhere
+    near that ceiling.
+    Returns True on successful delivery, False otherwise (caller decides
+    whether to still stamp last_report_sent_at)."""
+    import smtplib
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+
+    user = os.getenv('POKERPULSE_GMAIL_USER')
+    app_password = os.getenv('POKERPULSE_GMAIL_APP_PASSWORD')
+    if not user or not app_password:
+        print('[pokerpulse] send skipped: POKERPULSE_GMAIL_USER / '
+              'POKERPULSE_GMAIL_APP_PASSWORD not set in the environment')
+        return False
+
+    msg = MIMEMultipart('alternative')
+    msg['Subject'] = 'Your PokerPulse Report'
+    msg['From'] = user
+    msg['To'] = to_email
+    msg.attach(MIMEText(html, 'html'))
+
+    try:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=20) as server:
+            server.login(user, app_password)
+            server.sendmail(user, [to_email], msg.as_string())
+        return True
+    except Exception as exc:
+        print(f'[pokerpulse] send to {to_email} failed: {type(exc).__name__}: {exc}')
+        return False
 
 
 @app.route('/api/admin/pokerpulse/analyse', methods=['POST'])
@@ -3453,11 +3481,11 @@ def admin_pokerpulse_preview(target_uid):
 
 @app.route('/api/admin/pokerpulse/send', methods=['POST'])
 def admin_pokerpulse_send():
-    """Sends the report (stubbed transport, see _send_pokerpulse_email) to
-    every subscriber whose stored last_analysis matches [start, end) and has
-    total_hands > 0; skips (no email) everyone else, per this task's AC.
-    Stamps last_report_sent_at via .update() — the one field on this doc that
-    Send Now, not Analyse Now, owns (see docs/firestore-schema.md)."""
+    """Sends the report (see _send_pokerpulse_email) to every subscriber whose
+    stored last_analysis matches [start, end) and has total_hands > 0; skips
+    (no email) everyone else, per this task's AC. Stamps last_report_sent_at
+    via .update() — the one field on this doc that Send Now, not Analyse Now,
+    owns (see docs/firestore-schema.md) — only on confirmed delivery."""
     uid = _verify_bearer(request)
     if not _is_admin(uid):
         return jsonify({'error': 'Forbidden'}), 403
@@ -3485,7 +3513,9 @@ def admin_pokerpulse_send():
             continue
 
         html = render_pokerpulse_email(email, analysis)
-        _send_pokerpulse_email(email, html)
+        if not _send_pokerpulse_email(email, html):
+            skipped.append({'uid': target_uid, 'email': email, 'reason': 'send_failed'})
+            continue
         ref.update({'last_report_sent_at': now})
         sent.append({'uid': target_uid, 'email': email})
 
