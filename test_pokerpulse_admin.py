@@ -9,6 +9,8 @@ directly and focuses on what F1-5 actually adds: picking subscribed users,
 storing/reading users/{uid}/pokerpulse/last_analysis per the documented
 schema (docs/firestore-schema.md), the no-hands/stale-window skip rules for
 Send Now, the last_report_sent_at marker, and the admin auth gate.
+_send_pokerpulse_email() (F1-8's real Gmail SMTP transport) is stubbed too —
+this file only covers Send Now's own selection/marker logic, not SMTP itself.
 
     python test_pokerpulse_admin.py
 """
@@ -175,6 +177,11 @@ def main():
     A.admin_auth = FakeAuth(USERS)
     A.compute_uid_session_stats = lambda uid, start, end: FAKE_STATS[uid]
 
+    sent_emails = []
+    send_result = {'ok': True}
+    A._send_pokerpulse_email = lambda to_email, html: (
+        sent_emails.append(to_email) or send_result['ok'])
+
     caller = {'uid': ADMIN_UID}
     A._verify_bearer = lambda req: caller['uid']
     A._is_admin = lambda uid: uid == ADMIN_UID
@@ -263,6 +270,22 @@ def main():
           last_analysis(SUB_HANDS_UID)['stats'] == FAKE_STATS[SUB_HANDS_UID])
     check('last_report_sent_at NOT stamped for the skipped user',
           'last_report_sent_at' not in last_analysis(SUB_EMPTY_UID))
+    check('transport was actually invoked for the sent user',
+          sent_emails == ['hands@example.com'], str(sent_emails))
+
+    # ── 4b. Send Now — transport failure is not counted as sent ─────────────
+    stamp_before_failure = last_analysis(SUB_HANDS_UID).get('last_report_sent_at')
+    sent_emails.clear()
+    send_result['ok'] = False
+    status, body = send()
+    check('send 200 even when transport fails', status == 200, str(status))
+    check('failed transport skips rather than sends',
+          body['sent'] == [] and
+          {s['uid']: s['reason'] for s in body['skipped']}.get(SUB_HANDS_UID) == 'send_failed',
+          str(body))
+    check('last_report_sent_at left untouched by a failed send',
+          last_analysis(SUB_HANDS_UID).get('last_report_sent_at') == stamp_before_failure)
+    send_result['ok'] = True
 
     # ── 5. Send Now — stale/missing analysis ─────────────────────────────────
     db.put(('users', 'uid-sub-new'), {'pokerpulse_subscribed': True})
