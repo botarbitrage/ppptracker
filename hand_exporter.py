@@ -901,7 +901,11 @@ def _records_to_blocks(records, tz, blind_levels_by_room):
     per-player computed-stack overrides from hand to hand. This is the core
     of export_pokerstars, shared with records_to_ps_text so the leak engine
     consumes the exact same text a file export would produce.
-    Returns (blocks, {attempted, converted, warned, skipped}).
+    Returns (records, blocks, end_stacks_list, {attempted, converted, warned, skipped}).
+    records is the input, re-sorted oldest-first (the same order blocks and
+    end_stacks_list are in) so a caller can zip() all three together.
+    end_stacks_list is parallel to blocks: each entry is the {name: end_stack}
+    dict hand_to_ps_block computed for that hand ({} for a skipped/failed one).
     """
     import re as _re3
     blind_levels_by_room = blind_levels_by_room or {}
@@ -913,6 +917,7 @@ def _records_to_blocks(records, tz, blind_levels_by_room):
 
     attempted = converted = warned = skipped = 0
     blocks = []
+    end_stacks_list = []   # parallel to blocks — this hand's own end stacks
     computed_stacks = {}   # {player_name → end stack computed from previous hand}
 
     for i, rec in enumerate(records):
@@ -958,20 +963,24 @@ def _records_to_blocks(records, tz, blind_levels_by_room):
                 skipped += 1
                 gid = rec.get('summary', {}).get('D', f'index-{i+1}')
                 blocks.append(f"# SKIPPED hand {gid}: {'; '.join(w)}")
+                end_stacks_list.append({})
             elif w:
                 warned += 1
                 blocks.append(block)
+                end_stacks_list.append(end_stacks)
             else:
                 converted += 1
                 blocks.append(block)
+                end_stacks_list.append(end_stacks)
         except Exception as exc:
             skipped += 1
             gid = rec.get('summary', {}).get('D', f'index-{i+1}')
             blocks.append(f"# SKIPPED hand {gid}: unexpected error — {exc}")
+            end_stacks_list.append({})
         attempted += 1
 
-    return blocks, dict(attempted=attempted, converted=converted,
-                        warned=warned, skipped=skipped)
+    return records, blocks, end_stacks_list, dict(attempted=attempted, converted=converted,
+                                                   warned=warned, skipped=skipped)
 
 
 def records_to_ps_text(records, tz=None, blind_levels_by_room=None):
@@ -982,8 +991,24 @@ def records_to_ps_text(records, tz=None, blind_levels_by_room=None):
     """
     if tz is None:
         tz = _ADELAIDE_TZ
-    blocks, stats = _records_to_blocks(records, tz, blind_levels_by_room)
+    _records, blocks, _end_stacks_list, stats = _records_to_blocks(records, tz, blind_levels_by_room)
     return '\n\n'.join(blocks) + '\n', stats
+
+
+def records_to_ps_blocks_with_stacks(records, tz=None, blind_levels_by_room=None):
+    """
+    Like records_to_ps_text, but returns each hand's own PS text block and its
+    end-of-hand stacks separately instead of one joined string — for callers
+    (highlights.py's knock-off detector) that need to pair a hand's parsed IR
+    back to the real stack-chained end stacks hand_to_ps_block computed for it,
+    which the joined text alone can't reconstruct as reliably as re-deriving
+    "start stack" from a single hand in isolation would be.
+    Returns (records, blocks, end_stacks_list, stats) — records re-sorted
+    oldest-first to match blocks/end_stacks_list, so zip() lines them all up.
+    """
+    if tz is None:
+        tz = _ADELAIDE_TZ
+    return _records_to_blocks(records, tz, blind_levels_by_room)
 
 
 # ── Full export ─────────────────────────────────────────────────────────────
@@ -1040,7 +1065,7 @@ def export_pokerstars(records, tz=None, platform=None, blind_levels_by_room=None
     filepath = os.path.join('exports', 'pokerstars', filename)
 
     # Sort oldest→newest so PT4's stack-continuity checks pass
-    blocks, stats = _records_to_blocks(records, tz, blind_levels_by_room)
+    _records, blocks, _end_stacks_list, stats = _records_to_blocks(records, tz, blind_levels_by_room)
     attempted, converted = stats['attempted'], stats['converted']
     warned, skipped = stats['warned'], stats['skipped']
     log_lines = [
