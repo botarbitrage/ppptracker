@@ -3353,6 +3353,41 @@ def compute_uid_session_highlights(uid, start_ts, end_ts):
                                      start_ts, end_ts)
 
 
+def _persist_highlight_art(uid, highlights):
+    """Uploads each highlight's inline SVG (from highlights.py's
+    svg_data_uri, a data:image/svg+xml;base64 URI) to Cloud Storage and
+    rewrites its art_uri to a hosted https:// URL instead. Confirmed
+    2026-09-12: Gmail (and, per the original F1-2 PR, Outlook) both silently
+    drop data: URI images from received mail, so the art rendered as broken
+    images in the actual delivered report despite working fine in the admin
+    Preview (a same-origin browser iframe, which doesn't apply that
+    restriction). One object per (uid, highlight index) — a later Analyse
+    Now for the same uid simply overwrites the same paths rather than
+    accumulating unbounded storage, since nothing here needs history.
+    Falls back to leaving the original data URI in place if Storage isn't
+    configured or a given upload fails — better a possibly-blocked image
+    than a missing highlight."""
+    bucket = _get_admin_bucket()
+    if not bucket:
+        return highlights
+
+    import base64
+    base_url = request.url_root.rstrip('/')
+    for i, h in enumerate(highlights):
+        uri = h.get('art_uri') or ''
+        if not uri.startswith('data:image/svg+xml;base64,'):
+            continue
+        try:
+            svg_bytes = base64.b64decode(uri.split(',', 1)[1])
+            path = f'pokerpulse_highlights/{uid}/{i}.svg'
+            bucket.blob(path).upload_from_string(svg_bytes, content_type='image/svg+xml')
+            h['art_uri'] = f'{base_url}/api/pokerpulse/highlight-art/{uid}/{i}'
+        except Exception as exc:
+            print(f'[pokerpulse] highlight art upload failed for {uid}[{i}]: '
+                  f'{type(exc).__name__}: {exc}')
+    return highlights
+
+
 # ── PokerPulse: Session Reports (Admin) ─────────────────────────────────────
 # Admin → Session Reports: Analyse Now computes + stores each subscriber's
 # session stats for a chosen window; Preview renders the real email body from
@@ -3469,7 +3504,8 @@ def admin_pokerpulse_analyse():
     results = []
     for target_uid, email in _pokerpulse_subscribed_users(db):
         stats = compute_uid_session_stats(target_uid, start_ts, end_ts)
-        session_highlights = compute_uid_session_highlights(target_uid, start_ts, end_ts)
+        session_highlights = _persist_highlight_art(
+            target_uid, compute_uid_session_highlights(target_uid, start_ts, end_ts))
         doc = {
             'window_start': start_ts,
             'window_end':   end_ts,
@@ -3508,6 +3544,26 @@ def admin_pokerpulse_preview(target_uid):
 
     html = render_pokerpulse_email(user.email or '', snap.to_dict())
     return Response(html, mimetype='text/html')
+
+
+@app.route('/api/pokerpulse/highlight-art/<uid>/<int:idx>', methods=['GET'])
+def pokerpulse_highlight_art_get(uid, idx):
+    """Public, unauthenticated stream of one highlight's SVG art (see
+    _persist_highlight_art) — same audience/shape as /api/ad-media/<..>: the
+    recipient's email client has to load this with a plain <img src>, no
+    bearer token available to it, so it can't go through an admin-gated
+    route."""
+    bucket = _get_admin_bucket()
+    if not bucket:
+        return jsonify({'error': 'Storage is not configured'}), 503
+    try:
+        data = bucket.blob(f'pokerpulse_highlights/{uid}/{idx}.svg').download_as_bytes()
+    except Exception as exc:
+        print(f"[pokerpulse_highlight_art_get] download failed: {type(exc).__name__}: {exc}")
+        return jsonify({'error': 'Not found'}), 404
+    resp = Response(data, mimetype='image/svg+xml')
+    resp.headers['Cache-Control'] = 'public, max-age=3600'
+    return resp
 
 
 @app.route('/api/admin/pokerpulse/send', methods=['POST'])
