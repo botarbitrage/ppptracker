@@ -139,6 +139,27 @@ USERS = [
     _User(PLAIN_UID, 'plain@example.com'),
 ]
 
+class _FakeBlob:
+    def __init__(self, bucket, path):
+        self._bucket, self.path = bucket, path
+
+    def upload_from_string(self, data, content_type=None):
+        self._bucket.store[self.path] = (data, content_type)
+
+    def download_as_bytes(self):
+        if self.path not in self._bucket.store:
+            raise RuntimeError('no such blob: ' + self.path)
+        return self._bucket.store[self.path][0]
+
+
+class FakeBucket:
+    def __init__(self):
+        self.store = {}   # path -> (bytes, content_type)
+
+    def blob(self, path):
+        return _FakeBlob(self, path)
+
+
 FAKE_STATS = {
     SUB_HANDS_UID: {
         'total_hands': 42, 'total_games': 3, 'hands_parsed': 42,
@@ -152,6 +173,18 @@ FAKE_STATS = {
         'vpip_pct': 0.0, 'pfr_pct': 0.0, 'steal_pct': 0.0, 'check_raise_pct': 0.0,
         'three_bet_pct': 0.0, 'fold_to_bet_pct': 0.0, 'cbet_pct': 0.0, 'fold_to_cbet_pct': 0.0,
     },
+}
+
+from highlights import render_highlight_svg, svg_data_uri  # noqa: E402
+
+FAKE_HIGHLIGHTS = {
+    SUB_HANDS_UID: [{
+        'pattern': 'biggest_win', 'label': 'Biggest win', 'hand_id': 'h1',
+        'hand_url': 'https://example.com/h1',
+        'art_uri': svg_data_uri(render_highlight_svg(
+            'Biggest win', 'As Kd', ['2h', '3c', '4d'], 'Net: +12,400')),
+    }],
+    SUB_EMPTY_UID: [],
 }
 
 
@@ -173,9 +206,12 @@ def main():
     db.put(('users', SUB_EMPTY_UID), {'pokerpulse_subscribed': True})
     db.put(('users', PLAIN_UID), {'pokerpulse_subscribed': False})
 
+    bucket = FakeBucket()
     A._get_admin_db = lambda: db
+    A._get_admin_bucket = lambda: bucket
     A.admin_auth = FakeAuth(USERS)
     A.compute_uid_session_stats = lambda uid, start, end: FAKE_STATS[uid]
+    A.compute_uid_session_highlights = lambda uid, start, end: [dict(h) for h in FAKE_HIGHLIGHTS[uid]]
 
     sent_emails = []
     send_result = {'ok': True}
@@ -239,9 +275,33 @@ def main():
           stored['window_start'] == WIN['start'] and stored['window_end'] == WIN['end'])
     check('stored stats match compute_uid_session_stats output',
           stored['stats'] == FAKE_STATS[SUB_HANDS_UID], str(stored))
-    check('highlights default to empty (F1-2 not landed yet)', stored['highlights'] == [])
     check('no last_report_sent_at until Send Now runs',
           'last_report_sent_at' not in stored, str(stored))
+
+    # ── 2b. Highlight art persisted to Storage, art_uri rewritten ───────────
+    empty_stored = last_analysis(SUB_EMPTY_UID)
+    check('subscriber with no highlights stores an empty list',
+          empty_stored['highlights'] == [], str(empty_stored))
+
+    hl = stored['highlights']
+    check('one highlight stored for the hands subscriber', len(hl) == 1, str(hl))
+    art_uri = hl[0]['art_uri'] if hl else ''
+    check('art_uri rewritten to a hosted URL, not left as a data URI',
+          art_uri.startswith('http') and '/api/pokerpulse/highlight-art/' in art_uri,
+          art_uri[:80])
+    check('original SVG bytes actually landed in the fake bucket',
+          any(path.startswith(f'pokerpulse_highlights/{SUB_HANDS_UID}/') for path in bucket.store),
+          str(list(bucket.store)))
+
+    art_path = art_uri.split('http://localhost', 1)[-1] if art_uri.startswith('http://localhost') else None
+    if art_path:
+        art_res = client.get(art_path)
+        check('hosted highlight art route serves the SVG', art_res.status_code == 200,
+              str(art_res.status_code))
+        check('hosted highlight art has the right content type',
+              art_res.content_type.startswith('image/svg+xml'), art_res.content_type)
+    else:
+        check('hosted highlight art route serves the SVG', False, 'unexpected art_uri host: ' + art_uri)
 
     # ── 3. Preview ───────────────────────────────────────────────────────────
     res = preview(SUB_HANDS_UID)
