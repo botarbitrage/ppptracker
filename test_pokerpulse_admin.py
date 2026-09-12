@@ -9,8 +9,8 @@ directly and focuses on what F1-5 actually adds: picking subscribed users,
 storing/reading users/{uid}/pokerpulse/last_analysis per the documented
 schema (docs/firestore-schema.md), the no-hands/stale-window skip rules for
 Send Now, the last_report_sent_at marker, and the admin auth gate.
-_send_pokerpulse_email() (F1-8's real Gmail SMTP transport) is stubbed too —
-this file only covers Send Now's own selection/marker logic, not SMTP itself.
+_send_pokerpulse_email() (F1-8's real Brevo API transport) is stubbed too —
+this file only covers Send Now's own selection/marker logic, not the transport itself.
 
     python test_pokerpulse_admin.py
 """

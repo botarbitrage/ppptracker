@@ -3356,7 +3356,7 @@ def compute_uid_session_highlights(uid, start_ts, end_ts):
 # ── PokerPulse: Session Reports (Admin) ─────────────────────────────────────
 # Admin → Session Reports: Analyse Now computes + stores each subscriber's
 # session stats for a chosen window; Preview renders the real email body from
-# that stored result; Send Now delivers it via Gmail SMTP (see
+# that stored result; Send Now delivers it via Brevo's email API (see
 # _send_pokerpulse_email) to subscribers who actually played in the window.
 # See docs/firestore-schema.md for the users/{uid}/pokerpulse/last_analysis
 # doc shape this reads/writes.
@@ -3401,84 +3401,53 @@ def render_pokerpulse_email(email, analysis):
 
 
 def _send_pokerpulse_email(to_email, html):
-    """Sends the rendered report via Gmail SMTP as handtrackerpppoker@gmail.com.
-    Credentials come from Railway env vars POKERPULSE_GMAIL_USER /
-    POKERPULSE_GMAIL_APP_PASSWORD (a Gmail App Password, not the account
-    password — Google requires this for SMTP with 2FA on) and are never
-    committed. Standard Gmail SMTP caps at ~500 msgs/day; sends here are
-    admin-triggered only (no scheduler until F1-9, which itself gates
-    scheduled sends on reaching >=5 subscribers), so MVP volume is nowhere
-    near that ceiling.
+    """Sends the rendered report via Brevo's transactional email HTTP API,
+    as handtrackerpppoker@gmail.com (verified sender in Brevo — no domain of
+    our own yet, so DKIM/DMARC alignment is best-effort for this freemail
+    address; acceptable for MVP volume, revisit if deliverability suffers).
+    Credentials come from the Railway env var POKERPULSE_BREVO_API_KEY,
+    never committed. Brevo's free tier is 300 emails/day, far above the
+    admin-triggered-only volume here (no scheduler until F1-9, which itself
+    gates scheduled sends on reaching >=5 subscribers).
     Returns True on successful delivery, False otherwise (caller decides
     whether to still stamp last_report_sent_at).
 
-    Connects over IPv4 explicitly (Railway's containers have no IPv6 default
-    route — smtplib's default resolution tries Gmail's IPv6 address(es)
-    first and fails ENETUNREACH before falling through). On top of that,
-    tries port 465 (implicit TLS) then 587 (STARTTLS) with a short per-port
-    timeout: which outbound SMTP ports a given network egress allows is
-    provider-specific and wasn't yet confirmed for Railway as of 2026-09-11
-    (465 alone hung to a bare TCP-connect timeout in production — consistent
-    with the port being firewalled rather than the host being unreachable).
-    Logs a `[pokerpulse][diag]` line per attempt so the next real send's
-    Railway deploy log states definitively which port (if either) works."""
-    import smtplib
-    import socket
-    import time
-    from email.mime.multipart import MIMEMultipart
-    from email.mime.text import MIMEText
-
-    user = os.getenv('POKERPULSE_GMAIL_USER')
-    app_password = os.getenv('POKERPULSE_GMAIL_APP_PASSWORD')
-    if not user or not app_password:
-        print('[pokerpulse] send skipped: POKERPULSE_GMAIL_USER / '
-              'POKERPULSE_GMAIL_APP_PASSWORD not set in the environment')
+    Uses Brevo's REST API (HTTPS/443), not SMTP: Railway's network was
+    confirmed in production (2026-09-11) to silently drop outbound SMTP on
+    both port 465 (implicit TLS) and 587 (STARTTLS) — connection attempts
+    hung to a bare timeout rather than being refused, consistent with the
+    ports being firewalled outright. HTTPS to Firestore/Firebase already
+    works fine from this environment, so routing email over the same
+    protocol sidesteps the block entirely instead of guessing at more SMTP
+    ports."""
+    api_key = os.getenv('POKERPULSE_BREVO_API_KEY')
+    if not api_key:
+        print('[pokerpulse] send skipped: POKERPULSE_BREVO_API_KEY not set '
+              'in the environment')
         return False
 
-    msg = MIMEMultipart('alternative')
-    msg['Subject'] = 'Your PokerPulse Report'
-    msg['From'] = user
-    msg['To'] = to_email
-    msg.attach(MIMEText(html, 'html'))
-
-    real_getaddrinfo = socket.getaddrinfo
-
-    def _ipv4_only_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
-        return real_getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
-
-    def _connect_ssl(timeout):
-        server = smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=timeout)
-        return server
-
-    def _connect_starttls(timeout):
-        server = smtplib.SMTP('smtp.gmail.com', 587, timeout=timeout)
-        server.starttls()
-        return server
-
-    attempts = [('465/ssl', _connect_ssl), ('587/starttls', _connect_starttls)]
-    last_exc = None
+    payload = {
+        'sender': {'email': 'handtrackerpppoker@gmail.com', 'name': 'PokerPulse'},
+        'to': [{'email': to_email}],
+        'subject': 'Your PokerPulse Report',
+        'htmlContent': html,
+    }
     try:
-        socket.getaddrinfo = _ipv4_only_getaddrinfo
-        for label, connect in attempts:
-            t0 = time.monotonic()
-            try:
-                with connect(8) as server:
-                    elapsed = round(time.monotonic() - t0, 2)
-                    print(f'[pokerpulse][diag] {label} connected in {elapsed}s')
-                    server.login(user, app_password)
-                    server.sendmail(user, [to_email], msg.as_string())
-                print(f'[pokerpulse] sent to {to_email} via {label}')
-                return True
-            except Exception as exc:
-                elapsed = round(time.monotonic() - t0, 2)
-                print(f'[pokerpulse][diag] {label} failed after {elapsed}s: '
-                      f'{type(exc).__name__}: {exc}')
-                last_exc = exc
-        print(f'[pokerpulse] send to {to_email} failed on all ports: '
-              f'{type(last_exc).__name__}: {last_exc}')
+        resp = requests.post(
+            'https://api.brevo.com/v3/smtp/email',
+            json=payload,
+            headers={'api-key': api_key, 'Content-Type': 'application/json'},
+            timeout=15,
+        )
+        if resp.status_code in (200, 201):
+            print(f'[pokerpulse] sent to {to_email} via Brevo')
+            return True
+        print(f'[pokerpulse] send to {to_email} failed: Brevo {resp.status_code}: '
+              f'{resp.text[:500]}')
         return False
-    finally:
-        socket.getaddrinfo = real_getaddrinfo
+    except Exception as exc:
+        print(f'[pokerpulse] send to {to_email} failed: {type(exc).__name__}: {exc}')
+        return False
 
 
 @app.route('/api/admin/pokerpulse/analyse', methods=['POST'])
