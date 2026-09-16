@@ -1687,12 +1687,20 @@ button.auth-chip { background: none; }
   .section-header { padding: 10px 14px; }
   .table-dark tbody td { padding: 8px 6px; }
   .export-grid-btn { min-height: 58px; font-size: .68rem; }
-  /* .import-input + .btn-import sit in a flex-nowrap row (see index.html);
-     width:100% on the button alone fought that nowrap and forced the row
-     wider than the viewport instead of actually filling it, so the button
-     rendered oversized and overflowing the card. Stack the row so each
-     child's 100% width applies to its own line. */
-  .hero-row .import-card .d-flex.flex-nowrap { flex-wrap: wrap; }
+}
+
+/* .import-input + .btn-import sit in a flex-nowrap row (see index.html).
+   Bootstrap's own .flex-nowrap utility ships with !important, so an
+   unqualified override here is silently ignored — needs its own
+   !important to actually win. The breakpoint has to match .hero-row's
+   own column switch (767.98px, above), not the generic 575px mobile
+   cutoff: below that width .import-card shares the row with
+   #gam-block-right (up to 280px), so it can run out of room for
+   input+button well before the page itself looks "mobile" — including
+   at desktop-window browser zoom levels, which shrink the effective
+   CSS viewport the same way narrowing the window would. */
+@media (max-width: 767.98px) {
+  .hero-row .import-card .d-flex.flex-nowrap { flex-wrap: wrap !important; }
   .import-input { width: 100%; }
   .btn-import { width: 100%; }
 }
