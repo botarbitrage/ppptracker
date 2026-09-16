@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME    = 'pppokerha-v6';
+const CACHE_NAME    = 'pppokerha-v7';
 const OFFLINE_URL   = '/offline';
 
 // Truly static assets — cache-first (content never changes between deploys)
