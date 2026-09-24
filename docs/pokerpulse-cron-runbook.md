@@ -45,7 +45,7 @@ In the Railway project dashboard:
 3. **Settings → Deploy → Custom Start Command**, pointed at the main app's
    public URL:
    ```bash
-   curl -sf -X POST "$POKERPULSE_APP_URL/api/cron/pokerpulse" \
+   curl -sS --fail-with-body -X POST "$POKERPULSE_APP_URL/api/cron/pokerpulse" \
      -H "X-Cron-Secret: $POKERPULSE_CRON_SECRET"
    ```
    Use the app's actual public Railway domain for `POKERPULSE_APP_URL`
