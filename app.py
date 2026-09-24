@@ -3827,17 +3827,21 @@ def cron_pokerpulse():
     import hmac
     secret = os.getenv('POKERPULSE_CRON_SECRET', '')
     if not secret:
+        print("[cron_pokerpulse] tick rejected: POKERPULSE_CRON_SECRET is not set on the app service")
         return jsonify({'error': 'POKERPULSE_CRON_SECRET is not configured'}), 503
     provided = request.headers.get('X-Cron-Secret', '')
     if not provided or not hmac.compare_digest(provided, secret):
+        print("[cron_pokerpulse] tick rejected: X-Cron-Secret missing or does not match")
         return jsonify({'error': 'Forbidden'}), 403
 
     settings = _pokerpulse_settings()
+    now = _pokerpulse_now()
     if not settings['enabled']:
+        print(f"[cron_pokerpulse] tick at {now.isoformat()}: skipped (disabled)")
         return jsonify({'ok': True, 'skipped_reason': 'disabled'})
 
-    now = _pokerpulse_now()
     if not pokerpulse_scheduler.should_process_now(now, settings['send_time']):
+        print(f"[cron_pokerpulse] tick at {now.isoformat()}: skipped (too early, send_time={settings['send_time']} Adelaide)")
         return jsonify({'ok': True, 'skipped_reason': 'too_early'})
 
     cutoff = pokerpulse_scheduler.most_recent_cutoff(now)
@@ -3915,6 +3919,8 @@ def cron_pokerpulse():
                 pass
             errors.append({**outcome, 'reason': type(exc).__name__})
 
+    print(f"[cron_pokerpulse] tick at {now.isoformat()} cutoff={date_str}: "
+          f"sent={len(sent)} skipped={len(skipped)} errors={len(errors)}")
     return jsonify({'ok': True, 'cutoff_date': date_str, 'sent': sent, 'skipped': skipped, 'errors': errors})
 
 
