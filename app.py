@@ -22,6 +22,7 @@ from hand_parser import (process_hands, build_hand_rows, classify_game,
 from hand_exporter import validate_hands, export_pokerstars
 from tournament_analyzer import analyze_tournament
 import gamification
+import pokerpulse_scheduler
 
 app = Flask(__name__)
 
@@ -3353,7 +3354,7 @@ def compute_uid_session_highlights(uid, start_ts, end_ts):
                                      start_ts, end_ts)
 
 
-def _persist_highlight_art(uid, highlights):
+def _persist_highlight_art(uid, highlights, window_end):
     """Uploads each highlight's inline SVG (from highlights.py's
     svg_data_uri, a data:image/svg+xml;base64 URI) to Cloud Storage and
     rewrites its art_uri to a hosted https:// URL instead. Confirmed
@@ -3361,9 +3362,17 @@ def _persist_highlight_art(uid, highlights):
     drop data: URI images from received mail, so the art rendered as broken
     images in the actual delivered report despite working fine in the admin
     Preview (a same-origin browser iframe, which doesn't apply that
-    restriction). One object per (uid, highlight index) — a later Analyse
-    Now for the same uid simply overwrites the same paths rather than
-    accumulating unbounded storage, since nothing here needs history.
+    restriction).
+
+    Keyed by (uid, window_end, highlight index) — see F2-1: once scheduled
+    sends start, an older email must keep showing its own hands after a
+    later run re-analyses the same uid, so the path can no longer be
+    per-uid-only (that scheme overwrote on every Analyse Now, which was fine
+    when there was at most one live report per user but silently corrupts
+    an already-sent one otherwise). Applies to manual Analyse Now as well as
+    scheduled cron runs — both call this the same way, `window_end` is just
+    that call's end_ts.
+
     Falls back to leaving the original data URI in place if Storage isn't
     configured or a given upload fails — better a possibly-blocked image
     than a missing highlight."""
@@ -3379,9 +3388,9 @@ def _persist_highlight_art(uid, highlights):
             continue
         try:
             svg_bytes = base64.b64decode(uri.split(',', 1)[1])
-            path = f'pokerpulse_highlights/{uid}/{i}.svg'
+            path = f'pokerpulse_highlights/{uid}/{window_end}/{i}.svg'
             bucket.blob(path).upload_from_string(svg_bytes, content_type='image/svg+xml')
-            h['art_uri'] = f'{base_url}/api/pokerpulse/highlight-art/{uid}/{i}'
+            h['art_uri'] = f'{base_url}/api/pokerpulse/highlight-art/{uid}/{window_end}/{i}'
         except Exception as exc:
             print(f'[pokerpulse] highlight art upload failed for {uid}[{i}]: '
                   f'{type(exc).__name__}: {exc}')
@@ -3505,7 +3514,7 @@ def admin_pokerpulse_analyse():
     for target_uid, email in _pokerpulse_subscribed_users(db):
         stats = compute_uid_session_stats(target_uid, start_ts, end_ts)
         session_highlights = _persist_highlight_art(
-            target_uid, compute_uid_session_highlights(target_uid, start_ts, end_ts))
+            target_uid, compute_uid_session_highlights(target_uid, start_ts, end_ts), end_ts)
         doc = {
             'window_start': start_ts,
             'window_end':   end_ts,
@@ -3548,11 +3557,11 @@ def admin_pokerpulse_preview(target_uid):
 
 @app.route('/api/pokerpulse/highlight-art/<uid>/<int:idx>', methods=['GET'])
 def pokerpulse_highlight_art_get(uid, idx):
-    """Public, unauthenticated stream of one highlight's SVG art (see
-    _persist_highlight_art) — same audience/shape as /api/ad-media/<..>: the
-    recipient's email client has to load this with a plain <img src>, no
-    bearer token available to it, so it can't go through an admin-gated
-    route."""
+    """Public, unauthenticated stream of one highlight's SVG art, old
+    flat-path scheme (pre-F2-1: one object per uid, overwritten on every
+    Analyse Now). Kept working indefinitely for emails already sent under
+    that scheme — see pokerpulse_highlight_art_windowed_get below for the
+    current per-window path new highlights use."""
     bucket = _get_admin_bucket()
     if not bucket:
         return jsonify({'error': 'Storage is not configured'}), 503
@@ -3560,6 +3569,26 @@ def pokerpulse_highlight_art_get(uid, idx):
         data = bucket.blob(f'pokerpulse_highlights/{uid}/{idx}.svg').download_as_bytes()
     except Exception as exc:
         print(f"[pokerpulse_highlight_art_get] download failed: {type(exc).__name__}: {exc}")
+        return jsonify({'error': 'Not found'}), 404
+    resp = Response(data, mimetype='image/svg+xml')
+    resp.headers['Cache-Control'] = 'public, max-age=3600'
+    return resp
+
+
+@app.route('/api/pokerpulse/highlight-art/<uid>/<int:window_end>/<int:idx>', methods=['GET'])
+def pokerpulse_highlight_art_windowed_get(uid, window_end, idx):
+    """Same as pokerpulse_highlight_art_get, but for the current F2-1 path
+    (pokerpulse_highlights/{uid}/{window_end}/{i}.svg) — keyed by report
+    window so an older email keeps showing its own hands after later runs
+    re-analyse the same uid. Used by both manual Analyse Now and scheduled
+    cron sends (see _persist_highlight_art)."""
+    bucket = _get_admin_bucket()
+    if not bucket:
+        return jsonify({'error': 'Storage is not configured'}), 503
+    try:
+        data = bucket.blob(f'pokerpulse_highlights/{uid}/{window_end}/{idx}.svg').download_as_bytes()
+    except Exception as exc:
+        print(f"[pokerpulse_highlight_art_windowed_get] download failed: {type(exc).__name__}: {exc}")
         return jsonify({'error': 'Not found'}), 404
     resp = Response(data, mimetype='image/svg+xml')
     resp.headers['Cache-Control'] = 'public, max-age=3600'
@@ -3607,6 +3636,294 @@ def admin_pokerpulse_send():
         sent.append({'uid': target_uid, 'email': email})
 
     return jsonify({'sent': sent, 'skipped': skipped})
+
+
+# ── PokerPulse: scheduled sends (F2-1) ──────────────────────────────────────
+# An automatic run (Railway cron service, every 15 minutes) that classifies
+# every subscriber as daily or weekly by recent hand volume, then analyses
+# and sends their report for the matching window, ending at the 5am Adelaide
+# cutoff (see pokerpulse_scheduler.py for the DST-sensitive date math this
+# reuses, and docs/firestore-schema.md for the config/pokerpulse settings
+# doc and pokerpulse_runs/{date}/subscribers/{uid} idempotency records).
+
+_POKERPULSE_CRON_TICK_BUDGET_SECONDS = 90  # well under gunicorn's 120s timeout
+
+
+def _pokerpulse_now():
+    """The current Adelaide-tz datetime — a module-level seam so tests can
+    monkeypatch a fixed 'now' (e.g. to exercise the DST switch or the
+    send_time gate) without needing wall-clock time to cooperate."""
+    from datetime import datetime as _dt
+    return _dt.now(pokerpulse_scheduler.ADELAIDE_TZ)
+
+
+def _pokerpulse_settings():
+    """Admin-configurable schedule settings — read fresh from Firestore on
+    every call, same defaults-fallback pattern as _ad_media_config()."""
+    try:
+        snap = _get_admin_db().collection('config').document('pokerpulse').get()
+        stored = snap.to_dict() if snap.exists else {}
+    except Exception as exc:
+        print(f"[_pokerpulse_settings] read failed: {type(exc).__name__}: {exc}")
+        stored = {}
+    if not isinstance(stored, dict):
+        stored = {}
+
+    cfg = dict(pokerpulse_scheduler.POKERPULSE_SETTINGS_DEFAULTS)
+    for key in cfg:
+        if key in stored:
+            cfg[key] = stored[key]
+    return cfg
+
+
+@app.route('/api/admin/pokerpulse/settings', methods=['GET'])
+def admin_pokerpulse_settings_get():
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+    return jsonify(_pokerpulse_settings())
+
+
+@app.route('/api/admin/pokerpulse/settings', methods=['PATCH'])
+def admin_pokerpulse_settings_patch():
+    """Updates config/pokerpulse. Merge-updates only the fields provided,
+    validated against the same shape the cron endpoint trusts — a bad admin
+    edit here must not silently break the next scheduled tick."""
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+
+    import re
+    body = request.get_json(silent=True) or {}
+    updates = {}
+
+    if 'enabled' in body:
+        if not isinstance(body['enabled'], bool):
+            return jsonify({'error': 'enabled must be a boolean'}), 400
+        updates['enabled'] = body['enabled']
+
+    if 'send_time' in body:
+        send_time = body['send_time']
+        if not isinstance(send_time, str) or not re.match(r'^([01]\d|2[0-3]):[0-5]\d$', send_time):
+            return jsonify({'error': 'send_time must be HH:MM (24h)'}), 400
+        updates['send_time'] = send_time
+
+    if 'daily_threshold_hands' in body:
+        v = body['daily_threshold_hands']
+        if not isinstance(v, int) or isinstance(v, bool) or v < 1:
+            return jsonify({'error': 'daily_threshold_hands must be a positive integer'}), 400
+        updates['daily_threshold_hands'] = v
+
+    if 'lookback_days' in body:
+        v = body['lookback_days']
+        if not isinstance(v, int) or isinstance(v, bool) or v < 1:
+            return jsonify({'error': 'lookback_days must be a positive integer'}), 400
+        updates['lookback_days'] = v
+
+    if 'weekly_day' in body:
+        v = body['weekly_day']
+        if v not in pokerpulse_scheduler.WEEKDAY_NAMES:
+            return jsonify({'error': f'weekly_day must be one of {pokerpulse_scheduler.WEEKDAY_NAMES}'}), 400
+        updates['weekly_day'] = v
+
+    if not updates:
+        return jsonify({'error': 'No valid fields provided'}), 400
+
+    _get_admin_db().collection('config').document('pokerpulse').set(updates, merge=True)
+    return jsonify(_pokerpulse_settings())
+
+
+def _pokerpulse_plan_for_uid(db, target_uid, cutoff, settings):
+    """Classifies target_uid and picks their report window for this cutoff,
+    without writing anything — shared by the cron tick (which then claims
+    and sends) and the Dry Run admin action (which only previews). Returns
+    (cadence, start_ts, end_ts, eligible); eligible is False for a WEEKLY
+    subscriber on a cutoff that isn't the configured weekly_day, in which
+    case start_ts/end_ts are None."""
+    lookback_start, lookback_end = pokerpulse_scheduler.classification_lookback_window(
+        cutoff, settings['lookback_days'])
+    hand_count = compute_uid_session_stats(
+        target_uid,
+        pokerpulse_scheduler.to_epoch(lookback_start),
+        pokerpulse_scheduler.to_epoch(lookback_end),
+    )['total_hands']
+    cadence = pokerpulse_scheduler.classify(hand_count, settings['daily_threshold_hands'])
+
+    if cadence == 'weekly' and not pokerpulse_scheduler.is_weekly_send_day(cutoff, settings['weekly_day']):
+        return cadence, None, None, False
+
+    if cadence == 'daily':
+        start_dt, end_dt = pokerpulse_scheduler.daily_window(cutoff)
+    else:
+        last_sent_end = None
+        snap = _pokerpulse_analysis_ref(db, target_uid).get()
+        if snap.exists:
+            a = snap.to_dict()
+            if a.get('last_report_sent_at') and a.get('window_end'):
+                last_sent_end = pokerpulse_scheduler.from_epoch(a['window_end'])
+        start_dt, end_dt = pokerpulse_scheduler.weekly_window(cutoff, last_sent_end)
+
+    return cadence, pokerpulse_scheduler.to_epoch(start_dt), pokerpulse_scheduler.to_epoch(end_dt), True
+
+
+@app.route('/api/cron/pokerpulse', methods=['POST'])
+def cron_pokerpulse():
+    """Railway cron hits this every 15 minutes (see the runbook in
+    docs/pokerpulse-cron-runbook.md). Authenticated by a shared secret, not
+    a bearer token — there's no signed-in user behind a cron tick.
+
+    No-ops when disabled or before today's send_time; otherwise processes
+    whichever subscribers aren't claimed yet for today's cutoff date,
+    within a bounded time budget, leaving the rest for the next tick."""
+    import hmac
+    secret = os.getenv('POKERPULSE_CRON_SECRET', '')
+    if not secret:
+        return jsonify({'error': 'POKERPULSE_CRON_SECRET is not configured'}), 503
+    provided = request.headers.get('X-Cron-Secret', '')
+    if not provided or not hmac.compare_digest(provided, secret):
+        return jsonify({'error': 'Forbidden'}), 403
+
+    settings = _pokerpulse_settings()
+    if not settings['enabled']:
+        return jsonify({'ok': True, 'skipped_reason': 'disabled'})
+
+    now = _pokerpulse_now()
+    if not pokerpulse_scheduler.should_process_now(now, settings['send_time']):
+        return jsonify({'ok': True, 'skipped_reason': 'too_early'})
+
+    cutoff = pokerpulse_scheduler.most_recent_cutoff(now)
+    date_str = pokerpulse_scheduler.cutoff_date_str(cutoff)
+
+    db = _get_admin_db()
+    # Explicit parent doc (merge-set, idempotent) so this date shows up in a
+    # plain collection query of pokerpulse_runs for the admin run log — a
+    # Firestore doc that only ever gets a subcollection write and is never
+    # itself .set()/.create()'d doesn't exist as a queryable document.
+    date_doc_ref = db.collection('pokerpulse_runs').document(date_str)
+    date_doc_ref.set({'date': date_str, 'cutoff': pokerpulse_scheduler.to_epoch(cutoff)}, merge=True)
+    subscribers_col = date_doc_ref.collection('subscribers')
+
+    start_monotonic = time.monotonic()
+    sent, skipped, errors = [], [], []
+
+    for target_uid, email in _pokerpulse_subscribed_users(db):
+        if time.monotonic() - start_monotonic > _POKERPULSE_CRON_TICK_BUDGET_SECONDS:
+            break  # leaves this and every remaining subscriber unclaimed for the next tick
+
+        cadence, start_ts, end_ts, eligible = _pokerpulse_plan_for_uid(db, target_uid, cutoff, settings)
+        if not eligible:
+            continue  # WEEKLY, not their weekly_day — no claim written, nothing to retry today
+
+        claim_ref = subscribers_col.document(target_uid)
+        try:
+            claim_ref.create({
+                'uid': target_uid, 'email': email, 'cadence': cadence,
+                'window_start': start_ts, 'window_end': end_ts,
+                'status': 'claimed', 'claimed_at': int(time.time()),
+            })
+        except Exception:
+            continue  # already claimed by an earlier tick this cutoff date — idempotency in action
+
+        outcome = {'uid': target_uid, 'email': email, 'cadence': cadence,
+                   'window_start': start_ts, 'window_end': end_ts}
+        try:
+            stats = compute_uid_session_stats(target_uid, start_ts, end_ts)
+            hand_total = stats.get('total_hands', 0)
+            outcome['hand_count'] = hand_total
+            if not hand_total:
+                claim_ref.update({'status': 'skipped', 'reason': 'no_hands', 'done_at': int(time.time())})
+                skipped.append({**outcome, 'reason': 'no_hands'})
+                continue
+
+            session_highlights = _persist_highlight_art(
+                target_uid, compute_uid_session_highlights(target_uid, start_ts, end_ts), end_ts)
+            analysis_doc = {
+                'window_start':  start_ts,
+                'window_end':    end_ts,
+                'computed_at':   int(time.time()),
+                'stats':         stats,
+                'highlights':    session_highlights,
+                'cadence':       cadence,
+            }
+            # Full .set(), matching Analyse Now — the last run wins, whether
+            # it was a manual Analyse Now or this scheduled one.
+            _pokerpulse_analysis_ref(db, target_uid).set(analysis_doc)
+
+            html = render_pokerpulse_email(email, analysis_doc)
+            if not _send_pokerpulse_email(email, html):
+                claim_ref.update({'status': 'error', 'reason': 'send_failed', 'done_at': int(time.time())})
+                errors.append({**outcome, 'reason': 'send_failed'})
+                continue
+
+            _pokerpulse_analysis_ref(db, target_uid).update({'last_report_sent_at': int(time.time())})
+            claim_ref.update({'status': 'sent', 'done_at': int(time.time())})
+            sent.append(outcome)
+        except Exception as exc:
+            print(f"[cron_pokerpulse] processing failed for {target_uid}: {type(exc).__name__}: {exc}")
+            try:
+                claim_ref.update({'status': 'error', 'reason': type(exc).__name__, 'done_at': int(time.time())})
+            except Exception:
+                pass
+            errors.append({**outcome, 'reason': type(exc).__name__})
+
+    return jsonify({'ok': True, 'cutoff_date': date_str, 'sent': sent, 'skipped': skipped, 'errors': errors})
+
+
+@app.route('/api/admin/pokerpulse/dry-run', methods=['POST'])
+def admin_pokerpulse_dry_run():
+    """Shows today's classification and report windows for every subscriber
+    without writing anything or sending — same _pokerpulse_plan_for_uid the
+    cron tick uses, just without the claim/analyse/send side effects.
+    Ignores the enabled kill switch and the send_time gate so an admin can
+    preview before turning either on."""
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+
+    settings = _pokerpulse_settings()
+    db = _get_admin_db()
+    now = _pokerpulse_now()
+    cutoff = pokerpulse_scheduler.most_recent_cutoff(now)
+
+    results = []
+    for target_uid, email in _pokerpulse_subscribed_users(db):
+        cadence, start_ts, end_ts, eligible = _pokerpulse_plan_for_uid(db, target_uid, cutoff, settings)
+        row = {'uid': target_uid, 'email': email, 'cadence': cadence, 'eligible_today': eligible}
+        if eligible:
+            row['window_start'] = start_ts
+            row['window_end'] = end_ts
+            row['hand_count'] = compute_uid_session_stats(target_uid, start_ts, end_ts).get('total_hands', 0)
+        results.append(row)
+
+    results.sort(key=lambda r: r['email'].lower())
+    return jsonify({
+        'cutoff_date': pokerpulse_scheduler.cutoff_date_str(cutoff),
+        'cutoff':      pokerpulse_scheduler.to_epoch(cutoff),
+        'results':     results,
+    })
+
+
+@app.route('/api/admin/pokerpulse/run-log', methods=['GET'])
+def admin_pokerpulse_run_log():
+    """Last 7 cron cutoff-dates with each subscriber's outcome — reads
+    pokerpulse_runs/{date}/subscribers, the idempotency records the cron
+    endpoint claims. Newest date first; date ids (YYYY-MM-DD) sort
+    lexicographically the same as chronologically, so no separate
+    timestamp/order field is needed."""
+    uid = _verify_bearer(request)
+    if not _is_admin(uid):
+        return jsonify({'error': 'Forbidden'}), 403
+
+    db = _get_admin_db()
+    date_docs = (db.collection('pokerpulse_runs')
+                 .order_by('__name__', direction=admin_firestore.Query.DESCENDING)
+                 .limit(7).stream())
+    runs = []
+    for date_doc in date_docs:
+        subs = [s.to_dict() for s in date_doc.reference.collection('subscribers').stream()]
+        subs.sort(key=lambda s: (s.get('email') or '').lower())
+        runs.append({'date': date_doc.id, 'subscribers': subs})
+    return jsonify({'runs': runs})
 
 
 def _norm_room_name(s):

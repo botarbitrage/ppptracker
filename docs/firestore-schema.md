@@ -99,14 +99,19 @@ scratch space for a preview/send cycle, not a ledger.
 | `window_start` / `window_end` | int (epoch secs) | The report period this result covers (5am/5pm Adelaide-time cutoff — see the F1 Feature spec). |
 | `computed_at` | int (epoch secs) | When this run produced the result. |
 | `stats` | map | The session_engine.py `compute_session_stats()` output for the window (total hands, VPIP%, PFR%, etc. — see `session_engine.py`). |
-| `highlights` | array | Highlight-hand entries for the window (biggest win/loss, named patterns — see the F1-2 Task), once that Task lands. Empty/absent until then. |
-| `last_report_sent_at` | int (epoch secs) \| null | Set by Send Now's own endpoint (`admin_pokerpulse_send()` in `app.py`, F1-5), not Analyse Now — lets the admin UI show repeat sends and makes accidental double-sends visible, per this Task's Acceptance Criteria. `null`/absent until the first send. |
+| `highlights` | array | Highlight-hand entries for the window (biggest win/loss, named patterns — see `highlights.py`, F1-2). Each entry's `art_uri` points at Cloud Storage, keyed `pokerpulse_highlights/{uid}/{window_end}/{i}.svg` since F2-1 (was `pokerpulse_highlights/{uid}/{i}.svg`, overwritten on every run, before scheduled sends made that unsafe — see `_persist_highlight_art()` in `app.py`). |
+| `cadence` | `'daily'` \| `'weekly'` \| absent | Set by the F2-1 scheduled-send cron (`cron_pokerpulse()`) — which bucket this run's window came from, so F2-2's email redesign can label the report. Absent on a manual Analyse Now, which isn't tied to either cadence. |
+| `last_report_sent_at` | int (epoch secs) \| null | Set by Send Now (`admin_pokerpulse_send()`, F1-5) or the F2-1 cron (`cron_pokerpulse()`), never by Analyse Now — lets the admin UI show repeat sends and makes accidental double-sends visible, per the F1-5 Task's Acceptance Criteria. `null`/absent until the first send. |
 
 Read/written by `admin_pokerpulse_analyse()` (full `.set()`), `admin_pokerpulse_preview()`
-(read-only) and `admin_pokerpulse_send()` (`.update()` of `last_report_sent_at`
-only) in `app.py` — see the "PokerPulse: Session Reports (Admin)" section
-there. Actual email delivery is still a stub (`_send_pokerpulse_email()`) —
-the SMTP/transport wiring is F1-8's job, not this doc's.
+(read-only), `admin_pokerpulse_send()` (`.update()` of `last_report_sent_at`
+only) and the F2-1 cron `cron_pokerpulse()` (full `.set()` on send, matching
+Analyse Now — the last run wins whichever triggered it; `.update()` of
+`last_report_sent_at` on confirmed delivery) in `app.py` — see the
+"PokerPulse: Session Reports (Admin)" and "PokerPulse: scheduled sends
+(F2-1)" sections there. Delivery itself goes through Brevo's transactional
+email HTTP API (`_send_pokerpulse_email()`), not SMTP — see that function's
+docstring for why.
 
 ---
 
@@ -321,6 +326,65 @@ whole.
 
 ---
 
+## `config/pokerpulse` — admin-only
+
+F2-1's schedule settings for automated PokerPulse sends, set from Admin →
+Session Reports. Unlike `config/export_ads`/`config/import_ads` above, this
+doc is **not** publicly readable — `firestore.rules` carves `pokerpulse` out
+of the otherwise-public `config/{id}` match, since nothing about it (unlike
+blind structures/payout tables) needs to be client-visible. Read fresh from
+Firestore on every call via `_pokerpulse_settings()`; a missing doc or read
+failure falls back to `pokerpulse_scheduler.POKERPULSE_SETTINGS_DEFAULTS`.
+
+| Field | Type | Written by | Notes |
+| --- | --- | --- | --- |
+| `enabled` | bool | **admin-only** | Kill switch for the cron endpoint (`/api/cron/pokerpulse`). Default **`False`** — the automated run must never start sending just because this doc doesn't exist yet. |
+| `send_time` | string `HH:MM` | **admin-only** | Adelaide wall-clock time of day before which the cron tick is a no-op. Default **`"05:15"`**, shortly after the 5am cutoff. |
+| `daily_threshold_hands` | int | **admin-only** | A subscriber with `>=` this many hands in the classification lookback window is bucketed DAILY, otherwise WEEKLY. Default **100**. |
+| `lookback_days` | int | **admin-only** | Length of the classification lookback window (`[cutoff − lookback_days, cutoff)`), recomputed every run. Default **3**. |
+| `weekly_day` | string | **admin-only** | Adelaide weekday name (e.g. `"Monday"`) a WEEKLY subscriber is sent on. Default **`"Monday"`**. |
+
+Written via `PATCH`-style `.set(doc, merge=True)` in
+`admin_pokerpulse_settings_patch()` — a partial body only touches the fields
+it names. Read by `admin_pokerpulse_settings_get()`, `cron_pokerpulse()` and
+`admin_pokerpulse_dry_run()` in `app.py`. The DST-sensitive cutoff/window
+math these settings feed lives in `pokerpulse_scheduler.py`, kept separate
+from `app.py` so it's unit-testable without Firestore/Flask (see
+`test_pokerpulse_scheduler.py`).
+
+---
+
+## `pokerpulse_runs/{YYYY-MM-DD}/subscribers/{uid}` — server-only
+
+F2-1's cron idempotency records — one subcollection doc per subscriber the
+cron tick has claimed for a given Adelaide cutoff date, keyed by that date
+(`pokerpulse_scheduler.cutoff_date_str()`). Claimed **atomically** via
+`.create()` (which raises if the doc already exists), so two overlapping
+ticks — or a tick retried after a partial failure — can never both process
+the same `(cutoff date, uid)`: whichever tick loses the create simply moves
+on. The parent `pokerpulse_runs/{date}` doc itself is merge-`.set()` once
+per date (`{date, cutoff}`) purely so the date is listable in a plain
+collection query for the admin run log — a doc that only ever received
+subcollection writes wouldn't otherwise exist as a queryable document.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `uid` / `email` | string | The subscriber this record is for. |
+| `cadence` | `'daily'` \| `'weekly'` | This tick's classification for the subscriber, recomputed fresh — never read back from a previous run. |
+| `window_start` / `window_end` | int (epoch secs) | The report window claimed for this cutoff (see `pokerpulse_scheduler.daily_window()` / `weekly_window()`). |
+| `status` | `'claimed'` \| `'sent'` \| `'skipped'` \| `'error'` | `'claimed'` the instant the doc is created; a terminal status once processing finishes. A terminal status is never retried within the same cutoff date, by design — see the Idempotent bullet in the F2-1 Task's Acceptance Criteria. |
+| `reason` | string | Present when `status` is `'skipped'` (`'no_hands'`) or `'error'` (`'send_failed'` or an exception's type name). |
+| `hand_count` | int | Total hands in the claimed window, once known. Absent while `status == 'claimed'`. |
+| `claimed_at` / `done_at` | int (epoch secs) | `done_at` is absent while `status == 'claimed'`. |
+
+Written by `cron_pokerpulse()` in `app.py`; read (last 7 dates) by
+`admin_pokerpulse_run_log()` for Admin → Session Reports' run log. A WEEKLY
+subscriber on a cutoff date that isn't the configured `weekly_day` gets no
+record at all for that date — they were never eligible, so there's nothing
+to claim or retry (see `_pokerpulse_plan_for_uid`'s `eligible` return).
+
+---
+
 ## Storage: `anon_sessions/{token}.json`
 
 Not Firestore, but part of the same flow. An import made while signed out is
@@ -355,3 +419,9 @@ deleted outright once claimed.
 
 All five subcollections stay owner-**readable**, so a player can audit their
 own unlocks, payouts, tourney-export/gate history, and PokerPulse reports.
+
+3. **`config/pokerpulse` is carved out of the otherwise-public `config/{id}`
+   read**, and the top-level **`pokerpulse_runs`** collection (and its
+   `subscribers` subcollection) is denied read/write outright — both are
+   F2-1's schedule settings and cron idempotency records, Admin-SDK-only,
+   with no legitimate client reader.
