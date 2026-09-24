@@ -285,7 +285,7 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 | --- | --- | --- |
 | `APP_URL` | no | Origin used for Stripe success/cancel URLs when the request carries no `Origin`. |
 | `PERMANENT_ADMIN_EMAILS` | no | Comma-separated emails that are always admin, so the admin page can't lock everyone out. Defaults to the project owner. |
-| `FLASK_DEBUG` | no | Enables Flask debug mode for local runs. |
+| `FLASK_DEBUG` | no | Set to `1` to enable Flask debug mode when running `python app.py` locally. |
 
 ## Provider setup
 
