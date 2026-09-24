@@ -1868,6 +1868,14 @@
     }
   }
 
+  // Mirrors the reason codes admin_pokerpulse_send() returns in app.py.
+  const PP_SKIP_REASONS = {
+    not_analysed:   'not analysed yet',
+    stale_analysis: 'analysis is for a different window — run Analyse Now again',
+    no_hands:       'no hands in this window',
+    send_failed:    'send failed (email provider error)',
+  };
+
   async function ppSendNow() {
     if (!PP_WINDOW) {
       showPPError('Run Analyse Now first.');
@@ -1900,8 +1908,16 @@
           if (cell) cell.textContent = fmtSentAt(sentMap[uid]);
         }
       });
+      // Name each skip's actual reason — a single generic message hid a Brevo
+      // send failure behind "no hands in window" (2026-09-24).
+      const skipDetail = data.skipped.map(s =>
+        `${s.email}: ${PP_SKIP_REASONS[s.reason] || s.reason}`).join('; ');
       document.getElementById('adm-pp-status').textContent =
-        `Sent to ${data.sent.length}, skipped ${data.skipped.length} (no hands in window or not yet analysed).`;
+        `Sent to ${data.sent.length}, skipped ${data.skipped.length}` +
+        (skipDetail ? ` — ${skipDetail}.` : '.');
+      if (data.skipped.some(s => s.reason === 'send_failed')) {
+        showPPError('The email provider rejected at least one send — check the server logs for the Brevo error.');
+      }
     } catch (e) {
       showPPError('Could not reach the server: ' + e.message);
     } finally {
