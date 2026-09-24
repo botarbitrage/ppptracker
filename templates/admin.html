@@ -798,6 +798,37 @@
               </p>
               <div id="adm-pp-error" class="alert alert-danger d-none py-2"></div>
 
+              <h3 class="adm-subhead">Scheduled sends</h3>
+              <p class="adm-meta mb-2">
+                A Railway cron service hits <code>/api/cron/pokerpulse</code> every 15 minutes.
+                It's a no-op unless <strong>Enabled</strong> is on and the Adelaide clock has
+                passed <strong>Send time</strong> for the day. A subscriber with at least
+                <strong>Daily threshold</strong> hands in the last <strong>Lookback days</strong>
+                gets a daily report; everyone else gets a weekly one, sent on
+                <strong>Weekly day</strong>.
+              </p>
+              <div class="adm-toolbar px-0 flex-wrap mb-2">
+                <div class="form-check form-switch mb-0">
+                  <input class="form-check-input" type="checkbox" id="adm-pp-enabled"/>
+                  <label class="form-check-label adm-meta" for="adm-pp-enabled">Enabled</label>
+                </div>
+                <label class="adm-meta mb-0" for="adm-pp-send-time">Send time (ADL)</label>
+                <input type="time" id="adm-pp-send-time" class="form-control form-control-sm adm-search" style="max-width:110px;"/>
+                <label class="adm-meta mb-0" for="adm-pp-threshold">Daily threshold</label>
+                <input type="number" min="1" id="adm-pp-threshold" class="form-control form-control-sm adm-search" style="max-width:90px;"/>
+                <label class="adm-meta mb-0" for="adm-pp-lookback">Lookback days</label>
+                <input type="number" min="1" id="adm-pp-lookback" class="form-control form-control-sm adm-search" style="max-width:80px;"/>
+                <label class="adm-meta mb-0" for="adm-pp-weekly-day">Weekly day</label>
+                <select id="adm-pp-weekly-day" class="form-select form-select-sm adm-search" style="max-width:130px;">
+                  <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+                  <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+                </select>
+                <button type="button" class="adm-btn" id="adm-pp-save-settings" onclick="ppSaveSettings()">Save</button>
+                <button type="button" class="adm-btn" id="adm-pp-dry-run" onclick="ppDryRun()">Dry run</button>
+              </div>
+              <div id="adm-pp-dry-run-result" class="adm-meta mb-3"></div>
+
+              <h3 class="adm-subhead">Manual run</h3>
               <div class="adm-toolbar px-0 flex-wrap">
                 <label class="adm-meta mb-0" for="adm-pp-start">From</label>
                 <input type="datetime-local" id="adm-pp-start" class="form-control form-control-sm adm-search" style="max-width:220px;"/>
@@ -822,6 +853,25 @@
                   </thead>
                   <tbody id="adm-pp-body">
                     <tr><td colspan="5" class="text-center adm-meta py-4">Pick a window and run Analyse Now.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <h3 class="adm-subhead mt-4">Run log <span class="adm-meta">(last 7 cron cutoff dates)</span></h3>
+              <div class="table-responsive">
+                <table class="table table-dark table-striped table-hover mb-0">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Subscriber</th>
+                      <th>Bucket</th>
+                      <th>Hands</th>
+                      <th>Window</th>
+                      <th>Outcome</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adm-pp-runlog-body">
+                    <tr><td colspan="6" class="text-center adm-meta py-4">No cron runs yet.</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -941,6 +991,8 @@
     if (name === 'adcampaigns' && !ADS) loadExportAds();
     if (name === 'adcampaigns' && !BANNERS) loadBanners();
     if (name === 'adcampaigns' && !AD_MEDIA) loadAdMedia();
+    if (name === 'pokerpulse' && !PP_SETTINGS) loadPPSettings();
+    if (name === 'pokerpulse') loadPPRunLog();
   }
 
   // ── Gamification ───────────────────────────────────────────────────────────
@@ -1793,6 +1845,130 @@
 
   // ── PokerPulse: Session Reports ───────────────────────────────────────────
   let PP_WINDOW = null;   // {start, end} epoch secs of the last Analyse Now run
+  let PP_SETTINGS = null; // /api/admin/pokerpulse/settings response
+
+  async function loadPPSettings() {
+    showPPError('');
+    try {
+      const res = await authFetch('/api/admin/pokerpulse/settings');
+      if (!res.ok) {
+        showPPError(await errorText(res, 'Could not load scheduled-send settings'));
+        return;
+      }
+      PP_SETTINGS = await res.json();
+      document.getElementById('adm-pp-enabled').checked = !!PP_SETTINGS.enabled;
+      document.getElementById('adm-pp-send-time').value = PP_SETTINGS.send_time;
+      document.getElementById('adm-pp-threshold').value = PP_SETTINGS.daily_threshold_hands;
+      document.getElementById('adm-pp-lookback').value = PP_SETTINGS.lookback_days;
+      document.getElementById('adm-pp-weekly-day').value = PP_SETTINGS.weekly_day;
+    } catch (e) {
+      showPPError('Could not reach the server: ' + e.message);
+    }
+  }
+
+  async function ppSaveSettings() {
+    showPPError('');
+    const btn = document.getElementById('adm-pp-save-settings');
+    btn.disabled = true;
+    try {
+      const body = {
+        enabled:               document.getElementById('adm-pp-enabled').checked,
+        send_time:              document.getElementById('adm-pp-send-time').value,
+        daily_threshold_hands:  parseInt(document.getElementById('adm-pp-threshold').value, 10),
+        lookback_days:          parseInt(document.getElementById('adm-pp-lookback').value, 10),
+        weekly_day:             document.getElementById('adm-pp-weekly-day').value,
+      };
+      const res = await authFetch('/api/admin/pokerpulse/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        showPPError(await errorText(res, 'Could not save settings'));
+        return;
+      }
+      PP_SETTINGS = await res.json();
+      document.getElementById('adm-pp-status').textContent = 'Scheduled-send settings saved.';
+    } catch (e) {
+      showPPError('Could not reach the server: ' + e.message);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function fmtWindow(startTs, endTs) {
+    if (!startTs || !endTs) return '—';
+    return `${new Date(startTs * 1000).toLocaleString()} → ${new Date(endTs * 1000).toLocaleString()}`;
+  }
+
+  async function ppDryRun() {
+    showPPError('');
+    const btn = document.getElementById('adm-pp-dry-run');
+    btn.disabled = true;
+    const out = document.getElementById('adm-pp-dry-run-result');
+    out.textContent = 'Computing…';
+    try {
+      const res = await authFetch('/api/admin/pokerpulse/dry-run', { method: 'POST' });
+      if (!res.ok) {
+        showPPError(await errorText(res, 'Could not run Dry run'));
+        out.textContent = '';
+        return;
+      }
+      const data = await res.json();
+      if (!data.results.length) {
+        out.textContent = `Cutoff ${data.cutoff_date}: no subscribers.`;
+        return;
+      }
+      out.innerHTML = `Cutoff <strong>${data.cutoff_date}</strong>:<br/>` +
+        data.results.map(r => r.eligible_today
+          ? `${esc(r.email)} — <strong>${r.cadence}</strong>, ${r.hand_count} hands, ${fmtWindow(r.window_start, r.window_end)}`
+          : `${esc(r.email)} — <strong>${r.cadence}</strong>, not sent today (not the weekly day)`
+        ).join('<br/>');
+    } catch (e) {
+      showPPError('Could not reach the server: ' + e.message);
+      out.textContent = '';
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // Mirrors the status/reason codes cron_pokerpulse() writes to
+  // pokerpulse_runs/{date}/subscribers/{uid} in app.py.
+  const PP_RUNLOG_OUTCOME = {
+    sent:    () => 'sent',
+    skipped: r => `skipped (${r.reason === 'no_hands' ? 'no hands' : r.reason})`,
+    error:   r => `error (${r.reason || 'unknown'})`,
+    claimed: () => 'claimed (in progress or interrupted)',
+  };
+
+  async function loadPPRunLog() {
+    try {
+      const res = await authFetch('/api/admin/pokerpulse/run-log');
+      if (!res.ok) return;  // non-fatal — the rest of the panel still works
+      const data = await res.json();
+      const body = document.getElementById('adm-pp-runlog-body');
+      const rows = [];
+      (data.runs || []).forEach(run => {
+        if (!run.subscribers.length) return;
+        run.subscribers.forEach(s => {
+          const outcomeFn = PP_RUNLOG_OUTCOME[s.status] || (() => s.status);
+          rows.push(`
+            <tr>
+              <td class="adm-date">${esc(run.date)}</td>
+              <td>${esc(s.email || s.uid)}</td>
+              <td>${esc(s.cadence || '—')}</td>
+              <td>${s.hand_count ?? '—'}</td>
+              <td>${fmtWindow(s.window_start, s.window_end)}</td>
+              <td>${esc(outcomeFn(s))}</td>
+            </tr>`);
+        });
+      });
+      body.innerHTML = rows.length ? rows.join('') :
+        `<tr><td colspan="6" class="text-center adm-meta py-4">No cron runs yet.</td></tr>`;
+    } catch (e) {
+      // Silent — run log is supplementary, don't block the rest of the panel.
+    }
+  }
 
   function showPPError(msg) {
     const e = document.getElementById('adm-pp-error');

@@ -8,10 +8,27 @@ service cloud.firestore {
       allow write: if false; // writes via Admin SDK only
     }
 
-    // Public read: shared config (blind structures, payout tables)
+    // Public read: shared config (blind structures, payout tables) — EXCEPT
+    // 'pokerpulse' (F2-1's schedule settings: enabled kill switch, send
+    // time, thresholds). That doc is admin-only: it's read/written by the
+    // Admin SDK alone (admin.html's Session Reports settings panel, the
+    // cron endpoint), which bypasses these rules entirely, so this simply
+    // keeps it out of reach of a signed-out or signed-in client — no
+    // legitimate reader needs it, and it's not the kind of thing (unlike
+    // blind structures/payout tables) that's meant to be public.
     match /config/{id} {
-      allow read: if true;
+      allow read: if id != 'pokerpulse';
       allow write: if false;
+    }
+
+    // Cron idempotency records (F2-1) — server-written and server-read
+    // only (Admin SDK, same rationale as config/pokerpulse above); no
+    // client has any legitimate reason to see who's been sent what.
+    match /pokerpulse_runs/{date} {
+      allow read, write: if false;
+      match /subscribers/{uid} {
+        allow read, write: if false;
+      }
     }
 
     // Per-user data — only the owner can read/write, EXCEPT the fields the
