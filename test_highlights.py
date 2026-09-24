@@ -21,6 +21,7 @@ import sys
 import highlights
 from highlights import (detect_session_highlights, _detect_lucky_river,
                         _detect_triple_barrel, _detect_knock_off,
+                        _main_opponent, select_knock_offs,
                         render_highlight_svg, svg_data_uri)
 from test_session_engine import ALL_RECORDS, HAND1, HAND3, make_hand, PLAYERS
 
@@ -194,23 +195,56 @@ def main():
     }
 
     result = detect_session_highlights([barrel_raw], 0, 2000)
-    patterns = [h['pattern'] for h in result]
-    check('integration: triple_barrel_no_showdown found', 'triple_barrel_no_showdown' in patterns,
-          True, cond='triple_barrel_no_showdown' in patterns)
-    check('integration: biggest_win found (only hand in window)', 'biggest_win' in patterns,
-          True, cond='biggest_win' in patterns)
-    check('integration: no biggest_loss (same hand can\'t be both)', 'biggest_loss' in patterns,
-          False, cond='biggest_loss' not in patterns)
-    barrel_hl = next(h for h in result if h['pattern'] == 'triple_barrel_no_showdown')
+    all_patterns = [p for h in result for p in h['patterns']]
+    check('integration: triple_barrel_no_showdown found', 'triple_barrel_no_showdown' in all_patterns,
+          cond='triple_barrel_no_showdown' in all_patterns)
+    check('integration: biggest_win found (only hand in window)', 'biggest_win' in all_patterns,
+          cond='biggest_win' in all_patterns)
+    check('integration: no biggest_loss (same hand cannot be both)', 'biggest_loss' not in all_patterns,
+          cond='biggest_loss' not in all_patterns)
+    check('integration: a hand with several labels appears once, labels combined',
+          [h['label'] for h in result], cond=len(result) == 1 and ' · ' in result[0]['label'])
+    barrel_hl = result[0]
     check('integration: hand_url built from share_key', barrel_hl['hand_url'],
           cond=barrel_hl['hand_url'] != '#' and 'sharekey=x' in barrel_hl['hand_url'])
     check('integration: art_uri is a data URI', barrel_hl['art_uri'],
           cond=barrel_hl['art_uri'].startswith('data:image/svg+xml;base64,'))
+    check('integration: opponent stored (folded villain, cards unknown)', barrel_hl['opponent'],
+          cond=barrel_hl['opponent'] and barrel_hl['opponent']['cards'] == ''
+          and barrel_hl['opponent']['name'])
     import base64 as _b64
-    win_hl = next(h for h in result if h['pattern'] == 'biggest_win')
-    win_svg = _b64.b64decode(win_hl['art_uri'].split(',', 1)[1]).decode('utf-8')
-    check('integration: biggest_win art footer shows a positive net (villain folded, hero collects)',
-          'Net: +' in win_svg, cond='Net: +' in win_svg)
+    win_svg = _b64.b64decode(barrel_hl['art_uri'].split(',', 1)[1]).decode('utf-8')
+    check('integration: art shows a positive net badge', '>+' in win_svg, cond='>+' in win_svg)
+
+    # ── Unit: opponent extraction (shown vs mucked) ──────────────────────────
+    shown = _ir_hand(shows={'Villain': 'Qh Qd'}, stacks={'Hero': 5000, 'Villain': 3000})
+    check('opponent: showdown cards captured',
+          _main_opponent(shown), {'name': 'Villain', 'stack': 3000, 'cards': 'Qh Qd'})
+    mucked = _ir_hand(stacks={'Villain': 3000}, streets={
+        'preflop': [], 'flop': [], 'turn': [],
+        'river': [{'name': 'Villain', 'verb': 'fold', 'amount': 0, 'allin': False}]})
+    check('opponent: last folder used, cards unknown',
+          _main_opponent(mucked), {'name': 'Villain', 'stack': 3000, 'cards': ''})
+    check('opponent: knock-off villain wins over showdown order',
+          _main_opponent(_ir_hand(shows={'A': 'Ah Ad', 'B': 'Kh Kd'}), villain='B')['name'], 'B')
+    svg = render_highlight_svg('x', 'Ah Kd', ['2h'], opponent={'name': 'V', 'stack': 10, 'cards': ''})
+    check('svg: unknown opponent cards drawn as backs (2 backs, no ? glyph)',
+          svg.count(f'stroke="{highlights._MUTED}" stroke-width="1.5"'), 2)
+
+    # ── Unit: knock-off cap ──────────────────────────────────────────────────
+    def ko(order, bb, chips):
+        return {'order': order, 'bb_size': bb, 'chips': chips}
+    few = [ko(1, 5, 50), ko(2, 6, 60)]
+    check('cap: <=3 knock-offs all kept', len(select_knock_offs(few)), 2)
+    many = [ko(1, 9, 100), ko(2, 5, 900), ko(3, 4, 40), ko(4, 3, 30), ko(5, 2, 20)]
+    check('cap: biggest BB + biggest chips + latest', [c['order'] for c in select_knock_offs(many)],
+          [1, 2, 5])
+    overlap = [ko(1, 9, 900), ko(2, 5, 50), ko(3, 4, 40), ko(4, 3, 30), ko(5, 2, 20)]
+    check('cap: one hand wins BB and chips -> freed slot goes to next latest',
+          [c['order'] for c in select_knock_offs(overlap)], [1, 4, 5])
+    latest_overlap = [ko(1, 2, 20), ko(2, 3, 30), ko(3, 4, 40), ko(4, 5, 50), ko(5, 9, 900)]
+    check('cap: latest is also biggest -> still exactly 3, next latest fills',
+          [c['order'] for c in select_knock_offs(latest_overlap)], [3, 4, 5])
 
     # ── Integration: mixed multi-hand window doesn't crash and finds a win/loss
     mixed = detect_session_highlights(ALL_RECORDS, 0, 10000)
