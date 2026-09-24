@@ -257,7 +257,7 @@ def main():
     A.compute_uid_session_highlights = lambda uid, start, end: [dict(h) for h in make_highlight()]
 
     sent_emails = []
-    A._send_pokerpulse_email = lambda to_email, html: (sent_emails.append(to_email) or True)
+    A._send_pokerpulse_email = lambda to_email, html, subject=None: (sent_emails.append(to_email) or True)
 
     caller = {'uid': ADMIN_UID}
     A._verify_bearer = lambda req: caller['uid']

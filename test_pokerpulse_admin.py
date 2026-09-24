@@ -215,7 +215,7 @@ def main():
 
     sent_emails = []
     send_result = {'ok': True}
-    A._send_pokerpulse_email = lambda to_email, html: (
+    A._send_pokerpulse_email = lambda to_email, html, subject=None: (
         sent_emails.append(to_email) or send_result['ok'])
 
     caller = {'uid': ADMIN_UID}

@@ -10,149 +10,88 @@
   compute_uid_session_stats() (F1-1) and stored per-user in
   users/{uid}/pokerpulse/last_analysis (F1-3) — see docs/firestore-schema.md.
 
-  Expected context:
-    email            str   — recipient's Firebase Auth email
-    window_start_str str   — formatted period start, e.g. "Sep 10, 5:00 AM"
-    window_end_str   str   — formatted period end
-    stats            dict  — compute_session_stats() output: total_hands,
-                              total_games, hands_parsed, hands_per_street
-                              (dict), vpip_pct, pfr_pct, steal_pct,
-                              check_raise_pct, three_bet_pct,
-                              fold_to_bet_pct, cbet_pct, fold_to_cbet_pct
-    highlights       list  — highlight-hand entries from highlights.py (F1-2):
-                              {pattern, label, hand_id, hand_url, art_uri}.
-                              Empty when the window has none — the section
-                              below simply omits itself. Known limitation:
-                              art_uri is a data:image/svg+xml;base64 URI —
-                              renders fine in the admin Preview (a browser
-                              iframe) but Outlook desktop's Word-based
-                              renderer does not support data: image sources,
-                              so the art may not show there. Not fixed here
-                              since real sending (F1-8) isn't wired up yet;
-                              revisit (e.g. upload to Storage + a real https
-                              URL) before this actually goes out to inboxes.
-    app_url          str   — CTA link back into the app
+  Styled with the site's dark-theme tokens (static/style.css): bg #0d1117,
+  panel #111a11, panel-alt #162016, border #1e2d1e, text #d0ddd0, muted
+  #6b8c6b, green #00e676, red #ff5252.
+
+  Expected context (see render_pokerpulse_email in app.py):
+    email          str   — recipient's Firebase Auth email
+    cadence_label  str   — "Daily" / "Weekly" / "Session report" (F2-1 cadence)
+    window_str     str   — Adelaide-local window, "Tue 23 Sep 5:00am – Wed 24 Sep 5:00am"
+    stat_groups    list  — [(group title, [(label, formatted value), ...]), ...]
+    highlights     list  — highlights.py entries: {label, hand_url, art_uri,
+                            net_result, ...}. Empty -> section omitted.
+                            art_uri is hosted in Storage (https) once persisted;
+                            a data: URI only as the fallback (Gmail drops those).
+    app_url        str   — CTA link back into the app
 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Your PokerPulse session report</title>
+<title>Your PokerPulse {{ cadence_label|lower if cadence_label != 'Session report' else 'session report' }}</title>
 </head>
-<body style="margin:0; padding:0; background-color:#0b1210; font-family:Helvetica,Arial,sans-serif;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0b1210;">
+<body style="margin:0; padding:0; background-color:#0d1117; font-family:Helvetica,Arial,sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0d1117;">
   <tr>
     <td align="center" style="padding:32px 16px;">
-      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%; background-color:#101b17; border:1px solid #1d3a2c; border-radius:10px; overflow:hidden;">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%; background-color:#111a11; border:1px solid #1e2d1e; border-radius:10px; overflow:hidden;">
 
         <!-- Header -->
         <tr>
-          <td style="background-color:#0f2a1f; padding:24px 32px; border-bottom:1px solid #1d3a2c;">
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-              <tr>
-                <td style="font-size:20px; font-weight:bold; color:#00e676; letter-spacing:0.3px;">
-                  ♠ PokerPulse
-                </td>
-              </tr>
-              <tr>
-                <td style="font-size:13px; color:#9fb8ac; padding-top:4px;">
-                  Your session report &middot; {{ window_start_str }} &ndash; {{ window_end_str }}
-                </td>
-              </tr>
-            </table>
+          <td style="background-color:#162016; padding:24px 32px; border-bottom:1px solid #1e2d1e;">
+            <div style="font-size:20px; font-weight:bold; color:#00e676; letter-spacing:0.3px;">&spades; PokerPulse {{ cadence_label }}</div>
+            {% if window_str %}<div style="font-size:13px; color:#6b8c6b; padding-top:4px;">{{ window_str }} (Adelaide)</div>{% endif %}
           </td>
         </tr>
 
         <!-- Greeting -->
         <tr>
-          <td style="padding:28px 32px 8px 32px;">
-            <p style="margin:0; font-size:15px; line-height:1.5; color:#e7efec;">
-              Hi{% if email %} {{ email.split('@')[0] }}{% endif %}, here's what happened at the tables
-              this period.
+          <td style="padding:24px 32px 4px 32px;">
+            <p style="margin:0; font-size:15px; line-height:1.5; color:#d0ddd0;">
+              Hi{% if email %} {{ email.split('@')[0] }}{% endif %}, here's what happened at the tables this period.
             </p>
           </td>
         </tr>
 
-        <!-- Stat grid -->
+        <!-- Stats, grouped -->
+        {% for title, items in stat_groups %}
         <tr>
-          <td style="padding:16px 32px;">
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate; border-spacing:8px;">
+          <td style="padding:16px 32px 0 32px;">
+            <div style="font-size:12px; font-weight:bold; color:#6b8c6b; text-transform:uppercase; letter-spacing:0.6px; padding-bottom:6px;">{{ title }}</div>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate; border-spacing:0;">
               <tr>
-                <td width="50%" style="background-color:#152a20; border-radius:8px; padding:14px; text-align:center;">
-                  <div style="font-size:22px; font-weight:bold; color:#00e676;">{{ stats.total_hands }}</div>
-                  <div style="font-size:11px; color:#9fb8ac; text-transform:uppercase; letter-spacing:0.4px;">Hands played</div>
+                {% for label, value in items %}
+                <td width="{{ (100 / items|length)|int }}%" style="background-color:#162016; border:1px solid #1e2d1e; padding:12px 6px; text-align:center;">
+                  <div style="font-size:20px; font-weight:bold; color:#00e676;">{{ value }}</div>
+                  <div style="font-size:11px; color:#6b8c6b; text-transform:uppercase; letter-spacing:0.4px; padding-top:2px;">{{ label }}</div>
                 </td>
-                <td width="50%" style="background-color:#152a20; border-radius:8px; padding:14px; text-align:center;">
-                  <div style="font-size:22px; font-weight:bold; color:#00e676;">{{ stats.total_games }}</div>
-                  <div style="font-size:11px; color:#9fb8ac; text-transform:uppercase; letter-spacing:0.4px;">Tournaments</div>
-                </td>
-              </tr>
-              <tr>
-                <td width="50%" style="background-color:#152a20; border-radius:8px; padding:14px; text-align:center;">
-                  <div style="font-size:22px; font-weight:bold; color:#e7efec;">{{ stats.vpip_pct }}%</div>
-                  <div style="font-size:11px; color:#9fb8ac; text-transform:uppercase; letter-spacing:0.4px;">VPIP</div>
-                </td>
-                <td width="50%" style="background-color:#152a20; border-radius:8px; padding:14px; text-align:center;">
-                  <div style="font-size:22px; font-weight:bold; color:#e7efec;">{{ stats.pfr_pct }}%</div>
-                  <div style="font-size:11px; color:#9fb8ac; text-transform:uppercase; letter-spacing:0.4px;">PFR</div>
-                </td>
+                {% endfor %}
               </tr>
             </table>
           </td>
         </tr>
-
-        <!-- Secondary stat table -->
-        <tr>
-          <td style="padding:8px 32px 4px 32px;">
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; font-size:13px;">
-              <tr>
-                <td style="padding:6px 0; color:#9fb8ac; border-bottom:1px solid #1d3a2c;">3-Bet</td>
-                <td style="padding:6px 0; color:#e7efec; text-align:right; border-bottom:1px solid #1d3a2c;">{{ stats.three_bet_pct }}%</td>
-              </tr>
-              <tr>
-                <td style="padding:6px 0; color:#9fb8ac; border-bottom:1px solid #1d3a2c;">Steal</td>
-                <td style="padding:6px 0; color:#e7efec; text-align:right; border-bottom:1px solid #1d3a2c;">{{ stats.steal_pct }}%</td>
-              </tr>
-              <tr>
-                <td style="padding:6px 0; color:#9fb8ac; border-bottom:1px solid #1d3a2c;">Check-raise</td>
-                <td style="padding:6px 0; color:#e7efec; text-align:right; border-bottom:1px solid #1d3a2c;">{{ stats.check_raise_pct }}%</td>
-              </tr>
-              <tr>
-                <td style="padding:6px 0; color:#9fb8ac; border-bottom:1px solid #1d3a2c;">C-Bet</td>
-                <td style="padding:6px 0; color:#e7efec; text-align:right; border-bottom:1px solid #1d3a2c;">{{ stats.cbet_pct }}%</td>
-              </tr>
-              <tr>
-                <td style="padding:6px 0; color:#9fb8ac; border-bottom:1px solid #1d3a2c;">Fold to bet</td>
-                <td style="padding:6px 0; color:#e7efec; text-align:right; border-bottom:1px solid #1d3a2c;">{{ stats.fold_to_bet_pct }}%</td>
-              </tr>
-              <tr>
-                <td style="padding:6px 0; color:#9fb8ac;">Fold to c-bet</td>
-                <td style="padding:6px 0; color:#e7efec; text-align:right;">{{ stats.fold_to_cbet_pct }}%</td>
-              </tr>
-            </table>
-          </td>
-        </tr>
+        {% endfor %}
 
         {% if highlights %}
-        <!-- Highlights (F1-2) -->
+        <!-- Highlights -->
         <tr>
-          <td style="padding:20px 32px 4px 32px;">
-            <div style="font-size:13px; font-weight:bold; color:#00e676; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:8px;">
-              Highlights
-            </div>
+          <td style="padding:24px 32px 4px 32px;">
+            <div style="font-size:12px; font-weight:bold; color:#6b8c6b; text-transform:uppercase; letter-spacing:0.6px; padding-bottom:8px;">Highlights</div>
             {% for h in highlights %}
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
               <tr>
-                <td style="background-color:#152a20; border-radius:8px; padding:12px 14px;">
+                <td style="background-color:#162016; border:1px solid #1e2d1e; border-radius:8px; padding:12px;">
                   {% if h.art_uri %}
-                  <img src="{{ h.art_uri }}" width="320" height="170" alt="{{ h.label }}"
-                       style="display:block; width:100%; max-width:320px; height:auto; border-radius:6px; margin-bottom:8px;"/>
+                  <img src="{{ h.art_uri }}" width="536" alt="{{ h.label }}"
+                       style="display:block; width:100%; max-width:536px; height:auto; border-radius:6px;"/>
                   {% endif %}
-                  <span style="font-size:13px; color:#e7efec;">
+                  <div style="font-size:13px; color:#d0ddd0; padding-top:8px;">
                     {{ h.label }}
+                    {% if h.net_result is not none and h.net_result is defined %}&nbsp;&middot; <span style="color:{{ '#00e676' if h.net_result >= 0 else '#ff5252' }}; font-weight:bold;">{{ '{:+,}'.format(h.net_result) }}</span>{% endif %}
                     {% if h.hand_url %}&nbsp;&middot; <a href="{{ h.hand_url }}" style="color:#00e676; text-decoration:none;">View hand</a>{% endif %}
-                  </span>
+                  </div>
                 </td>
               </tr>
             </table>
@@ -164,7 +103,7 @@
         <!-- CTA -->
         <tr>
           <td style="padding:24px 32px;" align="center">
-            <a href="{{ app_url }}" style="display:inline-block; background-color:#00e676; color:#0b1210; font-weight:bold; font-size:14px; text-decoration:none; padding:12px 28px; border-radius:6px;">
+            <a href="{{ app_url }}" style="display:inline-block; background-color:#00e676; color:#0d1117; font-weight:bold; font-size:14px; text-decoration:none; padding:12px 28px; border-radius:6px;">
               Open PokerPulse
             </a>
           </td>
@@ -172,8 +111,8 @@
 
         <!-- Footer -->
         <tr>
-          <td style="padding:20px 32px 28px 32px; border-top:1px solid #1d3a2c;">
-            <p style="margin:0; font-size:11px; line-height:1.6; color:#6f8a7d;">
+          <td style="padding:20px 32px 28px 32px; border-top:1px solid #1e2d1e;">
+            <p style="margin:0; font-size:11px; line-height:1.6; color:#6b8c6b;">
               You're receiving this because you're a PokerPulse subscriber on PPP Hand Tracker.
               You can stop these reports any time from your account, or reply to this email and
               we'll unsubscribe you by hand.

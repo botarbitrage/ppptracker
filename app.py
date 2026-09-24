@@ -3425,26 +3425,75 @@ def _pokerpulse_analysis_ref(db, uid):
     return db.collection('users').document(uid).collection('pokerpulse').document('last_analysis')
 
 
+def _pokerpulse_fmt_adl(ts):
+    """'Tue 23 Sep 5:00am' — an epoch in Adelaide local time (DST-aware)."""
+    import pokerpulse_scheduler
+    if not ts:
+        return ''
+    dt = pokerpulse_scheduler.from_epoch(ts)
+    hour12 = dt.hour % 12 or 12
+    return f"{dt:%a} {dt.day} {dt:%b} {hour12}:{dt:%M}{'am' if dt.hour < 12 else 'pm'}"
+
+
+def pokerpulse_cadence_label(analysis):
+    """'Daily' / 'Weekly' from last_analysis.cadence (F2-1); 'Session report'
+    when missing (a manual Analyse Now doesn't set one)."""
+    return {'daily': 'Daily', 'weekly': 'Weekly'}.get(analysis.get('cadence'), 'Session report')
+
+
+def pokerpulse_email_subject(analysis):
+    """'Your PokerPulse daily — Wed 24 Sep'; 'Your PokerPulse Session report — …'
+    without a cadence. Dated by the window end (the 5am cutoff the send is for)."""
+    import pokerpulse_scheduler
+    label = pokerpulse_cadence_label(analysis)
+    label = label if label == 'Session report' else label.lower()
+    end = analysis.get('window_end')
+    date = ''
+    if end:
+        dt = pokerpulse_scheduler.from_epoch(end)
+        date = f' — {dt:%a} {dt.day} {dt:%b}'
+    return f'Your PokerPulse {label}{date}'
+
+
+def _pokerpulse_stat_groups(stats):
+    """Stat tiles grouped Volume / Preflop / Postflop, numbers pre-formatted
+    (thousands separators, percentages to 1 decimal)."""
+    def num(k):
+        v = stats.get(k)
+        return f'{int(v):,}' if v is not None else '—'
+
+    def pct(k):
+        v = stats.get(k)
+        return f'{float(v):.1f}%' if v is not None else '—'
+
+    return [
+        ('Volume', [('Hands', num('total_hands')), ('Tournaments', num('total_games'))]),
+        ('Preflop', [('VPIP', pct('vpip_pct')), ('PFR', pct('pfr_pct')),
+                     ('3-bet', pct('three_bet_pct')), ('Steal', pct('steal_pct'))]),
+        ('Postflop', [('C-bet', pct('cbet_pct')), ('Fold to c-bet', pct('fold_to_cbet_pct')),
+                      ('Fold to bet', pct('fold_to_bet_pct')),
+                      ('Check-raise', pct('check_raise_pct'))]),
+    ]
+
+
 def render_pokerpulse_email(email, analysis):
     """Renders the PokerPulse report template (templates/emails/pokerpulse_report.html)
     from a stored users/{uid}/pokerpulse/last_analysis document."""
-    from datetime import datetime as _dt, timezone as _tz
-
-    def _fmt(ts):
-        return _dt.fromtimestamp(ts, tz=_tz.utc).strftime('%b %d, %I:%M %p UTC') if ts else ''
-
+    stats = analysis.get('stats') or {}
     return render_template(
         'emails/pokerpulse_report.html',
         email=email,
-        window_start_str=_fmt(analysis.get('window_start')),
-        window_end_str=_fmt(analysis.get('window_end')),
-        stats=analysis.get('stats') or {},
+        cadence_label=pokerpulse_cadence_label(analysis),
+        window_str=(f"{_pokerpulse_fmt_adl(analysis.get('window_start'))} – "
+                    f"{_pokerpulse_fmt_adl(analysis.get('window_end'))}"
+                    if analysis.get('window_start') and analysis.get('window_end') else ''),
+        stat_groups=_pokerpulse_stat_groups(stats),
         highlights=analysis.get('highlights') or [],
         app_url=request.url_root.rstrip('/'),
     )
 
 
-def _send_pokerpulse_email(to_email, html):
+def _send_pokerpulse_email(to_email, html, subject='Your PokerPulse Report'):
     """Sends the rendered report via Brevo's transactional email HTTP API,
     as handtrackerpppoker@gmail.com (verified sender in Brevo — no domain of
     our own yet, so DKIM/DMARC alignment is best-effort for this freemail
@@ -3473,7 +3522,7 @@ def _send_pokerpulse_email(to_email, html):
     payload = {
         'sender': {'email': 'handtrackerpppoker@gmail.com', 'name': 'PokerPulse'},
         'to': [{'email': to_email}],
-        'subject': 'Your PokerPulse Report',
+        'subject': subject,
         'htmlContent': html,
     }
     try:
@@ -3629,7 +3678,7 @@ def admin_pokerpulse_send():
             continue
 
         html = render_pokerpulse_email(email, analysis)
-        if not _send_pokerpulse_email(email, html):
+        if not _send_pokerpulse_email(email, html, pokerpulse_email_subject(analysis)):
             skipped.append({'uid': target_uid, 'email': email, 'reason': 'send_failed'})
             continue
         ref.update({'last_report_sent_at': now})
@@ -3850,7 +3899,7 @@ def cron_pokerpulse():
             _pokerpulse_analysis_ref(db, target_uid).set(analysis_doc)
 
             html = render_pokerpulse_email(email, analysis_doc)
-            if not _send_pokerpulse_email(email, html):
+            if not _send_pokerpulse_email(email, html, pokerpulse_email_subject(analysis_doc)):
                 claim_ref.update({'status': 'error', 'reason': 'send_failed', 'done_at': int(time.time())})
                 errors.append({**outcome, 'reason': 'send_failed'})
                 continue
