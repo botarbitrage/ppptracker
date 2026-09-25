@@ -38,16 +38,22 @@ plan's included usage.
 
 In the Railway project dashboard:
 
-1. **New → Empty Service**, name it `pokerpulse-cron`.
+1. **New → Docker Image**, image `curlimages/curl:latest`, name the service
+   `pokerpulse-cron`. **Do not use "Empty Service"**: it has no source, so
+   there is never a deployment to run. The cron timer still counts down
+   ("Next run in N minutes") but nothing executes and the service shows
+   "There is no active deployment". Click **Deploy** once so a deployment
+   exists; after that, each tick re-runs it.
 2. **Settings → Cron Schedule**: `*/15 * * * *` (every 15 minutes, UTC —
    the endpoint itself does all the Adelaide-time logic; the cron schedule
    only controls how often it's *checked*, not when it fires).
 3. **Settings → Deploy → Custom Start Command**, pointed at the main app's
    public URL:
    ```bash
-   curl -sS --fail-with-body -X POST "$POKERPULSE_APP_URL/api/cron/pokerpulse" \
-     -H "X-Cron-Secret: $POKERPULSE_CRON_SECRET"
+   sh -c 'curl -sS --fail-with-body -X POST "$POKERPULSE_APP_URL/api/cron/pokerpulse" -H "X-Cron-Secret: $POKERPULSE_CRON_SECRET"'
    ```
+   (`sh -c` so the `$VARS` expand and the command overrides the image's
+   entrypoint.)
    Use the app's actual public Railway domain for `POKERPULSE_APP_URL`
    (e.g. `https://ppptracker.up.railway.app`) — `_persist_highlight_art()`
    builds highlight-art URLs from `request.url_root`, so the cron tick must
@@ -57,10 +63,10 @@ In the Railway project dashboard:
 4. Set `POKERPULSE_CRON_SECRET` (same value as step 1) and
    `POKERPULSE_APP_URL` as variables on this cron service. No other env
    vars are needed here — this service does nothing but make one HTTP call.
-5. A minimal image is enough to run `curl`; Railway's default Docker image
-   already has it, so no Dockerfile is required unless the project's
-   default builder doesn't include `curl` (check the deploy logs on first
-   run).
+5. `curlimages/curl` already includes `curl`, so no Dockerfile is needed.
+6. Verify: Cron Runs / Deployments should show a run every 15 minutes with
+   the app's JSON reply in the logs (`{"ok":...}` or a 403/503 that names
+   the problem). If Deployments is still empty, the service has no source.
 
 ## 3. Keep it DISABLED until verified
 
